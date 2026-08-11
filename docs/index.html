@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Speculate — a local-first API explorer for OpenAPI/Swagger specs</title>
+<meta name="description" content="Paste an OpenAPI or Swagger spec, get instant browsable docs — endpoints grouped by tag, parameters, schemas, and worked examples — with search, multi-spec tabs, and light/dark themes. No cloud, no account: a single runnable jar.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="alternate icon" href="favicon.ico">
+<link rel="stylesheet" href="style.css">
+<script>try{var t=localStorage.getItem("speculate-docs-theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="brand-row">
+      <img class="logo" src="logo.png" alt="">
+      <h1>Speculate</h1>
+    </div>
+    <p class="tagline">
+      A local-first API explorer for OpenAPI/Swagger specs. Paste a spec,
+      get instant browsable docs — endpoints grouped by tag, parameters,
+      schemas, and worked request/response examples — with search,
+      multi-spec tabs, and light/dark themes. No cloud, no account: it's a
+      single runnable jar that keeps its data on your machine.
+    </p>
+    <div class="cta-row">
+      <a class="btn primary" href="https://github.com/johnjoeallen/speculate">View on GitHub</a>
+      <a class="btn ghost" href="https://github.com/johnjoeallen/speculate/releases">Download latest release</a>
+    </div>
+  </div>
+</header>
+
+<nav class="subnav">
+  <div class="wrap">
+    <a href="#why">Why Speculate</a>
+    <a href="#features">Features</a>
+    <a href="#screenshot">Screenshot</a>
+    <a href="#get-started">Get started</a>
+    <a href="#roadmap">Roadmap</a>
+    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle color theme"></button>
+  </div>
+</nav>
+
+<main class="wrap">
+
+  <section id="why">
+    <h2>Why Speculate exists</h2>
+    <p class="lede">
+      Most OpenAPI viewers want you to run a server, wire up a build step,
+      or upload your spec to someone else's cloud before you can read it.
+      Speculate is the opposite: download one jar, run it, paste a spec
+      into a textbox, and read it — nothing leaves your machine, and there's
+      nothing to configure. It's meant for the everyday case of "I have a
+      spec, I just want to read it comfortably," not as an API management
+      platform.
+    </p>
+  </section>
+
+  <section id="features">
+    <h2>Features</h2>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <h3>Paste and go</h3>
+        <p>Paste OpenAPI or Swagger, JSON or YAML, into the textbox. Speculate parses it and saves it locally, keyed by the spec's title, so re-pasting an updated version replaces it instead of piling up duplicates.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Grouped by tag</h3>
+        <p>Endpoints are organized into collapsible sections by OpenAPI tag, each with its own expand/collapse-all control, method-colour badges, and a parameters table.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Worked examples</h3>
+        <p>Request/response bodies render as content-type tabs with a schema tree and a rendered example — the spec's own example when present, otherwise one synthesized from the schema.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Multiple specs, one window</h3>
+        <p>Saved specs live in a searchable sidebar. Opening one adds a tab, so you can flip between several open specs without losing your place.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Light and dark themes</h3>
+        <p>Follows your OS preference by default; the toggle remembers an explicit choice across sessions.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Single runnable jar</h3>
+        <p>No external database, no Docker, no network calls. Data lives in an embedded H2 database under <code>~/.speculate</code>.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="screenshot">
+    <h2>What it looks like</h2>
+    <p class="lede">A spec open in Speculate, endpoints grouped by tag.</p>
+    <img class="screenshot" src="screenshot.png" alt="Speculate showing a sample API spec with endpoints grouped into Books, Authors, and Other tag sections">
+  </section>
+
+  <section id="get-started">
+    <h2>Get started</h2>
+    <p class="lede">Requires Java 17 or later.</p>
+    <ol class="steps">
+      <li>Download the latest <code>speculate-&lt;version&gt;.zip</code> from the <a href="https://github.com/johnjoeallen/speculate/releases">releases page</a> and unzip it.</li>
+      <li>Run the launcher script for your platform: <code>./speculate.sh</code> on Linux/macOS, <code>speculate.bat</code> on Windows.</li>
+      <li>Open <code>http://localhost:6809</code> and paste a spec.</li>
+    </ol>
+    <p class="lede" style="margin-top: 1.2rem;">Need a different port, or a clean slate? <code>./speculate.sh --port 8080</code> or <code>./speculate.sh --wipe-db</code>. See the <a href="https://github.com/johnjoeallen/speculate#readme">README</a> for building from source and the full flag list.</p>
+  </section>
+
+  <section id="roadmap">
+    <h2>Roadmap</h2>
+    <div class="roadmap-card">
+      <span class="badge">Planned</span>
+      <h3 style="margin: 0 0 0.4rem;">Pluggable custom validation</h3>
+      <p style="margin: 0; color: var(--fg-dim);">
+        Define your own rules — naming conventions, required fields, security
+        scheme enforcement, and similar house-style checks — that run
+        against a pasted spec and surface as warnings alongside the parser's
+        own messages. Not built yet; it's the next major feature planned.
+        Follow progress in the <a href="https://github.com/johnjoeallen/speculate/issues">issues</a>.
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    Speculate is licensed under the
+    <a href="https://github.com/johnjoeallen/speculate/blob/main/LICENSE">Apache License 2.0</a>.
+    Source lives at
+    <a href="https://github.com/johnjoeallen/speculate">github.com/johnjoeallen/speculate</a>.
+  </div>
+</footer>
+
+<script src="theme-toggle.js"></script>
+</body>
+</html>
