@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="schemaView(schema, depth, showType)" class="schema">
+    <span th:if="${schema == null}" class="schema-any">any</span>
+
+    <div th:if="${schema != null}">
+        <span th:if="${showType and schema.type != null}" class="schema-type" th:text="${schema.type}">type</span>
+        <span th:if="${showType and schema.type == null}" class="schema-type" th:text="${schema.get$ref() != null} ? 'object' : 'any'">type</span>
+        <span th:if="${schema.format != null}" class="schema-format" th:text="'(' + ${schema.format} + ')'"></span>
+        <span th:if="${schema.nullable != null and schema.nullable}" class="schema-nullable">nullable</span>
+        <p th:if="${schema.description != null}" class="schema-description" th:text="${schema.description}"></p>
+
+        <div th:if="${schema.enum != null and !schema.enum.isEmpty()}" class="schema-enum">
+            enum: <span th:text="${schema.enum}"></span>
+        </div>
+
+        <div th:if="${schema.type == 'array' and schema.items != null and depth < 6}" class="schema-array-items">
+            <button type="button" class="schema-toggle-btn" aria-expanded="true">&#9662;</button>
+            <span class="schema-label">items:</span>
+            <div class="schema-toggle-content">
+                <div th:insert="~{fragments/schema :: schemaView(${schema.items}, ${depth + 1}, true)}"></div>
+            </div>
+        </div>
+
+        <table th:if="${schema.properties != null and !schema.properties.isEmpty() and depth < 6}" class="schema-properties">
+            <tbody>
+                <tr th:each="propEntry : ${schema.properties}">
+                    <td class="schema-prop-name">
+                        <button type="button" class="schema-toggle-btn"
+                                th:if="${propEntry.value != null and ((propEntry.value.properties != null and !propEntry.value.properties.isEmpty()) or (propEntry.value.type == 'array' and propEntry.value.items != null))}"
+                                aria-expanded="true">&#9662;</button>
+                        <code th:text="${propEntry.key}">prop</code>
+                        <span th:if="${schema.required != null and schema.required.contains(propEntry.key)}" class="schema-required" title="required">*</span>
+                    </td>
+                    <td class="schema-prop-value">
+                        <div class="schema-toggle-content">
+                            <div th:insert="~{fragments/schema :: schemaView(${propEntry.value}, ${depth + 1}, true)}"></div>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p th:if="${depth >= 6}" class="schema-truncated">&hellip;</p>
+    </div>
+</div>
+</body>
+</html>

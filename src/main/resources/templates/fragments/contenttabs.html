@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="contentTabs(content)" class="tabset" th:with="structureSchema=${@contentUtils.firstSchema(content)}">
+    <div class="tabset-nav">
+        <button type="button" class="tab-btn active">Object</button>
+        <button type="button" class="tab-btn" th:each="ct : ${content}" th:text="${ct.key}">application/json</button>
+    </div>
+    <div class="tabset-panels">
+        <div class="tab-panel active">
+            <div th:insert="~{fragments/schema :: schemaView(${structureSchema}, 0, false)}"></div>
+        </div>
+        <div class="tab-panel" th:each="ct : ${content}">
+            <pre class="example-body" th:text="${@exampleRenderer.render(ct.value, ct.key)}">example</pre>
+        </div>
+    </div>
+</div>
+</body>
+</html>

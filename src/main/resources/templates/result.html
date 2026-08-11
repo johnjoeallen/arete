@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${openApi != null and openApi.info != null and openApi.info.title != null} ? ${openApi.info.title} : 'Speculate'">Speculate</title>
+    <script>
+        (function () {
+            var saved = localStorage.getItem('openapi-viewer:theme');
+            var theme = saved || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+    <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+<div th:replace="~{fragments/sidebar :: sidebar(${specs}, ${q}, ${specId})}"></div>
+<div class="main">
+    <nav id="tab-bar" class="tab-bar" th:attr="data-spec-id=${specId},data-spec-title=${specTitle}"></nav>
+    <div class="main-content">
+
+    <div th:if="${parseErrors != null and !parseErrors.isEmpty()}" class="parse-errors">
+        <h2>Parse messages</h2>
+        <ul>
+            <li th:each="msg : ${parseErrors}" th:text="${msg}"></li>
+        </ul>
+    </div>
+
+    <div th:if="${openApi == null}">
+        <p>Could not parse the pasted spec.</p>
+    </div>
+
+    <div th:if="${openApi != null}">
+        <h1 th:text="${openApi.info != null and openApi.info.title != null} ? ${openApi.info.title} : '(untitled)'">Spec title</h1>
+        <p th:if="${openApi.info != null and openApi.info.version != null}">
+            <strong>Version:</strong> <span th:text="${openApi.info.version}"></span>
+        </p>
+        <p th:if="${openApi.info != null and openApi.info.description != null}" th:text="${openApi.info.description}"></p>
+
+        <div th:if="${openApi.paths != null and !openApi.paths.isEmpty()}" class="content-toolbar">
+            <button type="button" id="toggle-all-endpoints" class="toggle-all-btn">Expand all</button>
+        </div>
+
+        <div th:if="${openApi.paths != null}" th:each="pathEntry : ${openApi.paths}">
+            <div th:if="${pathEntry.value.readOperationsMap() != null}" th:each="opEntry : ${pathEntry.value.readOperationsMap()}" class="endpoint collapsed">
+                <h2 class="endpoint-toggle">
+                    <span class="toggle-indicator">&#9662;</span>
+                    <span class="method" th:classappend="'method-' + ${#strings.toLowerCase(opEntry.key)}" th:text="${opEntry.key}">GET</span>
+                    <code th:text="${pathEntry.key}">/path</code>
+                </h2>
+                <div class="endpoint-body">
+                <p th:if="${opEntry.value.summary != null}" th:text="${opEntry.value.summary}"></p>
+                <p th:if="${opEntry.value.description != null}" th:text="${opEntry.value.description}"></p>
+                <p th:if="${opEntry.value.operationId != null}"><em>operationId: </em><code th:text="${opEntry.value.operationId}"></code></p>
+
+                <div th:if="${opEntry.value.parameters != null and !opEntry.value.parameters.isEmpty()}">
+                    <h3>Parameters</h3>
+                    <table class="params">
+                        <thead>
+                            <tr><th>Name</th><th>In</th><th>Required</th><th>Type</th><th>Description</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="opParam : ${opEntry.value.parameters}">
+                                <td><code th:text="${opParam.name}"></code></td>
+                                <td th:text="${opParam.in}"></td>
+                                <td th:text="${opParam.required != null and opParam.required ? 'yes' : 'no'}"></td>
+                                <td><div th:insert="~{fragments/schema :: schemaView(${opParam.schema}, 0, true)}"></div></td>
+                                <td th:text="${opParam.description}"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="section" th:if="${opEntry.value.requestBody != null and opEntry.value.requestBody.content != null and !opEntry.value.requestBody.content.isEmpty()}">
+                    <h3 class="section-toggle"><span class="toggle-indicator">&#9662;</span> Request</h3>
+                    <div class="section-body">
+                        <div th:replace="~{fragments/contenttabs :: contentTabs(${opEntry.value.requestBody.content})}"></div>
+                    </div>
+                </div>
+
+                <div class="section collapsed" th:if="${opEntry.value.responses != null and !opEntry.value.responses.isEmpty()}">
+                    <h3 class="section-toggle"><span class="toggle-indicator">&#9662;</span> Responses</h3>
+                    <div class="section-body">
+                        <div th:each="respEntry : ${opEntry.value.responses}" class="response-block">
+                            <h4>
+                                <span th:text="${respEntry.key}">200</span>
+                                <span th:if="${respEntry.value.description != null}" th:text="'- ' + ${respEntry.value.description}"></span>
+                            </h4>
+                            <div th:if="${respEntry.value.content != null and !respEntry.value.content.isEmpty()}"
+                                 th:replace="~{fragments/contenttabs :: contentTabs(${respEntry.value.content})}"></div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+</div>
+<script src="/js/tabs.js" defer></script>
+<script src="/js/interactivity.js" defer></script>
+<script src="/js/theme.js" defer></script>
+</body>
+</html>
