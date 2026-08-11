@@ -4,6 +4,8 @@
 
 # Speculate
 
+**[Speculate site &rarr;](https://johnjoeallen.github.io/speculate/)**
+
 Speculate is a local-first API explorer for OpenAPI/Swagger specs. Paste a
 spec, get instant browsable docs — endpoints, parameters, schemas, and
 request/response examples — with search, multi-spec tabs, and light/dark
