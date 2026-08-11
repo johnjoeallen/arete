@@ -48,7 +48,7 @@ Download the latest `speculate-<version>.zip` from the
 your platform:
 
 ```
-unzip speculate-<version>.zip -d speculate
+unzip speculate-<version>.zip
 cd speculate
 ./speculate.sh        # Linux/macOS
 speculate.bat          # Windows

@@ -29,13 +29,13 @@ jobs:
       - name: Package zip
         run: |
           VERSION=${GITHUB_REF_NAME#v}
-          mkdir dist
-          cp target/openapi-viewer-${VERSION}.jar dist/speculate.jar
-          cp scripts/speculate.sh dist/
-          cp scripts/speculate.bat dist/
-          chmod +x dist/speculate.sh
+          mkdir -p dist/speculate
+          cp target/openapi-viewer-${VERSION}.jar dist/speculate/speculate.jar
+          cp scripts/speculate.sh dist/speculate/
+          cp scripts/speculate.bat dist/speculate/
+          chmod +x dist/speculate/speculate.sh
           ZIP="$(pwd)/speculate-${VERSION}.zip"
-          zip -j "$ZIP" dist/speculate.jar dist/speculate.sh dist/speculate.bat
+          (cd dist && zip -r "$ZIP" speculate)
 
       - name: Create GitHub release
         env:
