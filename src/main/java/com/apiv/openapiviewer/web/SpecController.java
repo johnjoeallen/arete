@@ -1,6 +1,7 @@
 package com.apiv.openapiviewer.web;
 
 import com.apiv.openapiviewer.domain.SpecEntity;
+import com.apiv.openapiviewer.service.EndpointGrouper;
 import com.apiv.openapiviewer.service.ParsedSpec;
 import com.apiv.openapiviewer.service.SpecParserService;
 import com.apiv.openapiviewer.service.SpecStorageService;
@@ -42,6 +43,7 @@ public class SpecController {
         try {
             ParsedSpec parsed = specParserService.parse(specText);
             model.addAttribute("openApi", parsed.openApi());
+            model.addAttribute("tagGroups", EndpointGrouper.group(parsed.openApi()));
 
             if (parsed.openApi() != null) {
                 String title = extractTitle(parsed.openApi());
@@ -74,6 +76,7 @@ public class SpecController {
 
         ParsedSpec parsed = specParserService.parse(entity.getRawContent());
         model.addAttribute("openApi", parsed.openApi());
+        model.addAttribute("tagGroups", EndpointGrouper.group(parsed.openApi()));
         model.addAttribute("parseErrors", parsed.messages());
         model.addAttribute("specTitle", entity.getTitle());
         populateSidebar(model, q, entity.getId());

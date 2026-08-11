@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title th:text="${openApi != null and openApi.info != null and openApi.info.title != null} ? ${openApi.info.title} : 'Speculate'">Speculate</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="alternate icon" href="/favicon.ico">
     <script>
         (function () {
             var saved = localStorage.getItem('openapi-viewer:theme');
@@ -36,30 +38,32 @@
         </p>
         <p th:if="${openApi.info != null and openApi.info.description != null}" th:text="${openApi.info.description}"></p>
 
-        <div th:if="${openApi.paths != null and !openApi.paths.isEmpty()}" class="content-toolbar">
-            <button type="button" id="toggle-all-endpoints" class="toggle-all-btn">Expand all</button>
-        </div>
+        <div th:if="${tagGroups != null}" th:each="group : ${tagGroups}" class="tag-group">
+            <div class="tag-group-header">
+                <h2 class="tag-group-name" th:text="${group.name}">tag</h2>
+                <button type="button" class="toggle-all-btn" data-toggle-all>Expand all</button>
+            </div>
+            <p th:if="${group.description != null}" class="tag-group-description" th:text="${group.description}"></p>
 
-        <div th:if="${openApi.paths != null}" th:each="pathEntry : ${openApi.paths}">
-            <div th:if="${pathEntry.value.readOperationsMap() != null}" th:each="opEntry : ${pathEntry.value.readOperationsMap()}" class="endpoint collapsed">
+            <div th:each="endpoint : ${group.endpoints}" class="endpoint collapsed">
                 <h2 class="endpoint-toggle">
                     <span class="toggle-indicator">&#9662;</span>
-                    <span class="method" th:classappend="'method-' + ${#strings.toLowerCase(opEntry.key)}" th:text="${opEntry.key}">GET</span>
-                    <code th:text="${pathEntry.key}">/path</code>
+                    <span class="method" th:classappend="'method-' + ${#strings.toLowerCase(endpoint.method)}" th:text="${endpoint.method}">GET</span>
+                    <code th:text="${endpoint.path}">/path</code>
                 </h2>
                 <div class="endpoint-body">
-                <p th:if="${opEntry.value.summary != null}" th:text="${opEntry.value.summary}"></p>
-                <p th:if="${opEntry.value.description != null}" th:text="${opEntry.value.description}"></p>
-                <p th:if="${opEntry.value.operationId != null}"><em>operationId: </em><code th:text="${opEntry.value.operationId}"></code></p>
+                <p th:if="${endpoint.operation.summary != null}" th:text="${endpoint.operation.summary}"></p>
+                <p th:if="${endpoint.operation.description != null}" th:text="${endpoint.operation.description}"></p>
+                <p th:if="${endpoint.operation.operationId != null}"><em>operationId: </em><code th:text="${endpoint.operation.operationId}"></code></p>
 
-                <div th:if="${opEntry.value.parameters != null and !opEntry.value.parameters.isEmpty()}">
+                <div th:if="${endpoint.operation.parameters != null and !endpoint.operation.parameters.isEmpty()}">
                     <h3>Parameters</h3>
                     <table class="params">
                         <thead>
                             <tr><th>Name</th><th>In</th><th>Required</th><th>Type</th><th>Description</th></tr>
                         </thead>
                         <tbody>
-                            <tr th:each="opParam : ${opEntry.value.parameters}">
+                            <tr th:each="opParam : ${endpoint.operation.parameters}">
                                 <td><code th:text="${opParam.name}"></code></td>
                                 <td th:text="${opParam.in}"></td>
                                 <td th:text="${opParam.required != null and opParam.required ? 'yes' : 'no'}"></td>
@@ -70,17 +74,17 @@
                     </table>
                 </div>
 
-                <div class="section" th:if="${opEntry.value.requestBody != null and opEntry.value.requestBody.content != null and !opEntry.value.requestBody.content.isEmpty()}">
+                <div class="section" th:if="${endpoint.operation.requestBody != null and endpoint.operation.requestBody.content != null and !endpoint.operation.requestBody.content.isEmpty()}">
                     <h3 class="section-toggle"><span class="toggle-indicator">&#9662;</span> Request</h3>
                     <div class="section-body">
-                        <div th:replace="~{fragments/contenttabs :: contentTabs(${opEntry.value.requestBody.content})}"></div>
+                        <div th:replace="~{fragments/contenttabs :: contentTabs(${endpoint.operation.requestBody.content})}"></div>
                     </div>
                 </div>
 
-                <div class="section collapsed" th:if="${opEntry.value.responses != null and !opEntry.value.responses.isEmpty()}">
+                <div class="section collapsed" th:if="${endpoint.operation.responses != null and !endpoint.operation.responses.isEmpty()}">
                     <h3 class="section-toggle"><span class="toggle-indicator">&#9662;</span> Responses</h3>
                     <div class="section-body">
-                        <div th:each="respEntry : ${opEntry.value.responses}" class="response-block">
+                        <div th:each="respEntry : ${endpoint.operation.responses}" class="response-block">
                             <h4>
                                 <span th:text="${respEntry.key}">200</span>
                                 <span th:if="${respEntry.value.description != null}" th:text="'- ' + ${respEntry.value.description}"></span>

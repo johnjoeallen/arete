@@ -15,20 +15,12 @@
     <link rel="stylesheet" href="/css/app.css">
 </head>
 <body>
-<div th:replace="~{fragments/sidebar :: sidebar(${specs}, ${q}, null)}"></div>
-<div class="main">
-    <nav id="tab-bar" class="tab-bar"></nav>
-    <div class="main-content">
-        <h1>Speculate</h1>
-        <p>Paste an OpenAPI or Swagger definition (JSON or YAML) below.</p>
-        <form method="post" action="/api/paste">
-            <textarea name="specText" rows="20" cols="100" placeholder="Paste your OpenAPI/Swagger spec here..."></textarea>
-            <br>
-            <button type="submit">Submit</button>
-        </form>
-    </div>
+<div class="error-page">
+    <img src="/favicon.svg" alt="" width="48" height="48">
+    <h1 th:text="(${status} ?: '') + ' ' + (${error} ?: 'Error')">Error</h1>
+    <p th:if="${status == 404}">The spec you're looking for doesn't exist — it may have been deleted, or the link is wrong.</p>
+    <p th:unless="${status == 404}">Something went wrong handling that request.</p>
+    <p><a href="/">&larr; Back to Speculate</a></p>
 </div>
-<script src="/js/tabs.js" defer></script>
-<script src="/js/theme.js" defer></script>
 </body>
 </html>

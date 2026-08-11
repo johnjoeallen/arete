@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 <aside th:fragment="sidebar(specs, q, activeId)" class="sidebar">
-    <h2><a href="/">Speculate</a></h2>
+    <h2><a href="/" class="brand"><img src="/favicon.svg" alt="" width="22" height="22" class="brand-logo">Speculate</a></h2>
     <form method="get" class="sidebar-search">
         <input type="text" name="q" placeholder="Search specs..." th:value="${q}">
         <button type="submit">Search</button>

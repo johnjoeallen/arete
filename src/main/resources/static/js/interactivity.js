@@ -1,40 +1,43 @@
 (function () {
 
-    // Collapsible endpoint sections: click the header to toggle the body.
-    var endpoints = Array.prototype.slice.call(document.querySelectorAll('.endpoint'));
-    var toggleAllBtn = document.getElementById('toggle-all-endpoints');
+    // Collapsible endpoint sections, with an expand/collapse-all button
+    // scoped to each tag section.
+    document.querySelectorAll('.tag-group').forEach(function (group) {
+        var endpoints = Array.prototype.slice.call(group.querySelectorAll('.endpoint'));
+        var toggleAllBtn = group.querySelector('[data-toggle-all]');
 
-    function updateToggleAllLabel() {
-        if (!toggleAllBtn) {
-            return;
+        function updateToggleAllLabel() {
+            if (!toggleAllBtn) {
+                return;
+            }
+            var allCollapsed = endpoints.length > 0 && endpoints.every(function (e) {
+                return e.classList.contains('collapsed');
+            });
+            toggleAllBtn.textContent = allCollapsed ? 'Expand all' : 'Collapse all';
         }
-        var allCollapsed = endpoints.length > 0 && endpoints.every(function (e) {
-            return e.classList.contains('collapsed');
-        });
-        toggleAllBtn.textContent = allCollapsed ? 'Expand all' : 'Collapse all';
-    }
 
-    endpoints.forEach(function (endpoint) {
-        var header = endpoint.querySelector(':scope > .endpoint-toggle');
-        if (!header) {
-            return;
-        }
-        header.addEventListener('click', function () {
-            endpoint.classList.toggle('collapsed');
-            updateToggleAllLabel();
+        endpoints.forEach(function (endpoint) {
+            var header = endpoint.querySelector(':scope > .endpoint-toggle');
+            if (!header) {
+                return;
+            }
+            header.addEventListener('click', function () {
+                endpoint.classList.toggle('collapsed');
+                updateToggleAllLabel();
+            });
         });
-    });
 
-    if (toggleAllBtn) {
-        toggleAllBtn.addEventListener('click', function () {
-            var shouldCollapse = toggleAllBtn.textContent === 'Collapse all';
-            endpoints.forEach(function (endpoint) {
-                endpoint.classList.toggle('collapsed', shouldCollapse);
+        if (toggleAllBtn) {
+            toggleAllBtn.addEventListener('click', function () {
+                var shouldCollapse = toggleAllBtn.textContent === 'Collapse all';
+                endpoints.forEach(function (endpoint) {
+                    endpoint.classList.toggle('collapsed', shouldCollapse);
+                });
+                updateToggleAllLabel();
             });
             updateToggleAllLabel();
-        });
-        updateToggleAllLabel();
-    }
+        }
+    });
 
     // Tabbed request/response body content types.
     document.querySelectorAll('.tabset').forEach(function (tabset) {

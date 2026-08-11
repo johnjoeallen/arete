@@ -110,11 +110,18 @@ body, .sidebar, .tab-bar, .endpoint, .tabset-nav .tab-btn, .tabset-panels .tab-p
 a { color: var(--link); }
 a:hover { color: var(--link-hover); }
 
+/* ---- Error page ---- */
+
+.error-page { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 0.6em; padding: 2em; }
+.error-page h1 { margin: 0; }
+.error-page p { color: var(--muted-fg); margin: 0; max-width: 32em; }
+
 /* ---- Sidebar ---- */
 
 .sidebar { width: 260px; flex-shrink: 0; padding: 1.25em 1em; overflow-y: auto; background: var(--surface); box-shadow: var(--shadow-sidebar); position: relative; z-index: 1; }
 .sidebar h2 { margin: 0 0 1em; font-size: 1.05em; font-weight: 600; letter-spacing: 0.01em; }
-.sidebar h2 a { color: var(--fg); text-decoration: none; }
+.sidebar h2 a { color: var(--fg); text-decoration: none; display: flex; align-items: center; gap: 0.5em; }
+.brand-logo { flex-shrink: 0; }
 .sidebar-search { margin-bottom: 0.9em; }
 .sidebar-search input {
     width: 100%;
@@ -148,8 +155,12 @@ a:hover { color: var(--link-hover); }
 .main-content h1 { font-size: 1.7em; margin-top: 0; }
 .main-content h3 { font-size: 1.05em; color: var(--muted-fg); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; margin-bottom: 0.5em; }
 
-.content-toolbar { display: flex; justify-content: flex-end; margin-bottom: 0.75em; }
-.toggle-all-btn { background: var(--bg); color: var(--muted-fg); border: 1px solid var(--border); border-radius: 4px; padding: 0.35em 0.8em; cursor: pointer; font-size: 0.85em; }
+.tag-group { margin-bottom: 2em; }
+.tag-group-header { display: flex; align-items: center; justify-content: space-between; gap: 1em; }
+.tag-group-name { margin: 0; }
+.tag-group-description { color: var(--muted-fg); margin-top: 0.15em; }
+
+.toggle-all-btn { flex-shrink: 0; background: var(--bg); color: var(--muted-fg); border: 1px solid var(--border); border-radius: 4px; padding: 0.35em 0.8em; cursor: pointer; font-size: 0.85em; }
 .toggle-all-btn:hover { border-color: var(--link); color: var(--link); }
 
 .tab-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 0.25em; padding: 0.4em 0.6em; background: var(--surface); flex-shrink: 0; box-shadow: var(--shadow-tabbar); position: relative; z-index: 1; }
