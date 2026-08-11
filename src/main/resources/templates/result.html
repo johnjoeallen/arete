@@ -36,14 +36,14 @@
         <p th:if="${openApi.info != null and openApi.info.version != null}">
             <strong>Version:</strong> <span th:text="${openApi.info.version}"></span>
         </p>
-        <p th:if="${openApi.info != null and openApi.info.description != null}" th:text="${openApi.info.description}"></p>
+        <div th:if="${openApi.info != null and openApi.info.description != null}" th:with="renderedDescription=${@markdownRenderer.render(openApi.info.description)}" class="markdown-body" th:utext="${renderedDescription}"></div>
 
         <div th:if="${tagGroups != null}" th:each="group : ${tagGroups}" class="tag-group">
             <div class="tag-group-header">
                 <h2 class="tag-group-name" th:text="${group.name}">tag</h2>
                 <button type="button" class="toggle-all-btn" data-toggle-all>Expand all</button>
             </div>
-            <p th:if="${group.description != null}" class="tag-group-description" th:text="${group.description}"></p>
+            <div th:if="${group.description != null}" th:with="renderedDescription=${@markdownRenderer.render(group.description)}" class="tag-group-description markdown-body" th:utext="${renderedDescription}"></div>
 
             <div th:each="endpoint : ${group.endpoints}" class="endpoint collapsed">
                 <h2 class="endpoint-toggle">
@@ -53,7 +53,7 @@
                 </h2>
                 <div class="endpoint-body">
                 <p th:if="${endpoint.operation.summary != null}" th:text="${endpoint.operation.summary}"></p>
-                <p th:if="${endpoint.operation.description != null}" th:text="${endpoint.operation.description}"></p>
+                <div th:if="${endpoint.operation.description != null}" th:with="renderedDescription=${@markdownRenderer.render(endpoint.operation.description)}" class="markdown-body" th:utext="${renderedDescription}"></div>
                 <p th:if="${endpoint.operation.operationId != null}"><em>operationId: </em><code th:text="${endpoint.operation.operationId}"></code></p>
 
                 <div th:if="${endpoint.operation.parameters != null and !endpoint.operation.parameters.isEmpty()}">
@@ -68,7 +68,7 @@
                                 <td th:text="${opParam.in}"></td>
                                 <td th:text="${opParam.required != null and opParam.required ? 'yes' : 'no'}"></td>
                                 <td><div th:insert="~{fragments/schema :: schemaView(${opParam.schema}, 0, true)}"></div></td>
-                                <td th:text="${opParam.description}"></td>
+                                <td th:with="renderedDescription=${@markdownRenderer.render(opParam.description)}" class="markdown-body" th:utext="${renderedDescription}"></td>
                             </tr>
                         </tbody>
                     </table>

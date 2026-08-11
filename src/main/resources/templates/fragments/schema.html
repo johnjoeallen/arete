@@ -9,7 +9,7 @@
         <span th:if="${showType and schema.type == null}" class="schema-type" th:text="${schema.get$ref() != null} ? 'object' : 'any'">type</span>
         <span th:if="${schema.format != null}" class="schema-format" th:text="'(' + ${schema.format} + ')'"></span>
         <span th:if="${schema.nullable != null and schema.nullable}" class="schema-nullable">nullable</span>
-        <p th:if="${schema.description != null}" class="schema-description" th:text="${schema.description}"></p>
+        <div th:if="${schema.description != null}" th:with="renderedDescription=${@markdownRenderer.render(schema.description)}" class="schema-description markdown-body" th:utext="${renderedDescription}"></div>
 
         <div th:if="${schema.enum != null and !schema.enum.isEmpty()}" class="schema-enum">
             enum: <span th:text="${schema.enum}"></span>
