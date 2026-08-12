@@ -7,10 +7,11 @@
 **[Speculate site &rarr;](https://johnjoeallen.github.io/speculate/)**
 
 Speculate is a local-first API explorer for OpenAPI/Swagger specs. Paste a
-spec, get instant browsable docs — endpoints, parameters, schemas, and
-request/response examples — with search, multi-spec tabs, and light/dark
-themes. No cloud, no build step for the reader, no account: it's a single
-runnable jar that keeps its data on your machine.
+spec, or point Speculate at one on disk, and get instant browsable docs —
+endpoints, parameters, schemas, request/response examples, and pluggable
+custom validation — with search, multi-spec tabs, and light/dark themes. No
+cloud, no build step for the reader, no account: it's a single runnable jar
+that keeps its data on your machine.
 
 ## What It Does
 
@@ -31,11 +32,26 @@ it rather than piling up duplicates), and renders it as browsable docs:
   `enum`, common string `format`s like `date-time`/`email`/`uuid`, nested
   objects and arrays) and rendered in the right shape for that content type
   — pretty-printed JSON, XML, or `x-www-form-urlencoded`.
+- `description` fields throughout the spec (info, tags, operations,
+  parameters) render as Markdown, including any raw HTML they contain,
+  sanitized for safe display.
 
-Saved specs live in a sidebar you can search by title. Opening a spec adds
-it to a tab bar (kept in `localStorage`) so you can flip between several
-open specs without losing your place, and closing a tab just drops it from
-the bar — the saved spec itself is untouched until you explicitly delete it.
+You don't have to paste — Speculate can also load a spec straight from
+disk and keep it in sync:
+
+- Enter a file's full path in the "load a file from elsewhere on disk"
+  field on the home page. Speculate reads it immediately and then watches
+  it, so saving a change to the file updates the saved copy automatically.
+- Drop a file into `~/.speculate/specs` and Speculate loads and watches it
+  the same way, with no path to type — this folder is scanned on startup
+  too, so files already sitting there when you launch get picked up.
+
+Saved specs live in a sidebar you can search by title, which stays live —
+a spec picked up by the file watcher appears there without a manual
+refresh. Opening a spec adds it to a tab bar (kept in `localStorage`) so
+you can flip between several open specs without losing your place, and
+closing a tab just drops it from the bar — the saved spec itself is
+untouched until you explicitly delete it.
 
 ## Requirements
 
@@ -81,17 +97,57 @@ scripts\speculate.bat
 ./scripts/speculate.sh --wipe-db
 ```
 
-Data is stored in an H2 database file under `~/.speculate/data`, regardless
-of which directory you launch the script from.
+The launcher scripts respect `JAVA_HOME` if it's set — checked before `java`
+is resolved from `PATH`, so a machine with multiple JDKs installed uses the
+one you point at instead of whichever `java` happens to be first on `PATH`.
 
-## Roadmap: Custom Validation
+Speculate keeps everything under `~/.speculate`, regardless of which
+directory you launch the script from:
 
-Speculate is intended to support **pluggable custom validation** — rules
-you define yourself (naming conventions, required fields, security scheme
-enforcement, and similar house-style checks) that run against a pasted spec
-and surface as warnings alongside the parser's own messages. This isn't
-built yet; it's the next major feature planned for the project. Follow the
-[issues](../../issues) for progress.
+| Path | Contents |
+|---|---|
+| `~/.speculate/data` | The embedded H2 database. |
+| `~/.speculate/specs` | Drop spec files here to have them loaded and watched automatically — see [What It Does](#what-it-does). |
+| `~/.speculate/plugins` | Drop extra validation plugin jars here — see [Custom Validation](#custom-validation). |
+
+## Custom Validation
+
+Every spec you load — pasted or from a file — is run through Speculate's
+validation plugins automatically, and the results appear on the spec page
+alongside the parser's own messages: severity, rule ID, finding,
+[JSON Pointer](https://www.rfc-editor.org/rfc/rfc6901) location, and which
+plugin reported it.
+
+Plugins are `.jar` files, discovered from two folders at startup:
+
+- `plugins/`, next to `speculate.jar` — this is where the release zip
+  ships the bundled default plugin, `noop-validation-plugin` (a
+  pass-everything reference implementation that proves the pipeline
+  works end to end). Not created automatically if missing, since in a
+  from-source dev run this resolves under `target/classes` and
+  shouldn't be conjured out of thin air there.
+- `~/.speculate/plugins` — a stable location independent of where
+  Speculate is installed, created automatically if it doesn't exist.
+  Drop your own plugin jars here.
+
+Enable or disable individual plugins from **Settings**; a disabled plugin
+stays loaded but is skipped during validation, so re-enabling it doesn't
+need a restart.
+
+### Writing your own plugin
+
+A plugin implements [`SpecValidationPlugin`](speculate-validation-spi/src/main/java/speculate/validation/spi/SpecValidationPlugin.java)
+from the `speculate-validation-spi` module and registers itself via
+`META-INF/services/speculate.validation.spi.SpecValidationPlugin`
+— standard `ServiceLoader` discovery, no Speculate-specific base class or
+annotations required. Each plugin jar loads in its own isolated
+classloader, so dependency versions between plugins — and between a plugin
+and Speculate itself — never collide.
+
+[`noop-validation-plugin`](noop-validation-plugin) is a minimal, fully
+worked reference implementation; it's the best starting point for writing
+your own. Build it (`mvn package`) and drop the resulting jar into either
+plugins folder above to see it loaded and toggleable in Settings.
 
 ## Build From Source
 
@@ -99,16 +155,19 @@ built yet; it's the next major feature planned for the project. Follow the
 mvn clean package
 ```
 
-Produces the fat jar at `target/openapi-viewer-<version>.jar`. `build.sh`/
-`build.bat` do this and copy the result to `scripts/speculate.jar` so the
-launcher scripts have something to run.
+Produces the fat jar at `speculate-app/target/speculate-<version>.jar` and
+the default plugin jar at
+`noop-validation-plugin/target/noop-validation-plugin-<version>.jar`.
+`build.sh`/`build.bat` do this and copy both into `scripts/` (the plugin
+jar under `scripts/plugins/`) so the launcher scripts have everything they
+need to run.
 
 ## Release
 
 Pushing a tag matching `v*.*.*` runs [`.github/workflows/release.yml`](.github/workflows/release.yml),
 which sets the Maven version from the tag, builds, packages a zip
-(`speculate.jar` + both launcher scripts), and publishes it as a GitHub
-release.
+(`speculate.jar`, both launcher scripts, and `plugins/` containing the
+bundled default plugin), and publishes it as a GitHub release.
 
 ## License
 

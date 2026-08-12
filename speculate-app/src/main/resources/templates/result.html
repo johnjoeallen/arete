@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${openApi != null and openApi.info != null and openApi.info.title != null} ? ${openApi.info.title} : 'Speculate'">Speculate</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="alternate icon" href="/favicon.ico">
+    <script>
+        (function () {
+            var saved = localStorage.getItem('openapi-viewer:theme');
+            var theme = saved || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+    <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+<div th:replace="~{fragments/sidebar :: sidebar(${specs}, ${q}, ${specId})}"></div>
+<div class="main">
+    <nav id="tab-bar" class="tab-bar" th:attr="data-spec-id=${specId},data-spec-title=${specTitle}"></nav>
+    <div class="main-content">
+
+    <div th:if="${parseErrors != null and !parseErrors.isEmpty()}" class="parse-errors">
+        <h2>Parse messages</h2>
+        <ul>
+            <li th:each="msg : ${parseErrors}" th:text="${msg}"></li>
+        </ul>
+    </div>
+
+    <div th:if="${validation != null and !validation.isEmpty()}" class="validation-results">
+        <h2>Validation</h2>
+        <p th:if="${validation.rulesEvaluatedCount() >= 0}" class="validation-summary-line"
+           th:text="${validation.rulesEvaluatedCount()} + ' rule(s) checked across ' + ${validation.pluginSummaries().size()} + ' validator(s).'"></p>
+        <ul class="plugin-outcomes">
+            <li th:each="s : ${validation.pluginSummaries()}">
+                <span th:text="${s.pluginName()}"></span>:
+                <span th:if="${s.status() == 'SUCCESS'}" th:text="${s.violationCount()} + ' violation(s)'"></span>
+                <span th:unless="${s.status() == 'SUCCESS'}" class="plugin-error" th:text="${s.status()} + ' - ' + ${s.errorMessage()}"></span>
+            </li>
+        </ul>
+        <table class="violations" th:if="${!validation.violations().isEmpty()}">
+            <thead>
+                <tr><th>Severity</th><th>Rule</th><th>Finding</th><th>Location</th><th>Source</th></tr>
+            </thead>
+            <tbody>
+                <tr th:each="av : ${validation.violations()}">
+                    <td>
+                        <span class="severity-badge"
+                              th:classappend="'severity-' + ${#strings.toLowerCase(av.violation().getSeverity())}"
+                              th:text="${av.violation().getSeverity()}"></span>
+                    </td>
+                    <td><code th:text="${av.violation().getRuleId()}"></code></td>
+                    <td>
+                        <div th:text="${av.violation().getTitle()}"></div>
+                        <div th:if="${av.violation().getDescription() != null}" class="violation-description" th:text="${av.violation().getDescription()}"></div>
+                    </td>
+                    <td th:text="${av.violation().getPointer()}"></td>
+                    <td><span class="violation-source" th:text="${av.pluginName()}"></span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div th:if="${openApi == null}">
+        <p>Could not parse the pasted spec.</p>
+    </div>
+
+    <div th:if="${openApi != null}">
+        <h1 th:text="${openApi.info != null and openApi.info.title != null} ? ${openApi.info.title} : '(untitled)'">Spec title</h1>
+        <p th:if="${openApi.info != null and openApi.info.version != null}">
+            <strong>Version:</strong> <span th:text="${openApi.info.version}"></span>
+        </p>
+        <p th:if="${specFilePath != null}" class="spec-source-line">
+            <strong>Loaded from:</strong> <code th:text="${specFilePath}"></code>
+        </p>
+        <div th:if="${openApi.info != null and openApi.info.description != null}" th:with="renderedDescription=${@markdownRenderer.render(openApi.info.description)}" class="markdown-body" th:utext="${renderedDescription}"></div>
+
+        <div th:if="${tagGroups != null}" th:each="group : ${tagGroups}" class="tag-group">
+            <div class="tag-group-header">
+                <h2 class="tag-group-name" th:text="${group.name}">tag</h2>
+                <button type="button" class="toggle-all-btn" data-toggle-all>Expand all</button>
+            </div>
+            <div th:if="${group.description != null}" th:with="renderedDescription=${@markdownRenderer.render(group.description)}" class="tag-group-description markdown-body" th:utext="${renderedDescription}"></div>
+
+            <div th:each="endpoint : ${group.endpoints}" class="endpoint collapsed">
+                <h2 class="endpoint-toggle">
+                    <span class="toggle-indicator">&#9662;</span>
+                    <span class="method" th:classappend="'method-' + ${#strings.toLowerCase(endpoint.method)}" th:text="${endpoint.method}">GET</span>
+                    <code th:text="${endpoint.path}">/path</code>
+                </h2>
+                <div class="endpoint-body">
+                <p th:if="${endpoint.operation.summary != null}" th:text="${endpoint.operation.summary}"></p>
+                <div th:if="${endpoint.operation.description != null}" th:with="renderedDescription=${@markdownRenderer.render(endpoint.operation.description)}" class="markdown-body" th:utext="${renderedDescription}"></div>
+                <p th:if="${endpoint.operation.operationId != null}"><em>operationId: </em><code th:text="${endpoint.operation.operationId}"></code></p>
+
+                <div th:if="${endpoint.operation.parameters != null and !endpoint.operation.parameters.isEmpty()}">
+                    <h3>Parameters</h3>
+                    <table class="params">
+                        <thead>
+                            <tr><th>Name</th><th>In</th><th>Required</th><th>Type</th><th>Description</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="opParam : ${endpoint.operation.parameters}">
+                                <td><code th:text="${opParam.name}"></code></td>
+                                <td th:text="${opParam.in}"></td>
+                                <td th:text="${opParam.required != null and opParam.required ? 'yes' : 'no'}"></td>
+                                <td><div th:insert="~{fragments/schema :: schemaView(${opParam.schema}, 0, true)}"></div></td>
+                                <td th:with="renderedDescription=${@markdownRenderer.render(opParam.description)}" class="markdown-body" th:utext="${renderedDescription}"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="section" th:if="${endpoint.operation.requestBody != null and endpoint.operation.requestBody.content != null and !endpoint.operation.requestBody.content.isEmpty()}">
+                    <h3 class="section-toggle"><span class="toggle-indicator">&#9662;</span> Request</h3>
+                    <div class="section-body">
+                        <div th:replace="~{fragments/contenttabs :: contentTabs(${endpoint.operation.requestBody.content})}"></div>
+                    </div>
+                </div>
+
+                <div class="section collapsed" th:if="${endpoint.operation.responses != null and !endpoint.operation.responses.isEmpty()}">
+                    <h3 class="section-toggle"><span class="toggle-indicator">&#9662;</span> Responses</h3>
+                    <div class="section-body">
+                        <div th:each="respEntry : ${endpoint.operation.responses}" class="response-block">
+                            <h4>
+                                <span th:text="${respEntry.key}">200</span>
+                                <span th:if="${respEntry.value.description != null}" th:text="'- ' + ${respEntry.value.description}"></span>
+                            </h4>
+                            <div th:if="${respEntry.value.content != null and !respEntry.value.content.isEmpty()}"
+                                 th:replace="~{fragments/contenttabs :: contentTabs(${respEntry.value.content})}"></div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+</div>
+<script src="/js/tabs.js" defer></script>
+<script src="/js/sidebar-refresh.js" defer></script>
+<script src="/js/interactivity.js" defer></script>
+<script src="/js/theme.js" defer></script>
+</body>
+</html>

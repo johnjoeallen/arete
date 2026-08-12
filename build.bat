@@ -1,14 +1,24 @@
 @echo off
 setlocal
 
-mvn --no-transfer-progress clean package -DskipTests
+mvn --no-transfer-progress -f "%~dp0pom.xml" clean package -DskipTests
 if %errorlevel% neq 0 exit /b %errorlevel%
 
-for %%f in ("%~dp0target\openapi-viewer-*.jar") do (
-    copy /y "%%f" "%~dp0scripts\speculate.jar" >nul
-    echo Built: scripts\speculate.jar
-    exit /b 0
+set "JAR="
+for %%f in ("%~dp0speculate-app\target\speculate-*.jar") do set "JAR=%%f"
+if "%JAR%"=="" (
+    echo Build succeeded but no JAR found in target\ >&2
+    exit /b 1
 )
 
-echo Build succeeded but no JAR found in target\ >&2
-exit /b 1
+set "PLUGIN_JAR="
+for %%f in ("%~dp0noop-validation-plugin\target\noop-validation-plugin-*.jar") do set "PLUGIN_JAR=%%f"
+if "%PLUGIN_JAR%"=="" (
+    echo Build succeeded but no plugin JAR found in noop-validation-plugin\target\ >&2
+    exit /b 1
+)
+
+copy /y "%JAR%" "%~dp0scripts\speculate.jar" >nul
+if not exist "%~dp0scripts\plugins" mkdir "%~dp0scripts\plugins"
+copy /y "%PLUGIN_JAR%" "%~dp0scripts\plugins\" >nul
+echo Built: scripts\speculate.jar (+ scripts\plugins\)

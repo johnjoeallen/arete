@@ -32,6 +32,13 @@ if [ ! -f "$JAR" ]; then
   exit 1
 fi
 
+# Prefer JAVA_HOME when set, so a machine with multiple JDKs on PATH still
+# runs the one the user pointed at. Only touch PATH once we know JAVA_HOME is
+# actually set — prepending an empty value would corrupt PATH.
+if [ -n "$JAVA_HOME" ]; then
+  PATH="$JAVA_HOME/bin:$PATH"
+fi
+
 if ! command -v java &>/dev/null; then
   echo "Error: Java 17 or later is required." >&2
   echo "Download from https://adoptium.net" >&2

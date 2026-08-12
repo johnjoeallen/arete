@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Speculate — a local-first API explorer for OpenAPI/Swagger specs</title>
-<meta name="description" content="Paste an OpenAPI or Swagger spec, get instant browsable docs — endpoints grouped by tag, parameters, schemas, and worked examples — with search, multi-spec tabs, and light/dark themes. No cloud, no account: a single runnable jar.">
+<meta name="description" content="Paste an OpenAPI or Swagger spec, or point Speculate at one on disk, and get instant browsable docs — endpoints grouped by tag, parameters, schemas, worked examples, and pluggable custom validation — with search, multi-spec tabs, and light/dark themes. No cloud, no account: a single runnable jar.">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="alternate icon" href="favicon.ico">
 <link rel="stylesheet" href="style.css">
@@ -20,10 +20,11 @@
     </div>
     <p class="tagline">
       A local-first API explorer for OpenAPI/Swagger specs. Paste a spec,
-      get instant browsable docs — endpoints grouped by tag, parameters,
-      schemas, and worked request/response examples — with search,
-      multi-spec tabs, and light/dark themes. No cloud, no account: it's a
-      single runnable jar that keeps its data on your machine.
+      or point Speculate at one on disk, and get instant browsable docs —
+      endpoints grouped by tag, parameters, schemas, worked request/response
+      examples, and pluggable custom validation — with search, multi-spec
+      tabs, and light/dark themes. No cloud, no account: it's a single
+      runnable jar that keeps its data on your machine.
     </p>
     <div class="cta-row">
       <a class="btn primary" href="https://github.com/johnjoeallen/speculate">View on GitHub</a>
@@ -38,7 +39,7 @@
     <a href="#features">Features</a>
     <a href="#screenshot">Screenshot</a>
     <a href="#get-started">Get started</a>
-    <a href="#roadmap">Roadmap</a>
+    <a href="#validation">Validation</a>
     <button id="theme-toggle" class="theme-toggle" aria-label="Toggle color theme"></button>
   </div>
 </nav>
@@ -75,7 +76,15 @@
       </div>
       <div class="feature-card">
         <h3>Multiple specs, one window</h3>
-        <p>Saved specs live in a searchable sidebar. Opening one adds a tab, so you can flip between several open specs without losing your place.</p>
+        <p>Saved specs live in a searchable sidebar that stays live. Opening one adds a tab, so you can flip between several open specs without losing your place.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Load from disk, and watch it</h3>
+        <p>Point Speculate at a spec's full path, or just drop the file into <code>~/.speculate/specs</code>. Either way it's loaded immediately and kept in sync — edit the file and Speculate reloads it automatically.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Pluggable custom validation</h3>
+        <p>Every spec runs through validator plugins automatically, with results — severity, rule, finding, location — shown alongside the parser's own messages. Write your own against a small SPI, or drop a jar into <code>~/.speculate/plugins</code>.</p>
       </div>
       <div class="feature-card">
         <h3>Light and dark themes</h3>
@@ -100,24 +109,24 @@
     <ol class="steps">
       <li>Download the latest <code>speculate-&lt;version&gt;.zip</code> from the <a href="https://github.com/johnjoeallen/speculate/releases">releases page</a> and unzip it.</li>
       <li>Run the launcher script for your platform: <code>./speculate.sh</code> on Linux/macOS, <code>speculate.bat</code> on Windows.</li>
-      <li>Open <code>http://localhost:6809</code> and paste a spec.</li>
+      <li>Open <code>http://localhost:6809</code> and paste a spec — or drop one into <code>~/.speculate/specs</code> and skip pasting entirely.</li>
     </ol>
     <p class="lede" style="margin-top: 1.2rem;">Need a different port, or a clean slate? <code>./speculate.sh --port 8080</code> or <code>./speculate.sh --wipe-db</code>. See the <a href="https://github.com/johnjoeallen/speculate#readme">README</a> for building from source and the full flag list.</p>
   </section>
 
-  <section id="roadmap">
-    <h2>Roadmap</h2>
-    <div class="roadmap-card">
-      <span class="badge">Planned</span>
-      <h3 style="margin: 0 0 0.4rem;">Pluggable custom validation</h3>
-      <p style="margin: 0; color: var(--fg-dim);">
-        Define your own rules — naming conventions, required fields, security
-        scheme enforcement, and similar house-style checks — that run
-        against a pasted spec and surface as warnings alongside the parser's
-        own messages. Not built yet; it's the next major feature planned.
-        Follow progress in the <a href="https://github.com/johnjoeallen/speculate/issues">issues</a>.
-      </p>
-    </div>
+  <section id="validation">
+    <h2>Custom validation</h2>
+    <p class="lede">
+      Define your own rules — naming conventions, required fields, security
+      scheme enforcement, and similar house-style checks — that run against
+      every spec you load and surface as warnings alongside the parser's own
+      messages. Plugins are discovered from two folders: the bundled
+      <code>plugins/</code> next to <code>speculate.jar</code> (which ships
+      with a working reference plugin) and <code>~/.speculate/plugins</code>
+      for your own, toggleable per-plugin from Settings without a restart.
+      See the <a href="https://github.com/johnjoeallen/speculate#custom-validation">README</a>
+      for how to write one.
+    </p>
   </section>
 
 </main>

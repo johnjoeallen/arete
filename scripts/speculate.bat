@@ -49,6 +49,13 @@ if not exist "%JAR%" (
     exit /b 1
 )
 
+rem Prefer JAVA_HOME when set, so a machine with multiple JDKs on PATH still
+rem runs the one the user pointed at. Only touch PATH once we know JAVA_HOME
+rem is actually set -- prepending an empty value would corrupt PATH.
+if defined JAVA_HOME (
+    set "PATH=%JAVA_HOME%\bin;%PATH%"
+)
+
 where java >nul 2>&1
 if %errorlevel% neq 0 (
     echo Error: Java 17 or later is required.
