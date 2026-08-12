@@ -113,10 +113,14 @@ directory you launch the script from:
 ## Custom Validation
 
 Every spec you load — pasted or from a file — is run through Speculate's
-validation plugins automatically, and the results appear on the spec page
-alongside the parser's own messages: severity, rule ID, finding,
-[JSON Pointer](https://www.rfc-editor.org/rfc/rfc6901) location, and which
-plugin reported it.
+validation plugins automatically. Each endpoint whose findings map to a
+specific operation shows a severity-count badge (❌ error, ⚠️ warning, ℹ️ info,
+💡 hint) in its header; expanding the endpoint lists those findings in full —
+severity, rule ID, finding, [JSON Pointer](https://www.rfc-editor.org/rfc/rfc6901)
+location, which plugin reported it, and a "Learn more" link out to the
+plugin's own rule documentation when it provides one (e.g. Zally links back
+to the relevant section of the Zalando API guidelines; an organization's own
+plugin could just as well link to an internal wiki page).
 
 Plugins are `.jar` files, discovered from two folders at startup:
 

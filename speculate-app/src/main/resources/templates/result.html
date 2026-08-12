@@ -69,13 +69,13 @@
                     <code th:text="${endpoint.path}">/path</code>
                     <span class="finding-badges" th:if="${findings != null and findings.counts().total() > 0}">
                         <span class="finding-badge finding-badge-error" th:if="${findings.counts().errorCount() > 0}"
-                              th:text="${findings.counts().errorCount()} + ' err'" th:title="${findings.counts().errorCount()} + ' error(s)'"></span>
+                              th:text="'❌ ' + ${findings.counts().errorCount()}" th:title="${findings.counts().errorCount()} + ' error(s)'"></span>
                         <span class="finding-badge finding-badge-warning" th:if="${findings.counts().warningCount() > 0}"
-                              th:text="${findings.counts().warningCount()} + ' warn'" th:title="${findings.counts().warningCount()} + ' warning(s)'"></span>
+                              th:text="'⚠️ ' + ${findings.counts().warningCount()}" th:title="${findings.counts().warningCount()} + ' warning(s)'"></span>
                         <span class="finding-badge finding-badge-info" th:if="${findings.counts().infoCount() > 0}"
-                              th:text="${findings.counts().infoCount()} + ' info'" th:title="${findings.counts().infoCount()} + ' info finding(s)'"></span>
+                              th:text="'ℹ️ ' + ${findings.counts().infoCount()}" th:title="${findings.counts().infoCount()} + ' info finding(s)'"></span>
                         <span class="finding-badge finding-badge-hint" th:if="${findings.counts().hintCount() > 0}"
-                              th:text="${findings.counts().hintCount()} + ' hint'" th:title="${findings.counts().hintCount()} + ' hint(s)'"></span>
+                              th:text="'💡 ' + ${findings.counts().hintCount()}" th:title="${findings.counts().hintCount()} + ' hint(s)'"></span>
                     </span>
                 </h2>
                 <div class="endpoint-body">
@@ -100,6 +100,10 @@
                                 <td>
                                     <div th:text="${av.violation().getTitle()}"></div>
                                     <div th:if="${av.violation().getDescription() != null}" class="violation-description" th:text="${av.violation().getDescription()}"></div>
+                                    <a th:if="${av.violation().getDocumentationUrl() != null}"
+                                       th:href="${av.violation().getDocumentationUrl()}"
+                                       target="_blank" rel="noopener noreferrer"
+                                       class="violation-doc-link">Learn more &#8599;</a>
                                 </td>
                                 <td th:text="${av.violation().getPointer()}"></td>
                                 <td><span class="violation-source" th:text="${av.pluginName()}"></span></td>
