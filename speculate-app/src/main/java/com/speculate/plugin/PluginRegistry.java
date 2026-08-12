@@ -39,9 +39,10 @@ import java.util.stream.Collectors;
  *     extra plugin jar.</li>
  * </ul>
  *
- * Each jar gets its own isolated {@link URLClassLoader}, parented on the
- * classloader that loaded {@link SpecValidationPlugin} itself, per the
- * interface's classloading contract.
+ * Each jar gets its own isolated, <em>child-first</em> {@link URLClassLoader}
+ * (see {@link ChildFirstClassLoader}), parented on the classloader that
+ * loaded {@link SpecValidationPlugin} itself, per the interface's
+ * classloading contract.
  *
  * <p>This is the minimal loader described for the discovery-pipeline proof:
  * one instance per plugin jar, loaded once at startup and reused for every
@@ -82,7 +83,7 @@ public class PluginRegistry {
         List<SpecValidationPlugin> loaded = new ArrayList<>();
         for (File jar : jars) {
             try {
-                URLClassLoader isolated = new URLClassLoader(
+                URLClassLoader isolated = new ChildFirstClassLoader(
                         new URL[] {jar.toURI().toURL()},
                         SpecValidationPlugin.class.getClassLoader());
                 ServiceLoader<SpecValidationPlugin> serviceLoader =
@@ -97,7 +98,10 @@ public class PluginRegistry {
                 // Plugin jars are untrusted, dynamically loaded code and must never
                 // be allowed to take down startup — this also catches things like
                 // LinkageError from a classpath mismatch, not just RuntimeException.
-                log.warn("Failed to load validation plugin from {}: {}", jar.getName(), t.toString());
+                // Pass the throwable itself (not t.toString()) so the cause chain
+                // actually reaches the log — a bare summary line has repeatedly not
+                // been enough to diagnose real plugin-loading failures.
+                log.warn("Failed to load validation plugin from {}", jar.getName(), t);
             }
         }
 
