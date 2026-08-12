@@ -18,5 +18,5 @@ fi
 
 cp "$JAR" "$DIR/scripts/speculate.jar"
 mkdir -p "$DIR/scripts/plugins"
-cp "$PLUGIN_JAR" "$DIR/scripts/plugins/"
-echo "Built: scripts/speculate.jar (+ scripts/plugins/$(basename "$PLUGIN_JAR"))"
+cp "$PLUGIN_JAR" "$DIR/scripts/plugins/zally-validation-plugin.jar"
+echo "Built: scripts/speculate.jar (+ scripts/plugins/zally-validation-plugin.jar)"

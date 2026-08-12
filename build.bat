@@ -20,5 +20,5 @@ if "%PLUGIN_JAR%"=="" (
 
 copy /y "%JAR%" "%~dp0scripts\speculate.jar" >nul
 if not exist "%~dp0scripts\plugins" mkdir "%~dp0scripts\plugins"
-copy /y "%PLUGIN_JAR%" "%~dp0scripts\plugins\" >nul
-echo Built: scripts\speculate.jar (+ scripts\plugins\)
+copy /y "%PLUGIN_JAR%" "%~dp0scripts\plugins\zally-validation-plugin.jar" >nul
+echo Built: scripts\speculate.jar (+ scripts\plugins\zally-validation-plugin.jar)
