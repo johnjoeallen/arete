@@ -64,25 +64,29 @@ class EndpointFindingsTest {
         Violation specLevel = Violation.builder()
                 .ruleId("r4").title("t4").severity(Severity.ERROR).pointer("/info").build();
 
-        List<AttributedViolation> violations = List.of(
-                new AttributedViolation("p", "P", endpointError),
-                new AttributedViolation("p", "P", sameEndpointWarning),
-                new AttributedViolation("p", "P", otherEndpointHint),
-                new AttributedViolation("p", "P", specLevel));
+        AttributedViolation avEndpointError = new AttributedViolation("p", "P", endpointError);
+        AttributedViolation avSameEndpointWarning = new AttributedViolation("p", "P", sameEndpointWarning);
+        AttributedViolation avOtherEndpointHint = new AttributedViolation("p", "P", otherEndpointHint);
+        AttributedViolation avSpecLevel = new AttributedViolation("p", "P", specLevel);
 
-        Map<String, SeverityCounts> byEndpoint = EndpointFindings.byEndpoint(violations);
+        List<AttributedViolation> violations =
+                List.of(avEndpointError, avSameEndpointWarning, avOtherEndpointHint, avSpecLevel);
+
+        Map<String, EndpointFindingsView> byEndpoint = EndpointFindings.byEndpoint(violations);
 
         assertThat(byEndpoint).containsOnlyKeys("GET /items", "POST /items");
-        SeverityCounts getCounts = byEndpoint.get("GET /items");
-        assertThat(getCounts.errorCount()).isEqualTo(1);
-        assertThat(getCounts.warningCount()).isEqualTo(1);
-        assertThat(getCounts.infoCount()).isEqualTo(0);
-        assertThat(getCounts.hintCount()).isEqualTo(0);
-        assertThat(getCounts.total()).isEqualTo(2);
+        EndpointFindingsView getFindings = byEndpoint.get("GET /items");
+        assertThat(getFindings.counts().errorCount()).isEqualTo(1);
+        assertThat(getFindings.counts().warningCount()).isEqualTo(1);
+        assertThat(getFindings.counts().infoCount()).isEqualTo(0);
+        assertThat(getFindings.counts().hintCount()).isEqualTo(0);
+        assertThat(getFindings.counts().total()).isEqualTo(2);
+        assertThat(getFindings.violations()).containsExactly(avEndpointError, avSameEndpointWarning);
 
-        SeverityCounts postCounts = byEndpoint.get("POST /items");
-        assertThat(postCounts.hintCount()).isEqualTo(1);
-        assertThat(postCounts.total()).isEqualTo(1);
+        EndpointFindingsView postFindings = byEndpoint.get("POST /items");
+        assertThat(postFindings.counts().hintCount()).isEqualTo(1);
+        assertThat(postFindings.counts().total()).isEqualTo(1);
+        assertThat(postFindings.violations()).containsExactly(avOtherEndpointHint);
     }
 
     @Test

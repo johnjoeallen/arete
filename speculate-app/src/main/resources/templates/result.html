@@ -61,22 +61,52 @@
             </div>
             <div th:if="${group.description != null}" th:with="renderedDescription=${@markdownRenderer.render(group.description)}" class="tag-group-description markdown-body" th:utext="${renderedDescription}"></div>
 
-            <div th:each="endpoint : ${group.endpoints}" class="endpoint collapsed">
-                <h2 class="endpoint-toggle" th:with="counts=${findingCounts != null ? findingCounts.get(endpoint.method + ' ' + endpoint.path) : null}">
+            <div th:each="endpoint : ${group.endpoints}" class="endpoint collapsed"
+                 th:with="findings=${endpointFindings != null ? endpointFindings.get(endpoint.method + ' ' + endpoint.path) : null}">
+                <h2 class="endpoint-toggle">
                     <span class="toggle-indicator">&#9662;</span>
                     <span class="method" th:classappend="'method-' + ${#strings.toLowerCase(endpoint.method)}" th:text="${endpoint.method}">GET</span>
                     <code th:text="${endpoint.path}">/path</code>
-                    <span class="finding-badges" th:if="${counts != null and counts.total() > 0}">
-                        <span class="finding-badge finding-badge-error" th:if="${counts.errorCount() > 0}" th:text="${counts.errorCount()}"></span>
-                        <span class="finding-badge finding-badge-warning" th:if="${counts.warningCount() > 0}" th:text="${counts.warningCount()}"></span>
-                        <span class="finding-badge finding-badge-info" th:if="${counts.infoCount() > 0}" th:text="${counts.infoCount()}"></span>
-                        <span class="finding-badge finding-badge-hint" th:if="${counts.hintCount() > 0}" th:text="${counts.hintCount()}"></span>
+                    <span class="finding-badges" th:if="${findings != null and findings.counts().total() > 0}">
+                        <span class="finding-badge finding-badge-error" th:if="${findings.counts().errorCount() > 0}"
+                              th:text="${findings.counts().errorCount()} + ' err'" th:title="${findings.counts().errorCount()} + ' error(s)'"></span>
+                        <span class="finding-badge finding-badge-warning" th:if="${findings.counts().warningCount() > 0}"
+                              th:text="${findings.counts().warningCount()} + ' warn'" th:title="${findings.counts().warningCount()} + ' warning(s)'"></span>
+                        <span class="finding-badge finding-badge-info" th:if="${findings.counts().infoCount() > 0}"
+                              th:text="${findings.counts().infoCount()} + ' info'" th:title="${findings.counts().infoCount()} + ' info finding(s)'"></span>
+                        <span class="finding-badge finding-badge-hint" th:if="${findings.counts().hintCount() > 0}"
+                              th:text="${findings.counts().hintCount()} + ' hint'" th:title="${findings.counts().hintCount()} + ' hint(s)'"></span>
                     </span>
                 </h2>
                 <div class="endpoint-body">
                 <p th:if="${endpoint.operation.summary != null}" th:text="${endpoint.operation.summary}"></p>
                 <div th:if="${endpoint.operation.description != null}" th:with="renderedDescription=${@markdownRenderer.render(endpoint.operation.description)}" class="markdown-body" th:utext="${renderedDescription}"></div>
                 <p th:if="${endpoint.operation.operationId != null}"><em>operationId: </em><code th:text="${endpoint.operation.operationId}"></code></p>
+
+                <div class="section" th:if="${findings != null and !findings.violations().isEmpty()}">
+                    <h3>Validation findings</h3>
+                    <table class="endpoint-findings">
+                        <thead>
+                            <tr><th>Severity</th><th>Rule</th><th>Finding</th><th>Location</th><th>Source</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="av : ${findings.violations()}">
+                                <td>
+                                    <span class="severity-badge"
+                                          th:classappend="'severity-' + ${#strings.toLowerCase(av.violation().getSeverity())}"
+                                          th:text="${av.violation().getSeverity()}"></span>
+                                </td>
+                                <td><code th:text="${av.violation().getRuleId()}"></code></td>
+                                <td>
+                                    <div th:text="${av.violation().getTitle()}"></div>
+                                    <div th:if="${av.violation().getDescription() != null}" class="violation-description" th:text="${av.violation().getDescription()}"></div>
+                                </td>
+                                <td th:text="${av.violation().getPointer()}"></td>
+                                <td><span class="violation-source" th:text="${av.pluginName()}"></span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
 
                 <div th:if="${endpoint.operation.parameters != null and !endpoint.operation.parameters.isEmpty()}">
                     <h3>Parameters</h3>

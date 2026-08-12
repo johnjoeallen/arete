@@ -126,7 +126,7 @@ public class SpecController {
         model.addAttribute("specFilePath", entity.getFilePath());
         AggregatedValidationResult validation = pluginValidationService.validate(entity.getRawContent());
         model.addAttribute("validation", validation);
-        model.addAttribute("findingCounts", EndpointFindings.byEndpoint(validation.violations()));
+        model.addAttribute("endpointFindings", EndpointFindings.byEndpoint(validation.violations()));
         populateSidebar(model, q, entity.getId());
         return "result";
     }
@@ -167,7 +167,7 @@ public class SpecController {
                     model.addAttribute("specFilePath", saved.getFilePath());
                     AggregatedValidationResult validation = pluginValidationService.validate(content);
                     model.addAttribute("validation", validation);
-                    model.addAttribute("findingCounts", EndpointFindings.byEndpoint(validation.violations()));
+                    model.addAttribute("endpointFindings", EndpointFindings.byEndpoint(validation.violations()));
                     populateSidebar(model, null, saved.getId());
                     return saved;
                 } else {

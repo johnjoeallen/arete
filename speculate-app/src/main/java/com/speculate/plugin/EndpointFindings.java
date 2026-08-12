@@ -2,6 +2,7 @@ package com.speculate.plugin;
 
 import speculate.validation.spi.Severity;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -11,8 +12,9 @@ import java.util.Set;
 
 /**
  * Groups validation findings by the endpoint (HTTP method + path) their
- * JSON Pointer location falls under, for the per-endpoint severity badges
- * shown on the spec page instead of one long itemized findings list.
+ * JSON Pointer location falls under: severity-badge counts for the
+ * collapsed endpoint header, and the full finding list for when it's
+ * expanded, instead of one long itemized list up front.
  */
 public final class EndpointFindings {
 
@@ -27,22 +29,29 @@ public final class EndpointFindings {
      * matching {@code EndpointView.method() + " " + EndpointView.path()}. A
      * finding whose pointer isn't under a specific operation — e.g. one
      * against {@code info} or a shared component schema — isn't
-     * attributable to any single endpoint and is simply not counted here.
+     * attributable to any single endpoint and doesn't appear here.
      */
-    public static Map<String, SeverityCounts> byEndpoint(List<AttributedViolation> violations) {
-        Map<String, EnumMap<Severity, Long>> counts = new LinkedHashMap<>();
+    public static Map<String, EndpointFindingsView> byEndpoint(List<AttributedViolation> violations) {
+        Map<String, List<AttributedViolation>> byKey = new LinkedHashMap<>();
         for (AttributedViolation av : violations) {
             String key = endpointKey(av.violation().getPointer());
             if (key == null) {
                 continue;
             }
-            counts.computeIfAbsent(key, k -> new EnumMap<>(Severity.class))
-                    .merge(av.violation().getSeverity(), 1L, Long::sum);
+            byKey.computeIfAbsent(key, k -> new ArrayList<>()).add(av);
         }
 
-        Map<String, SeverityCounts> result = new LinkedHashMap<>();
-        counts.forEach((key, bySeverity) -> result.put(key, SeverityCounts.of(bySeverity)));
+        Map<String, EndpointFindingsView> result = new LinkedHashMap<>();
+        byKey.forEach((key, forEndpoint) -> result.put(key, new EndpointFindingsView(countsOf(forEndpoint), forEndpoint)));
         return result;
+    }
+
+    private static SeverityCounts countsOf(List<AttributedViolation> violations) {
+        EnumMap<Severity, Long> bySeverity = new EnumMap<>(Severity.class);
+        for (AttributedViolation av : violations) {
+            bySeverity.merge(av.violation().getSeverity(), 1L, Long::sum);
+        }
+        return SeverityCounts.of(bySeverity);
     }
 
     /** {@code null} unless {@code pointer} is rooted at a specific {@code /paths/<path>/<method>} operation. */
