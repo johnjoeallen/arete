@@ -1,6 +1,8 @@
 package com.speculate.web;
 
 import com.speculate.domain.SpecEntity;
+import com.speculate.plugin.AggregatedValidationResult;
+import com.speculate.plugin.EndpointFindings;
 import com.speculate.plugin.PluginValidationService;
 import com.speculate.service.EndpointGrouper;
 import com.speculate.service.ParsedSpec;
@@ -122,7 +124,9 @@ public class SpecController {
         model.addAttribute("parseErrors", parsed.messages());
         model.addAttribute("specTitle", entity.getTitle());
         model.addAttribute("specFilePath", entity.getFilePath());
-        model.addAttribute("validation", pluginValidationService.validate(entity.getRawContent()));
+        AggregatedValidationResult validation = pluginValidationService.validate(entity.getRawContent());
+        model.addAttribute("validation", validation);
+        model.addAttribute("findingCounts", EndpointFindings.byEndpoint(validation.violations()));
         populateSidebar(model, q, entity.getId());
         return "result";
     }
@@ -161,7 +165,9 @@ public class SpecController {
                     model.addAttribute("parseErrors", parsed.messages());
                     model.addAttribute("specTitle", saved.getTitle());
                     model.addAttribute("specFilePath", saved.getFilePath());
-                    model.addAttribute("validation", pluginValidationService.validate(content));
+                    AggregatedValidationResult validation = pluginValidationService.validate(content);
+                    model.addAttribute("validation", validation);
+                    model.addAttribute("findingCounts", EndpointFindings.byEndpoint(validation.violations()));
                     populateSidebar(model, null, saved.getId());
                     return saved;
                 } else {

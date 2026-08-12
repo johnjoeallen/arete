@@ -38,27 +38,6 @@
                 <span th:unless="${s.status() == 'SUCCESS'}" class="plugin-error" th:text="${s.status()} + ' - ' + ${s.errorMessage()}"></span>
             </li>
         </ul>
-        <table class="violations" th:if="${!validation.violations().isEmpty()}">
-            <thead>
-                <tr><th>Severity</th><th>Rule</th><th>Finding</th><th>Location</th><th>Source</th></tr>
-            </thead>
-            <tbody>
-                <tr th:each="av : ${validation.violations()}">
-                    <td>
-                        <span class="severity-badge"
-                              th:classappend="'severity-' + ${#strings.toLowerCase(av.violation().getSeverity())}"
-                              th:text="${av.violation().getSeverity()}"></span>
-                    </td>
-                    <td><code th:text="${av.violation().getRuleId()}"></code></td>
-                    <td>
-                        <div th:text="${av.violation().getTitle()}"></div>
-                        <div th:if="${av.violation().getDescription() != null}" class="violation-description" th:text="${av.violation().getDescription()}"></div>
-                    </td>
-                    <td th:text="${av.violation().getPointer()}"></td>
-                    <td><span class="violation-source" th:text="${av.pluginName()}"></span></td>
-                </tr>
-            </tbody>
-        </table>
     </div>
 
     <div th:if="${openApi == null}">
@@ -83,10 +62,16 @@
             <div th:if="${group.description != null}" th:with="renderedDescription=${@markdownRenderer.render(group.description)}" class="tag-group-description markdown-body" th:utext="${renderedDescription}"></div>
 
             <div th:each="endpoint : ${group.endpoints}" class="endpoint collapsed">
-                <h2 class="endpoint-toggle">
+                <h2 class="endpoint-toggle" th:with="counts=${findingCounts != null ? findingCounts.get(endpoint.method + ' ' + endpoint.path) : null}">
                     <span class="toggle-indicator">&#9662;</span>
                     <span class="method" th:classappend="'method-' + ${#strings.toLowerCase(endpoint.method)}" th:text="${endpoint.method}">GET</span>
                     <code th:text="${endpoint.path}">/path</code>
+                    <span class="finding-badges" th:if="${counts != null and counts.total() > 0}">
+                        <span class="finding-badge finding-badge-error" th:if="${counts.errorCount() > 0}" th:text="${counts.errorCount()}"></span>
+                        <span class="finding-badge finding-badge-warning" th:if="${counts.warningCount() > 0}" th:text="${counts.warningCount()}"></span>
+                        <span class="finding-badge finding-badge-info" th:if="${counts.infoCount() > 0}" th:text="${counts.infoCount()}"></span>
+                        <span class="finding-badge finding-badge-hint" th:if="${counts.hintCount() > 0}" th:text="${counts.hintCount()}"></span>
+                    </span>
                 </h2>
                 <div class="endpoint-body">
                 <p th:if="${endpoint.operation.summary != null}" th:text="${endpoint.operation.summary}"></p>
