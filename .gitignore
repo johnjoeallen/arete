@@ -25,6 +25,7 @@ replay_pid*
 
 # Build output
 target/
+dependency-reduced-pom.xml
 
 # Runtime data
 data/

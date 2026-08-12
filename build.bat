@@ -12,9 +12,9 @@ if "%JAR%"=="" (
 )
 
 set "PLUGIN_JAR="
-for %%f in ("%~dp0noop-validation-plugin\target\noop-validation-plugin-*.jar") do set "PLUGIN_JAR=%%f"
+for %%f in ("%~dp0zally-validation-plugin\target\zally-validation-plugin-*.jar") do set "PLUGIN_JAR=%%f"
 if "%PLUGIN_JAR%"=="" (
-    echo Build succeeded but no plugin JAR found in noop-validation-plugin\target\ >&2
+    echo Build succeeded but no plugin JAR found in zally-validation-plugin\target\ >&2
     exit /b 1
 )
 

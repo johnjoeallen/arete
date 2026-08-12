@@ -24,7 +24,7 @@ jobs:
         run: mvn --no-transfer-progress versions:set -DnewVersion=${GITHUB_REF_NAME#v} -DgenerateBackupPoms=false -DprocessAllModules=true
 
       - name: Build
-        run: mvn --no-transfer-progress package -DskipTests
+        run: mvn --no-transfer-progress verify
 
       - name: Package zip
         run: |
@@ -33,7 +33,7 @@ jobs:
           cp speculate-app/target/speculate-${VERSION}.jar dist/speculate/speculate.jar
           cp scripts/speculate.sh dist/speculate/
           cp scripts/speculate.bat dist/speculate/
-          cp noop-validation-plugin/target/noop-validation-plugin-${VERSION}.jar dist/speculate/plugins/
+          cp zally-validation-plugin/target/zally-validation-plugin-${VERSION}.jar dist/speculate/plugins/
           chmod +x dist/speculate/speculate.sh
           ZIP="$(pwd)/speculate-${VERSION}.zip"
           (cd dist && zip -r "$ZIP" speculate)

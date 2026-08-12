@@ -84,7 +84,7 @@
       </div>
       <div class="feature-card">
         <h3>Pluggable custom validation</h3>
-        <p>Every spec runs through validator plugins automatically, with results — severity, rule, finding, location — shown alongside the parser's own messages. Write your own against a small SPI, or drop a jar into <code>~/.speculate/plugins</code>.</p>
+        <p>Every spec runs through validator plugins automatically, with results — severity, rule, finding, location — shown alongside the parser's own messages. Ships with Zalando's Zally API-guidelines linter built in; write your own against a small SPI, or drop a jar into <code>~/.speculate/plugins</code>.</p>
       </div>
       <div class="feature-card">
         <h3>Light and dark themes</h3>
@@ -122,9 +122,12 @@
       every spec you load and surface as warnings alongside the parser's own
       messages. Plugins are discovered from two folders: the bundled
       <code>plugins/</code> next to <code>speculate.jar</code> (which ships
-      with a working reference plugin) and <code>~/.speculate/plugins</code>
-      for your own, toggleable per-plugin from Settings without a restart.
-      See the <a href="https://github.com/johnjoeallen/speculate#custom-validation">README</a>
+      with <a href="https://github.com/zalando/zally">Zally</a>, Zalando's
+      API guidelines linter, as the default) and
+      <code>~/.speculate/plugins</code> for your own — an organization-specific
+      ruleset, for instance — toggleable per-plugin from Settings without a
+      restart. See the
+      <a href="https://github.com/johnjoeallen/speculate#custom-validation">README</a>
       for how to write one.
     </p>
   </section>

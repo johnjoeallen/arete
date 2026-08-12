@@ -121,14 +121,16 @@ plugin reported it.
 Plugins are `.jar` files, discovered from two folders at startup:
 
 - `plugins/`, next to `speculate.jar` — this is where the release zip
-  ships the bundled default plugin, `noop-validation-plugin` (a
-  pass-everything reference implementation that proves the pipeline
-  works end to end). Not created automatically if missing, since in a
-  from-source dev run this resolves under `target/classes` and
-  shouldn't be conjured out of thin air there.
+  ships the bundled default plugin, `zally-validation-plugin`, which wraps
+  Zalando's [Zally](https://github.com/zalando/zally) linter and its core
+  API-guidelines ruleset. Not created automatically if missing, since in a
+  from-source dev run this resolves under `target/classes` and shouldn't
+  be conjured out of thin air there.
 - `~/.speculate/plugins` — a stable location independent of where
   Speculate is installed, created automatically if it doesn't exist.
-  Drop your own plugin jars here.
+  Drop your own plugin jars here — e.g. an organization-specific Zally
+  ruleset, packaged the same way as the bundled one but with its own
+  `getId()`, so it runs alongside rather than replacing it.
 
 Enable or disable individual plugins from **Settings**; a disabled plugin
 stays loaded but is skipped during validation, so re-enabling it doesn't
@@ -144,10 +146,14 @@ annotations required. Each plugin jar loads in its own isolated
 classloader, so dependency versions between plugins — and between a plugin
 and Speculate itself — never collide.
 
-[`noop-validation-plugin`](noop-validation-plugin) is a minimal, fully
-worked reference implementation; it's the best starting point for writing
-your own. Build it (`mvn package`) and drop the resulting jar into either
-plugins folder above to see it loaded and toggleable in Settings.
+[`zally-validation-plugin`](zally-validation-plugin) is a fully worked
+example — it's the best starting point for writing your own. One thing it
+does that a from-scratch plugin usually needs to as well: Speculate loads
+each plugin through an isolated, single-jar `URLClassLoader` (see
+`PluginRegistry`), so unless a plugin's only dependency is the SPI itself,
+its jar needs to be self-contained. `zally-validation-plugin`'s `pom.xml`
+uses `maven-shade-plugin` to bundle Zally and its dependencies in; a new
+plugin with real dependencies will generally need the same.
 
 ## Build From Source
 
@@ -157,7 +163,7 @@ mvn clean package
 
 Produces the fat jar at `speculate-app/target/speculate-<version>.jar` and
 the default plugin jar at
-`noop-validation-plugin/target/noop-validation-plugin-<version>.jar`.
+`zally-validation-plugin/target/zally-validation-plugin-<version>.jar`.
 `build.sh`/`build.bat` do this and copy both into `scripts/` (the plugin
 jar under `scripts/plugins/`) so the launcher scripts have everything they
 need to run.

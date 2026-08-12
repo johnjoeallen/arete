@@ -10,9 +10,9 @@ if [ -z "$JAR" ]; then
   exit 1
 fi
 
-PLUGIN_JAR=$(ls "$DIR"/noop-validation-plugin/target/noop-validation-plugin-*.jar 2>/dev/null | head -1)
+PLUGIN_JAR=$(ls "$DIR"/zally-validation-plugin/target/zally-validation-plugin-*.jar 2>/dev/null | head -1)
 if [ -z "$PLUGIN_JAR" ]; then
-  echo "Build succeeded but no plugin JAR found in noop-validation-plugin/target/" >&2
+  echo "Build succeeded but no plugin JAR found in zally-validation-plugin/target/" >&2
   exit 1
 fi
 
