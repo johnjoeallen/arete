@@ -189,11 +189,14 @@ secrets that don't exist until this one-time setup is done:
    `MAVEN_CENTRAL_USERNAME` / `MAVEN_CENTRAL_PASSWORD` (a Central Portal user
    token), `GPG_PRIVATE_KEY`, `GPG_PASSPHRASE`.
 
-Once those secrets exist, every tagged release automatically builds, signs,
-and uploads `speculate-validation-spi` (only that module — not
-`zally-validation-plugin` or `speculate-app`, neither of which is meant to
-be an external dependency) to the Central Portal. `autoPublish` is
-deliberately off: each upload sits as a pending deployment at
+Once those secrets exist, publishing is a manual step, not something every
+tagged release does — run
+[`publish-spi.yml`](.github/workflows/publish-spi.yml) from the Actions tab,
+pointing it at the tag to publish. It builds, signs, and uploads only
+`speculate-validation-spi` (never `zally-validation-plugin` or
+`speculate-app`, neither of which is meant to be an external dependency) to
+the Central Portal. `autoPublish` is deliberately off: each upload sits as a
+pending deployment at
 [central.sonatype.com/publishing/deployments](https://central.sonatype.com/publishing/deployments)
 for manual review and publish, since Central doesn't allow deleting or
 overwriting a release once it's live.
