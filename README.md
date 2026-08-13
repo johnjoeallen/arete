@@ -159,6 +159,45 @@ its jar needs to be self-contained. `zally-validation-plugin`'s `pom.xml`
 uses `maven-shade-plugin` to bundle Zally and its dependencies in; a new
 plugin with real dependencies will generally need the same.
 
+An external plugin should depend on the SPI as a real (`provided`) Maven
+dependency, never by copying its source — a copy that ends up compiled into
+the plugin's own jar is a *different* class from the host's, and
+`ServiceLoader` won't recognize it as implementing `SpecValidationPlugin` at
+all. Once published (see below), the coordinate is:
+
+```xml
+<dependency>
+    <groupId>net.dublinux.speculate</groupId>
+    <artifactId>speculate-validation-spi</artifactId>
+    <version>...</version>
+    <scope>provided</scope>
+</dependency>
+```
+
+#### Publishing `speculate-validation-spi` to Maven Central
+
+Not active yet — the release workflow's publish step is gated behind repo
+secrets that don't exist until this one-time setup is done:
+
+1. Claim the `net.dublinux` namespace at
+   [central.sonatype.com](https://central.sonatype.com) (a DNS TXT record on
+   `dublinux.net` proves ownership).
+2. Generate a GPG keypair, publish the public key to a keyserver (e.g.
+   [keys.openpgp.org](https://keys.openpgp.org)), and keep the private key +
+   passphrase.
+3. Add these secrets to the GitHub repo (Settings → Secrets → Actions):
+   `MAVEN_CENTRAL_USERNAME` / `MAVEN_CENTRAL_PASSWORD` (a Central Portal user
+   token), `GPG_PRIVATE_KEY`, `GPG_PASSPHRASE`.
+
+Once those secrets exist, every tagged release automatically builds, signs,
+and uploads `speculate-validation-spi` (only that module — not
+`zally-validation-plugin` or `speculate-app`, neither of which is meant to
+be an external dependency) to the Central Portal. `autoPublish` is
+deliberately off: each upload sits as a pending deployment at
+[central.sonatype.com/publishing/deployments](https://central.sonatype.com/publishing/deployments)
+for manual review and publish, since Central doesn't allow deleting or
+overwriting a release once it's live.
+
 ## Build From Source
 
 ```

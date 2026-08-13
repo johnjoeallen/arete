@@ -25,7 +25,7 @@
              plugin's isolated URLClassLoader as its parent, so it must not be
              repackaged into the plugin jar. -->
         <dependency>
-            <groupId>speculate</groupId>
+            <groupId>net.dublinux.speculate</groupId>
             <artifactId>speculate-validation-spi</artifactId>
             <version>0.1.0-SNAPSHOT</version>
             <scope>provided</scope>
