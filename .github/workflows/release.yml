@@ -47,35 +47,53 @@ jobs:
             --title "$GITHUB_REF_NAME" \
             --generate-notes
 
-      # The two steps below only run once MAVEN_CENTRAL_USERNAME is set as a
-      # repo secret — until then they're skipped, so this workflow works
+      # The three steps below only run once MAVEN_CENTRAL_USERNAME is set as
+      # a repo secret — until then they're skipped, so this workflow works
       # exactly as before with no Central account configured. See README's
       # Custom Validation section for the one-time account/secrets setup.
+      #
+      # Gating on a step output rather than `if: secrets.X != ''` directly is
+      # deliberate, not a style choice: GitHub rejects the `secrets` context
+      # in a step/job `if:` outright ("Unrecognized named-value: 'secrets'"),
+      # even though the exact same context is fine in `env:` (see the
+      # existing GITHUB_TOKEN usage above) — this doesn't fail at runtime, it
+      # fails workflow *parsing*, so every run silently fails at 0 jobs.
+      - name: Check for Maven Central credentials
+        id: central-secrets
+        env:
+          MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+        run: |
+          if [ -n "$MAVEN_CENTRAL_USERNAME" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Import GPG key
-        if: ${{ secrets.MAVEN_CENTRAL_USERNAME != '' }}
+        if: steps.central-secrets.outputs.configured == 'true'
         uses: crazy-max/ghaction-import-gpg@v7
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
 
       - name: Publish speculate-validation-spi to Maven Central
-        if: ${{ secrets.MAVEN_CENTRAL_USERNAME != '' }}
+        if: steps.central-secrets.outputs.configured == 'true'
         env:
           MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
           MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: |
           mkdir -p ~/.m2
-          cat > ~/.m2/settings.xml <<'SETTINGS'
-          <settings>
-            <servers>
-              <server>
-                <id>central</id>
-                <username>${env.MAVEN_CENTRAL_USERNAME}</username>
-                <password>${env.MAVEN_CENTRAL_PASSWORD}</password>
-              </server>
-            </servers>
-          </settings>
-          SETTINGS
+          {
+            echo '<settings>'
+            echo '  <servers>'
+            echo '    <server>'
+            echo '      <id>central</id>'
+            echo "      <username>${MAVEN_CENTRAL_USERNAME}</username>"
+            echo "      <password>${MAVEN_CENTRAL_PASSWORD}</password>"
+            echo '    </server>'
+            echo '  </servers>'
+            echo '</settings>'
+          } > ~/.m2/settings.xml
           mvn --no-transfer-progress -pl speculate-validation-spi -Prelease deploy
           echo "Uploaded to Central Portal — review and publish manually at https://central.sonatype.com/publishing/deployments"
