@@ -1,8 +1,8 @@
 package com.speculate.plugin;
 
 import org.junit.jupiter.api.Test;
-import speculate.validation.spi.Severity;
-import speculate.validation.spi.Violation;
+import net.dublinux.speculate.validation.spi.Severity;
+import net.dublinux.speculate.validation.spi.Violation;
 
 import java.util.List;
 import java.util.Map;

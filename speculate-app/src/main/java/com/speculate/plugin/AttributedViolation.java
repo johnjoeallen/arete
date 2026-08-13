@@ -1,6 +1,6 @@
 package com.speculate.plugin;
 
-import speculate.validation.spi.Violation;
+import net.dublinux.speculate.validation.spi.Violation;
 
 /**
  * A {@link Violation} tagged with the plugin that produced it.

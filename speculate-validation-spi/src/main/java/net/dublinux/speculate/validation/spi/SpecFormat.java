@@ -1,4 +1,4 @@
-package speculate.validation.spi;
+package net.dublinux.speculate.validation.spi;
 
 /**
  * The specification dialect being validated. Deliberately a closed enum

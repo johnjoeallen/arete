@@ -3,11 +3,11 @@ package com.speculate.plugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import speculate.validation.spi.SpecFormat;
-import speculate.validation.spi.SpecInput;
-import speculate.validation.spi.SpecValidationPlugin;
-import speculate.validation.spi.ValidationResult;
-import speculate.validation.spi.Violation;
+import net.dublinux.speculate.validation.spi.SpecFormat;
+import net.dublinux.speculate.validation.spi.SpecInput;
+import net.dublinux.speculate.validation.spi.SpecValidationPlugin;
+import net.dublinux.speculate.validation.spi.ValidationResult;
+import net.dublinux.speculate.validation.spi.Violation;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -8,8 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import speculate.validation.spi.SpecFormat;
-import speculate.validation.spi.SpecValidationPlugin;
+import net.dublinux.speculate.validation.spi.SpecFormat;
+import net.dublinux.speculate.validation.spi.SpecValidationPlugin;
 
 import java.nio.file.Path;
 import java.util.Map;
@@ -90,7 +90,7 @@ class SettingsControllerTest {
             }
 
             @Override
-            public speculate.validation.spi.ValidationResult validate(speculate.validation.spi.SpecInput input) {
+            public net.dublinux.speculate.validation.spi.ValidationResult validate(net.dublinux.speculate.validation.spi.SpecInput input) {
                 throw new UnsupportedOperationException();
             }
         };

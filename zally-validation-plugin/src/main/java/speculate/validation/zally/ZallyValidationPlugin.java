@@ -11,10 +11,10 @@ import org.zalando.zally.core.JsonRulesValidator;
 import org.zalando.zally.core.Result;
 import org.zalando.zally.core.RulesManager;
 import org.zalando.zally.core.RulesPolicy;
-import speculate.validation.spi.SpecFormat;
-import speculate.validation.spi.SpecInput;
-import speculate.validation.spi.SpecValidationPlugin;
-import speculate.validation.spi.Violation;
+import net.dublinux.speculate.validation.spi.SpecFormat;
+import net.dublinux.speculate.validation.spi.SpecInput;
+import net.dublinux.speculate.validation.spi.SpecValidationPlugin;
+import net.dublinux.speculate.validation.spi.Violation;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -111,7 +111,7 @@ public final class ZallyValidationPlugin implements SpecValidationPlugin {
     }
 
     @Override
-    public speculate.validation.spi.ValidationResult validate(SpecInput input) {
+    public net.dublinux.speculate.validation.spi.ValidationResult validate(SpecInput input) {
         // Same context-classloader swap as the constructor, and for the same
         // reason: a defensive belt-and-suspenders in case some individual
         // rule's @Check resolves config lazily at validate-time rather than
@@ -126,9 +126,9 @@ public final class ZallyValidationPlugin implements SpecValidationPlugin {
                 violations.add(toViolation(result));
             }
             int rulesEvaluatedCount = rulesManager.checks(policy).size();
-            return speculate.validation.spi.ValidationResult.success(violations, rulesEvaluatedCount);
+            return net.dublinux.speculate.validation.spi.ValidationResult.success(violations, rulesEvaluatedCount);
         } catch (Exception e) {
-            return speculate.validation.spi.ValidationResult.pluginError(
+            return net.dublinux.speculate.validation.spi.ValidationResult.pluginError(
                     "Zally failed to validate the spec: " + e);
         } finally {
             Thread.currentThread().setContextClassLoader(previousContextLoader);
@@ -156,16 +156,16 @@ public final class ZallyValidationPlugin implements SpecValidationPlugin {
         return builder.build();
     }
 
-    private static speculate.validation.spi.Severity mapSeverity(org.zalando.zally.rule.api.Severity severity) {
+    private static net.dublinux.speculate.validation.spi.Severity mapSeverity(org.zalando.zally.rule.api.Severity severity) {
         switch (severity) {
             case MUST:
-                return speculate.validation.spi.Severity.ERROR;
+                return net.dublinux.speculate.validation.spi.Severity.ERROR;
             case SHOULD:
-                return speculate.validation.spi.Severity.WARNING;
+                return net.dublinux.speculate.validation.spi.Severity.WARNING;
             case MAY:
-                return speculate.validation.spi.Severity.INFO;
+                return net.dublinux.speculate.validation.spi.Severity.INFO;
             case HINT:
-                return speculate.validation.spi.Severity.HINT;
+                return net.dublinux.speculate.validation.spi.Severity.HINT;
             default:
                 throw new IllegalArgumentException("Unknown Zally severity: " + severity);
         }

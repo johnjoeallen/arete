@@ -1,6 +1,6 @@
 package com.speculate.plugin;
 
-import speculate.validation.spi.Severity;
+import net.dublinux.speculate.validation.spi.Severity;
 
 import java.util.Map;
 

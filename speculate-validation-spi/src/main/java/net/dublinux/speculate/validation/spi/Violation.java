@@ -1,4 +1,4 @@
-package speculate.validation.spi;
+package net.dublinux.speculate.validation.spi;
 
 import java.util.Collections;
 import java.util.List;

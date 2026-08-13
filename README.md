@@ -142,9 +142,9 @@ need a restart.
 
 ### Writing your own plugin
 
-A plugin implements [`SpecValidationPlugin`](speculate-validation-spi/src/main/java/speculate/validation/spi/SpecValidationPlugin.java)
+A plugin implements [`SpecValidationPlugin`](speculate-validation-spi/src/main/java/net/dublinux/speculate/validation/spi/SpecValidationPlugin.java)
 from the `speculate-validation-spi` module and registers itself via
-`META-INF/services/speculate.validation.spi.SpecValidationPlugin`
+`META-INF/services/net.dublinux.speculate.validation.spi.SpecValidationPlugin`
 — standard `ServiceLoader` discovery, no Speculate-specific base class or
 annotations required. Each plugin jar loads in its own isolated
 classloader, so dependency versions between plugins — and between a plugin

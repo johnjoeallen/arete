@@ -7,7 +7,7 @@ import jakarta.persistence.Table;
 
 /**
  * Persisted enabled/disabled flag for a validator plugin, keyed by
- * {@link speculate.validation.spi.SpecValidationPlugin#getId()} —
+ * {@link net.dublinux.speculate.validation.spi.SpecValidationPlugin#getId()} —
  * not by instance, since plugin instances don't survive a restart but IDs
  * do.
  */

@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.system.ApplicationHome;
 import org.springframework.stereotype.Component;
-import speculate.validation.spi.SpecValidationPlugin;
+import net.dublinux.speculate.validation.spi.SpecValidationPlugin;
 
 import java.io.File;
 import java.io.IOException;

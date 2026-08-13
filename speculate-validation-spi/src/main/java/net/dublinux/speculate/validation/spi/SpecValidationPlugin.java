@@ -1,4 +1,4 @@
-package speculate.validation.spi;
+package net.dublinux.speculate.validation.spi;
 
 import java.util.Map;
 import java.util.Set;
@@ -7,7 +7,7 @@ import java.util.Set;
  * A linter engine adapter, discovered dynamically via {@link
  * java.util.ServiceLoader} from a jar dropped in the host's {@code
  * plugins/} folder. Implementations declare themselves via {@code
- * META-INF/services/speculate.validation.spi.SpecValidationPlugin}
+ * META-INF/services/net.dublinux.speculate.validation.spi.SpecValidationPlugin}
  * — no host-specific base class, annotation, or reflection wiring beyond
  * that is required (non-functional requirement re: no reflection tricks).
  *

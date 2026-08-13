@@ -1,10 +1,10 @@
 package speculate.validation.zally;
 
 import org.junit.jupiter.api.Test;
-import speculate.validation.spi.SpecFormat;
-import speculate.validation.spi.SpecInput;
-import speculate.validation.spi.SpecValidationPlugin;
-import speculate.validation.spi.ValidationResult;
+import net.dublinux.speculate.validation.spi.SpecFormat;
+import net.dublinux.speculate.validation.spi.SpecInput;
+import net.dublinux.speculate.validation.spi.SpecValidationPlugin;
+import net.dublinux.speculate.validation.spi.ValidationResult;
 
 import java.io.File;
 import java.net.URL;

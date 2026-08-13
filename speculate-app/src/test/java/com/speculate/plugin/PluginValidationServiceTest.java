@@ -1,10 +1,10 @@
 package com.speculate.plugin;
 
 import org.junit.jupiter.api.Test;
-import speculate.validation.spi.SpecFormat;
-import speculate.validation.spi.SpecValidationPlugin;
-import speculate.validation.spi.ValidationResult;
-import speculate.validation.spi.Violation;
+import net.dublinux.speculate.validation.spi.SpecFormat;
+import net.dublinux.speculate.validation.spi.SpecValidationPlugin;
+import net.dublinux.speculate.validation.spi.ValidationResult;
+import net.dublinux.speculate.validation.spi.Violation;
 
 import java.util.List;
 import java.util.Set;
@@ -39,7 +39,7 @@ class PluginValidationServiceTest {
     @Test
     void violationsFromEnabledPluginsAreTaggedWithTheirSourcePlugin() {
         Violation violation = Violation.builder()
-                .ruleId("no-empty-title").title("Title is empty").severity(speculate.validation.spi.Severity.ERROR)
+                .ruleId("no-empty-title").title("Title is empty").severity(net.dublinux.speculate.validation.spi.Severity.ERROR)
                 .build();
         SpecValidationPlugin plugin = stubPlugin("linter-a", "Linter A");
         when(plugin.validate(any())).thenReturn(ValidationResult.success(List.of(violation), 10));
@@ -87,7 +87,7 @@ class PluginValidationServiceTest {
         SpecValidationPlugin failing = stubPlugin("broken", "Broken Plugin");
         when(failing.validate(any())).thenThrow(new RuntimeException("boom"));
         Violation violation = Violation.builder()
-                .ruleId("ok-rule").title("Fine").severity(speculate.validation.spi.Severity.INFO)
+                .ruleId("ok-rule").title("Fine").severity(net.dublinux.speculate.validation.spi.Severity.INFO)
                 .build();
         SpecValidationPlugin working = stubPlugin("working", "Working Plugin");
         when(working.validate(any())).thenReturn(ValidationResult.success(List.of(violation), 3));

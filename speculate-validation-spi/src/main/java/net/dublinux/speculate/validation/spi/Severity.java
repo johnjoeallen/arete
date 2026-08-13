@@ -1,4 +1,4 @@
-package speculate.validation.spi;
+package net.dublinux.speculate.validation.spi;
 
 /**
  * Generic 4-level severity scale that every plugin maps its own
