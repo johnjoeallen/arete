@@ -147,6 +147,11 @@ public class SpecFileWatcher {
         return specsHome;
     }
 
+    /** Immediately (re)loads a file, bypassing the debounce — for callers reacting to a non-filesystem event. */
+    public void reload(Path path) {
+        loadOrRefresh(path);
+    }
+
     private void registerDir(Path dir) {
         if (!registeredDirs.add(dir)) {
             return;

@@ -1,6 +1,7 @@
 package com.speculate.web;
 
 import com.speculate.domain.SpecEntity;
+import com.speculate.domain.SpecSource;
 import com.speculate.plugin.AggregatedValidationResult;
 import com.speculate.plugin.EndpointFindings;
 import com.speculate.plugin.PluginValidationService;
@@ -131,9 +132,23 @@ public class SpecController {
         return "result";
     }
 
+    /**
+     * Deleting a spec whose source file is still sitting in a watched folder
+     * doesn't really make sense as a permanent removal — the file is the
+     * source of truth, so once the DB row is gone this immediately reloads
+     * it from disk rather than leaving a confusing gap until the next
+     * unrelated filesystem event (or app restart) happens to pick it back up.
+     */
     @PostMapping("/api/specs/{id}/delete")
     public String delete(@PathVariable Long id) {
+        SpecEntity entity = specStorageService.findById(id).orElse(null);
         specStorageService.deleteById(id);
+        if (entity != null && entity.getSource() == SpecSource.FILE && entity.getFilePath() != null) {
+            Path path = Path.of(entity.getFilePath());
+            if (Files.isRegularFile(path)) {
+                specFileWatcher.reload(path);
+            }
+        }
         return "redirect:/?closedTab=" + id;
     }
 
@@ -197,7 +212,7 @@ public class SpecController {
         String needle = q == null ? null : q.trim().toLowerCase(Locale.ROOT);
         return entities.stream()
                 .filter(e -> needle == null || needle.isEmpty() || e.getTitle().toLowerCase(Locale.ROOT).contains(needle))
-                .map(e -> new SpecSummary(e.getId(), e.getTitle()))
+                .map(e -> new SpecSummary(e.getId(), e.getTitle(), e.getUpdatedAt().toEpochMilli()))
                 .sorted(Comparator.comparing(SpecSummary::title, String.CASE_INSENSITIVE_ORDER))
                 .toList();
     }

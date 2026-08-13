@@ -31,7 +31,7 @@ public class SettingsController {
     @GetMapping("/settings")
     public String settings(Model model) {
         model.addAttribute("specs", specStorageService.findAll().stream()
-                .map(e -> new SpecSummary(e.getId(), e.getTitle()))
+                .map(e -> new SpecSummary(e.getId(), e.getTitle(), e.getUpdatedAt().toEpochMilli()))
                 .sorted(Comparator.comparing(SpecSummary::title, String.CASE_INSENSITIVE_ORDER))
                 .toList());
         model.addAttribute("q", null);

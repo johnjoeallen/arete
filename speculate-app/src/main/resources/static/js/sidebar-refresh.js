@@ -67,6 +67,15 @@
         });
     }
 
+    function findSpec(specs, id) {
+        for (var i = 0; i < specs.length; i++) {
+            if (String(specs[i].id) === String(id)) {
+                return specs[i];
+            }
+        }
+        return null;
+    }
+
     var lastSpecs = null;
 
     function poll() {
@@ -74,11 +83,28 @@
         fetch('/api/specs' + (q ? '?q=' + encodeURIComponent(q) : ''))
             .then(function (res) { return res.ok ? res.json() : null; })
             .then(function (specs) {
-                if (!specs || (lastSpecs && specsEqual(lastSpecs, specs))) {
+                if (!specs) {
                     return;
                 }
+
+                // A body-only edit (title unchanged) doesn't change this list at
+                // all, so it can't be caught by specsEqual below — if it's the
+                // spec currently open, reload the page to pick it up.
+                var activeId = currentActiveId();
+                if (activeId && lastSpecs) {
+                    var prevActive = findSpec(lastSpecs, activeId);
+                    var newActive = findSpec(specs, activeId);
+                    if (prevActive && newActive && prevActive.updatedAtMillis !== newActive.updatedAtMillis) {
+                        window.location.reload();
+                        return;
+                    }
+                }
+
+                var changed = !lastSpecs || !specsEqual(lastSpecs, specs);
                 lastSpecs = specs;
-                render(specs);
+                if (changed) {
+                    render(specs);
+                }
             })
             .catch(function () {
                 // Transient fetch failures (e.g. a mid-restart request) just wait for the next poll.
