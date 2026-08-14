@@ -181,6 +181,9 @@ a:hover { color: var(--link-hover); }
 
 .toggle-all-btn { flex-shrink: 0; background: var(--bg); color: var(--muted-fg); border: 1px solid var(--border); border-radius: 4px; padding: 0.35em 0.8em; cursor: pointer; font-size: 0.85em; }
 .toggle-all-btn:hover { border-color: var(--link); color: var(--link); }
+.tag-group > .toggle-all-btn { margin-bottom: 0.75em; }
+
+.model-subtabset { margin-top: 0; }
 
 .tab-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 0.25em; padding: 0.4em 0.6em; background: var(--surface); flex-shrink: 0; box-shadow: var(--shadow-tabbar); position: relative; z-index: 1; }
 .tab-bar .tab { display: inline-flex; align-items: center; gap: 0.3em; padding: 0.35em 0.6em; border: 1px solid var(--border); border-radius: 4px 4px 0 0; background: var(--surface-alt); max-width: 200px; font-size: 0.88em; }
