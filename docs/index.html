@@ -37,7 +37,7 @@
   <div class="wrap">
     <a href="#why">Why Speculate</a>
     <a href="#features">Features</a>
-    <a href="#screenshot">Screenshot</a>
+    <a href="#screenshot">Screenshots</a>
     <a href="#get-started">Get started</a>
     <a href="#validation">Validation</a>
     <button id="theme-toggle" class="theme-toggle" aria-label="Toggle color theme"></button>
@@ -84,7 +84,7 @@
       </div>
       <div class="feature-card">
         <h3>Pluggable custom validation</h3>
-        <p>Every spec runs through validator plugins automatically, with results — severity, rule, finding, location — shown alongside the parser's own messages. Ships with Zalando's Zally API-guidelines linter built in; write your own against a small SPI, or drop a jar into <code>~/.speculate/plugins</code>.</p>
+        <p>Pick a plugin and rule set on any spec's page and click Analyse — findings show up right where they apply: on the endpoint, schema, request body, or response they're about, with a checkbox to hide whatever's already compliant. Ships with Zalando's Zally API-guidelines linter built in; write your own against a small SPI, or drop a jar into <code>~/.speculate/plugins</code>.</p>
       </div>
       <div class="feature-card">
         <h3>Light and dark themes</h3>
@@ -99,8 +99,15 @@
 
   <section id="screenshot">
     <h2>What it looks like</h2>
-    <p class="lede">A spec open in Speculate, endpoints grouped by tag.</p>
-    <img class="screenshot" src="screenshot.png" alt="Speculate showing a sample API spec with endpoints grouped into Books, Authors, and Other tag sections">
+
+    <p class="lede">Endpoints grouped by tag, with parameters and a worked example for each.</p>
+    <img class="screenshot" src="screenshot.png" alt="Speculate showing the Interface tab of a sample Bookstore API, with a GET /books endpoint expanded showing its parameters">
+
+    <p class="lede" style="margin-top: 2.2rem;">Schemas, request bodies, and responses live in their own Model tab — sub-tabbed the same way — so validation findings against your data model show up next to the shape they're about, not mixed in with the endpoints.</p>
+    <img class="screenshot" src="screenshot-model.png" alt="Speculate's Model tab showing a Book schema with validation findings and its property tree">
+
+    <p class="lede" style="margin-top: 2.2rem;">Pick a plugin and rule set, click Analyse, and findings appear as badges on exactly the endpoint or schema they apply to — with a checkbox to hide whatever's already compliant.</p>
+    <img class="screenshot" src="screenshot-validation.png" alt="Speculate's validation picker with a plugin and rule set selected, and a GET /books endpoint showing two findings">
   </section>
 
   <section id="get-started">
@@ -118,9 +125,12 @@
     <h2>Custom validation</h2>
     <p class="lede">
       Define your own rules — naming conventions, required fields, security
-      scheme enforcement, and similar house-style checks — that run against
-      every spec you load and surface as warnings alongside the parser's own
-      messages. Plugins are discovered from two folders: the bundled
+      scheme enforcement, and similar house-style checks. Validation is
+      on-demand: a picker on each spec's page lets you choose exactly one
+      enabled plugin and one of its rule sets, then Analyse to run it —
+      findings land right on the endpoint, schema, request body, or response
+      they're about, alongside the parser's own messages. Plugins are
+      discovered from two folders: the bundled
       <code>plugins/</code> next to <code>speculate.jar</code> (which ships
       with <a href="https://github.com/zalando/zally">Zally</a>, Zalando's
       API guidelines linter, as the default) and
