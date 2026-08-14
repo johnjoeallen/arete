@@ -4,6 +4,7 @@ import com.speculate.domain.SpecEntity;
 import com.speculate.domain.SpecSource;
 import com.speculate.plugin.AggregatedValidationResult;
 import com.speculate.plugin.EndpointFindings;
+import com.speculate.plugin.GeneralFindings;
 import com.speculate.plugin.PluginRegistry;
 import com.speculate.plugin.PluginSettingsService;
 import com.speculate.plugin.PluginValidationService;
@@ -160,6 +161,7 @@ public class SpecController {
             model.addAttribute("validation", validation);
             model.addAttribute("endpointFindings", EndpointFindings.byEndpoint(validation.violations()));
             model.addAttribute("schemaFindings", SchemaFindings.bySchema(validation.violations()));
+            model.addAttribute("generalFindings", GeneralFindings.unattributed(validation.violations()));
         }
         populateSidebar(model, q, entity.getId());
         return "result";

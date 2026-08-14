@@ -108,6 +108,7 @@
             <div class="tabset-nav">
                 <button type="button" class="tab-btn active">Interface</button>
                 <button type="button" class="tab-btn">Model</button>
+                <button type="button" class="tab-btn" th:if="${generalFindings != null and !generalFindings.violations().isEmpty()}">General</button>
             </div>
             <div class="tabset-panels">
             <div class="tab-panel active">
@@ -197,6 +198,11 @@
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <div class="tab-panel" th:if="${generalFindings != null and !generalFindings.violations().isEmpty()}">
+                <p class="empty-note">Findings not tied to a specific endpoint or schema — e.g. against <code>info</code>, <code>servers</code>, <code>security</code>, or other shared components.</p>
+                <div th:replace="~{fragments/findings :: findingsTable(${generalFindings})}"></div>
             </div>
             </div>
         </div>
