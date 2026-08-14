@@ -29,21 +29,12 @@
                 <input type="text" name="filePath" id="load-file-path" placeholder="/absolute/path/to/spec.yaml">
                 <button type="submit">Load &amp; watch</button>
             </div>
-            <div th:if="${!pluginRuleSetChoices.isEmpty()}" class="rule-set-choices" th:fragment="ruleSetChoices">
-                <div th:each="choice : ${pluginRuleSetChoices}" class="rule-set-choice">
-                    <label th:for="${'ruleSet_' + choice.pluginId()}" th:text="${choice.pluginName()} + ' rule set'">Plugin rule set</label>
-                    <select th:id="${'ruleSet_' + choice.pluginId()}" th:name="${'ruleSet_' + choice.pluginId()}">
-                        <option th:each="ruleSet : ${choice.ruleSets()}" th:value="${ruleSet}" th:text="${ruleSet}">rule set</option>
-                    </select>
-                </div>
-            </div>
         </form>
 
         <p class="paste-divider">or paste an OpenAPI/Swagger definition (JSON or YAML) below</p>
         <form method="post" action="/api/paste">
             <textarea name="specText" rows="20" cols="100" placeholder="Paste your OpenAPI/Swagger spec here..."></textarea>
             <br>
-            <div th:replace="~{::ruleSetChoices}"></div>
             <button type="submit">Submit</button>
         </form>
     </div>

@@ -101,11 +101,13 @@ public interface SpecValidationPlugin {
      * to a config key it happens to call "validation type" internally) is
      * entirely up to the plugin; the SPI only ever sees the name.
      *
-     * <p>The host surfaces these as a per-plugin choice when a spec is added
-     * (paste or load-file) and threads the selection back in via {@link
-     * SpecInput#getRuleSet()} on every subsequent {@link #validate(SpecInput)}
-     * call for that spec — the choice is made once, not re-asked on every
-     * validation run.
+     * <p>The host surfaces these as a picker on the spec's view page —
+     * choose a plugin, choose one of its rule sets, hit Refresh — and
+     * threads the selection through via {@link SpecInput#getRuleSet()} for
+     * that one on-demand {@link #validate(SpecInput)} call. Validation is
+     * never automatic or persisted between runs: nothing runs until the
+     * user explicitly picks a plugin and rule set and clicks Refresh, and
+     * every click is a fresh choice.
      *
      * <p>A default method returning just {@link #DEFAULT_RULE_SET} keeps
      * every existing single-set plugin (including zally-core) working

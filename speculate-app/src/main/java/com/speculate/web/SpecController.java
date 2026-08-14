@@ -34,19 +34,14 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.TreeSet;
 
 @Controller
 public class SpecController {
 
     private static final Logger log = LoggerFactory.getLogger(SpecController.class);
-
-    /** Form field name prefix for a plugin's rule-set picker; suffixed with the plugin ID. */
-    private static final String RULE_SET_PARAM_PREFIX = "ruleSet_";
 
     private final SpecParserService specParserService;
     private final SpecStorageService specStorageService;
@@ -69,14 +64,13 @@ public class SpecController {
     @GetMapping("/")
     public String index(@RequestParam(required = false) String q, Model model) {
         model.addAttribute("specsDir", specFileWatcher.getSpecsHome().toString());
-        model.addAttribute("pluginRuleSetChoices", pluginRuleSetChoices());
         populateSidebar(model, q, null);
         return "index";
     }
 
     @PostMapping("/api/paste")
-    public String paste(@RequestParam String specText, @RequestParam Map<String, String> allParams, Model model) {
-        parseAndSave(specText, null, extractRuleSets(allParams), model);
+    public String paste(@RequestParam String specText, Model model) {
+        parseAndSave(specText, null, model);
         return "result";
     }
 
@@ -90,8 +84,7 @@ public class SpecController {
      * disagree. Reading the path directly keeps there being exactly one.
      */
     @PostMapping("/api/load-file")
-    public String loadFile(@RequestParam String filePath, @RequestParam Map<String, String> allParams, Model model) {
-        Map<String, String> pluginRuleSets = extractRuleSets(allParams);
+    public String loadFile(@RequestParam String filePath, Model model) {
         String trimmedPath = filePath == null ? "" : filePath.trim();
         if (trimmedPath.isEmpty()) {
             model.addAttribute("openApi", null);
@@ -128,15 +121,23 @@ public class SpecController {
             return "result";
         }
 
-        SpecEntity saved = parseAndSave(content, trimmedPath, pluginRuleSets, model);
+        SpecEntity saved = parseAndSave(content, trimmedPath, model);
         if (saved != null) {
             specFileWatcher.watch(path);
         }
         return "result";
     }
 
+    /**
+     * Renders a spec's docs. Validation is on-demand, not automatic — see
+     * {@link PluginValidationService} — so {@code pluginId}/{@code ruleSet}
+     * are absent on a plain open (nothing runs, just the picker/Refresh
+     * control shows) and present when the Refresh form resubmits here.
+     */
     @GetMapping("/spec/{id}")
-    public String open(@PathVariable Long id, @RequestParam(required = false) String q, Model model) {
+    public String open(@PathVariable Long id, @RequestParam(required = false) String q,
+            @RequestParam(required = false) String pluginId, @RequestParam(required = false) String ruleSet,
+            Model model) {
         SpecEntity entity = specStorageService.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Spec not found"));
 
@@ -146,10 +147,14 @@ public class SpecController {
         model.addAttribute("parseErrors", parsed.messages());
         model.addAttribute("specTitle", entity.getTitle());
         model.addAttribute("specFilePath", entity.getFilePath());
-        AggregatedValidationResult validation =
-                pluginValidationService.validate(entity.getRawContent(), entity.getPluginRuleSets());
-        model.addAttribute("validation", validation);
-        model.addAttribute("endpointFindings", EndpointFindings.byEndpoint(validation.violations()));
+        model.addAttribute("selectedPluginId", pluginId);
+        model.addAttribute("selectedRuleSet", ruleSet);
+        if (pluginId != null && !pluginId.isBlank()) {
+            AggregatedValidationResult validation =
+                    pluginValidationService.validateOne(entity.getRawContent(), pluginId, ruleSet);
+            model.addAttribute("validation", validation);
+            model.addAttribute("endpointFindings", EndpointFindings.byEndpoint(validation.violations()));
+        }
         populateSidebar(model, q, entity.getId());
         return "result";
     }
@@ -182,13 +187,14 @@ public class SpecController {
     }
 
     /**
-     * Shared parse/validate/save/render-model flow for both entry points.
+     * Shared parse/save/render-model flow for both entry points.
      * {@code filePath == null} means pasted text; otherwise the content was
      * loaded from that path. Returns the saved entity, or {@code null} if
-     * nothing was saved (parse failure, or no title to key it on).
+     * nothing was saved (parse failure, or no title to key it on). Never
+     * runs validation itself — that's only ever triggered from the spec
+     * view page's Refresh control (see {@link #open}).
      */
-    private SpecEntity parseAndSave(String content, String filePath, Map<String, String> pluginRuleSets,
-            Model model) {
+    private SpecEntity parseAndSave(String content, String filePath, Model model) {
         try {
             ParsedSpec parsed = specParserService.parse(content);
             model.addAttribute("openApi", parsed.openApi());
@@ -198,15 +204,11 @@ public class SpecController {
                 String title = parsed.title();
                 if (title != null) {
                     SpecEntity saved = filePath == null
-                            ? specStorageService.saveOrReplace(title, content, pluginRuleSets)
-                            : specStorageService.saveOrReplaceFromFile(title, content, filePath, pluginRuleSets);
+                            ? specStorageService.saveOrReplace(title, content)
+                            : specStorageService.saveOrReplaceFromFile(title, content, filePath);
                     model.addAttribute("parseErrors", parsed.messages());
                     model.addAttribute("specTitle", saved.getTitle());
                     model.addAttribute("specFilePath", saved.getFilePath());
-                    AggregatedValidationResult validation =
-                            pluginValidationService.validate(content, pluginRuleSets);
-                    model.addAttribute("validation", validation);
-                    model.addAttribute("endpointFindings", EndpointFindings.byEndpoint(validation.violations()));
                     populateSidebar(model, null, saved.getId());
                     return saved;
                 } else {
@@ -230,6 +232,7 @@ public class SpecController {
         model.addAttribute("specs", toSummaries(specStorageService.findAll(), q));
         model.addAttribute("q", q);
         model.addAttribute("specId", activeId);
+        model.addAttribute("enabledPlugins", enabledPluginChoices());
     }
 
     private static List<SpecSummary> toSummaries(List<SpecEntity> entities, String q) {
@@ -250,32 +253,14 @@ public class SpecController {
         return combined;
     }
 
-    /** Pulls out this request's {@code ruleSet_<pluginId>} fields, keyed by plugin ID with the prefix stripped. */
-    private static Map<String, String> extractRuleSets(Map<String, String> allParams) {
-        Map<String, String> result = new HashMap<>();
-        for (Map.Entry<String, String> entry : allParams.entrySet()) {
-            if (entry.getKey().startsWith(RULE_SET_PARAM_PREFIX) && !entry.getValue().isBlank()) {
-                result.put(entry.getKey().substring(RULE_SET_PARAM_PREFIX.length()), entry.getValue());
-            }
-        }
-        return result;
-    }
-
-    /**
-     * One entry per enabled plugin that declares more than one rule set —
-     * a plugin with only the implicit default has no real choice to offer,
-     * so it's left out rather than shown as a single-option picker.
-     */
-    private List<PluginRuleSetChoice> pluginRuleSetChoices() {
+    /** Every enabled plugin with its declared rule sets, for the view page's plugin/rule-set picker. */
+    private List<PluginRuleSetChoice> enabledPluginChoices() {
         List<PluginRuleSetChoice> choices = new ArrayList<>();
         for (SpecValidationPlugin plugin : pluginRegistry.getPlugins()) {
             if (!pluginSettingsService.isEnabled(plugin.getId())) {
                 continue;
             }
-            List<String> ruleSets = safeRuleSets(plugin);
-            if (ruleSets.size() > 1) {
-                choices.add(new PluginRuleSetChoice(plugin.getId(), plugin.getName(), ruleSets));
-            }
+            choices.add(new PluginRuleSetChoice(plugin.getId(), plugin.getName(), safeRuleSets(plugin)));
         }
         choices.sort(Comparator.comparing(PluginRuleSetChoice::pluginName, String.CASE_INSENSITIVE_ORDER));
         return choices;

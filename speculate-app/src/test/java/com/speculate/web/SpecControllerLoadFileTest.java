@@ -1,7 +1,6 @@
 package com.speculate.web;
 
 import com.speculate.domain.SpecEntity;
-import com.speculate.plugin.AggregatedValidationResult;
 import com.speculate.plugin.PluginRegistry;
 import com.speculate.plugin.PluginSettingsService;
 import com.speculate.plugin.PluginValidationService;
@@ -21,7 +20,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -69,20 +67,16 @@ class SpecControllerLoadFileTest {
         saved.setId(1L);
         saved.setTitle("Loaded API");
         saved.setFilePath(specFile.toString());
-        when(specStorageService.saveOrReplaceFromFile(
-                eq("Loaded API"), eq("openapi: 3.0.0"), eq(specFile.toString()), eq(Map.of())))
+        when(specStorageService.saveOrReplaceFromFile(eq("Loaded API"), eq("openapi: 3.0.0"), eq(specFile.toString())))
                 .thenReturn(saved);
         when(specStorageService.findAll()).thenReturn(List.of());
-        when(pluginValidationService.validate(anyString(), any()))
-                .thenReturn(new AggregatedValidationResult(List.of(), List.of(), -1));
 
         mockMvc.perform(post("/api/load-file").param("filePath", specFile.toString()))
                 .andExpect(status().isOk())
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Loaded from")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(specFile.toString())));
 
-        verify(specStorageService).saveOrReplaceFromFile(
-                eq("Loaded API"), eq("openapi: 3.0.0"), eq(specFile.toString()), eq(Map.of()));
+        verify(specStorageService).saveOrReplaceFromFile(eq("Loaded API"), eq("openapi: 3.0.0"), eq(specFile.toString()));
         verify(specFileWatcher).watch(eq(specFile));
     }
 
@@ -94,7 +88,7 @@ class SpecControllerLoadFileTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("file path is required")));
 
-        verify(specStorageService, never()).saveOrReplaceFromFile(anyString(), anyString(), anyString(), any());
+        verify(specStorageService, never()).saveOrReplaceFromFile(anyString(), anyString(), anyString());
         verify(specParserService, never()).parse(any());
         verify(specFileWatcher, never()).watch(any());
     }
@@ -107,7 +101,7 @@ class SpecControllerLoadFileTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("a full path")));
 
-        verify(specStorageService, never()).saveOrReplaceFromFile(anyString(), anyString(), anyString(), any());
+        verify(specStorageService, never()).saveOrReplaceFromFile(anyString(), anyString(), anyString());
         verify(specParserService, never()).parse(any());
         verify(specFileWatcher, never()).watch(any());
     }
@@ -121,7 +115,7 @@ class SpecControllerLoadFileTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Couldn")));
 
-        verify(specStorageService, never()).saveOrReplaceFromFile(anyString(), anyString(), anyString(), any());
+        verify(specStorageService, never()).saveOrReplaceFromFile(anyString(), anyString(), anyString());
         verify(specParserService, never()).parse(any());
         verify(specFileWatcher, never()).watch(any());
     }

@@ -27,8 +27,58 @@
         </ul>
     </div>
 
-    <div th:if="${validation != null and !validation.isEmpty()}" class="validation-results">
+    <div th:if="${enabledPlugins != null and !enabledPlugins.isEmpty() and specId != null}" class="validation-picker-wrapper">
         <h2>Validation</h2>
+        <form method="get" th:action="@{/spec/{id}(id=${specId})}" class="validation-picker" id="validation-picker-form">
+            <div class="validation-picker-field">
+                <label for="validation-plugin-select">Plugin</label>
+                <select id="validation-plugin-select" name="pluginId">
+                    <option th:each="p : ${enabledPlugins}" th:value="${p.pluginId()}" th:text="${p.pluginName()}"
+                            th:selected="${selectedPluginId != null and selectedPluginId == p.pluginId()}"></option>
+                </select>
+            </div>
+            <div class="validation-picker-field">
+                <label for="validation-ruleset-select">Rule set</label>
+                <select id="validation-ruleset-select" name="ruleSet">
+                    <th:block th:each="p : ${enabledPlugins}">
+                        <option th:each="rs : ${p.ruleSets()}" th:value="${rs}" th:text="${rs}"
+                                th:attr="data-plugin-id=${p.pluginId()}"
+                                th:selected="${selectedPluginId != null and selectedPluginId == p.pluginId() and selectedRuleSet != null and selectedRuleSet == rs}"></option>
+                    </th:block>
+                </select>
+            </div>
+            <button type="submit">Refresh</button>
+        </form>
+        <script>
+            (function () {
+                var pluginSelect = document.getElementById('validation-plugin-select');
+                var ruleSetSelect = document.getElementById('validation-ruleset-select');
+                if (!pluginSelect || !ruleSetSelect) {
+                    return;
+                }
+                var allOptions = Array.prototype.map.call(ruleSetSelect.options, function (o) {
+                    return { pluginId: o.getAttribute('data-plugin-id'), value: o.value, text: o.textContent, selected: o.selected };
+                });
+                function rebuild() {
+                    var pluginId = pluginSelect.value;
+                    ruleSetSelect.innerHTML = '';
+                    allOptions.filter(function (o) { return o.pluginId === pluginId; }).forEach(function (o) {
+                        var opt = document.createElement('option');
+                        opt.value = o.value;
+                        opt.textContent = o.text;
+                        if (o.selected) {
+                            opt.selected = true;
+                        }
+                        ruleSetSelect.appendChild(opt);
+                    });
+                }
+                pluginSelect.addEventListener('change', rebuild);
+                rebuild();
+            })();
+        </script>
+    </div>
+
+    <div th:if="${validation != null and !validation.isEmpty()}" class="validation-results">
         <p th:if="${validation.rulesEvaluatedCount() >= 0}" class="validation-summary-line"
            th:text="${validation.rulesEvaluatedCount()} + ' rule(s) checked across ' + ${validation.pluginSummaries().size()} + ' validator(s).'"></p>
         <ul class="plugin-outcomes">

@@ -112,10 +112,12 @@ directory you launch the script from:
 
 ## Custom Validation
 
-Every spec you load — pasted or from a file — is run through Speculate's
-validation plugins automatically. Each endpoint whose findings map to a
-specific operation shows a severity-count badge (❌ error, ⚠️ warning, ℹ️ info,
-💡 hint) in its header; expanding the endpoint lists those findings in full —
+Validation is on-demand, not automatic: opening a spec doesn't run anything
+by itself. A "Validation" picker on the spec's page lets you choose exactly
+one enabled plugin and one of its rule sets, then **Refresh** to run it —
+nothing runs until you do. Each endpoint whose findings map to a specific
+operation shows a severity-count badge (❌ error, ⚠️ warning, ℹ️ info, 💡 hint)
+in its header; expanding the endpoint lists those findings in full —
 severity, rule ID, finding, [JSON Pointer](https://www.rfc-editor.org/rfc/rfc6901)
 location, which plugin reported it, and a "Learn more" link out to the
 plugin's own rule documentation when it provides one (e.g. Zally links back
@@ -142,14 +144,13 @@ need a restart.
 
 A plugin can declare more than one named rule set — e.g. an
 `internal`/`external` split for an organization that lints differently
-depending on API audience. When an enabled plugin has more than one, Speculate
-shows a picker for it on both "add a spec" forms (paste and load-file); the
-choice is made once, when the spec is added, and reused on every later
-validation run for that spec, including after a watched file changes. The
+depending on API audience. Every enabled plugin appears in the picker's
+plugin dropdown regardless of how many rule sets it has; picking one
+populates the second dropdown with just that plugin's own rule sets (a
+plugin with only the implicit default set just has one entry there). The
 bundled `zally-core` plugin has two — `pedantic` (report every violation)
 and `lenient` (only the `MUST`-severity ones) — as a working reference for
-what a plugin does with the name it's given; a plugin with only the
-implicit default set shows no picker at all. This is deliberately
+what a plugin does with the name it's given. This is deliberately
 engine-agnostic: a rule set is just a plugin-chosen name, not a Zally- or
 any other engine-specific concept — see [Writing a custom Zally ruleset](#writing-a-custom-zally-ruleset)
 for how a Zally-based plugin in particular maps that name to its own

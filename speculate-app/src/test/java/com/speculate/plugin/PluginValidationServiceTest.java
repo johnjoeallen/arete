@@ -2,6 +2,7 @@ package com.speculate.plugin;
 
 import org.junit.jupiter.api.Test;
 import net.dublinux.speculate.validation.spi.SpecFormat;
+import net.dublinux.speculate.validation.spi.SpecInput;
 import net.dublinux.speculate.validation.spi.SpecValidationPlugin;
 import net.dublinux.speculate.validation.spi.ValidationResult;
 import net.dublinux.speculate.validation.spi.Violation;
@@ -24,12 +25,12 @@ class PluginValidationServiceTest {
             new PluginValidationService(pluginRegistry, pluginSettingsService);
 
     @Test
-    void disabledPluginsAreNeverInvoked() {
+    void aDisabledPluginIsNeverInvokedAndYieldsAnEmptyResult() {
         SpecValidationPlugin disabled = stubPlugin("off", "Disabled Plugin");
         when(pluginRegistry.getPlugins()).thenReturn(List.of(disabled));
         when(pluginSettingsService.isEnabled("off")).thenReturn(false);
 
-        AggregatedValidationResult result = service.validate("openapi: 3.0.0");
+        AggregatedValidationResult result = service.validateOne("openapi: 3.0.0", "off", null);
 
         verify(disabled, never()).validate(any());
         assertThat(result.pluginSummaries()).isEmpty();
@@ -37,7 +38,17 @@ class PluginValidationServiceTest {
     }
 
     @Test
-    void violationsFromEnabledPluginsAreTaggedWithTheirSourcePlugin() {
+    void anUnknownPluginIdYieldsAnEmptyResult() {
+        when(pluginRegistry.getPlugins()).thenReturn(List.of());
+
+        AggregatedValidationResult result = service.validateOne("openapi: 3.0.0", "nonexistent", null);
+
+        assertThat(result.pluginSummaries()).isEmpty();
+        assertThat(result.violations()).isEmpty();
+    }
+
+    @Test
+    void violationsFromTheSelectedPluginAreTaggedWithItsId() {
         Violation violation = Violation.builder()
                 .ruleId("no-empty-title").title("Title is empty").severity(net.dublinux.speculate.validation.spi.Severity.ERROR)
                 .build();
@@ -46,68 +57,69 @@ class PluginValidationServiceTest {
         when(pluginRegistry.getPlugins()).thenReturn(List.of(plugin));
         when(pluginSettingsService.isEnabled("linter-a")).thenReturn(true);
 
-        AggregatedValidationResult result = service.validate("openapi: 3.0.0");
+        AggregatedValidationResult result = service.validateOne("openapi: 3.0.0", "linter-a", null);
 
         assertThat(result.violations()).hasSize(1);
         AttributedViolation attributed = result.violations().get(0);
         assertThat(attributed.pluginId()).isEqualTo("linter-a");
         assertThat(attributed.pluginName()).isEqualTo("Linter A");
         assertThat(attributed.violation()).isSameAs(violation);
+        assertThat(result.rulesEvaluatedCount()).isEqualTo(10);
     }
 
     @Test
-    void rulesEvaluatedCountSumsAcrossPluginsAndIgnoresUnknownCounts() {
-        SpecValidationPlugin knownCount = stubPlugin("a", "A");
-        when(knownCount.validate(any())).thenReturn(ValidationResult.success(List.of(), 5));
-        SpecValidationPlugin unknownCount = stubPlugin("b", "B");
-        when(unknownCount.validate(any())).thenReturn(ValidationResult.success(List.of(), -1));
-        when(pluginRegistry.getPlugins()).thenReturn(List.of(knownCount, unknownCount));
+    void aBlankRuleSetFallsBackToTheDefaultRuleSetConstant() {
+        SpecValidationPlugin plugin = stubPlugin("a", "A");
+        when(plugin.validate(any())).thenReturn(ValidationResult.success(List.of(), 1));
+        when(pluginRegistry.getPlugins()).thenReturn(List.of(plugin));
         when(pluginSettingsService.isEnabled("a")).thenReturn(true);
-        when(pluginSettingsService.isEnabled("b")).thenReturn(true);
 
-        AggregatedValidationResult result = service.validate("openapi: 3.0.0");
+        service.validateOne("openapi: 3.0.0", "a", null);
 
-        assertThat(result.rulesEvaluatedCount()).isEqualTo(5);
+        org.mockito.ArgumentCaptor<SpecInput> captor = org.mockito.ArgumentCaptor.forClass(SpecInput.class);
+        verify(plugin).validate(captor.capture());
+        assertThat(captor.getValue().getRuleSet()).isEqualTo(SpecValidationPlugin.DEFAULT_RULE_SET);
     }
 
     @Test
-    void rulesEvaluatedCountIsUnknownWhenNoPluginReportsIt() {
+    void anExplicitRuleSetIsPassedThroughUnchanged() {
+        SpecValidationPlugin plugin = stubPlugin("a", "A");
+        when(plugin.validate(any())).thenReturn(ValidationResult.success(List.of(), 1));
+        when(pluginRegistry.getPlugins()).thenReturn(List.of(plugin));
+        when(pluginSettingsService.isEnabled("a")).thenReturn(true);
+
+        service.validateOne("openapi: 3.0.0", "a", "lenient");
+
+        org.mockito.ArgumentCaptor<SpecInput> captor = org.mockito.ArgumentCaptor.forClass(SpecInput.class);
+        verify(plugin).validate(captor.capture());
+        assertThat(captor.getValue().getRuleSet()).isEqualTo("lenient");
+    }
+
+    @Test
+    void rulesEvaluatedCountIsUnknownWhenThePluginDoesNotReportIt() {
         SpecValidationPlugin plugin = stubPlugin("a", "A");
         when(plugin.validate(any())).thenReturn(ValidationResult.success(List.of(), -1));
         when(pluginRegistry.getPlugins()).thenReturn(List.of(plugin));
         when(pluginSettingsService.isEnabled("a")).thenReturn(true);
 
-        AggregatedValidationResult result = service.validate("openapi: 3.0.0");
+        AggregatedValidationResult result = service.validateOne("openapi: 3.0.0", "a", null);
 
         assertThat(result.rulesEvaluatedCount()).isEqualTo(-1);
     }
 
     @Test
-    void aFailingPluginDoesNotHideAnotherPluginsCleanResults() {
+    void aThrowingPluginYieldsAPluginErrorSummaryInsteadOfPropagating() {
         SpecValidationPlugin failing = stubPlugin("broken", "Broken Plugin");
         when(failing.validate(any())).thenThrow(new RuntimeException("boom"));
-        Violation violation = Violation.builder()
-                .ruleId("ok-rule").title("Fine").severity(net.dublinux.speculate.validation.spi.Severity.INFO)
-                .build();
-        SpecValidationPlugin working = stubPlugin("working", "Working Plugin");
-        when(working.validate(any())).thenReturn(ValidationResult.success(List.of(violation), 3));
-        when(pluginRegistry.getPlugins()).thenReturn(List.of(failing, working));
+        when(pluginRegistry.getPlugins()).thenReturn(List.of(failing));
         when(pluginSettingsService.isEnabled("broken")).thenReturn(true);
-        when(pluginSettingsService.isEnabled("working")).thenReturn(true);
 
-        AggregatedValidationResult result = service.validate("openapi: 3.0.0");
+        AggregatedValidationResult result = service.validateOne("openapi: 3.0.0", "broken", null);
 
-        assertThat(result.violations()).hasSize(1);
-        assertThat(result.pluginSummaries()).hasSize(2);
-        assertThat(result.pluginSummaries()).anySatisfy(s -> {
-            assertThat(s.pluginName()).isEqualTo("Broken Plugin");
-            assertThat(s.status()).isEqualTo("PLUGIN_ERROR");
-        });
-        assertThat(result.pluginSummaries()).anySatisfy(s -> {
-            assertThat(s.pluginName()).isEqualTo("Working Plugin");
-            assertThat(s.status()).isEqualTo("SUCCESS");
-            assertThat(s.violationCount()).isEqualTo(1);
-        });
+        assertThat(result.violations()).isEmpty();
+        assertThat(result.pluginSummaries()).hasSize(1);
+        assertThat(result.pluginSummaries().get(0).pluginName()).isEqualTo("Broken Plugin");
+        assertThat(result.pluginSummaries().get(0).status()).isEqualTo("PLUGIN_ERROR");
     }
 
     private static SpecValidationPlugin stubPlugin(String id, String name) {

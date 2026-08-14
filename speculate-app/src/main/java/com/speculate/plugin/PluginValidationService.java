@@ -11,13 +11,15 @@ import net.dublinux.speculate.validation.spi.Violation;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
- * Runs every <em>enabled</em> {@link SpecValidationPlugin} against a raw
- * spec and combines their outcomes into one {@link AggregatedValidationResult}.
- * Disabled plugins stay loaded (see {@link PluginRegistry}) but are skipped
- * here entirely — not even {@code validate()} is called on them.
+ * Runs a single, caller-chosen <em>enabled</em> {@link SpecValidationPlugin}
+ * against a raw spec. Validation is on-demand and single-plugin by design:
+ * the host never runs anything automatically, and never aggregates more
+ * than one plugin's results into a single view — the caller (the spec view
+ * page's Refresh control) picks exactly one plugin and rule set per run.
+ * Disabled plugins are never selectable in the first place (see
+ * {@link PluginRegistry}), but this still refuses to run one defensively.
  */
 @Service
 public class PluginValidationService {
@@ -32,54 +34,51 @@ public class PluginValidationService {
         this.pluginSettingsService = pluginSettingsService;
     }
 
-    public AggregatedValidationResult validate(String rawSpec) {
-        return validate(rawSpec, Map.of());
-    }
-
     /**
-     * @param pluginRuleSets the rule set selected for each plugin ID, keyed
-     *                       the same way as {@code SpecEntity.getPluginRuleSets()}
-     *                       on the caller side; a plugin with no entry here
-     *                       gets {@link SpecValidationPlugin#DEFAULT_RULE_SET}
+     * @param pluginId the {@link SpecValidationPlugin#getId()} to run; if
+     *                  it isn't loaded or isn't enabled, the result is empty
+     *                  (no summaries, no violations) rather than an error —
+     *                  there's nothing meaningful to report about a plugin
+     *                  the caller couldn't legitimately have selected
+     * @param ruleSet   one of that plugin's {@link SpecValidationPlugin#getRuleSets()}
+     *                  values, or {@link SpecValidationPlugin#DEFAULT_RULE_SET}
      */
-    public AggregatedValidationResult validate(String rawSpec, Map<String, String> pluginRuleSets) {
-        SpecFormat format = detectFormat(rawSpec);
-
-        List<ValidationSummary> summaries = new ArrayList<>();
-        List<AttributedViolation> violations = new ArrayList<>();
-        int rulesEvaluatedTotal = 0;
-        boolean anyRulesEvaluatedCountKnown = false;
-
-        for (SpecValidationPlugin plugin : pluginRegistry.getPlugins()) {
-            if (!pluginSettingsService.isEnabled(plugin.getId())) {
-                continue;
-            }
-
-            SpecInput input = SpecInput.builder()
-                    .content(rawSpec)
-                    .format(format)
-                    .ruleSet(pluginRuleSets.getOrDefault(
-                            plugin.getId(), SpecValidationPlugin.DEFAULT_RULE_SET))
-                    .build();
-            ValidationResult result = runOne(plugin, input);
-            summaries.add(toSummary(plugin, result));
-
-            if (result.getStatus() == ValidationResult.Status.SUCCESS) {
-                for (Violation violation : result.getViolations()) {
-                    violations.add(new AttributedViolation(plugin.getId(), plugin.getName(), violation));
-                }
-                // -1 means "unknown / not reported" per the SPI contract; a plugin
-                // that can't produce this number must not be allowed to corrupt the
-                // aggregate sum, so it's skipped rather than treated as zero.
-                if (result.getRulesEvaluatedCount() >= 0) {
-                    rulesEvaluatedTotal += result.getRulesEvaluatedCount();
-                    anyRulesEvaluatedCountKnown = true;
-                }
-            }
+    public AggregatedValidationResult validateOne(String rawSpec, String pluginId, String ruleSet) {
+        SpecValidationPlugin plugin = findEnabled(pluginId);
+        if (plugin == null) {
+            return new AggregatedValidationResult(List.of(), List.of(), -1);
         }
 
-        return new AggregatedValidationResult(
-                summaries, violations, anyRulesEvaluatedCountKnown ? rulesEvaluatedTotal : -1);
+        SpecInput input = SpecInput.builder()
+                .content(rawSpec)
+                .format(detectFormat(rawSpec))
+                .ruleSet(ruleSet == null || ruleSet.isBlank() ? SpecValidationPlugin.DEFAULT_RULE_SET : ruleSet)
+                .build();
+        ValidationResult result = runOne(plugin, input);
+        ValidationSummary summary = toSummary(plugin, result);
+
+        List<AttributedViolation> violations = new ArrayList<>();
+        int rulesEvaluatedCount = -1;
+        if (result.getStatus() == ValidationResult.Status.SUCCESS) {
+            for (Violation violation : result.getViolations()) {
+                violations.add(new AttributedViolation(plugin.getId(), plugin.getName(), violation));
+            }
+            rulesEvaluatedCount = result.getRulesEvaluatedCount();
+        }
+
+        return new AggregatedValidationResult(List.of(summary), violations, rulesEvaluatedCount);
+    }
+
+    private SpecValidationPlugin findEnabled(String pluginId) {
+        if (pluginId == null || pluginId.isBlank()) {
+            return null;
+        }
+        for (SpecValidationPlugin plugin : pluginRegistry.getPlugins()) {
+            if (plugin.getId().equals(pluginId) && pluginSettingsService.isEnabled(plugin.getId())) {
+                return plugin;
+            }
+        }
+        return null;
     }
 
     private static ValidationResult runOne(SpecValidationPlugin plugin, SpecInput input) {
