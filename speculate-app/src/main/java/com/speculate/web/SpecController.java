@@ -3,12 +3,12 @@ package com.speculate.web;
 import com.speculate.domain.SpecEntity;
 import com.speculate.domain.SpecSource;
 import com.speculate.plugin.AggregatedValidationResult;
+import com.speculate.plugin.ComponentFindings;
 import com.speculate.plugin.EndpointFindings;
 import com.speculate.plugin.GeneralFindings;
 import com.speculate.plugin.PluginRegistry;
 import com.speculate.plugin.PluginSettingsService;
 import com.speculate.plugin.PluginValidationService;
-import com.speculate.plugin.SchemaFindings;
 import com.speculate.service.EndpointGrouper;
 import com.speculate.service.ParsedSpec;
 import com.speculate.service.SpecFileWatcher;
@@ -18,6 +18,8 @@ import com.speculate.web.dto.PluginRuleSetChoice;
 import com.speculate.web.dto.SpecSummary;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.parameters.RequestBody;
+import io.swagger.v3.oas.models.responses.ApiResponse;
 import net.dublinux.speculate.validation.spi.SpecValidationPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -152,6 +154,8 @@ public class SpecController {
         model.addAttribute("openApi", parsed.openApi());
         model.addAttribute("tagGroups", EndpointGrouper.group(parsed.openApi()));
         model.addAttribute("componentSchemas", componentSchemasOf(parsed.openApi()));
+        model.addAttribute("componentRequestBodies", componentRequestBodiesOf(parsed.openApi()));
+        model.addAttribute("componentResponses", componentResponsesOf(parsed.openApi()));
         model.addAttribute("parseErrors", parsed.messages());
         model.addAttribute("specTitle", entity.getTitle());
         model.addAttribute("specFilePath", entity.getFilePath());
@@ -162,7 +166,9 @@ public class SpecController {
                     pluginValidationService.validateOne(entity.getRawContent(), pluginId, resolveRuleSet(pluginId, ruleSet));
             model.addAttribute("validation", validation);
             model.addAttribute("endpointFindings", EndpointFindings.byEndpoint(validation.violations()));
-            model.addAttribute("schemaFindings", SchemaFindings.bySchema(validation.violations()));
+            model.addAttribute("schemaFindings", ComponentFindings.byComponent("schemas", validation.violations()));
+            model.addAttribute("requestBodyFindings", ComponentFindings.byComponent("requestBodies", validation.violations()));
+            model.addAttribute("responseFindings", ComponentFindings.byComponent("responses", validation.violations()));
             model.addAttribute("generalFindings", GeneralFindings.unattributed(validation.violations()));
         }
         populateSidebar(model, q, entity.getId());
@@ -210,6 +216,8 @@ public class SpecController {
             model.addAttribute("openApi", parsed.openApi());
             model.addAttribute("tagGroups", EndpointGrouper.group(parsed.openApi()));
             model.addAttribute("componentSchemas", componentSchemasOf(parsed.openApi()));
+            model.addAttribute("componentRequestBodies", componentRequestBodiesOf(parsed.openApi()));
+            model.addAttribute("componentResponses", componentResponsesOf(parsed.openApi()));
 
             if (parsed.openApi() != null) {
                 String title = parsed.title();
@@ -261,6 +269,22 @@ public class SpecController {
             return Map.of();
         }
         return openApi.getComponents().getSchemas();
+    }
+
+    /** Never null; empty if the spec declares no {@code components.requestBodies}. */
+    private static Map<String, RequestBody> componentRequestBodiesOf(OpenAPI openApi) {
+        if (openApi == null || openApi.getComponents() == null || openApi.getComponents().getRequestBodies() == null) {
+            return Map.of();
+        }
+        return openApi.getComponents().getRequestBodies();
+    }
+
+    /** Never null; empty if the spec declares no {@code components.responses}. */
+    private static Map<String, ApiResponse> componentResponsesOf(OpenAPI openApi) {
+        if (openApi == null || openApi.getComponents() == null || openApi.getComponents().getResponses() == null) {
+            return Map.of();
+        }
+        return openApi.getComponents().getResponses();
     }
 
     private static List<String> withWarning(List<String> messages, String warning) {

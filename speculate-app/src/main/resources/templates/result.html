@@ -179,7 +179,11 @@
             </div>
 
             <div class="tab-panel">
-                <p th:if="${componentSchemas == null or componentSchemas.isEmpty()}" class="empty-note">No component schemas defined in this spec.</p>
+                <p th:if="${(componentSchemas == null or componentSchemas.isEmpty())
+                            and (componentRequestBodies == null or componentRequestBodies.isEmpty())
+                            and (componentResponses == null or componentResponses.isEmpty())}"
+                   class="empty-note">No component schemas, request bodies, or responses defined in this spec.</p>
+
                 <div th:if="${componentSchemas != null and !componentSchemas.isEmpty()}" class="tag-group">
                     <div class="tag-group-header">
                         <h2 class="tag-group-name">Schemas</h2>
@@ -195,6 +199,48 @@
                         <div class="endpoint-body">
                             <div th:replace="~{fragments/findings :: findingsTable(${findings})}"></div>
                             <div th:insert="~{fragments/schema :: schemaView(${schemaEntry.value}, 0, true)}"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:if="${componentRequestBodies != null and !componentRequestBodies.isEmpty()}" class="tag-group">
+                    <div class="tag-group-header">
+                        <h2 class="tag-group-name">Request Bodies</h2>
+                        <button type="button" class="toggle-all-btn" data-toggle-all>Expand all</button>
+                    </div>
+                    <div th:each="rbEntry : ${componentRequestBodies}" class="endpoint collapsed"
+                         th:with="findings=${requestBodyFindings != null ? requestBodyFindings.get(rbEntry.key) : null}">
+                        <h2 class="endpoint-toggle">
+                            <span class="toggle-indicator">&#9662;</span>
+                            <code th:text="${rbEntry.key}">RequestBodyName</code>
+                            <span th:replace="~{fragments/findings :: findingBadges(${findings})}"></span>
+                        </h2>
+                        <div class="endpoint-body">
+                            <div th:replace="~{fragments/findings :: findingsTable(${findings})}"></div>
+                            <p th:if="${rbEntry.value.description != null}" th:with="renderedDescription=${@markdownRenderer.render(rbEntry.value.description)}" class="markdown-body" th:utext="${renderedDescription}"></p>
+                            <div th:if="${rbEntry.value.content != null and !rbEntry.value.content.isEmpty()}"
+                                 th:replace="~{fragments/contenttabs :: contentTabs(${rbEntry.value.content})}"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:if="${componentResponses != null and !componentResponses.isEmpty()}" class="tag-group">
+                    <div class="tag-group-header">
+                        <h2 class="tag-group-name">Responses</h2>
+                        <button type="button" class="toggle-all-btn" data-toggle-all>Expand all</button>
+                    </div>
+                    <div th:each="respEntry : ${componentResponses}" class="endpoint collapsed"
+                         th:with="findings=${responseFindings != null ? responseFindings.get(respEntry.key) : null}">
+                        <h2 class="endpoint-toggle">
+                            <span class="toggle-indicator">&#9662;</span>
+                            <code th:text="${respEntry.key}">ResponseName</code>
+                            <span th:replace="~{fragments/findings :: findingBadges(${findings})}"></span>
+                        </h2>
+                        <div class="endpoint-body">
+                            <div th:replace="~{fragments/findings :: findingsTable(${findings})}"></div>
+                            <p th:if="${respEntry.value.description != null}" th:with="renderedDescription=${@markdownRenderer.render(respEntry.value.description)}" class="markdown-body" th:utext="${renderedDescription}"></p>
+                            <div th:if="${respEntry.value.content != null and !respEntry.value.content.isEmpty()}"
+                                 th:replace="~{fragments/contenttabs :: contentTabs(${respEntry.value.content})}"></div>
                         </div>
                     </div>
                 </div>
