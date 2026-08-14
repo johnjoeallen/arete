@@ -187,37 +187,104 @@ Use the version matching the latest published deployment — check
 [central.sonatype.com](https://central.sonatype.com) or search
 `net.dublinux.speculate:speculate-validation-spi`; it isn't always the
 latest `speculate` release tag, since publishing to Central is a separate,
-manually-triggered step (see below), not something every tagged release
-does automatically.
+manually-triggered step, not something every tagged release does
+automatically.
 
-#### Publishing `speculate-validation-spi` to Maven Central
+A minimal from-scratch plugin — no engine, just enough to compile and load —
+looks like this:
 
-The one-time account setup is done — namespace claimed, GPG key generated,
-repo secrets configured — so this is just what publishing a new version
-looks like, and what that one-time setup was:
+```java
+package com.example.myvalidator;
 
-1. Claim the `net.dublinux` namespace at
-   [central.sonatype.com](https://central.sonatype.com) (a DNS TXT record on
-   `dublinux.net` proves ownership).
-2. Generate a GPG keypair, publish the public key to a keyserver (e.g.
-   [keys.openpgp.org](https://keys.openpgp.org)), and keep the private key +
-   passphrase.
-3. Add these secrets to the GitHub repo (Settings → Secrets → Actions):
-   `MAVEN_CENTRAL_USERNAME` / `MAVEN_CENTRAL_PASSWORD` (a Central Portal user
-   token), `GPG_PRIVATE_KEY`, `GPG_PASSPHRASE`.
+import net.dublinux.speculate.validation.spi.*;
+import java.util.*;
 
-To actually publish a version once those secrets exist: run
-[`publish-spi.yml`](.github/workflows/publish-spi.yml) from the Actions tab,
-pointing it at the tag to publish. It builds, signs, and uploads only
-`speculate-validation-spi` (never `zally-validation-plugin` or
-`speculate-app`, neither of which is meant to be an external dependency) to
-the Central Portal — deliberately not part of `release.yml`, since a Central
-publish should be a reviewed, one-off action rather than something every
-tagged release triggers. `autoPublish` is deliberately off: each upload
-sits as a pending deployment at
-[central.sonatype.com/publishing/deployments](https://central.sonatype.com/publishing/deployments)
-for manual review and publish, since Central doesn't allow deleting or
-overwriting a release once it's live.
+public final class MyValidatorPlugin implements SpecValidationPlugin {
+    @Override public String getId() { return "my-validator"; }
+    @Override public String getName() { return "My Validator"; }
+    @Override public String getVersion() { return "1.0.0"; }
+    @Override public Set<SpecFormat> getSupportedFormats() {
+        return EnumSet.of(SpecFormat.OPENAPI3);
+    }
+    @Override public void configure(Map<String, String> config) { }
+
+    @Override public ValidationResult validate(SpecInput input) {
+        List<Violation> violations = new ArrayList<>();
+        // ... run your engine against input.getContent(), append Violations ...
+        return ValidationResult.success(violations, /* rules evaluated */ -1);
+    }
+}
+```
+
+Package it as a jar with `META-INF/services/net.dublinux.speculate.validation.spi.SpecValidationPlugin`
+containing the line `com.example.myvalidator.MyValidatorPlugin`, and drop it
+into `~/.speculate/plugins`.
+
+### Writing a custom Zally ruleset
+
+If your organization already likes the Zally engine and just wants
+different rules — the Mastercard-supplied plugin mentioned above is exactly
+this case — you don't need to write a `SpecValidationPlugin` from scratch.
+`zally-validation-plugin` already wraps `zally-core`; the same pattern
+works for a second, independent plugin jar that bundles your own rules
+instead of (or alongside) `zally-ruleset-zalando`.
+
+A Zally rule (verified against `zally-rule-api:2.1.1` — these are Kotlin
+interfaces/annotations, but ordinary Java classes implement them the same
+way) has two parts:
+
+1. A `RuleSet` — one per plugin, groups your rules under a shared ID/URL:
+
+   ```java
+   package com.example.myruleset;
+
+   import org.zalando.zally.rule.api.RuleSet;
+   import java.net.URI;
+
+   public final class MyRuleSet implements RuleSet {
+       @Override public String getId() { return "my-org"; }
+       @Override public URI getUrl() { return URI.create("https://wiki.example.com/api-guidelines"); }
+       @Override public URI url(org.zalando.zally.rule.api.Rule rule) { return getUrl(); }
+   }
+   ```
+
+2. One class per rule, annotated `@Rule` at the class level and `@Check` on
+   the method that does the checking:
+
+   ```java
+   package com.example.myruleset;
+
+   import org.zalando.zally.rule.api.*;
+   import java.util.List;
+
+   @Rule(ruleSet = MyRuleSet.class, id = "MY100", severity = Severity.MUST, title = "No trailing slashes")
+   public final class NoTrailingSlashRule {
+       @Check(severity = Severity.MUST)
+       public List<Violation> validate(Context context) {
+           // build Violations from context.getApi(), e.g. via context.validatePaths(...)
+           return List.of();
+       }
+   }
+   ```
+
+Register every rule class (not the `RuleSet`) in
+`META-INF/services/org.zalando.zally.rule.api.Rule` — one FQCN per line,
+same as `zally-ruleset-zalando` does — then wrap them exactly the way
+[`ZallyValidationPlugin`](zally-validation-plugin/src/main/java/speculate/validation/zally/ZallyValidationPlugin.java)
+wraps the bundled Zalando ruleset: `RulesManager.Companion.fromClassLoader(config)`
+discovers rules via that same `META-INF/services` scan of the plugin's own
+classloader, so — same as any other plugin — the jar needs to be
+self-contained (`maven-shade-plugin`, `ServicesResourceTransformer`) and
+give itself its own `getId()` so it runs alongside `zally-core` rather than
+replacing it.
+
+If a single ruleset needs to behave differently per audience (e.g. stricter
+checks for externally-published APIs), that's exactly what
+[`getValidationTypes()`](#custom-validation) is for: declare the types,
+read `input.getValidationType()` in `validate()`, and use it to pick a
+`RulesPolicy` — Zally's own ignore-list mechanism, already used in
+`ZallyValidationPlugin.configure()` for the `ignoreRules` key — instead of
+running every rule unconditionally.
 
 ## Build From Source
 
