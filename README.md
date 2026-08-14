@@ -172,7 +172,7 @@ An external plugin should depend on the SPI as a real (`provided`) Maven
 dependency, never by copying its source — a copy that ends up compiled into
 the plugin's own jar is a *different* class from the host's, and
 `ServiceLoader` won't recognize it as implementing `SpecValidationPlugin` at
-all. Once published (see below), the coordinate is:
+all. It's published to Maven Central; the coordinate is:
 
 ```xml
 <dependency>
@@ -183,10 +183,18 @@ all. Once published (see below), the coordinate is:
 </dependency>
 ```
 
+Use the version matching the latest published deployment — check
+[central.sonatype.com](https://central.sonatype.com) or search
+`net.dublinux.speculate:speculate-validation-spi`; it isn't always the
+latest `speculate` release tag, since publishing to Central is a separate,
+manually-triggered step (see below), not something every tagged release
+does automatically.
+
 #### Publishing `speculate-validation-spi` to Maven Central
 
-Not active yet — the release workflow's publish step is gated behind repo
-secrets that don't exist until this one-time setup is done:
+The one-time account setup is done — namespace claimed, GPG key generated,
+repo secrets configured — so this is just what publishing a new version
+looks like, and what that one-time setup was:
 
 1. Claim the `net.dublinux` namespace at
    [central.sonatype.com](https://central.sonatype.com) (a DNS TXT record on
@@ -198,14 +206,15 @@ secrets that don't exist until this one-time setup is done:
    `MAVEN_CENTRAL_USERNAME` / `MAVEN_CENTRAL_PASSWORD` (a Central Portal user
    token), `GPG_PRIVATE_KEY`, `GPG_PASSPHRASE`.
 
-Once those secrets exist, publishing is a manual step, not something every
-tagged release does — run
+To actually publish a version once those secrets exist: run
 [`publish-spi.yml`](.github/workflows/publish-spi.yml) from the Actions tab,
 pointing it at the tag to publish. It builds, signs, and uploads only
 `speculate-validation-spi` (never `zally-validation-plugin` or
 `speculate-app`, neither of which is meant to be an external dependency) to
-the Central Portal. `autoPublish` is deliberately off: each upload sits as a
-pending deployment at
+the Central Portal — deliberately not part of `release.yml`, since a Central
+publish should be a reviewed, one-off action rather than something every
+tagged release triggers. `autoPublish` is deliberately off: each upload
+sits as a pending deployment at
 [central.sonatype.com/publishing/deployments](https://central.sonatype.com/publishing/deployments)
 for manual review and publish, since Central doesn't allow deleting or
 overwriting a release once it's live.
