@@ -88,6 +88,10 @@
                 <span th:unless="${s.status() == 'SUCCESS'}" class="plugin-error" th:text="${s.status()} + ' - ' + ${s.errorMessage()}"></span>
             </li>
         </ul>
+        <label class="hide-compliant-toggle">
+            <input type="checkbox" id="hide-compliant-checkbox">
+            Hide compliant
+        </label>
     </div>
 
     <div th:if="${openApi == null}">
@@ -121,7 +125,8 @@
             <div th:if="${group.description != null}" th:with="renderedDescription=${@markdownRenderer.render(group.description)}" class="tag-group-description markdown-body" th:utext="${renderedDescription}"></div>
 
             <div th:each="endpoint : ${group.endpoints}" class="endpoint collapsed"
-                 th:with="findings=${endpointFindings != null ? endpointFindings.get(endpoint.method + ' ' + endpoint.path) : null}">
+                 th:with="findings=${endpointFindings != null ? endpointFindings.get(endpoint.method + ' ' + endpoint.path) : null}"
+                 th:attr="data-has-findings=${findings != null and findings.counts().total() > 0}">
                 <h2 class="endpoint-toggle">
                     <span class="toggle-indicator">&#9662;</span>
                     <span class="method" th:classappend="'method-' + ${#strings.toLowerCase(endpoint.method)}" th:text="${endpoint.method}">GET</span>
@@ -191,7 +196,8 @@
                             <div th:if="${componentSchemas != null and !componentSchemas.isEmpty()}" class="tag-group">
                                 <button type="button" class="toggle-all-btn" data-toggle-all>Expand all</button>
                                 <div th:each="schemaEntry : ${componentSchemas}" class="endpoint collapsed"
-                                     th:with="findings=${schemaFindings != null ? schemaFindings.get(schemaEntry.key) : null}">
+                                     th:with="findings=${schemaFindings != null ? schemaFindings.get(schemaEntry.key) : null}"
+                                     th:attr="data-has-findings=${findings != null and findings.counts().total() > 0}">
                                     <h2 class="endpoint-toggle">
                                         <span class="toggle-indicator">&#9662;</span>
                                         <code th:text="${schemaEntry.key}">SchemaName</code>
@@ -210,7 +216,8 @@
                             <div th:if="${componentRequestBodies != null and !componentRequestBodies.isEmpty()}" class="tag-group">
                                 <button type="button" class="toggle-all-btn" data-toggle-all>Expand all</button>
                                 <div th:each="rbEntry : ${componentRequestBodies}" class="endpoint collapsed"
-                                     th:with="findings=${requestBodyFindings != null ? requestBodyFindings.get(rbEntry.key) : null}">
+                                     th:with="findings=${requestBodyFindings != null ? requestBodyFindings.get(rbEntry.key) : null}"
+                                     th:attr="data-has-findings=${findings != null and findings.counts().total() > 0}">
                                     <h2 class="endpoint-toggle">
                                         <span class="toggle-indicator">&#9662;</span>
                                         <code th:text="${rbEntry.key}">RequestBodyName</code>
@@ -231,7 +238,8 @@
                             <div th:if="${componentResponses != null and !componentResponses.isEmpty()}" class="tag-group">
                                 <button type="button" class="toggle-all-btn" data-toggle-all>Expand all</button>
                                 <div th:each="respEntry : ${componentResponses}" class="endpoint collapsed"
-                                     th:with="findings=${responseFindings != null ? responseFindings.get(respEntry.key) : null}">
+                                     th:with="findings=${responseFindings != null ? responseFindings.get(respEntry.key) : null}"
+                                     th:attr="data-has-findings=${findings != null and findings.counts().total() > 0}">
                                     <h2 class="endpoint-toggle">
                                         <span class="toggle-indicator">&#9662;</span>
                                         <code th:text="${respEntry.key}">ResponseName</code>

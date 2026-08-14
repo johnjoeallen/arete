@@ -71,6 +71,22 @@
         });
     });
 
+    // "Hide compliant" filter: hides any .endpoint card (an operation, a
+    // schema, a request body, a response) with data-has-findings="false"
+    // once checked. State persists across page loads the same way the
+    // theme toggle does.
+    var hideCompliantCheckbox = document.getElementById('hide-compliant-checkbox');
+    if (hideCompliantCheckbox) {
+        var HIDE_COMPLIANT_STORAGE_KEY = 'speculate:hide-compliant';
+        var hideCompliant = localStorage.getItem(HIDE_COMPLIANT_STORAGE_KEY) === 'true';
+        hideCompliantCheckbox.checked = hideCompliant;
+        document.body.classList.toggle('hide-compliant', hideCompliant);
+        hideCompliantCheckbox.addEventListener('change', function () {
+            document.body.classList.toggle('hide-compliant', hideCompliantCheckbox.checked);
+            localStorage.setItem(HIDE_COMPLIANT_STORAGE_KEY, String(hideCompliantCheckbox.checked));
+        });
+    }
+
     // Toggling nested schema details (object properties / array items).
     document.querySelectorAll('.schema-toggle-btn').forEach(function (btn) {
         var container = btn.closest('tr, .schema-array-items');

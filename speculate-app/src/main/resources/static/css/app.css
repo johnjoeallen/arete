@@ -262,6 +262,9 @@ th { background: var(--surface); font-family: var(--font-heading); font-weight: 
 .plugin-outcomes { list-style: none; padding: 0; margin: 0 0 0.8em; font-size: 0.92em; }
 .plugin-outcomes .plugin-error { color: var(--danger); }
 
+.hide-compliant-toggle { display: inline-flex; align-items: center; gap: 0.4em; font-size: 0.9em; color: var(--muted-fg); cursor: pointer; }
+body.hide-compliant .endpoint[data-has-findings="false"] { display: none; }
+
 .finding-badges { display: inline-flex; gap: 0.3em; margin-left: auto; }
 .finding-badge { display: inline-flex; align-items: center; height: 1.5em; padding: 0 0.55em; border-radius: 999px; font-size: 0.78em; font-weight: 700; color: #fff; white-space: nowrap; cursor: default; }
 .finding-badge-error { background: var(--danger); }
