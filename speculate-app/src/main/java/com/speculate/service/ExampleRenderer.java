@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.media.MediaType;
 import org.springframework.stereotype.Component;
@@ -28,8 +29,20 @@ public class ExampleRenderer {
     private final XmlMapper xmlMapper;
 
     public ExampleRenderer() {
-        this.jsonMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
+        // swagger-parser resolves an explicit `format: date-time` example
+        // value (e.g. "2024-01-01T00:00:00Z") to a real OffsetDateTime
+        // rather than leaving it as a String, so these mappers need
+        // JavaTimeModule to serialize it back out — without it, any example
+        // containing a date-time field fails to render at all. Disabling
+        // WRITE_DATES_AS_TIMESTAMPS keeps the output as the same ISO-8601
+        // text the spec originally declared, instead of an epoch array.
+        this.jsonMapper = new ObjectMapper()
+                .registerModule(new JavaTimeModule())
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                .enable(SerializationFeature.INDENT_OUTPUT);
         this.xmlMapper = new XmlMapper();
+        this.xmlMapper.registerModule(new JavaTimeModule());
+        this.xmlMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         this.xmlMapper.enable(SerializationFeature.INDENT_OUTPUT);
     }
 
