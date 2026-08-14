@@ -288,6 +288,11 @@ table.endpoint-findings { width: 100%; }
 .tabset-panels .tab-panel { display: none; padding: 0.85em 0; }
 .tabset-panels .tab-panel.active { display: block; }
 
+.top-level-tabset { margin-top: 1.25em; }
+.top-level-tabset > .tabset-nav .tab-btn { font-size: 1.05em; padding: 0.5em 1.1em; }
+
+.empty-note { color: var(--muted-fg); }
+
 /* Redoc's signature dark code/example panel - stays dark in both themes. */
 .example-body {
     margin: 0;

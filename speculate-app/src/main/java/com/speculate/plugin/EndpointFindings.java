@@ -1,9 +1,6 @@
 package com.speculate.plugin;
 
-import net.dublinux.speculate.validation.spi.Severity;
-
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -42,16 +39,8 @@ public final class EndpointFindings {
         }
 
         Map<String, EndpointFindingsView> result = new LinkedHashMap<>();
-        byKey.forEach((key, forEndpoint) -> result.put(key, new EndpointFindingsView(countsOf(forEndpoint), forEndpoint)));
+        byKey.forEach((key, forEndpoint) -> result.put(key, new EndpointFindingsView(SeverityCounts.from(forEndpoint), forEndpoint)));
         return result;
-    }
-
-    private static SeverityCounts countsOf(List<AttributedViolation> violations) {
-        EnumMap<Severity, Long> bySeverity = new EnumMap<>(Severity.class);
-        for (AttributedViolation av : violations) {
-            bySeverity.merge(av.violation().getSeverity(), 1L, Long::sum);
-        }
-        return SeverityCounts.of(bySeverity);
     }
 
     /** {@code null} unless {@code pointer} is rooted at a specific {@code /paths/<path>/<method>} operation. */

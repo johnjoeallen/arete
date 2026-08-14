@@ -104,7 +104,15 @@
         </p>
         <div th:if="${openApi.info != null and openApi.info.description != null}" th:with="renderedDescription=${@markdownRenderer.render(openApi.info.description)}" class="markdown-body" th:utext="${renderedDescription}"></div>
 
-        <div th:if="${tagGroups != null}" th:each="group : ${tagGroups}" class="tag-group">
+        <div class="tabset top-level-tabset">
+            <div class="tabset-nav">
+                <button type="button" class="tab-btn active">Interface</button>
+                <button type="button" class="tab-btn">Model</button>
+            </div>
+            <div class="tabset-panels">
+            <div class="tab-panel active">
+            <p th:if="${tagGroups == null or tagGroups.isEmpty()}" class="empty-note">No endpoints defined in this spec.</p>
+            <div th:if="${tagGroups != null}" th:each="group : ${tagGroups}" class="tag-group">
             <div class="tag-group-header">
                 <h2 class="tag-group-name" th:text="${group.name}">tag</h2>
                 <button type="button" class="toggle-all-btn" data-toggle-all>Expand all</button>
@@ -117,50 +125,14 @@
                     <span class="toggle-indicator">&#9662;</span>
                     <span class="method" th:classappend="'method-' + ${#strings.toLowerCase(endpoint.method)}" th:text="${endpoint.method}">GET</span>
                     <code th:text="${endpoint.path}">/path</code>
-                    <span class="finding-badges" th:if="${findings != null and findings.counts().total() > 0}">
-                        <span class="finding-badge finding-badge-error" th:if="${findings.counts().errorCount() > 0}"
-                              th:text="'❌ ' + ${findings.counts().errorCount()}" th:title="${findings.counts().errorCount()} + ' error(s)'"></span>
-                        <span class="finding-badge finding-badge-warning" th:if="${findings.counts().warningCount() > 0}"
-                              th:text="'⚠️ ' + ${findings.counts().warningCount()}" th:title="${findings.counts().warningCount()} + ' warning(s)'"></span>
-                        <span class="finding-badge finding-badge-info" th:if="${findings.counts().infoCount() > 0}"
-                              th:text="'ℹ️ ' + ${findings.counts().infoCount()}" th:title="${findings.counts().infoCount()} + ' info finding(s)'"></span>
-                        <span class="finding-badge finding-badge-hint" th:if="${findings.counts().hintCount() > 0}"
-                              th:text="'💡 ' + ${findings.counts().hintCount()}" th:title="${findings.counts().hintCount()} + ' hint(s)'"></span>
-                    </span>
+                    <span th:replace="~{fragments/findings :: findingBadges(${findings})}"></span>
                 </h2>
                 <div class="endpoint-body">
                 <p th:if="${endpoint.operation.summary != null}" th:text="${endpoint.operation.summary}"></p>
                 <div th:if="${endpoint.operation.description != null}" th:with="renderedDescription=${@markdownRenderer.render(endpoint.operation.description)}" class="markdown-body" th:utext="${renderedDescription}"></div>
                 <p th:if="${endpoint.operation.operationId != null}"><em>operationId: </em><code th:text="${endpoint.operation.operationId}"></code></p>
 
-                <div class="section" th:if="${findings != null and !findings.violations().isEmpty()}">
-                    <h3>Validation findings</h3>
-                    <table class="endpoint-findings">
-                        <thead>
-                            <tr><th>Severity</th><th>Rule</th><th>Finding</th><th>Location</th><th>Source</th></tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="av : ${findings.violations()}">
-                                <td>
-                                    <span class="severity-badge"
-                                          th:classappend="'severity-' + ${#strings.toLowerCase(av.violation().getSeverity())}"
-                                          th:text="${av.violation().getSeverity()}"></span>
-                                </td>
-                                <td><code th:text="${av.violation().getRuleId()}"></code></td>
-                                <td>
-                                    <div th:text="${av.violation().getTitle()}"></div>
-                                    <div th:if="${av.violation().getDescription() != null}" class="violation-description" th:text="${av.violation().getDescription()}"></div>
-                                    <a th:if="${av.violation().getDocumentationUrl() != null}"
-                                       th:href="${av.violation().getDocumentationUrl()}"
-                                       target="_blank" rel="noopener noreferrer"
-                                       class="violation-doc-link">Learn more &#8599;</a>
-                                </td>
-                                <td th:text="${av.violation().getPointer()}"></td>
-                                <td><span class="violation-source" th:text="${av.pluginName()}"></span></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+                <div th:replace="~{fragments/findings :: findingsTable(${findings})}"></div>
 
                 <div th:if="${endpoint.operation.parameters != null and !endpoint.operation.parameters.isEmpty()}">
                     <h3>Parameters</h3>
@@ -201,6 +173,31 @@
                     </div>
                 </div>
                 </div>
+            </div>
+            </div>
+            </div>
+
+            <div class="tab-panel">
+                <p th:if="${componentSchemas == null or componentSchemas.isEmpty()}" class="empty-note">No component schemas defined in this spec.</p>
+                <div th:if="${componentSchemas != null and !componentSchemas.isEmpty()}" class="tag-group">
+                    <div class="tag-group-header">
+                        <h2 class="tag-group-name">Schemas</h2>
+                        <button type="button" class="toggle-all-btn" data-toggle-all>Expand all</button>
+                    </div>
+                    <div th:each="schemaEntry : ${componentSchemas}" class="endpoint collapsed"
+                         th:with="findings=${schemaFindings != null ? schemaFindings.get(schemaEntry.key) : null}">
+                        <h2 class="endpoint-toggle">
+                            <span class="toggle-indicator">&#9662;</span>
+                            <code th:text="${schemaEntry.key}">SchemaName</code>
+                            <span th:replace="~{fragments/findings :: findingBadges(${findings})}"></span>
+                        </h2>
+                        <div class="endpoint-body">
+                            <div th:replace="~{fragments/findings :: findingsTable(${findings})}"></div>
+                            <div th:insert="~{fragments/schema :: schemaView(${schemaEntry.value}, 0, true)}"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             </div>
         </div>
     </div>

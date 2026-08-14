@@ -7,6 +7,7 @@ import com.speculate.plugin.EndpointFindings;
 import com.speculate.plugin.PluginRegistry;
 import com.speculate.plugin.PluginSettingsService;
 import com.speculate.plugin.PluginValidationService;
+import com.speculate.plugin.SchemaFindings;
 import com.speculate.service.EndpointGrouper;
 import com.speculate.service.ParsedSpec;
 import com.speculate.service.SpecFileWatcher;
@@ -14,6 +15,8 @@ import com.speculate.service.SpecParserService;
 import com.speculate.service.SpecStorageService;
 import com.speculate.web.dto.PluginRuleSetChoice;
 import com.speculate.web.dto.SpecSummary;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.media.Schema;
 import net.dublinux.speculate.validation.spi.SpecValidationPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TreeSet;
 
 @Controller
@@ -144,6 +148,7 @@ public class SpecController {
         ParsedSpec parsed = specParserService.parse(entity.getRawContent());
         model.addAttribute("openApi", parsed.openApi());
         model.addAttribute("tagGroups", EndpointGrouper.group(parsed.openApi()));
+        model.addAttribute("componentSchemas", componentSchemasOf(parsed.openApi()));
         model.addAttribute("parseErrors", parsed.messages());
         model.addAttribute("specTitle", entity.getTitle());
         model.addAttribute("specFilePath", entity.getFilePath());
@@ -154,6 +159,7 @@ public class SpecController {
                     pluginValidationService.validateOne(entity.getRawContent(), pluginId, ruleSet);
             model.addAttribute("validation", validation);
             model.addAttribute("endpointFindings", EndpointFindings.byEndpoint(validation.violations()));
+            model.addAttribute("schemaFindings", SchemaFindings.bySchema(validation.violations()));
         }
         populateSidebar(model, q, entity.getId());
         return "result";
@@ -199,6 +205,7 @@ public class SpecController {
             ParsedSpec parsed = specParserService.parse(content);
             model.addAttribute("openApi", parsed.openApi());
             model.addAttribute("tagGroups", EndpointGrouper.group(parsed.openApi()));
+            model.addAttribute("componentSchemas", componentSchemasOf(parsed.openApi()));
 
             if (parsed.openApi() != null) {
                 String title = parsed.title();
@@ -242,6 +249,14 @@ public class SpecController {
                 .map(e -> new SpecSummary(e.getId(), e.getTitle(), e.getUpdatedAt().toEpochMilli()))
                 .sorted(Comparator.comparing(SpecSummary::title, String.CASE_INSENSITIVE_ORDER))
                 .toList();
+    }
+
+    /** Never null; empty if the spec declares no {@code components.schemas}. */
+    private static Map<String, Schema> componentSchemasOf(OpenAPI openApi) {
+        if (openApi == null || openApi.getComponents() == null || openApi.getComponents().getSchemas() == null) {
+            return Map.of();
+        }
+        return openApi.getComponents().getSchemas();
     }
 
     private static List<String> withWarning(List<String> messages, String warning) {
