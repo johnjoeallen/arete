@@ -91,19 +91,19 @@ public final class ZallyValidationPlugin implements SpecValidationPlugin {
     /**
      * Two rule sets, both running every discovered rule — they differ only
      * in which severities get reported. This is the reference example for
-     * {@link #getRuleSets()}: the SPI-facing name ({@code "lenient"}) has no
+     * {@link #getRuleSets()}: the SPI-facing name ({@code "Relaxed"}) has no
      * meaning to Zally at all, it's purely this adapter's own choice of how
      * to map it onto a mechanism Zally does understand (here, filtering
      * {@link Result#getViolationType()} after the fact; a different plugin
      * might instead map rule-set names onto a {@link RulesPolicy} ignore
      * list, or something else entirely).
      */
-    private static final String RULE_SET_PEDANTIC = "pedantic";
-    private static final String RULE_SET_LENIENT = "lenient";
+    private static final String RULE_SET_STRICT = "Strict";
+    private static final String RULE_SET_RELAXED = "Relaxed";
 
     @Override
     public Set<String> getRuleSets() {
-        return Set.of(RULE_SET_PEDANTIC, RULE_SET_LENIENT);
+        return Set.of(RULE_SET_STRICT, RULE_SET_RELAXED);
     }
 
     /**
@@ -139,15 +139,15 @@ public final class ZallyValidationPlugin implements SpecValidationPlugin {
         try {
             RulesPolicy policy = new RulesPolicy(ignoredRuleIds);
             List<Result> results = validator.validate(input.getContent(), policy, "");
-            // Anything other than the exact string "lenient" — including
-            // "pedantic" itself, the SPI's DEFAULT_RULE_SET sentinel, and any
+            // Anything other than the exact string "Relaxed" — including
+            // "Strict" itself, the SPI's DEFAULT_RULE_SET sentinel, and any
             // value this adapter doesn't recognize — defaults to reporting
             // everything: a stricter, more-information default is safer than
             // silently dropping violations a caller never asked to suppress.
-            boolean lenient = RULE_SET_LENIENT.equals(input.getRuleSet());
+            boolean relaxed = RULE_SET_RELAXED.equals(input.getRuleSet());
             List<Violation> violations = new ArrayList<>(results.size());
             for (Result result : results) {
-                if (lenient && result.getViolationType() != org.zalando.zally.rule.api.Severity.MUST) {
+                if (relaxed && result.getViolationType() != org.zalando.zally.rule.api.Severity.MUST) {
                     continue;
                 }
                 violations.add(toViolation(result));
