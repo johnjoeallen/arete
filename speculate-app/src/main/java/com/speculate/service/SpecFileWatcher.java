@@ -181,6 +181,17 @@ public class SpecFileWatcher {
             if (dir != null) {
                 for (WatchEvent<?> event : key.pollEvents()) {
                     if (event.kind() == StandardWatchEventKinds.OVERFLOW) {
+                        // The OS-level event buffer overflowed, so some events
+                        // -- most likely an edit to a file we're already
+                        // tracking -- may have been silently dropped rather
+                        // than delivered as ENTRY_MODIFY. This is far more
+                        // common on Windows than Linux: WindowsWatchService
+                        // overflows more readily, and a single editor "save"
+                        // there often fires several raw filesystem events for
+                        // one logical edit. Re-scanning is the JDK's own
+                        // documented recovery for OVERFLOW, since the event
+                        // stream can no longer be trusted to be complete.
+                        rescanDir(dir);
                         continue;
                     }
                     Path changed = dir.resolve((Path) event.context());
@@ -196,6 +207,21 @@ public class SpecFileWatcher {
             if (!key.reset()) {
                 watchedDirsByKey.remove(key);
             }
+        }
+    }
+
+    /** Recovery for a lost {@code OVERFLOW} event: reload everything we'd expect to be watching in {@code dir}. */
+    void rescanDir(Path dir) {
+        if (dir.equals(specsHome)) {
+            try (var files = Files.list(dir)) {
+                files.filter(Files::isRegularFile).forEach(this::scheduleReload);
+            } catch (IOException e) {
+                log.warn("Could not rescan specs drop folder {} after a missed filesystem event: {}", dir, e.toString());
+            }
+            return;
+        }
+        for (String filename : trackedFilenamesByDir.getOrDefault(dir, Set.of())) {
+            scheduleReload(dir.resolve(filename));
         }
     }
 

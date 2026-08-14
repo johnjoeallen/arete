@@ -93,6 +93,48 @@ class SpecFileWatcherTest {
         awaitUntil(() -> repository.findByTitle("External API v2").isPresent());
     }
 
+    /**
+     * Proves the {@code OVERFLOW} recovery path in isolation: builds a
+     * watcher that's never {@code start()}ed, so no real filesystem event
+     * could reach it, and calls {@link SpecFileWatcher#rescanDir} directly
+     * (the same call the watch loop makes on a real {@code OVERFLOW}) as the
+     * only possible cause of the reload. Windows' WatchService overflows far
+     * more readily than Linux's, dropping edits it should have delivered as
+     * {@code ENTRY_MODIFY} — this is the recovery for exactly that.
+     */
+    @Test
+    void rescanDirRecoversAnEditToAFileInTheSpecsHome() throws Exception {
+        watcher.stop(); // otherwise setUp's already-running watcher would also see and race to save this file
+        SpecFileWatcher freshWatcher = new SpecFileWatcher(specsHome, 50, parserService, storageService);
+        try {
+            Path file = specsHome.resolve("watched.yaml");
+            Files.writeString(file, specWithTitle("Rescanned Title"), StandardCharsets.UTF_8);
+
+            freshWatcher.rescanDir(specsHome);
+
+            awaitUntil(() -> repository.findByTitle("Rescanned Title").isPresent());
+        } finally {
+            freshWatcher.stop();
+        }
+    }
+
+    @Test
+    void rescanDirRecoversAnEditToAnExternallyTrackedFile() throws Exception {
+        watcher.stop(); // otherwise setUp's already-running watcher would also see and race to save this file
+        SpecFileWatcher freshWatcher = new SpecFileWatcher(specsHome, 50, parserService, storageService);
+        try {
+            Path file = externalDir.resolve("external.yaml");
+            Files.writeString(file, specWithTitle("External Rescanned"), StandardCharsets.UTF_8);
+            freshWatcher.watch(file);
+
+            freshWatcher.rescanDir(externalDir);
+
+            awaitUntil(() -> repository.findByTitle("External Rescanned").isPresent());
+        } finally {
+            freshWatcher.stop();
+        }
+    }
+
     @Test
     void aFileWithNoTitleIsSkippedRatherThanSaved() throws Exception {
         Files.writeString(specsHome.resolve("no-title.yaml"), "openapi: 3.0.0\ninfo: {}", StandardCharsets.UTF_8);
