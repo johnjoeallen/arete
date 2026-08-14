@@ -12,7 +12,7 @@ import com.speculate.service.ParsedSpec;
 import com.speculate.service.SpecFileWatcher;
 import com.speculate.service.SpecParserService;
 import com.speculate.service.SpecStorageService;
-import com.speculate.web.dto.PluginValidationTypeChoice;
+import com.speculate.web.dto.PluginRuleSetChoice;
 import com.speculate.web.dto.SpecSummary;
 import net.dublinux.speculate.validation.spi.SpecValidationPlugin;
 import org.slf4j.Logger;
@@ -45,8 +45,8 @@ public class SpecController {
 
     private static final Logger log = LoggerFactory.getLogger(SpecController.class);
 
-    /** Form field name prefix for a plugin's validation-type picker; suffixed with the plugin ID. */
-    private static final String VALIDATION_TYPE_PARAM_PREFIX = "validationType_";
+    /** Form field name prefix for a plugin's rule-set picker; suffixed with the plugin ID. */
+    private static final String RULE_SET_PARAM_PREFIX = "ruleSet_";
 
     private final SpecParserService specParserService;
     private final SpecStorageService specStorageService;
@@ -69,14 +69,14 @@ public class SpecController {
     @GetMapping("/")
     public String index(@RequestParam(required = false) String q, Model model) {
         model.addAttribute("specsDir", specFileWatcher.getSpecsHome().toString());
-        model.addAttribute("pluginValidationTypeChoices", pluginValidationTypeChoices());
+        model.addAttribute("pluginRuleSetChoices", pluginRuleSetChoices());
         populateSidebar(model, q, null);
         return "index";
     }
 
     @PostMapping("/api/paste")
     public String paste(@RequestParam String specText, @RequestParam Map<String, String> allParams, Model model) {
-        parseAndSave(specText, null, extractValidationTypes(allParams), model);
+        parseAndSave(specText, null, extractRuleSets(allParams), model);
         return "result";
     }
 
@@ -91,7 +91,7 @@ public class SpecController {
      */
     @PostMapping("/api/load-file")
     public String loadFile(@RequestParam String filePath, @RequestParam Map<String, String> allParams, Model model) {
-        Map<String, String> pluginValidationTypes = extractValidationTypes(allParams);
+        Map<String, String> pluginRuleSets = extractRuleSets(allParams);
         String trimmedPath = filePath == null ? "" : filePath.trim();
         if (trimmedPath.isEmpty()) {
             model.addAttribute("openApi", null);
@@ -128,7 +128,7 @@ public class SpecController {
             return "result";
         }
 
-        SpecEntity saved = parseAndSave(content, trimmedPath, pluginValidationTypes, model);
+        SpecEntity saved = parseAndSave(content, trimmedPath, pluginRuleSets, model);
         if (saved != null) {
             specFileWatcher.watch(path);
         }
@@ -147,7 +147,7 @@ public class SpecController {
         model.addAttribute("specTitle", entity.getTitle());
         model.addAttribute("specFilePath", entity.getFilePath());
         AggregatedValidationResult validation =
-                pluginValidationService.validate(entity.getRawContent(), entity.getPluginValidationTypes());
+                pluginValidationService.validate(entity.getRawContent(), entity.getPluginRuleSets());
         model.addAttribute("validation", validation);
         model.addAttribute("endpointFindings", EndpointFindings.byEndpoint(validation.violations()));
         populateSidebar(model, q, entity.getId());
@@ -187,7 +187,7 @@ public class SpecController {
      * loaded from that path. Returns the saved entity, or {@code null} if
      * nothing was saved (parse failure, or no title to key it on).
      */
-    private SpecEntity parseAndSave(String content, String filePath, Map<String, String> pluginValidationTypes,
+    private SpecEntity parseAndSave(String content, String filePath, Map<String, String> pluginRuleSets,
             Model model) {
         try {
             ParsedSpec parsed = specParserService.parse(content);
@@ -198,13 +198,13 @@ public class SpecController {
                 String title = parsed.title();
                 if (title != null) {
                     SpecEntity saved = filePath == null
-                            ? specStorageService.saveOrReplace(title, content, pluginValidationTypes)
-                            : specStorageService.saveOrReplaceFromFile(title, content, filePath, pluginValidationTypes);
+                            ? specStorageService.saveOrReplace(title, content, pluginRuleSets)
+                            : specStorageService.saveOrReplaceFromFile(title, content, filePath, pluginRuleSets);
                     model.addAttribute("parseErrors", parsed.messages());
                     model.addAttribute("specTitle", saved.getTitle());
                     model.addAttribute("specFilePath", saved.getFilePath());
                     AggregatedValidationResult validation =
-                            pluginValidationService.validate(content, pluginValidationTypes);
+                            pluginValidationService.validate(content, pluginRuleSets);
                     model.addAttribute("validation", validation);
                     model.addAttribute("endpointFindings", EndpointFindings.byEndpoint(validation.violations()));
                     populateSidebar(model, null, saved.getId());
@@ -250,44 +250,44 @@ public class SpecController {
         return combined;
     }
 
-    /** Pulls out this request's {@code validationType_<pluginId>} fields, keyed by plugin ID with the prefix stripped. */
-    private static Map<String, String> extractValidationTypes(Map<String, String> allParams) {
+    /** Pulls out this request's {@code ruleSet_<pluginId>} fields, keyed by plugin ID with the prefix stripped. */
+    private static Map<String, String> extractRuleSets(Map<String, String> allParams) {
         Map<String, String> result = new HashMap<>();
         for (Map.Entry<String, String> entry : allParams.entrySet()) {
-            if (entry.getKey().startsWith(VALIDATION_TYPE_PARAM_PREFIX) && !entry.getValue().isBlank()) {
-                result.put(entry.getKey().substring(VALIDATION_TYPE_PARAM_PREFIX.length()), entry.getValue());
+            if (entry.getKey().startsWith(RULE_SET_PARAM_PREFIX) && !entry.getValue().isBlank()) {
+                result.put(entry.getKey().substring(RULE_SET_PARAM_PREFIX.length()), entry.getValue());
             }
         }
         return result;
     }
 
     /**
-     * One entry per enabled plugin that declares more than one validation
-     * type — a plugin with only the implicit default has no real choice to
-     * offer, so it's left out rather than shown as a single-option picker.
+     * One entry per enabled plugin that declares more than one rule set —
+     * a plugin with only the implicit default has no real choice to offer,
+     * so it's left out rather than shown as a single-option picker.
      */
-    private List<PluginValidationTypeChoice> pluginValidationTypeChoices() {
-        List<PluginValidationTypeChoice> choices = new ArrayList<>();
+    private List<PluginRuleSetChoice> pluginRuleSetChoices() {
+        List<PluginRuleSetChoice> choices = new ArrayList<>();
         for (SpecValidationPlugin plugin : pluginRegistry.getPlugins()) {
             if (!pluginSettingsService.isEnabled(plugin.getId())) {
                 continue;
             }
-            List<String> types = safeValidationTypes(plugin);
-            if (types.size() > 1) {
-                choices.add(new PluginValidationTypeChoice(plugin.getId(), plugin.getName(), types));
+            List<String> ruleSets = safeRuleSets(plugin);
+            if (ruleSets.size() > 1) {
+                choices.add(new PluginRuleSetChoice(plugin.getId(), plugin.getName(), ruleSets));
             }
         }
-        choices.sort(Comparator.comparing(PluginValidationTypeChoice::pluginName, String.CASE_INSENSITIVE_ORDER));
+        choices.sort(Comparator.comparing(PluginRuleSetChoice::pluginName, String.CASE_INSENSITIVE_ORDER));
         return choices;
     }
 
     /** Defensive: a plugin is untrusted, dynamically loaded code, same as every other call into it (see PluginRegistry, PluginValidationService). */
-    private List<String> safeValidationTypes(SpecValidationPlugin plugin) {
+    private List<String> safeRuleSets(SpecValidationPlugin plugin) {
         try {
-            return List.copyOf(new TreeSet<>(plugin.getValidationTypes()));
+            return List.copyOf(new TreeSet<>(plugin.getRuleSets()));
         } catch (Throwable t) {
-            log.warn("Validation plugin '{}' threw from getValidationTypes(): {}", plugin.getId(), t.toString());
-            return List.of(SpecValidationPlugin.DEFAULT_VALIDATION_TYPE);
+            log.warn("Validation plugin '{}' threw from getRuleSets(): {}", plugin.getId(), t.toString());
+            return List.of(SpecValidationPlugin.DEFAULT_RULE_SET);
         }
     }
 

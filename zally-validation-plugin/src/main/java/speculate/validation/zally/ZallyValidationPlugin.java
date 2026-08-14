@@ -89,6 +89,24 @@ public final class ZallyValidationPlugin implements SpecValidationPlugin {
     }
 
     /**
+     * Two rule sets, both running every discovered rule — they differ only
+     * in which severities get reported. This is the reference example for
+     * {@link #getRuleSets()}: the SPI-facing name ({@code "lenient"}) has no
+     * meaning to Zally at all, it's purely this adapter's own choice of how
+     * to map it onto a mechanism Zally does understand (here, filtering
+     * {@link Result#getViolationType()} after the fact; a different plugin
+     * might instead map rule-set names onto a {@link RulesPolicy} ignore
+     * list, or something else entirely).
+     */
+    private static final String RULE_SET_PEDANTIC = "pedantic";
+    private static final String RULE_SET_LENIENT = "lenient";
+
+    @Override
+    public Set<String> getRuleSets() {
+        return Set.of(RULE_SET_PEDANTIC, RULE_SET_LENIENT);
+    }
+
+    /**
      * Recognizes a single key, {@code "ignoreRules"}: a comma-separated list
      * of Zally rule IDs to skip, e.g. {@code "150,175"}. Absent or blank
      * means every discovered rule runs.
@@ -121,8 +139,17 @@ public final class ZallyValidationPlugin implements SpecValidationPlugin {
         try {
             RulesPolicy policy = new RulesPolicy(ignoredRuleIds);
             List<Result> results = validator.validate(input.getContent(), policy, "");
+            // Anything other than the exact string "lenient" — including
+            // "pedantic" itself, the SPI's DEFAULT_RULE_SET sentinel, and any
+            // value this adapter doesn't recognize — defaults to reporting
+            // everything: a stricter, more-information default is safer than
+            // silently dropping violations a caller never asked to suppress.
+            boolean lenient = RULE_SET_LENIENT.equals(input.getRuleSet());
             List<Violation> violations = new ArrayList<>(results.size());
             for (Result result : results) {
+                if (lenient && result.getViolationType() != org.zalando.zally.rule.api.Severity.MUST) {
+                    continue;
+                }
                 violations.add(toViolation(result));
             }
             int rulesEvaluatedCount = rulesManager.checks(policy).size();

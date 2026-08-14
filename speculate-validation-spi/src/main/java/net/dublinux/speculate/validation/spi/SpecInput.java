@@ -20,25 +20,26 @@ import java.util.Objects;
  * <p>{@code baseUri} is optional and used by plugins that need to resolve
  * relative {@code $ref}s or want a filename for reporting purposes.
  *
- * <p>{@code validationType} is one of the values the plugin itself declared
- * via {@link SpecValidationPlugin#getValidationTypes()} (or {@link
- * SpecValidationPlugin#DEFAULT_VALIDATION_TYPE} if nothing was explicitly
- * selected) — see that method's javadoc for the full contract. Defaults to
- * {@code DEFAULT_VALIDATION_TYPE} so existing callers that never set it
- * (host code predating this concept, or a test) keep working unchanged.
+ * <p>{@code ruleSet} is one of the values the plugin itself declared via
+ * {@link SpecValidationPlugin#getRuleSets()} (or {@link
+ * SpecValidationPlugin#DEFAULT_RULE_SET} if nothing was explicitly
+ * selected) — see that method's javadoc for the full contract, including
+ * why this is a plain name rather than a typed concept. Defaults to
+ * {@code DEFAULT_RULE_SET} so existing callers that never set it (host code
+ * predating this concept, or a test) keep working unchanged.
  */
 public final class SpecInput {
 
     private final String content;
     private final SpecFormat format;
     private final String baseUri;
-    private final String validationType;
+    private final String ruleSet;
 
     private SpecInput(Builder b) {
         this.content = Objects.requireNonNull(b.content, "content must not be null");
         this.format = Objects.requireNonNull(b.format, "format must not be null");
         this.baseUri = b.baseUri;
-        this.validationType = Objects.requireNonNull(b.validationType, "validationType must not be null");
+        this.ruleSet = Objects.requireNonNull(b.ruleSet, "ruleSet must not be null");
     }
 
     public String getContent() {
@@ -55,8 +56,8 @@ public final class SpecInput {
     }
 
     /** Never null; see the class-level doc. */
-    public String getValidationType() {
-        return validationType;
+    public String getRuleSet() {
+        return ruleSet;
     }
 
     public static Builder builder() {
@@ -67,7 +68,7 @@ public final class SpecInput {
         private String content;
         private SpecFormat format;
         private String baseUri;
-        private String validationType = SpecValidationPlugin.DEFAULT_VALIDATION_TYPE;
+        private String ruleSet = SpecValidationPlugin.DEFAULT_RULE_SET;
 
         public Builder content(String content) {
             this.content = content;
@@ -84,8 +85,8 @@ public final class SpecInput {
             return this;
         }
 
-        public Builder validationType(String validationType) {
-            this.validationType = validationType;
+        public Builder ruleSet(String ruleSet) {
+            this.ruleSet = ruleSet;
             return this;
         }
 

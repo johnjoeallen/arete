@@ -63,17 +63,17 @@ public interface SpecValidationPlugin {
     int INTERFACE_VERSION = 1;
 
     /**
-     * Placeholder the host passes via {@link SpecInput#getValidationType()}
-     * when nothing has been explicitly selected for a given plugin/spec
-     * pair (e.g. every spec saved before this concept existed, or a plugin
-     * whose {@link #getValidationTypes()} never grew past the implicit
-     * single type). A plugin with more than one real validation type whose
-     * own names don't happen to include this string should treat it — or
-     * any value it doesn't recognize — as "use your own default behavior",
-     * the same way an unrecognized key in {@link #configure(Map)} would be
-     * ignored rather than rejected.
+     * Placeholder the host passes via {@link SpecInput#getRuleSet()} when
+     * nothing has been explicitly selected for a given plugin/spec pair
+     * (e.g. every spec saved before this concept existed, or a plugin whose
+     * {@link #getRuleSets()} never grew past the implicit single set). A
+     * plugin with more than one real rule set whose own names don't happen
+     * to include this string should treat it — or any value it doesn't
+     * recognize — as "use your own default behavior", the same way an
+     * unrecognized key in {@link #configure(Map)} would be ignored rather
+     * than rejected.
      */
-    String DEFAULT_VALIDATION_TYPE = "default";
+    String DEFAULT_RULE_SET = "default";
 
     /** Stable unique identifier for this plugin, e.g. {@code "zally"}. */
     String getId();
@@ -93,20 +93,28 @@ public interface SpecValidationPlugin {
     /**
      * Named rule-set variants this plugin can apply, e.g. {@code {"internal",
      * "external"}} for an organization that lints differently depending on
-     * API audience. The host surfaces these as a per-plugin choice when a
-     * spec is added (paste or load-file) and threads the selection back in
-     * via {@link SpecInput#getValidationType()} on every subsequent {@link
-     * #validate(SpecInput)} call for that spec — the choice is made once,
-     * not re-asked on every validation run.
+     * API audience. Engine-agnostic by design — Speculate isn't locked to
+     * any one linting engine's own vocabulary, so this is deliberately just
+     * a plugin-chosen name, not a typed concept. How a plugin maps that name
+     * to whatever mechanism its wrapped engine actually uses internally
+     * (e.g. a Zally-based adapter might map it to a {@code RulesPolicy}, or
+     * to a config key it happens to call "validation type" internally) is
+     * entirely up to the plugin; the SPI only ever sees the name.
      *
-     * <p>A default method returning just {@link #DEFAULT_VALIDATION_TYPE}
-     * keeps every existing single-type plugin (including zally-core)
-     * working unchanged: such plugins never have a real choice to offer, so
-     * the host shows no picker for them at all — a picker only appears once
+     * <p>The host surfaces these as a per-plugin choice when a spec is added
+     * (paste or load-file) and threads the selection back in via {@link
+     * SpecInput#getRuleSet()} on every subsequent {@link #validate(SpecInput)}
+     * call for that spec — the choice is made once, not re-asked on every
+     * validation run.
+     *
+     * <p>A default method returning just {@link #DEFAULT_RULE_SET} keeps
+     * every existing single-set plugin (including zally-core) working
+     * unchanged: such plugins never have a real choice to offer, so the
+     * host shows no picker for them at all — a picker only appears once
      * this returns more than one entry. Never null or empty.
      */
-    default Set<String> getValidationTypes() {
-        return Set.of(DEFAULT_VALIDATION_TYPE);
+    default Set<String> getRuleSets() {
+        return Set.of(DEFAULT_RULE_SET);
     }
 
     /**

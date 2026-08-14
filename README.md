@@ -140,14 +140,20 @@ Enable or disable individual plugins from **Settings**; a disabled plugin
 stays loaded but is skipped during validation, so re-enabling it doesn't
 need a restart.
 
-A plugin can declare more than one named validation type — e.g. an
-`internal`/`external` rule-set split for an organization that lints
-differently depending on API audience. When an enabled plugin has more than
-one type, Speculate shows a picker for it on both "add a spec" forms (paste
-and load-file); the choice is made once, when the spec is added, and reused
-on every later validation run for that spec, including after a watched file
-changes. A plugin with only the implicit default type (the common case —
-`zally-core` included) shows no picker at all.
+A plugin can declare more than one named rule set — e.g. an
+`internal`/`external` split for an organization that lints differently
+depending on API audience. When an enabled plugin has more than one, Speculate
+shows a picker for it on both "add a spec" forms (paste and load-file); the
+choice is made once, when the spec is added, and reused on every later
+validation run for that spec, including after a watched file changes. The
+bundled `zally-core` plugin has two — `pedantic` (report every violation)
+and `lenient` (only the `MUST`-severity ones) — as a working reference for
+what a plugin does with the name it's given; a plugin with only the
+implicit default set shows no picker at all. This is deliberately
+engine-agnostic: a rule set is just a plugin-chosen name, not a Zally- or
+any other engine-specific concept — see [Writing a custom Zally ruleset](#writing-a-custom-zally-ruleset)
+for how a Zally-based plugin in particular maps that name to its own
+internal mechanism.
 
 ### Writing your own plugin
 
@@ -279,8 +285,8 @@ replacing it.
 
 If a single ruleset needs to behave differently per audience (e.g. stricter
 checks for externally-published APIs), that's exactly what
-[`getValidationTypes()`](#custom-validation) is for: declare the types,
-read `input.getValidationType()` in `validate()`, and use it to pick a
+[`getRuleSets()`](#custom-validation) is for: declare the names, read
+`input.getRuleSet()` in `validate()`, and map whichever name comes back to a
 `RulesPolicy` — Zally's own ignore-list mechanism, already used in
 `ZallyValidationPlugin.configure()` for the `ignoreRules` key — instead of
 running every rule unconditionally.

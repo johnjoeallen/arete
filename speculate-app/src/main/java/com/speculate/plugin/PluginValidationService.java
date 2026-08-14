@@ -37,13 +37,12 @@ public class PluginValidationService {
     }
 
     /**
-     * @param pluginValidationTypes the validation type selected for each
-     *                               plugin ID, keyed the same way as {@code
-     *                               SpecEntity.getPluginValidationTypes()}
-     *                               on the caller side; a plugin with no
-     *                               entry here gets {@link SpecValidationPlugin#DEFAULT_VALIDATION_TYPE}
+     * @param pluginRuleSets the rule set selected for each plugin ID, keyed
+     *                       the same way as {@code SpecEntity.getPluginRuleSets()}
+     *                       on the caller side; a plugin with no entry here
+     *                       gets {@link SpecValidationPlugin#DEFAULT_RULE_SET}
      */
-    public AggregatedValidationResult validate(String rawSpec, Map<String, String> pluginValidationTypes) {
+    public AggregatedValidationResult validate(String rawSpec, Map<String, String> pluginRuleSets) {
         SpecFormat format = detectFormat(rawSpec);
 
         List<ValidationSummary> summaries = new ArrayList<>();
@@ -59,8 +58,8 @@ public class PluginValidationService {
             SpecInput input = SpecInput.builder()
                     .content(rawSpec)
                     .format(format)
-                    .validationType(pluginValidationTypes.getOrDefault(
-                            plugin.getId(), SpecValidationPlugin.DEFAULT_VALIDATION_TYPE))
+                    .ruleSet(pluginRuleSets.getOrDefault(
+                            plugin.getId(), SpecValidationPlugin.DEFAULT_RULE_SET))
                     .build();
             ValidationResult result = runOne(plugin, input);
             summaries.add(toSummary(plugin, result));
