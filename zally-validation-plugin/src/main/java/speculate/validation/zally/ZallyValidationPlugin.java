@@ -28,9 +28,9 @@ import java.util.Set;
  * ({@code zally-core} + the {@code zally-ruleset-zalando} ruleset) as a
  * {@link SpecValidationPlugin}. Speculate's bundled default validator — this
  * is the "core" ruleset shipped in {@code plugins/}; a separate,
- * organization-specific ruleset (e.g. a Mastercard variant) is expected to
- * be supplied and dropped into {@code ~/.speculate/plugins} independently,
- * as its own plugin jar with its own {@code getId()}.
+ * organization-specific ruleset is expected to be supplied and dropped into
+ * {@code ~/.speculate/plugins} independently, as its own plugin jar with
+ * its own {@code getId()}.
  *
  * <p>{@link RulesManager.Companion#fromClassLoader} discovers rules via a
  * {@code ServiceLoader}-style scan of {@code this::class.java.classLoader}

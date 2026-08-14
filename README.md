@@ -223,9 +223,8 @@ into `~/.speculate/plugins`.
 ### Writing a custom Zally ruleset
 
 If your organization already likes the Zally engine and just wants
-different rules — the Mastercard-supplied plugin mentioned above is exactly
-this case — you don't need to write a `SpecValidationPlugin` from scratch.
-`zally-validation-plugin` already wraps `zally-core`; the same pattern
+different rules, you don't need to write a `SpecValidationPlugin` from
+scratch. `zally-validation-plugin` already wraps `zally-core`; the same pattern
 works for a second, independent plugin jar that bundles your own rules
 instead of (or alongside) `zally-ruleset-zalando`.
 
