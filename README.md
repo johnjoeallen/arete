@@ -156,6 +156,17 @@ any other engine-specific concept — see [Writing a custom Zally ruleset](#writ
 for how a Zally-based plugin in particular maps that name to its own
 internal mechanism.
 
+`getRuleSets()` returns a `List`, not a `Set`: return them in the order
+you want them to appear in the picker (your preferred default first). This
+is deliberate rather than incidental — a `Set.of(...)` with two or more
+elements has no iteration-order guarantee at all in Java (it's randomized
+per JVM run), so an implementation that used `Set` would see its rule sets
+reshuffle in the UI on every restart. The picker itself submits a rule
+set's position in that list rather than its name, so it's the plugin's own
+returned order that determines what gets validated against a given
+selection — keep it stable across releases if you're changing a plugin's
+rule sets.
+
 ### Writing your own plugin
 
 A plugin implements [`SpecValidationPlugin`](speculate-validation-spi/src/main/java/net/dublinux/speculate/validation/spi/SpecValidationPlugin.java)

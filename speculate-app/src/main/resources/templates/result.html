@@ -41,9 +41,9 @@
                 <label for="validation-ruleset-select">Rule set</label>
                 <select id="validation-ruleset-select" name="ruleSet">
                     <th:block th:each="p : ${enabledPlugins}">
-                        <option th:each="rs : ${p.ruleSets()}" th:value="${rs}" th:text="${rs}"
+                        <option th:each="rs, rsStat : ${p.ruleSets()}" th:value="${rsStat.index}" th:text="${rs}"
                                 th:attr="data-plugin-id=${p.pluginId()}"
-                                th:selected="${selectedPluginId != null and selectedPluginId == p.pluginId() and selectedRuleSet != null and selectedRuleSet == rs}"></option>
+                                th:selected="${selectedPluginId != null and selectedPluginId == p.pluginId() and selectedRuleSet != null and selectedRuleSet == '' + rsStat.index}"></option>
                     </th:block>
                 </select>
             </div>

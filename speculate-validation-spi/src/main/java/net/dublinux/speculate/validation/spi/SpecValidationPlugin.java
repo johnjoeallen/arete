@@ -1,5 +1,6 @@
 package net.dublinux.speculate.validation.spi;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -91,8 +92,8 @@ public interface SpecValidationPlugin {
     Set<SpecFormat> getSupportedFormats();
 
     /**
-     * Named rule-set variants this plugin can apply, e.g. {@code {"internal",
-     * "external"}} for an organization that lints differently depending on
+     * Named rule-set variants this plugin can apply, e.g. {@code ["internal",
+     * "external"]} for an organization that lints differently depending on
      * API audience. Engine-agnostic by design — Speculate isn't locked to
      * any one linting engine's own vocabulary, so this is deliberately just
      * a plugin-chosen name, not a typed concept. How a plugin maps that name
@@ -100,6 +101,14 @@ public interface SpecValidationPlugin {
      * (e.g. a Zally-based adapter might map it to a {@code RulesPolicy}, or
      * to a config key it happens to call "validation type" internally) is
      * entirely up to the plugin; the SPI only ever sees the name.
+     *
+     * <p>A {@code List}, not a {@code Set}: the host displays these in the
+     * exact order returned, so the order is significant and belongs to the
+     * plugin (put your preferred default first). This deliberately isn't a
+     * {@code Set} — {@link Set#of} in particular gives no iteration-order
+     * guarantee at all for two or more elements (it's randomized per JVM
+     * run), which would make the picker's option order shuffle on every
+     * restart.
      *
      * <p>The host surfaces these as a picker on the spec's view page —
      * choose a plugin, choose one of its rule sets, click Analyse — and
@@ -113,10 +122,11 @@ public interface SpecValidationPlugin {
      * every existing single-set plugin (including zally-core) working
      * unchanged: such plugins never have a real choice to offer, so the
      * host shows no picker for them at all — a picker only appears once
-     * this returns more than one entry. Never null or empty.
+     * this returns more than one entry. Never null or empty; no duplicate
+     * entries.
      */
-    default Set<String> getRuleSets() {
-        return Set.of(DEFAULT_RULE_SET);
+    default List<String> getRuleSets() {
+        return List.of(DEFAULT_RULE_SET);
     }
 
     /**

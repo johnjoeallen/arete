@@ -90,10 +90,11 @@ public final class ZallyValidationPlugin implements SpecValidationPlugin {
 
     /**
      * Two rule sets, both running every discovered rule — they differ only
-     * in which severities get reported. This is the reference example for
-     * {@link #getRuleSets()}: the SPI-facing name ({@code "Relaxed"}) has no
-     * meaning to Zally at all, it's purely this adapter's own choice of how
-     * to map it onto a mechanism Zally does understand (here, filtering
+     * in which severities get reported. Listed strictest first, since
+     * {@link #getRuleSets()} is display order. This is the reference
+     * example for that method: the SPI-facing name ({@code "Relaxed"}) has
+     * no meaning to Zally at all, it's purely this adapter's own choice of
+     * how to map it onto a mechanism Zally does understand (here, filtering
      * {@link Result#getViolationType()} after the fact; a different plugin
      * might instead map rule-set names onto a {@link RulesPolicy} ignore
      * list, or something else entirely).
@@ -102,8 +103,8 @@ public final class ZallyValidationPlugin implements SpecValidationPlugin {
     private static final String RULE_SET_RELAXED = "Relaxed";
 
     @Override
-    public Set<String> getRuleSets() {
-        return Set.of(RULE_SET_STRICT, RULE_SET_RELAXED);
+    public List<String> getRuleSets() {
+        return List.of(RULE_SET_STRICT, RULE_SET_RELAXED);
     }
 
     /**

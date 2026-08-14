@@ -41,7 +41,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TreeSet;
 
 @Controller
 public class SpecController {
@@ -138,6 +137,9 @@ public class SpecController {
      * {@link PluginValidationService} — so {@code pluginId}/{@code ruleSet}
      * are absent on a plain open (nothing runs, just the picker/Refresh
      * control shows) and present when the Refresh form resubmits here.
+     *
+     * <p>{@code ruleSet} is the rule set's <em>position</em> in the picker
+     * (e.g. {@code "0"}), not its name — see {@link #resolveRuleSet}.
      */
     @GetMapping("/spec/{id}")
     public String open(@PathVariable Long id, @RequestParam(required = false) String q,
@@ -157,7 +159,7 @@ public class SpecController {
         model.addAttribute("selectedRuleSet", ruleSet);
         if (pluginId != null && !pluginId.isBlank()) {
             AggregatedValidationResult validation =
-                    pluginValidationService.validateOne(entity.getRawContent(), pluginId, ruleSet);
+                    pluginValidationService.validateOne(entity.getRawContent(), pluginId, resolveRuleSet(pluginId, ruleSet));
             model.addAttribute("validation", validation);
             model.addAttribute("endpointFindings", EndpointFindings.byEndpoint(validation.violations()));
             model.addAttribute("schemaFindings", SchemaFindings.bySchema(validation.violations()));
@@ -283,14 +285,52 @@ public class SpecController {
         return choices;
     }
 
-    /** Defensive: a plugin is untrusted, dynamically loaded code, same as every other call into it (see PluginRegistry, PluginValidationService). */
+    /**
+     * Defensive: a plugin is untrusted, dynamically loaded code, same as
+     * every other call into it (see PluginRegistry, PluginValidationService).
+     * Preserves the plugin's own declared order — see {@link
+     * SpecValidationPlugin#getRuleSets()} — rather than re-sorting it, since
+     * that order is what the picker displays and what {@link
+     * #resolveRuleSet} indexes into.
+     */
     private List<String> safeRuleSets(SpecValidationPlugin plugin) {
         try {
-            return List.copyOf(new TreeSet<>(plugin.getRuleSets()));
+            return List.copyOf(plugin.getRuleSets());
         } catch (Throwable t) {
             log.warn("Validation plugin '{}' threw from getRuleSets(): {}", plugin.getId(), t.toString());
             return List.of(SpecValidationPlugin.DEFAULT_RULE_SET);
         }
+    }
+
+    /**
+     * The rule-set picker on the spec view page submits a position in
+     * {@code plugin.getRuleSets()} (e.g. {@code "0"}) rather than the rule
+     * set's name, so results stay correct even if a plugin's declared
+     * rule-set names contain characters that would need care in a URL.
+     * Falls back to {@link
+     * SpecValidationPlugin#DEFAULT_RULE_SET} for anything that doesn't
+     * resolve: an absent/unknown plugin, a non-numeric or out-of-range
+     * index — the same "use your own default" fallback {@link
+     * SpecValidationPlugin#DEFAULT_RULE_SET}'s own javadoc describes for an
+     * unrecognized rule set.
+     */
+    private String resolveRuleSet(String pluginId, String ruleSetIndex) {
+        if (ruleSetIndex == null || ruleSetIndex.isBlank()) {
+            return SpecValidationPlugin.DEFAULT_RULE_SET;
+        }
+        int index;
+        try {
+            index = Integer.parseInt(ruleSetIndex.trim());
+        } catch (NumberFormatException e) {
+            return SpecValidationPlugin.DEFAULT_RULE_SET;
+        }
+        for (SpecValidationPlugin plugin : pluginRegistry.getPlugins()) {
+            if (plugin.getId().equals(pluginId) && pluginSettingsService.isEnabled(plugin.getId())) {
+                List<String> ruleSets = safeRuleSets(plugin);
+                return index >= 0 && index < ruleSets.size() ? ruleSets.get(index) : SpecValidationPlugin.DEFAULT_RULE_SET;
+            }
+        }
+        return SpecValidationPlugin.DEFAULT_RULE_SET;
     }
 
 }
