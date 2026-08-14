@@ -102,11 +102,11 @@ public interface SpecValidationPlugin {
      * entirely up to the plugin; the SPI only ever sees the name.
      *
      * <p>The host surfaces these as a picker on the spec's view page —
-     * choose a plugin, choose one of its rule sets, hit Refresh — and
+     * choose a plugin, choose one of its rule sets, click Analyse — and
      * threads the selection through via {@link SpecInput#getRuleSet()} for
      * that one on-demand {@link #validate(SpecInput)} call. Validation is
      * never automatic or persisted between runs: nothing runs until the
-     * user explicitly picks a plugin and rule set and clicks Refresh, and
+     * user explicitly picks a plugin and rule set and clicks Analyse, and
      * every click is a fresh choice.
      *
      * <p>A default method returning just {@link #DEFAULT_RULE_SET} keeps
