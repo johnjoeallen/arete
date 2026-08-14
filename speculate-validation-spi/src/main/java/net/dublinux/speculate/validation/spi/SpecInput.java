@@ -19,17 +19,26 @@ import java.util.Objects;
  *
  * <p>{@code baseUri} is optional and used by plugins that need to resolve
  * relative {@code $ref}s or want a filename for reporting purposes.
+ *
+ * <p>{@code validationType} is one of the values the plugin itself declared
+ * via {@link SpecValidationPlugin#getValidationTypes()} (or {@link
+ * SpecValidationPlugin#DEFAULT_VALIDATION_TYPE} if nothing was explicitly
+ * selected) — see that method's javadoc for the full contract. Defaults to
+ * {@code DEFAULT_VALIDATION_TYPE} so existing callers that never set it
+ * (host code predating this concept, or a test) keep working unchanged.
  */
 public final class SpecInput {
 
     private final String content;
     private final SpecFormat format;
     private final String baseUri;
+    private final String validationType;
 
     private SpecInput(Builder b) {
         this.content = Objects.requireNonNull(b.content, "content must not be null");
         this.format = Objects.requireNonNull(b.format, "format must not be null");
         this.baseUri = b.baseUri;
+        this.validationType = Objects.requireNonNull(b.validationType, "validationType must not be null");
     }
 
     public String getContent() {
@@ -45,6 +54,11 @@ public final class SpecInput {
         return baseUri;
     }
 
+    /** Never null; see the class-level doc. */
+    public String getValidationType() {
+        return validationType;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -53,6 +67,7 @@ public final class SpecInput {
         private String content;
         private SpecFormat format;
         private String baseUri;
+        private String validationType = SpecValidationPlugin.DEFAULT_VALIDATION_TYPE;
 
         public Builder content(String content) {
             this.content = content;
@@ -66,6 +81,11 @@ public final class SpecInput {
 
         public Builder baseUri(String baseUri) {
             this.baseUri = baseUri;
+            return this;
+        }
+
+        public Builder validationType(String validationType) {
+            this.validationType = validationType;
             return this;
         }
 

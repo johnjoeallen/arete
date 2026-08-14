@@ -62,6 +62,19 @@ public interface SpecValidationPlugin {
      */
     int INTERFACE_VERSION = 1;
 
+    /**
+     * Placeholder the host passes via {@link SpecInput#getValidationType()}
+     * when nothing has been explicitly selected for a given plugin/spec
+     * pair (e.g. every spec saved before this concept existed, or a plugin
+     * whose {@link #getValidationTypes()} never grew past the implicit
+     * single type). A plugin with more than one real validation type whose
+     * own names don't happen to include this string should treat it — or
+     * any value it doesn't recognize — as "use your own default behavior",
+     * the same way an unrecognized key in {@link #configure(Map)} would be
+     * ignored rather than rejected.
+     */
+    String DEFAULT_VALIDATION_TYPE = "default";
+
     /** Stable unique identifier for this plugin, e.g. {@code "zally"}. */
     String getId();
 
@@ -76,6 +89,25 @@ public interface SpecValidationPlugin {
 
     /** Which spec dialects this plugin can validate. Never null or empty. */
     Set<SpecFormat> getSupportedFormats();
+
+    /**
+     * Named rule-set variants this plugin can apply, e.g. {@code {"internal",
+     * "external"}} for an organization that lints differently depending on
+     * API audience. The host surfaces these as a per-plugin choice when a
+     * spec is added (paste or load-file) and threads the selection back in
+     * via {@link SpecInput#getValidationType()} on every subsequent {@link
+     * #validate(SpecInput)} call for that spec — the choice is made once,
+     * not re-asked on every validation run.
+     *
+     * <p>A default method returning just {@link #DEFAULT_VALIDATION_TYPE}
+     * keeps every existing single-type plugin (including zally-core)
+     * working unchanged: such plugins never have a real choice to offer, so
+     * the host shows no picker for them at all — a picker only appears once
+     * this returns more than one entry. Never null or empty.
+     */
+    default Set<String> getValidationTypes() {
+        return Set.of(DEFAULT_VALIDATION_TYPE);
+    }
 
     /**
      * Open question #6: a default method rather than a required one, so

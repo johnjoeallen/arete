@@ -11,6 +11,7 @@ import net.dublinux.speculate.validation.spi.Violation;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Runs every <em>enabled</em> {@link SpecValidationPlugin} against a raw
@@ -32,10 +33,18 @@ public class PluginValidationService {
     }
 
     public AggregatedValidationResult validate(String rawSpec) {
-        SpecInput input = SpecInput.builder()
-                .content(rawSpec)
-                .format(detectFormat(rawSpec))
-                .build();
+        return validate(rawSpec, Map.of());
+    }
+
+    /**
+     * @param pluginValidationTypes the validation type selected for each
+     *                               plugin ID, keyed the same way as {@code
+     *                               SpecEntity.getPluginValidationTypes()}
+     *                               on the caller side; a plugin with no
+     *                               entry here gets {@link SpecValidationPlugin#DEFAULT_VALIDATION_TYPE}
+     */
+    public AggregatedValidationResult validate(String rawSpec, Map<String, String> pluginValidationTypes) {
+        SpecFormat format = detectFormat(rawSpec);
 
         List<ValidationSummary> summaries = new ArrayList<>();
         List<AttributedViolation> violations = new ArrayList<>();
@@ -47,6 +56,12 @@ public class PluginValidationService {
                 continue;
             }
 
+            SpecInput input = SpecInput.builder()
+                    .content(rawSpec)
+                    .format(format)
+                    .validationType(pluginValidationTypes.getOrDefault(
+                            plugin.getId(), SpecValidationPlugin.DEFAULT_VALIDATION_TYPE))
+                    .build();
             ValidationResult result = runOne(plugin, input);
             summaries.add(toSummary(plugin, result));
 

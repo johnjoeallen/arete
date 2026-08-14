@@ -12,6 +12,7 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.HexFormat;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -26,6 +27,12 @@ public class SpecStorageService {
     /** Saves pasted spec text. Clears any prior file association — a paste replaces a file link, it doesn't layer on it. */
     @Transactional
     public SpecEntity saveOrReplace(String title, String rawContent) {
+        return saveOrReplace(title, rawContent, Map.of());
+    }
+
+    /** As {@link #saveOrReplace(String, String)}, additionally setting the per-plugin validation type selection made when the spec was added. */
+    @Transactional
+    public SpecEntity saveOrReplace(String title, String rawContent, Map<String, String> pluginValidationTypes) {
         SpecEntity entity = repository.findByTitle(title).orElseGet(SpecEntity::new);
         entity.setTitle(title);
         entity.setRawContent(rawContent);
@@ -33,6 +40,7 @@ public class SpecStorageService {
         entity.setSource(SpecSource.PASTED);
         entity.setFilePath(null);
         entity.setContentHash(null);
+        entity.setPluginValidationTypes(pluginValidationTypes);
         return repository.save(entity);
     }
 
@@ -45,6 +53,12 @@ public class SpecStorageService {
      */
     @Transactional
     public SpecEntity saveOrReplaceFromFile(String title, String rawContent, String filePath) {
+        return saveOrReplaceFromFile(title, rawContent, filePath, Map.of());
+    }
+
+    /** As {@link #saveOrReplaceFromFile(String, String, String)}, additionally setting the per-plugin validation type selection made when the spec was added. */
+    @Transactional
+    public SpecEntity saveOrReplaceFromFile(String title, String rawContent, String filePath, Map<String, String> pluginValidationTypes) {
         SpecEntity entity = repository.findByTitle(title).orElseGet(SpecEntity::new);
         entity.setTitle(title);
         entity.setRawContent(rawContent);
@@ -52,6 +66,7 @@ public class SpecStorageService {
         entity.setSource(SpecSource.FILE);
         entity.setFilePath(filePath);
         entity.setContentHash(sha256Hex(rawContent));
+        entity.setPluginValidationTypes(pluginValidationTypes);
         return repository.save(entity);
     }
 

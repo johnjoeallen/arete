@@ -140,6 +140,15 @@ Enable or disable individual plugins from **Settings**; a disabled plugin
 stays loaded but is skipped during validation, so re-enabling it doesn't
 need a restart.
 
+A plugin can declare more than one named validation type — e.g. an
+`internal`/`external` rule-set split for an organization that lints
+differently depending on API audience. When an enabled plugin has more than
+one type, Speculate shows a picker for it on both "add a spec" forms (paste
+and load-file); the choice is made once, when the spec is added, and reused
+on every later validation run for that spec, including after a watched file
+changes. A plugin with only the implicit default type (the common case —
+`zally-core` included) shows no picker at all.
+
 ### Writing your own plugin
 
 A plugin implements [`SpecValidationPlugin`](speculate-validation-spi/src/main/java/net/dublinux/speculate/validation/spi/SpecValidationPlugin.java)

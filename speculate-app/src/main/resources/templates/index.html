@@ -29,12 +29,21 @@
                 <input type="text" name="filePath" id="load-file-path" placeholder="/absolute/path/to/spec.yaml">
                 <button type="submit">Load &amp; watch</button>
             </div>
+            <div th:if="${!pluginValidationTypeChoices.isEmpty()}" class="validation-type-choices" th:fragment="validationTypeChoices">
+                <div th:each="choice : ${pluginValidationTypeChoices}" class="validation-type-choice">
+                    <label th:for="${'validationType_' + choice.pluginId()}" th:text="${choice.pluginName()} + ' validation type'">Plugin validation type</label>
+                    <select th:id="${'validationType_' + choice.pluginId()}" th:name="${'validationType_' + choice.pluginId()}">
+                        <option th:each="type : ${choice.validationTypes()}" th:value="${type}" th:text="${type}">type</option>
+                    </select>
+                </div>
+            </div>
         </form>
 
         <p class="paste-divider">or paste an OpenAPI/Swagger definition (JSON or YAML) below</p>
         <form method="post" action="/api/paste">
             <textarea name="specText" rows="20" cols="100" placeholder="Paste your OpenAPI/Swagger spec here..."></textarea>
             <br>
+            <div th:replace="~{::validationTypeChoices}"></div>
             <button type="submit">Submit</button>
         </form>
     </div>

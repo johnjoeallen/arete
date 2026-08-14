@@ -168,6 +168,11 @@ a:hover { color: var(--link-hover); }
 
 .paste-divider { color: var(--muted-fg); font-size: 0.9em; margin: 1.5em 0 0.8em; }
 
+.validation-type-choices { display: flex; flex-wrap: wrap; gap: 1em; margin-top: 0.6em; }
+.validation-type-choice { display: flex; flex-direction: column; gap: 0.25em; font-size: 0.9em; }
+.validation-type-choice label { color: var(--muted-fg); }
+.validation-type-choice select { padding: 0.35em 0.5em; background: var(--bg); color: var(--fg); border: 1px solid var(--border); border-radius: 4px; }
+
 .tag-group { margin-bottom: 2em; }
 .tag-group-header { display: flex; align-items: center; justify-content: space-between; gap: 1em; }
 .tag-group-name { margin: 0; }

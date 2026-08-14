@@ -2,6 +2,8 @@ package com.speculate.web;
 
 import com.speculate.domain.SpecEntity;
 import com.speculate.plugin.AggregatedValidationResult;
+import com.speculate.plugin.PluginRegistry;
+import com.speculate.plugin.PluginSettingsService;
 import com.speculate.plugin.PluginValidationService;
 import com.speculate.service.ParsedSpec;
 import com.speculate.service.SpecFileWatcher;
@@ -19,6 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -48,6 +51,12 @@ class SpecControllerLoadFileTest {
     @MockitoBean
     private SpecFileWatcher specFileWatcher;
 
+    @MockitoBean
+    private PluginRegistry pluginRegistry;
+
+    @MockitoBean
+    private PluginSettingsService pluginSettingsService;
+
     @Test
     void loadingAFileFromAConfirmedAbsolutePathReadsItAndSavesItAsFileSourced(@TempDir Path tempDir) throws Exception {
         Path specFile = tempDir.resolve("spec.yaml");
@@ -60,10 +69,11 @@ class SpecControllerLoadFileTest {
         saved.setId(1L);
         saved.setTitle("Loaded API");
         saved.setFilePath(specFile.toString());
-        when(specStorageService.saveOrReplaceFromFile(eq("Loaded API"), eq("openapi: 3.0.0"), eq(specFile.toString())))
+        when(specStorageService.saveOrReplaceFromFile(
+                eq("Loaded API"), eq("openapi: 3.0.0"), eq(specFile.toString()), eq(Map.of())))
                 .thenReturn(saved);
         when(specStorageService.findAll()).thenReturn(List.of());
-        when(pluginValidationService.validate(anyString()))
+        when(pluginValidationService.validate(anyString(), any()))
                 .thenReturn(new AggregatedValidationResult(List.of(), List.of(), -1));
 
         mockMvc.perform(post("/api/load-file").param("filePath", specFile.toString()))
@@ -71,7 +81,8 @@ class SpecControllerLoadFileTest {
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Loaded from")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString(specFile.toString())));
 
-        verify(specStorageService).saveOrReplaceFromFile(eq("Loaded API"), eq("openapi: 3.0.0"), eq(specFile.toString()));
+        verify(specStorageService).saveOrReplaceFromFile(
+                eq("Loaded API"), eq("openapi: 3.0.0"), eq(specFile.toString()), eq(Map.of()));
         verify(specFileWatcher).watch(eq(specFile));
     }
 
@@ -83,7 +94,7 @@ class SpecControllerLoadFileTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("file path is required")));
 
-        verify(specStorageService, never()).saveOrReplaceFromFile(anyString(), anyString(), anyString());
+        verify(specStorageService, never()).saveOrReplaceFromFile(anyString(), anyString(), anyString(), any());
         verify(specParserService, never()).parse(any());
         verify(specFileWatcher, never()).watch(any());
     }
@@ -96,7 +107,7 @@ class SpecControllerLoadFileTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("a full path")));
 
-        verify(specStorageService, never()).saveOrReplaceFromFile(anyString(), anyString(), anyString());
+        verify(specStorageService, never()).saveOrReplaceFromFile(anyString(), anyString(), anyString(), any());
         verify(specParserService, never()).parse(any());
         verify(specFileWatcher, never()).watch(any());
     }
@@ -110,7 +121,7 @@ class SpecControllerLoadFileTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Couldn")));
 
-        verify(specStorageService, never()).saveOrReplaceFromFile(anyString(), anyString(), anyString());
+        verify(specStorageService, never()).saveOrReplaceFromFile(anyString(), anyString(), anyString(), any());
         verify(specParserService, never()).parse(any());
         verify(specFileWatcher, never()).watch(any());
     }
