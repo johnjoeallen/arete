@@ -23,6 +23,11 @@
                     <span class="severity-badge"
                           th:classappend="'severity-' + ${#strings.toLowerCase(av.violation().getSeverity())}"
                           th:text="${severityLabels != null ? severityLabels.get(av.violation().getSeverity().name()) : av.violation().getSeverity()}"></span>
+                    <span th:if="${!T(java.lang.Double).isNaN(av.violation().getScoreImprovement())}"
+                          class="score-improvement-badge"
+                          th:classappend="${av.violation().getScoreImprovement() < 0} ? 'score-improvement-negative' : 'score-improvement-positive'"
+                          th:text="${(av.violation().getScoreImprovement() >= 0 ? '+' : '') + #numbers.formatDecimal(av.violation().getScoreImprovement(), 1, 1) + ' pts'}"
+                          th:title="'Score impact of resolving this rule'"></span>
                 </td>
                 <td><code th:text="${av.violation().getRuleId()}"></code></td>
                 <td>

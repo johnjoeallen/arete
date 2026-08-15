@@ -259,6 +259,7 @@ th { background: var(--surface); font-family: var(--font-heading); font-weight: 
 .validation-picker-wrapper h2 { margin-bottom: 0.5em; }
 .validation-results { margin-bottom: 1.5em; }
 .validation-summary-line { color: var(--muted-fg); margin-top: 0; }
+.validation-score-line { font-weight: 600; }
 .plugin-outcomes { list-style: none; padding: 0; margin: 0 0 0.8em; font-size: 0.92em; }
 .plugin-outcomes .plugin-error { color: var(--danger); }
 
@@ -282,6 +283,9 @@ table.endpoint-findings { width: 100%; }
 .violation-description { color: var(--muted-fg); font-size: 0.88em; margin-top: 0.2em; }
 .violation-doc-link { display: inline-block; margin-top: 0.3em; font-size: 0.88em; color: var(--link); }
 .violation-source { color: var(--muted-fg); font-size: 0.88em; }
+.score-improvement-badge { display: inline-block; margin-left: 0.4em; padding: 0.1em 0.5em; border-radius: 999px; font-size: 0.78em; font-weight: 700; white-space: nowrap; color: #fff; }
+.score-improvement-positive { background: var(--success); }
+.score-improvement-negative { background: var(--danger); }
 
 .schema-toggle-btn { background: none; border: none; cursor: pointer; padding: 0 0.2em; font-size: 0.85em; color: var(--muted-fg); }
 .schema-toggle-content.collapsed { display: none; }

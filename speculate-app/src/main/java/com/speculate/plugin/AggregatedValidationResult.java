@@ -21,7 +21,9 @@ import java.util.List;
 public record AggregatedValidationResult(
         List<ValidationSummary> pluginSummaries,
         List<AttributedViolation> violations,
-        int rulesEvaluatedCount) {
+        int rulesEvaluatedCount,
+        double overallScore,
+        double overallScoreWithoutBlockers) {
 
     public boolean isEmpty() {
         return pluginSummaries.isEmpty();

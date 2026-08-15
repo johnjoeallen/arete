@@ -46,7 +46,7 @@ public class PluginValidationService {
     public AggregatedValidationResult validateOne(String rawSpec, String pluginId, String ruleSet) {
         SpecValidationPlugin plugin = findEnabled(pluginId);
         if (plugin == null) {
-            return new AggregatedValidationResult(List.of(), List.of(), -1);
+            return new AggregatedValidationResult(List.of(), List.of(), -1, Double.NaN, Double.NaN);
         }
 
         SpecInput input = SpecInput.builder()
@@ -59,14 +59,19 @@ public class PluginValidationService {
 
         List<AttributedViolation> violations = new ArrayList<>();
         int rulesEvaluatedCount = -1;
+        double overallScore = Double.NaN;
+        double overallScoreWithoutBlockers = Double.NaN;
         if (result.getStatus() == ValidationResult.Status.SUCCESS) {
             for (Violation violation : result.getViolations()) {
                 violations.add(new AttributedViolation(plugin.getId(), plugin.getName(), violation));
             }
             rulesEvaluatedCount = result.getRulesEvaluatedCount();
+            overallScore = result.getOverallScore();
+            overallScoreWithoutBlockers = result.getOverallScoreWithoutBlockers();
         }
 
-        return new AggregatedValidationResult(List.of(summary), violations, rulesEvaluatedCount);
+        return new AggregatedValidationResult(
+                List.of(summary), violations, rulesEvaluatedCount, overallScore, overallScoreWithoutBlockers);
     }
 
     private SpecValidationPlugin findEnabled(String pluginId) {

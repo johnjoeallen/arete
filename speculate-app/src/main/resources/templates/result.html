@@ -81,6 +81,11 @@
     <div th:if="${validation != null and !validation.isEmpty()}" class="validation-results">
         <p th:if="${validation.rulesEvaluatedCount() >= 0}" class="validation-summary-line"
            th:text="${validation.rulesEvaluatedCount()} + ' rule(s) checked across ' + ${validation.pluginSummaries().size()} + ' validator(s).'"></p>
+        <p th:if="${!T(java.lang.Double).isNaN(validation.overallScore())}" class="validation-summary-line validation-score-line">
+            Score: <span th:text="${#numbers.formatDecimal(validation.overallScore(), 1, 1)}"></span>/100
+            <span th:if="${!T(java.lang.Double).isNaN(validation.overallScoreWithoutBlockers())}"
+                  th:text="'(' + ${#numbers.formatDecimal(validation.overallScoreWithoutBlockers(), 1, 1)} + '/100 without blockers)'"></span>
+        </p>
         <ul class="plugin-outcomes">
             <li th:each="s : ${validation.pluginSummaries()}">
                 <span th:text="${s.pluginName()}"></span>:
