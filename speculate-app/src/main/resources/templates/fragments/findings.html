@@ -18,7 +18,7 @@
             <tr><th>Severity</th><th>Rule</th><th>Finding</th><th>Location</th><th>Source</th></tr>
         </thead>
         <tbody>
-            <tr th:each="av : ${findings.violations()}">
+            <tr th:each="av : ${findings.violations()}" th:attr="data-severity=${av.violation().getSeverity()}">
                 <td>
                     <span class="severity-badge"
                           th:classappend="'severity-' + ${#strings.toLowerCase(av.violation().getSeverity())}"

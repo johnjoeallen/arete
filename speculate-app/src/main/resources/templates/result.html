@@ -88,10 +88,32 @@
                 <span th:unless="${s.status() == 'SUCCESS'}" class="plugin-error" th:text="${s.status()} + ' - ' + ${s.errorMessage()}"></span>
             </li>
         </ul>
-        <label class="hide-compliant-toggle">
-            <input type="checkbox" id="hide-compliant-checkbox">
-            Hide compliant
-        </label>
+        <div class="severity-filter">
+            <label class="severity-filter-item severity-filter-item-all">
+                <input type="checkbox" class="severity-filter-all" checked>
+                All
+            </label>
+            <label class="severity-filter-item">
+                <input type="checkbox" class="severity-filter-value" value="ERROR" checked>
+                Must
+            </label>
+            <label class="severity-filter-item">
+                <input type="checkbox" class="severity-filter-value" value="WARNING" checked>
+                Should
+            </label>
+            <label class="severity-filter-item">
+                <input type="checkbox" class="severity-filter-value" value="INFO" checked>
+                May
+            </label>
+            <label class="severity-filter-item">
+                <input type="checkbox" class="severity-filter-value" value="HINT" checked>
+                Hint
+            </label>
+            <label class="severity-filter-item">
+                <input type="checkbox" class="severity-filter-value" value="COMPLIANT" checked>
+                Compliant
+            </label>
+        </div>
     </div>
 
     <div th:if="${openApi == null}">

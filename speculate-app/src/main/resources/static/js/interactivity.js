@@ -71,20 +71,67 @@
         });
     });
 
-    // "Hide compliant" filter: hides any .endpoint card (an operation, a
-    // schema, a request body, a response) with data-has-findings="false"
-    // once checked. State persists across page loads the same way the
-    // theme toggle does.
-    var hideCompliantCheckbox = document.getElementById('hide-compliant-checkbox');
-    if (hideCompliantCheckbox) {
-        var HIDE_COMPLIANT_STORAGE_KEY = 'speculate:hide-compliant';
-        var hideCompliant = localStorage.getItem(HIDE_COMPLIANT_STORAGE_KEY) === 'true';
-        hideCompliantCheckbox.checked = hideCompliant;
-        document.body.classList.toggle('hide-compliant', hideCompliant);
-        hideCompliantCheckbox.addEventListener('change', function () {
-            document.body.classList.toggle('hide-compliant', hideCompliantCheckbox.checked);
-            localStorage.setItem(HIDE_COMPLIANT_STORAGE_KEY, String(hideCompliantCheckbox.checked));
+    // Severity filter: each finding row carries data-severity (ERROR/WARNING/
+    // INFO/HINT); each .endpoint card (an operation, a schema, a request
+    // body, a response) carries data-has-findings. A row shows only if its
+    // severity is checked; a card shows if it has a visible row, or — for a
+    // card with no findings at all — if "Compliant" is checked. Rows outside
+    // any .endpoint card (the General tab's flat list) are filtered the same
+    // way, just with no card to hide. State persists the same way the theme
+    // toggle does.
+    var severityFilter = document.querySelector('.severity-filter');
+    if (severityFilter) {
+        var SEVERITY_FILTER_STORAGE_KEY = 'speculate:severity-filter';
+        var allCheckbox = severityFilter.querySelector('.severity-filter-all');
+        var valueCheckboxes = Array.prototype.slice.call(severityFilter.querySelectorAll('.severity-filter-value'));
+
+        var saved = null;
+        try {
+            saved = JSON.parse(localStorage.getItem(SEVERITY_FILTER_STORAGE_KEY));
+        } catch (e) {
+            saved = null;
+        }
+        if (Array.isArray(saved)) {
+            valueCheckboxes.forEach(function (cb) {
+                cb.checked = saved.indexOf(cb.value) !== -1;
+            });
+            allCheckbox.checked = valueCheckboxes.every(function (cb) { return cb.checked; });
+        }
+
+        function applyFilter() {
+            var active = valueCheckboxes.filter(function (cb) { return cb.checked; }).map(function (cb) { return cb.value; });
+
+            document.querySelectorAll('.endpoint-findings tbody tr[data-severity]').forEach(function (row) {
+                row.style.display = active.indexOf(row.getAttribute('data-severity')) === -1 ? 'none' : '';
+            });
+
+            document.querySelectorAll('.endpoint').forEach(function (card) {
+                if (card.getAttribute('data-has-findings') === 'false') {
+                    card.style.display = active.indexOf('COMPLIANT') === -1 ? 'none' : '';
+                    return;
+                }
+                var anyRowVisible = Array.prototype.some.call(
+                    card.querySelectorAll('.endpoint-findings tbody tr[data-severity]'),
+                    function (row) { return row.style.display !== 'none'; }
+                );
+                card.style.display = anyRowVisible ? '' : 'none';
+            });
+
+            localStorage.setItem(SEVERITY_FILTER_STORAGE_KEY, JSON.stringify(active));
+        }
+
+        allCheckbox.addEventListener('change', function () {
+            valueCheckboxes.forEach(function (cb) { cb.checked = allCheckbox.checked; });
+            applyFilter();
         });
+        valueCheckboxes.forEach(function (cb) {
+            cb.addEventListener('change', function () {
+                allCheckbox.checked = valueCheckboxes.every(function (c) { return c.checked; });
+                applyFilter();
+            });
+        });
+
+        applyFilter();
     }
 
     // Toggling nested schema details (object properties / array items).
