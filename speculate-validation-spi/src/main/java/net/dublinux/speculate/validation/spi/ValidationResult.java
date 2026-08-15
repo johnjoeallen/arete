@@ -46,12 +46,16 @@ public final class ValidationResult {
     private final List<Violation> violations;
     private final String errorMessage;
     private final int rulesEvaluatedCount;
+    private final double overallScore;
+    private final double overallScoreWithoutBlockers;
 
     private ValidationResult(Builder b) {
         this.status = Objects.requireNonNull(b.status, "status must not be null");
         this.violations = b.violations == null ? Collections.emptyList() : List.copyOf(b.violations);
         this.errorMessage = b.errorMessage;
         this.rulesEvaluatedCount = b.rulesEvaluatedCount;
+        this.overallScore = b.overallScore;
+        this.overallScoreWithoutBlockers = b.overallScoreWithoutBlockers;
     }
 
     public Status getStatus() {
@@ -83,6 +87,35 @@ public final class ValidationResult {
         return rulesEvaluatedCount;
     }
 
+    /**
+     * Overall compliance score for the validated spec, 0–100, or {@link
+     * Double#NaN} if this engine has no scoring concept (or the plugin jar
+     * predates this field — it defaults to {@code NaN} in {@link Builder}).
+     * A new, standalone, optional concept: not every linter can reduce a
+     * spec's violations to a single number, and this SPI doesn't require
+     * one to. Callers must check {@link Double#isNaN(double)} rather than
+     * treating {@code 0} as "no score" — a spec that's genuinely scored at
+     * zero is a real, valid value distinct from "not computed".
+     *
+     * @see #getOverallScoreWithoutBlockers()
+     * @see Violation#getScoreImprovement()
+     */
+    public double getOverallScore() {
+        return overallScore;
+    }
+
+    /**
+     * {@link #getOverallScore()} recomputed as though every blocker-severity
+     * ({@link Severity#ERROR}) violation were already resolved, all other
+     * violations held constant — for a plugin whose scoring model
+     * distinguishes "how compliant is this spec today" from "how compliant
+     * could it be once the must-fix items are gone". Same {@link
+     * Double#NaN} "not computed" convention as {@link #getOverallScore()}.
+     */
+    public double getOverallScoreWithoutBlockers() {
+        return overallScoreWithoutBlockers;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -108,6 +141,8 @@ public final class ValidationResult {
         private List<Violation> violations;
         private String errorMessage;
         private int rulesEvaluatedCount = -1;
+        private double overallScore = Double.NaN;
+        private double overallScoreWithoutBlockers = Double.NaN;
 
         public Builder status(Status status) {
             this.status = status;
@@ -126,6 +161,18 @@ public final class ValidationResult {
 
         public Builder rulesEvaluatedCount(int rulesEvaluatedCount) {
             this.rulesEvaluatedCount = rulesEvaluatedCount;
+            return this;
+        }
+
+        /** See {@link ValidationResult#getOverallScore()}. Defaults to {@link Double#NaN} ("not computed") if never called. */
+        public Builder overallScore(double overallScore) {
+            this.overallScore = overallScore;
+            return this;
+        }
+
+        /** See {@link ValidationResult#getOverallScoreWithoutBlockers()}. Defaults to {@link Double#NaN} ("not computed") if never called. */
+        public Builder overallScoreWithoutBlockers(double overallScoreWithoutBlockers) {
+            this.overallScoreWithoutBlockers = overallScoreWithoutBlockers;
             return this;
         }
 

@@ -17,6 +17,19 @@ import java.util.Objects;
  * component breaks every already-compiled plugin jar that calls the
  * constructor positionally, forcing an adapter rebuild for every plugin
  * whenever the DTO grows. The builder absorbs that churn instead.
+ *
+ * <p>Open question — score improvement: {@link #getScoreImprovement()} is
+ * per-violation rather than a separate per-rule summary method so the host
+ * UI can render it right next to that specific violation's own
+ * accept/waive control — e.g. "+4.2 pts if resolved" beside that finding's
+ * checkbox — without a second lookup from violation to rule to score. It's
+ * optional and {@link Double#NaN}-defaulted for the same reason {@link
+ * #getLineNumber()} and {@link #getDocumentationUrl()} are: not every
+ * engine has a scoring model at all, and forcing one would either
+ * fabricate numbers or block adapters for engines that don't. A host must
+ * hide the indicator entirely for a {@code NaN} value — never render
+ * "NaN pts" or fall back to "0 pts", since a genuinely zero-impact
+ * violation is a real, distinct value from "not computed".
  */
 public final class Violation {
 
@@ -28,6 +41,7 @@ public final class Violation {
     private final List<String> paths;
     private final Integer lineNumber;
     private final String documentationUrl;
+    private final double scoreImprovement;
 
     private Violation(Builder b) {
         this.ruleId = Objects.requireNonNull(b.ruleId, "ruleId must not be null");
@@ -38,6 +52,7 @@ public final class Violation {
         this.paths = b.paths == null ? Collections.emptyList() : List.copyOf(b.paths);
         this.lineNumber = b.lineNumber;
         this.documentationUrl = b.documentationUrl;
+        this.scoreImprovement = b.scoreImprovement;
     }
 
     public String getRuleId() {
@@ -93,6 +108,38 @@ public final class Violation {
         return documentationUrl;
     }
 
+    /**
+     * Score points — same 0–100 scale as {@link
+     * ValidationResult#getOverallScore()} — gained if every violation of
+     * this violation's rule were resolved, all other violations held
+     * constant. Per distinct rule, not per individual finding: if the same
+     * rule fires 5 times, each of those 5 {@code Violation}s reports the
+     * same value, since "resolve one instance of this rule in isolation"
+     * isn't a coherent question for most scoring models — the jump is
+     * defined for resolving the rule, not a single finding of it.
+     *
+     * <p>Positive means resolving the rule helps the score, as expected —
+     * but a plugin may legitimately report a negative value if its
+     * scoring model has interactions where resolving one rule changes
+     * eligibility for another rule's scoring bucket, lowering the total.
+     * The host renders the sign explicitly ("+4.2 pts" / "−1.0 pts")
+     * rather than assuming improvement is always positive.
+     *
+     * <p>{@link Double#NaN} — never {@code 0}, never assume it means
+     * "no impact" — is "not computed": for an engine with no scoring
+     * concept at all, or a plugin jar built before this field existed (it
+     * defaults to {@code NaN} in {@link Builder}, so such a plugin keeps
+     * compiling and simply never reports a score impact). A host must
+     * check {@link Double#isNaN(double)} and hide the indicator entirely
+     * next to that violation's checkbox/toggle when {@code NaN} — a
+     * genuinely zero-impact violation (already fully priced into the
+     * score via some other already-violated rule) is a real, valid value
+     * distinct from "unknown".
+     */
+    public double getScoreImprovement() {
+        return scoreImprovement;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -106,6 +153,7 @@ public final class Violation {
         private List<String> paths;
         private Integer lineNumber;
         private String documentationUrl;
+        private double scoreImprovement = Double.NaN;
 
         public Builder ruleId(String ruleId) {
             this.ruleId = ruleId;
@@ -144,6 +192,12 @@ public final class Violation {
 
         public Builder documentationUrl(String documentationUrl) {
             this.documentationUrl = documentationUrl;
+            return this;
+        }
+
+        /** See {@link Violation#getScoreImprovement()}. Defaults to {@link Double#NaN} ("not computed") if never called. */
+        public Builder scoreImprovement(double scoreImprovement) {
+            this.scoreImprovement = scoreImprovement;
             return this;
         }
 
