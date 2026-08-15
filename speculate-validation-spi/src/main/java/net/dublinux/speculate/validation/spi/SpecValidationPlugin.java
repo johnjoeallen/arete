@@ -130,6 +130,32 @@ public interface SpecValidationPlugin {
     }
 
     /**
+     * Display text for one of the four generic {@link Severity} levels,
+     * e.g. a Zally-based plugin returning {@code "Must"} for {@link
+     * Severity#ERROR} to match the MUST/SHOULD/MAY/HINT vocabulary its own
+     * findings' rule documentation already uses. {@link Severity} itself
+     * stays a fixed, engine-agnostic 4-level scale (see its own javadoc) —
+     * this is purely how a plugin chooses to *label* those four levels to
+     * a human reader; the enum identity everything else (sorting,
+     * filtering, badge colour) keys off is untouched.
+     *
+     * <p>The default just title-cases the enum name, which is exactly
+     * right for a plugin whose wrapped engine has no established severity
+     * vocabulary of its own to surface instead.
+     *
+     * @param severity never null
+     * @return never null or blank
+     */
+    default String getSeverityLabel(Severity severity) {
+        return switch (severity) {
+            case ERROR -> "Error";
+            case WARNING -> "Warning";
+            case INFO -> "Info";
+            case HINT -> "Hint";
+        };
+    }
+
+    /**
      * Open question #6: a default method rather than a required one, so
      * existing plugin jars compiled against interface v1 keep working
      * (they inherit the default) even if this method is added after the

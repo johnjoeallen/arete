@@ -11,7 +11,7 @@
     <span class="finding-badge finding-badge-hint" th:if="${findings.counts().hintCount() > 0}"
           th:text="'💡 ' + ${findings.counts().hintCount()}" th:title="${findings.counts().hintCount()} + ' hint(s)'"></span>
 </span>
-<div th:fragment="findingsTable(findings)" th:if="${findings != null and !findings.violations().isEmpty()}" class="section">
+<div th:fragment="findingsTable(findings, severityLabels)" th:if="${findings != null and !findings.violations().isEmpty()}" class="section">
     <h3>Validation findings</h3>
     <table class="endpoint-findings">
         <thead>
@@ -22,7 +22,7 @@
                 <td>
                     <span class="severity-badge"
                           th:classappend="'severity-' + ${#strings.toLowerCase(av.violation().getSeverity())}"
-                          th:text="${av.violation().getSeverity()}"></span>
+                          th:text="${severityLabels != null ? severityLabels.get(av.violation().getSeverity().name()) : av.violation().getSeverity()}"></span>
                 </td>
                 <td><code th:text="${av.violation().getRuleId()}"></code></td>
                 <td>

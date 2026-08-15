@@ -20,6 +20,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
+import net.dublinux.speculate.validation.spi.Severity;
 import net.dublinux.speculate.validation.spi.SpecValidationPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +41,7 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -170,6 +172,7 @@ public class SpecController {
             model.addAttribute("requestBodyFindings", ComponentFindings.byComponent("requestBodies", validation.violations()));
             model.addAttribute("responseFindings", ComponentFindings.byComponent("responses", validation.violations()));
             model.addAttribute("generalFindings", GeneralFindings.unattributed(validation.violations()));
+            model.addAttribute("severityLabels", severityLabelsOf(pluginId));
         }
         populateSidebar(model, q, entity.getId());
         return "result";
@@ -348,13 +351,53 @@ public class SpecController {
         } catch (NumberFormatException e) {
             return SpecValidationPlugin.DEFAULT_RULE_SET;
         }
+        SpecValidationPlugin plugin = findEnabledPlugin(pluginId);
+        if (plugin == null) {
+            return SpecValidationPlugin.DEFAULT_RULE_SET;
+        }
+        List<String> ruleSets = safeRuleSets(plugin);
+        return index >= 0 && index < ruleSets.size() ? ruleSets.get(index) : SpecValidationPlugin.DEFAULT_RULE_SET;
+    }
+
+    private SpecValidationPlugin findEnabledPlugin(String pluginId) {
         for (SpecValidationPlugin plugin : pluginRegistry.getPlugins()) {
             if (plugin.getId().equals(pluginId) && pluginSettingsService.isEnabled(plugin.getId())) {
-                List<String> ruleSets = safeRuleSets(plugin);
-                return index >= 0 && index < ruleSets.size() ? ruleSets.get(index) : SpecValidationPlugin.DEFAULT_RULE_SET;
+                return plugin;
             }
         }
-        return SpecValidationPlugin.DEFAULT_RULE_SET;
+        return null;
+    }
+
+    /**
+     * Display text for each of the four {@link Severity} levels, as the
+     * given plugin would label them (e.g. zally-core's Must/Should/May/Hint)
+     * — see {@link SpecValidationPlugin#getSeverityLabel}. Falls back to the
+     * SPI's own default labels for an absent/unknown/disabled plugin, or one
+     * that throws.
+     */
+    private Map<String, String> severityLabelsOf(String pluginId) {
+        SpecValidationPlugin plugin = findEnabledPlugin(pluginId);
+        Map<String, String> labels = new LinkedHashMap<>();
+        for (Severity severity : Severity.values()) {
+            labels.put(severity.name(), safeSeverityLabel(plugin, severity));
+        }
+        return labels;
+    }
+
+    private String safeSeverityLabel(SpecValidationPlugin plugin, Severity severity) {
+        if (plugin != null) {
+            try {
+                return plugin.getSeverityLabel(severity);
+            } catch (Throwable t) {
+                log.warn("Validation plugin '{}' threw from getSeverityLabel({}): {}", plugin.getId(), severity, t.toString());
+            }
+        }
+        return switch (severity) {
+            case ERROR -> "Error";
+            case WARNING -> "Warning";
+            case INFO -> "Info";
+            case HINT -> "Hint";
+        };
     }
 
 }

@@ -95,19 +95,19 @@
             </label>
             <label class="severity-filter-item">
                 <input type="checkbox" class="severity-filter-value" value="ERROR" checked>
-                Must
+                <span th:text="${severityLabels.get('ERROR')}">Error</span>
             </label>
             <label class="severity-filter-item">
                 <input type="checkbox" class="severity-filter-value" value="WARNING" checked>
-                Should
+                <span th:text="${severityLabels.get('WARNING')}">Warning</span>
             </label>
             <label class="severity-filter-item">
                 <input type="checkbox" class="severity-filter-value" value="INFO" checked>
-                May
+                <span th:text="${severityLabels.get('INFO')}">Info</span>
             </label>
             <label class="severity-filter-item">
                 <input type="checkbox" class="severity-filter-value" value="HINT" checked>
-                Hint
+                <span th:text="${severityLabels.get('HINT')}">Hint</span>
             </label>
             <label class="severity-filter-item">
                 <input type="checkbox" class="severity-filter-value" value="COMPLIANT" checked>
@@ -160,7 +160,7 @@
                 <div th:if="${endpoint.operation.description != null}" th:with="renderedDescription=${@markdownRenderer.render(endpoint.operation.description)}" class="markdown-body" th:utext="${renderedDescription}"></div>
                 <p th:if="${endpoint.operation.operationId != null}"><em>operationId: </em><code th:text="${endpoint.operation.operationId}"></code></p>
 
-                <div th:replace="~{fragments/findings :: findingsTable(${findings})}"></div>
+                <div th:replace="~{fragments/findings :: findingsTable(${findings}, ${severityLabels})}"></div>
 
                 <div th:if="${endpoint.operation.parameters != null and !endpoint.operation.parameters.isEmpty()}">
                     <h3>Parameters</h3>
@@ -226,7 +226,7 @@
                                         <span th:replace="~{fragments/findings :: findingBadges(${findings})}"></span>
                                     </h2>
                                     <div class="endpoint-body">
-                                        <div th:replace="~{fragments/findings :: findingsTable(${findings})}"></div>
+                                        <div th:replace="~{fragments/findings :: findingsTable(${findings}, ${severityLabels})}"></div>
                                         <div th:insert="~{fragments/schema :: schemaView(${schemaEntry.value}, 0, true)}"></div>
                                     </div>
                                 </div>
@@ -246,7 +246,7 @@
                                         <span th:replace="~{fragments/findings :: findingBadges(${findings})}"></span>
                                     </h2>
                                     <div class="endpoint-body">
-                                        <div th:replace="~{fragments/findings :: findingsTable(${findings})}"></div>
+                                        <div th:replace="~{fragments/findings :: findingsTable(${findings}, ${severityLabels})}"></div>
                                         <p th:if="${rbEntry.value.description != null}" th:with="renderedDescription=${@markdownRenderer.render(rbEntry.value.description)}" class="markdown-body" th:utext="${renderedDescription}"></p>
                                         <div th:if="${rbEntry.value.content != null and !rbEntry.value.content.isEmpty()}"
                                              th:replace="~{fragments/contenttabs :: contentTabs(${rbEntry.value.content})}"></div>
@@ -268,7 +268,7 @@
                                         <span th:replace="~{fragments/findings :: findingBadges(${findings})}"></span>
                                     </h2>
                                     <div class="endpoint-body">
-                                        <div th:replace="~{fragments/findings :: findingsTable(${findings})}"></div>
+                                        <div th:replace="~{fragments/findings :: findingsTable(${findings}, ${severityLabels})}"></div>
                                         <p th:if="${respEntry.value.description != null}" th:with="renderedDescription=${@markdownRenderer.render(respEntry.value.description)}" class="markdown-body" th:utext="${renderedDescription}"></p>
                                         <div th:if="${respEntry.value.content != null and !respEntry.value.content.isEmpty()}"
                                              th:replace="~{fragments/contenttabs :: contentTabs(${respEntry.value.content})}"></div>
@@ -282,7 +282,7 @@
 
             <div class="tab-panel" th:if="${generalFindings != null and !generalFindings.violations().isEmpty()}">
                 <p class="empty-note">Findings not tied to a specific endpoint or schema — e.g. against <code>info</code>, <code>servers</code>, <code>security</code>, or other shared components.</p>
-                <div th:replace="~{fragments/findings :: findingsTable(${generalFindings})}"></div>
+                <div th:replace="~{fragments/findings :: findingsTable(${generalFindings}, ${severityLabels})}"></div>
             </div>
             </div>
         </div>

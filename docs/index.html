@@ -68,7 +68,7 @@
     <p class="lede" style="margin-top: 2.2rem;">Schemas, request bodies, and responses live in their own Model tab — sub-tabbed the same way — so validation findings against your data model show up next to the shape they're about, not mixed in with the endpoints.</p>
     <img class="screenshot" src="screenshot-model.png" alt="Speculate's Model tab showing a Book schema with validation findings and its property tree">
 
-    <p class="lede" style="margin-top: 2.2rem;">Pick a plugin and rule set, click Analyse, and findings appear as badges on exactly the endpoint or schema they apply to — with a checkbox to hide whatever's already compliant.</p>
+    <p class="lede" style="margin-top: 2.2rem;">Pick a plugin and rule set, click Analyse, and findings appear as badges on exactly the endpoint or schema they apply to — filter by severity, in the plugin's own vocabulary, down to just what needs attention.</p>
     <img class="screenshot" src="screenshot-validation.png" alt="Speculate's validation picker with a plugin and rule set selected, and a GET /books endpoint showing two findings">
   </section>
 
@@ -97,7 +97,7 @@
       </div>
       <div class="feature-card">
         <h3>Pluggable custom validation</h3>
-        <p>Pick a plugin and rule set on any spec's page and click Analyse — findings show up right where they apply: on the endpoint, schema, request body, or response they're about, with a checkbox to hide whatever's already compliant. Ships with Zalando's Zally API-guidelines linter built in; write your own against a small SPI, or drop a jar into <code>~/.speculate/plugins</code>.</p>
+        <p>Pick a plugin and rule set on any spec's page and click Analyse — findings show up right where they apply: on the endpoint, schema, request body, or response they're about, with a severity filter (in the plugin's own vocabulary) to focus on just what matters. Ships with Zalando's Zally API-guidelines linter built in; write your own against a small SPI, or drop a jar into <code>~/.speculate/plugins</code>.</p>
       </div>
       <div class="feature-card">
         <h3>Light and dark themes</h3>

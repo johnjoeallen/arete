@@ -167,6 +167,18 @@ returned order that determines what gets validated against a given
 selection — keep it stable across releases if you're changing a plugin's
 rule sets.
 
+Findings are tagged with one of four fixed `Severity` levels (`ERROR` /
+`WARNING` / `INFO` / `HINT` — see the enum's own javadoc for why it's a
+closed set rather than an open string), but the *label* Speculate shows for
+each one — on the severity filter's checkboxes and in the findings table —
+comes from `getSeverityLabel(Severity)`, not the enum name. `zally-core`
+overrides it to return Zally's own `Must`/`Should`/`May`/`Hint` vocabulary
+(the same terms its rules' own documentation uses), matching
+`mapSeverity()`'s `MUST → ERROR`, `SHOULD → WARNING`, `MAY → INFO`, `HINT →
+HINT`. The default just title-cases the enum name, which is the right
+choice for a plugin with no established severity vocabulary of its own to
+surface instead.
+
 ### Writing your own plugin
 
 A plugin implements [`SpecValidationPlugin`](speculate-validation-spi/src/main/java/net/dublinux/speculate/validation/spi/SpecValidationPlugin.java)

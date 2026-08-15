@@ -11,6 +11,7 @@ import org.zalando.zally.core.JsonRulesValidator;
 import org.zalando.zally.core.Result;
 import org.zalando.zally.core.RulesManager;
 import org.zalando.zally.core.RulesPolicy;
+import net.dublinux.speculate.validation.spi.Severity;
 import net.dublinux.speculate.validation.spi.SpecFormat;
 import net.dublinux.speculate.validation.spi.SpecInput;
 import net.dublinux.speculate.validation.spi.SpecValidationPlugin;
@@ -105,6 +106,17 @@ public final class ZallyValidationPlugin implements SpecValidationPlugin {
     @Override
     public List<String> getRuleSets() {
         return List.of(RULE_SET_STRICT, RULE_SET_RELAXED);
+    }
+
+    /** Zally's own MUST/SHOULD/MAY/HINT vocabulary, verbatim — see {@link #mapSeverity} for the reverse direction. */
+    @Override
+    public String getSeverityLabel(Severity severity) {
+        return switch (severity) {
+            case ERROR -> "Must";
+            case WARNING -> "Should";
+            case INFO -> "May";
+            case HINT -> "Hint";
+        };
     }
 
     /**
