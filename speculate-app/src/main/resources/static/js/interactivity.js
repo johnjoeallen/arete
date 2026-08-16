@@ -1,18 +1,30 @@
 (function () {
 
-    // Analyse button: disabled whenever no plugin row is checked, since
-    // submitting with nothing checked would just persist "everything off"
-    // and run nothing.
+    // Analyse button: disabled whenever no plugin row is checked (submitting
+    // with nothing checked would just persist "everything off" and run
+    // nothing), and also disabled up front if the server says the currently
+    // shown results already reflect this exact spec content — re-running
+    // would just reproduce them. That "up to date" state is a one-way latch:
+    // touching any checkbox or rule-set select releases it for the rest of
+    // this page view, on the assumption the visitor is deliberately picking
+    // a different combination worth (re-)running, even back to one that
+    // happens to match what's already shown.
     var pickerForm = document.getElementById('validation-picker-form');
     if (pickerForm) {
         var pluginCheckboxes = Array.prototype.slice.call(pickerForm.querySelectorAll('input[name="plugin"]'));
+        var ruleSetSelects = Array.prototype.slice.call(pickerForm.querySelectorAll('select'));
         var analyseBtn = pickerForm.querySelector('button[type="submit"]');
         if (analyseBtn) {
+            var resultUpToDate = pickerForm.getAttribute('data-result-up-to-date') === 'true';
             function updateAnalyseDisabled() {
-                analyseBtn.disabled = !pluginCheckboxes.some(function (cb) { return cb.checked; });
+                var anyChecked = pluginCheckboxes.some(function (cb) { return cb.checked; });
+                analyseBtn.disabled = resultUpToDate || !anyChecked;
             }
-            pluginCheckboxes.forEach(function (cb) {
-                cb.addEventListener('change', updateAnalyseDisabled);
+            pluginCheckboxes.concat(ruleSetSelects).forEach(function (control) {
+                control.addEventListener('change', function () {
+                    resultUpToDate = false;
+                    updateAnalyseDisabled();
+                });
             });
             updateAnalyseDisabled();
         }

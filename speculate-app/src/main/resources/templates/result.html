@@ -29,7 +29,8 @@
 
     <div th:if="${pluginChoices != null and !pluginChoices.isEmpty() and specId != null}" class="validation-picker-wrapper">
         <h2>Validation</h2>
-        <form method="get" th:action="@{/spec/{id}(id=${specId})}" class="validation-picker" id="validation-picker-form">
+        <form method="get" th:action="@{/spec/{id}(id=${specId})}" class="validation-picker" id="validation-picker-form"
+              th:attr="data-result-up-to-date=${resultUpToDate}">
             <input type="hidden" name="ran" value="1">
             <table class="plugin-picker-table">
                 <thead>
@@ -48,11 +49,12 @@
                     </tr>
                 </tbody>
             </table>
-            <button type="submit">Analyse</button>
+            <button type="submit" th:disabled="${resultUpToDate}">Analyse</button>
         </form>
     </div>
 
     <div th:if="${validation != null and !validation.isEmpty()}" class="validation-results">
+        <p th:if="${resultFromCache}" class="validation-summary-line validation-cached-note">Showing results from the last Analyse run.</p>
         <p th:if="${validation.rulesEvaluatedCount() >= 0}" class="validation-summary-line"
            th:text="${validation.rulesEvaluatedCount()} + ' rule(s) checked across ' + ${validation.pluginSummaries().size()} + ' validator(s).'"></p>
         <p th:if="${!T(java.lang.Double).isNaN(validation.overallScore())}" class="validation-summary-line validation-score-line">

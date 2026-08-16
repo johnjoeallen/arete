@@ -30,6 +30,15 @@ public class SpecPluginSettingsEntity {
     @Column(nullable = false)
     private boolean enabled;
 
+    /**
+     * The rule-set picker's last-submitted position (see {@code
+     * SpecController#resolveRuleSet}) for this plugin on this spec; {@code
+     * null} means "never chosen, default to index 0" — same convention as
+     * an absent row entirely.
+     */
+    @Column(name = "rule_set_index")
+    private Integer ruleSetIndex;
+
     public Long getSpecId() {
         return specId;
     }
@@ -52,6 +61,14 @@ public class SpecPluginSettingsEntity {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+    }
+
+    public Integer getRuleSetIndex() {
+        return ruleSetIndex;
+    }
+
+    public void setRuleSetIndex(Integer ruleSetIndex) {
+        this.ruleSetIndex = ruleSetIndex;
     }
 
 }

@@ -3,6 +3,7 @@ package com.speculate.web;
 import com.speculate.domain.SpecEntity;
 import com.speculate.domain.SpecSource;
 import com.speculate.plugin.AggregatedValidationResult;
+import com.speculate.plugin.CachedValidationResult;
 import com.speculate.plugin.ComponentFindings;
 import com.speculate.plugin.EndpointFindings;
 import com.speculate.plugin.GeneralFindings;
@@ -11,6 +12,7 @@ import com.speculate.plugin.PluginRunRequest;
 import com.speculate.plugin.PluginSettingsService;
 import com.speculate.plugin.PluginValidationService;
 import com.speculate.plugin.SpecPluginSettingsService;
+import com.speculate.plugin.SpecValidationResultService;
 import com.speculate.service.EndpointGrouper;
 import com.speculate.service.ParsedSpec;
 import com.speculate.service.SpecFileWatcher;
@@ -61,11 +63,12 @@ public class SpecController {
     private final PluginRegistry pluginRegistry;
     private final PluginSettingsService pluginSettingsService;
     private final SpecPluginSettingsService specPluginSettingsService;
+    private final SpecValidationResultService specValidationResultService;
 
     public SpecController(SpecParserService specParserService, SpecStorageService specStorageService,
             PluginValidationService pluginValidationService, SpecFileWatcher specFileWatcher,
             PluginRegistry pluginRegistry, PluginSettingsService pluginSettingsService,
-            SpecPluginSettingsService specPluginSettingsService) {
+            SpecPluginSettingsService specPluginSettingsService, SpecValidationResultService specValidationResultService) {
         this.specParserService = specParserService;
         this.specStorageService = specStorageService;
         this.pluginValidationService = pluginValidationService;
@@ -73,6 +76,7 @@ public class SpecController {
         this.pluginRegistry = pluginRegistry;
         this.pluginSettingsService = pluginSettingsService;
         this.specPluginSettingsService = specPluginSettingsService;
+        this.specValidationResultService = specValidationResultService;
     }
 
     @GetMapping("/")
@@ -145,16 +149,18 @@ public class SpecController {
     /**
      * Renders a spec's docs. Validation is on-demand, not automatic — see
      * {@link PluginValidationService} — so {@code ran} is absent on a plain
-     * open (nothing runs, the picker just reflects each plugin's persisted
-     * per-spec enabled state) and present when the Analyse form resubmits
-     * here. {@code plugin} is the checked plugin ids from that form — a
-     * plugin present in {@code allParams} (i.e. rendered as a picker row)
-     * but absent from {@code plugin} was unchecked, per HTML's normal
-     * "an unchecked checkbox submits nothing" behaviour.
+     * open (nothing runs; instead the last Analyse run's result, if any, is
+     * reloaded from {@link SpecValidationResultService} so it doesn't just
+     * vanish when the page is left) and present when the Analyse form
+     * resubmits here. {@code plugin} is the checked plugin ids from that
+     * form — a plugin present in {@code allParams} (i.e. rendered as a
+     * picker row) but absent from {@code plugin} was unchecked, per HTML's
+     * normal "an unchecked checkbox submits nothing" behaviour.
      *
-     * <p>Every candidate plugin's per-spec enabled state is persisted from
-     * {@code plugin} before running anything, so the checkbox state
-     * survives a later plain reopen of this page.
+     * <p>Every candidate plugin's per-spec enabled state and rule-set choice
+     * is persisted from the submitted form before running anything, so both
+     * survive a later plain reopen of this page — see {@link
+     * #pluginChoices}.
      *
      * <p>Each row's rule set is submitted as {@code ruleSet_<pluginId>},
      * valued by its <em>position</em> in that plugin's rule sets (e.g.
@@ -177,6 +183,8 @@ public class SpecController {
         model.addAttribute("specTitle", entity.getTitle());
         model.addAttribute("specFilePath", entity.getFilePath());
 
+        String currentContentHash = SpecValidationResultService.contentHashOf(entity.getRawContent());
+
         if (ran != null) {
             Set<String> checkedPluginIds = plugin == null ? Set.of() : Set.copyOf(plugin);
             List<PluginRunRequest> requests = new ArrayList<>();
@@ -185,29 +193,68 @@ public class SpecController {
                     continue;
                 }
                 boolean enabledForSpec = checkedPluginIds.contains(candidate.getId());
-                specPluginSettingsService.setEnabledForSpec(id, candidate.getId(), enabledForSpec);
+                Integer ruleSetIndex = parseIndexOrNull(allParams.get("ruleSet_" + candidate.getId()));
+                specPluginSettingsService.setSelection(id, candidate.getId(), enabledForSpec, ruleSetIndex);
                 if (enabledForSpec) {
                     requests.add(new PluginRunRequest(candidate.getId(),
                             resolveRuleSet(candidate.getId(), allParams.get("ruleSet_" + candidate.getId()))));
                 }
             }
-            if (!requests.isEmpty()) {
+            if (requests.isEmpty()) {
+                specValidationResultService.deleteForSpec(id);
+                model.addAttribute("resultUpToDate", false);
+            } else {
                 AggregatedValidationResult validation = pluginValidationService.validateMany(entity.getRawContent(), requests);
-                model.addAttribute("validation", validation);
-                model.addAttribute("endpointFindings", EndpointFindings.byEndpoint(validation.violations()));
-                model.addAttribute("schemaFindings", ComponentFindings.byComponent("schemas", validation.violations()));
-                model.addAttribute("requestBodyFindings", ComponentFindings.byComponent("requestBodies", validation.violations()));
-                model.addAttribute("responseFindings", ComponentFindings.byComponent("responses", validation.violations()));
-                model.addAttribute("generalFindings", GeneralFindings.unattributed(validation.violations()));
-                model.addAttribute("severityLabels",
-                        severityLabelsOf(requests.stream().map(PluginRunRequest::pluginId).toList()));
-                model.addAttribute("severityScoreImpact", severityScoreImpactOf(validation));
+                List<String> activePluginIds = requests.stream().map(PluginRunRequest::pluginId).toList();
+                specValidationResultService.save(id, currentContentHash, validation, activePluginIds);
+                populateValidationModel(model, validation, activePluginIds);
+                model.addAttribute("resultUpToDate", true);
             }
+        } else {
+            populateCachedValidation(model, id, currentContentHash);
         }
 
         populateSidebar(model, q, entity.getId());
         model.addAttribute("pluginChoices", pluginChoices(id, allParams));
         return "result";
+    }
+
+    /**
+     * Loads whatever the last Analyse run for this spec found, if any, and
+     * whether it's still current for {@code currentContentHash} — used
+     * whenever a spec is shown without a fresh run having just happened
+     * (a plain reopen, or right after saving a pasted/loaded spec whose
+     * title reused an existing row's id).
+     */
+    private void populateCachedValidation(Model model, Long specId, String currentContentHash) {
+        model.addAttribute("resultUpToDate", specValidationResultService.isUpToDate(specId, currentContentHash));
+        specValidationResultService.findForSpec(specId).ifPresent(cached -> {
+            populateValidationModel(model, cached.result(), cached.activePluginIds());
+            model.addAttribute("resultFromCache", true);
+        });
+    }
+
+    private void populateValidationModel(Model model, AggregatedValidationResult validation, List<String> activePluginIds) {
+        model.addAttribute("validation", validation);
+        model.addAttribute("endpointFindings", EndpointFindings.byEndpoint(validation.violations()));
+        model.addAttribute("schemaFindings", ComponentFindings.byComponent("schemas", validation.violations()));
+        model.addAttribute("requestBodyFindings", ComponentFindings.byComponent("requestBodies", validation.violations()));
+        model.addAttribute("responseFindings", ComponentFindings.byComponent("responses", validation.violations()));
+        model.addAttribute("generalFindings", GeneralFindings.unattributed(validation.violations()));
+        model.addAttribute("severityLabels", severityLabelsOf(activePluginIds));
+        model.addAttribute("severityScoreImpact", severityScoreImpactOf(validation));
+    }
+
+    /** {@code null} (not {@code 0}) for a blank/unparseable index, so a persisted row can distinguish "never chosen" from "chose index 0". */
+    private static Integer parseIndexOrNull(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        try {
+            return Integer.parseInt(value.trim());
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     /**
@@ -221,6 +268,8 @@ public class SpecController {
     public String delete(@PathVariable Long id) {
         SpecEntity entity = specStorageService.findById(id).orElse(null);
         specStorageService.deleteById(id);
+        specPluginSettingsService.deleteAllForSpec(id);
+        specValidationResultService.deleteForSpec(id);
         if (entity != null && entity.getSource() == SpecSource.FILE && entity.getFilePath() != null) {
             Path path = Path.of(entity.getFilePath());
             if (Files.isRegularFile(path)) {
@@ -263,6 +312,7 @@ public class SpecController {
                     model.addAttribute("parseErrors", parsed.messages());
                     model.addAttribute("specTitle", saved.getTitle());
                     model.addAttribute("specFilePath", saved.getFilePath());
+                    populateCachedValidation(model, saved.getId(), SpecValidationResultService.contentHashOf(content));
                     populateSidebar(model, null, saved.getId());
                     return saved;
                 } else {
@@ -342,9 +392,11 @@ public class SpecController {
      *                        own no-override-means-enabled default
      * @param ruleSetSelections {@code ruleSet_<pluginId>} request params to
      *                        read the selected index from, keyed exactly as
-     *                        the picker form submits them; a plugin with no
-     *                        entry here (or an out-of-range/non-numeric one)
-     *                        defaults to index 0
+     *                        the picker form submits them (a just-submitted
+     *                        Analyse); a plugin with no entry here falls
+     *                        back to its persisted per-spec choice, then to
+     *                        index 0 if that's absent too (or either value
+     *                        is out-of-range/non-numeric)
      */
     private List<SpecPluginRunChoice> pluginChoices(Long specId, Map<String, String> ruleSetSelections) {
         List<SpecPluginRunChoice> choices = new ArrayList<>();
@@ -354,23 +406,18 @@ public class SpecController {
             }
             List<String> ruleSets = safeRuleSets(plugin);
             boolean enabledForSpec = specId == null || specPluginSettingsService.isEnabledForSpec(specId, plugin.getId());
-            int selectedIndex = parseRuleSetIndex(ruleSetSelections.get("ruleSet_" + plugin.getId()), ruleSets.size());
+            String submitted = ruleSetSelections.get("ruleSet_" + plugin.getId());
+            Integer persisted = specId == null ? null : specPluginSettingsService.ruleSetIndexForSpec(specId, plugin.getId());
+            int selectedIndex = resolveSelectedIndex(submitted, persisted, ruleSets.size());
             choices.add(new SpecPluginRunChoice(plugin.getId(), plugin.getName(), ruleSets, enabledForSpec, selectedIndex));
         }
         choices.sort(Comparator.comparing(SpecPluginRunChoice::pluginName, String.CASE_INSENSITIVE_ORDER));
         return choices;
     }
 
-    private static int parseRuleSetIndex(String value, int ruleSetCount) {
-        if (value == null) {
-            return 0;
-        }
-        try {
-            int index = Integer.parseInt(value.trim());
-            return index >= 0 && index < ruleSetCount ? index : 0;
-        } catch (NumberFormatException e) {
-            return 0;
-        }
+    private static int resolveSelectedIndex(String submitted, Integer persisted, int ruleSetCount) {
+        Integer index = submitted != null ? parseIndexOrNull(submitted) : persisted;
+        return index != null && index >= 0 && index < ruleSetCount ? index : 0;
     }
 
     /**
