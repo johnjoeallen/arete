@@ -1,5 +1,23 @@
 (function () {
 
+    // Analyse button: disabled whenever no plugin row is checked, since
+    // submitting with nothing checked would just persist "everything off"
+    // and run nothing.
+    var pickerForm = document.getElementById('validation-picker-form');
+    if (pickerForm) {
+        var pluginCheckboxes = Array.prototype.slice.call(pickerForm.querySelectorAll('input[name="plugin"]'));
+        var analyseBtn = pickerForm.querySelector('button[type="submit"]');
+        if (analyseBtn) {
+            function updateAnalyseDisabled() {
+                analyseBtn.disabled = !pluginCheckboxes.some(function (cb) { return cb.checked; });
+            }
+            pluginCheckboxes.forEach(function (cb) {
+                cb.addEventListener('change', updateAnalyseDisabled);
+            });
+            updateAnalyseDisabled();
+        }
+    }
+
     // Collapsible endpoint sections, with an expand/collapse-all button
     // scoped to each tag section.
     document.querySelectorAll('.tag-group').forEach(function (group) {

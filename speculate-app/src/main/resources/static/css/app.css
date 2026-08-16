@@ -169,7 +169,9 @@ a:hover { color: var(--link-hover); }
 .paste-divider { color: var(--muted-fg); font-size: 0.9em; margin: 1.5em 0 0.8em; }
 
 .validation-picker { display: flex; flex-direction: column; align-items: flex-start; gap: 0.8em; }
-.validation-picker button { padding: 0.4em 0.9em; }
+.validation-picker button { padding: 0.4em 0.9em; border: 1px solid var(--link); border-radius: 4px; background: var(--link); color: #fff; cursor: pointer; }
+.validation-picker button:hover:not(:disabled) { background: var(--link-hover); border-color: var(--link-hover); }
+.validation-picker button:disabled { background: var(--surface-alt); border-color: var(--border); color: var(--muted-fg); cursor: not-allowed; }
 .plugin-picker-table { border-collapse: collapse; font-size: 0.9em; }
 .plugin-picker-table th { text-align: left; color: var(--muted-fg); font-weight: 600; padding: 0.2em 0.8em 0.2em 0; }
 .plugin-picker-table td { padding: 0.25em 0.8em 0.25em 0; vertical-align: middle; }
