@@ -2,6 +2,7 @@ package com.speculate.plugin;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -24,23 +25,51 @@ public final class EndpointFindings {
     /**
      * Keyed by {@code "<METHOD> <path>"} (e.g. {@code "GET /items/{id}"}),
      * matching {@code EndpointView.method() + " " + EndpointView.path()}. A
-     * finding whose pointer isn't under a specific operation — e.g. one
-     * against {@code info} or a shared component schema — isn't
-     * attributable to any single endpoint and doesn't appear here.
+     * violation is attributed to every endpoint it names — its {@code
+     * pointer}'s own operation, if any, plus every entry in {@link
+     * net.dublinux.speculate.validation.spi.Violation#getPaths()} — so a
+     * rule a plugin reports once but flags as affecting several endpoints
+     * (via {@code paths}, rather than emitting one {@code Violation} per
+     * endpoint) shows up on all of them, not just the one its {@code
+     * pointer} happens to point at. A finding attributable to neither —
+     * e.g. one against {@code info} or a shared component schema, with no
+     * {@code paths} entries either — doesn't appear here.
      */
     public static Map<String, EndpointFindingsView> byEndpoint(List<AttributedViolation> violations) {
         Map<String, List<AttributedViolation>> byKey = new LinkedHashMap<>();
         for (AttributedViolation av : violations) {
-            String key = endpointKey(av.violation().getPointer());
-            if (key == null) {
-                continue;
+            for (String key : endpointKeys(av.violation())) {
+                byKey.computeIfAbsent(key, k -> new ArrayList<>()).add(av);
             }
-            byKey.computeIfAbsent(key, k -> new ArrayList<>()).add(av);
         }
 
         Map<String, EndpointFindingsView> result = new LinkedHashMap<>();
         byKey.forEach((key, forEndpoint) -> result.put(key, new EndpointFindingsView(SeverityCounts.from(forEndpoint), forEndpoint)));
         return result;
+    }
+
+    /** Every endpoint key a violation is attributable to — see {@link #byEndpoint}. */
+    private static Set<String> endpointKeys(net.dublinux.speculate.validation.spi.Violation violation) {
+        Set<String> keys = new LinkedHashSet<>();
+        String pointerKey = endpointKey(violation.getPointer());
+        if (pointerKey != null) {
+            keys.add(pointerKey);
+        }
+        for (String path : violation.getPaths()) {
+            if (path != null && !path.isBlank()) {
+                keys.add(normalizeMethod(path.trim()));
+            }
+        }
+        return keys;
+    }
+
+    /** Upper-cases a leading HTTP method so a plugin-supplied {@code "get /items"} matches the {@code "GET /items"} keys built from a pointer. */
+    private static String normalizeMethod(String pathEntry) {
+        int spaceIndex = pathEntry.indexOf(' ');
+        if (spaceIndex <= 0) {
+            return pathEntry;
+        }
+        return pathEntry.substring(0, spaceIndex).toUpperCase(Locale.ROOT) + pathEntry.substring(spaceIndex);
     }
 
     /** {@code null} unless {@code pointer} is rooted at a specific {@code /paths/<path>/<method>} operation. */

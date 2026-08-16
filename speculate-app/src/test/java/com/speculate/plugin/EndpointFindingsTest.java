@@ -93,4 +93,49 @@ class EndpointFindingsTest {
     void byEndpointReturnsAnEmptyMapForNoViolations() {
         assertThat(EndpointFindings.byEndpoint(List.of())).isEmpty();
     }
+
+    @Test
+    void byEndpointAttributesAViolationToEveryEndpointItsPathsListNamesInAdditionToItsPointer() {
+        Violation crossEndpointRule = Violation.builder()
+                .ruleId("r1").title("t1").severity(Severity.ERROR)
+                .pointer("/paths/~1items/get")
+                .paths(List.of("GET /items", "POST /items", "DELETE /items/{id}"))
+                .build();
+
+        AttributedViolation av = new AttributedViolation("p", "P", crossEndpointRule);
+        Map<String, EndpointFindingsView> byEndpoint = EndpointFindings.byEndpoint(List.of(av));
+
+        assertThat(byEndpoint).containsOnlyKeys("GET /items", "POST /items", "DELETE /items/{id}");
+        assertThat(byEndpoint.get("GET /items").violations()).containsExactly(av);
+        assertThat(byEndpoint.get("POST /items").violations()).containsExactly(av);
+        assertThat(byEndpoint.get("DELETE /items/{id}").violations()).containsExactly(av);
+    }
+
+    @Test
+    void byEndpointDoesNotDuplicateAViolationWhenItsPathsListRepeatsItsPointersOwnEndpoint() {
+        Violation violation = Violation.builder()
+                .ruleId("r1").title("t1").severity(Severity.ERROR)
+                .pointer("/paths/~1items/get")
+                .paths(List.of("GET /items"))
+                .build();
+
+        AttributedViolation av = new AttributedViolation("p", "P", violation);
+        Map<String, EndpointFindingsView> byEndpoint = EndpointFindings.byEndpoint(List.of(av));
+
+        assertThat(byEndpoint).containsOnlyKeys("GET /items");
+        assertThat(byEndpoint.get("GET /items").violations()).containsExactly(av);
+    }
+
+    @Test
+    void byEndpointNormalizesALowercaseMethodInAPathsEntry() {
+        Violation violation = Violation.builder()
+                .ruleId("r1").title("t1").severity(Severity.ERROR)
+                .paths(List.of("get /items"))
+                .build();
+
+        AttributedViolation av = new AttributedViolation("p", "P", violation);
+        Map<String, EndpointFindingsView> byEndpoint = EndpointFindings.byEndpoint(List.of(av));
+
+        assertThat(byEndpoint).containsOnlyKeys("GET /items");
+    }
 }

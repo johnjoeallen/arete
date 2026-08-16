@@ -77,7 +77,18 @@ public final class Violation {
         return pointer;
     }
 
-    /** Affected API paths/operations; never null, may be empty. */
+    /**
+     * Every endpoint this violation affects, each formatted {@code "<METHOD>
+     * <path>"} (e.g. {@code "GET /items/{id}"}, method upper-case) — never
+     * null, may be empty. This is how a rule that's evaluated once but
+     * flags several endpoints (a naming-convention check across an entire
+     * spec, say) reports all of them, rather than the host only ever
+     * learning about the one endpoint {@link #getPointer()} happens to
+     * point at. A host attributes this violation to every endpoint named
+     * here in addition to whatever {@link #getPointer()} resolves to, so
+     * list every affected endpoint even if one of them is also the
+     * pointer's own operation — duplicates are harmless.
+     */
     public List<String> getPaths() {
         return paths;
     }
