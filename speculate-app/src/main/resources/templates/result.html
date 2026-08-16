@@ -82,9 +82,9 @@
         <p th:if="${validation.rulesEvaluatedCount() >= 0}" class="validation-summary-line"
            th:text="${validation.rulesEvaluatedCount()} + ' rule(s) checked across ' + ${validation.pluginSummaries().size()} + ' validator(s).'"></p>
         <p th:if="${!T(java.lang.Double).isNaN(validation.overallScore())}" class="validation-summary-line validation-score-line">
-            Score: <span th:text="${#numbers.formatDecimal(validation.overallScore(), 1, 1)}"></span>/100
+            Score: <span th:text="${#numbers.formatDecimal(validation.overallScore(), 1, 1)}"></span>%
             <span th:if="${!T(java.lang.Double).isNaN(validation.overallScoreWithoutBlockers())}"
-                  th:text="'(' + ${#numbers.formatDecimal(validation.overallScoreWithoutBlockers(), 1, 1)} + '/100 without blockers)'"></span>
+                  th:text="'(' + ${#numbers.formatDecimal(validation.overallScoreWithoutBlockers(), 1, 1)} + '% without blockers)'"></span>
         </p>
         <ul class="plugin-outcomes">
             <li th:each="s : ${validation.pluginSummaries()}">
@@ -98,21 +98,12 @@
                 <input type="checkbox" class="severity-filter-all" checked>
                 All
             </label>
-            <label class="severity-filter-item">
-                <input type="checkbox" class="severity-filter-value" value="ERROR" checked>
-                <span th:text="${severityLabels.get('ERROR')}">Error</span>
-            </label>
-            <label class="severity-filter-item">
-                <input type="checkbox" class="severity-filter-value" value="WARNING" checked>
-                <span th:text="${severityLabels.get('WARNING')}">Warning</span>
-            </label>
-            <label class="severity-filter-item">
-                <input type="checkbox" class="severity-filter-value" value="INFO" checked>
-                <span th:text="${severityLabels.get('INFO')}">Info</span>
-            </label>
-            <label class="severity-filter-item">
-                <input type="checkbox" class="severity-filter-value" value="HINT" checked>
-                <span th:text="${severityLabels.get('HINT')}">Hint</span>
+            <label class="severity-filter-item" th:each="sev : ${T(net.dublinux.speculate.validation.spi.Severity).values()}">
+                <input type="checkbox" class="severity-filter-value" th:value="${sev.name()}" checked>
+                <span th:text="${severityLabels.get(sev.name())}">Error</span>
+                <span th:if="${severityScoreImpact != null and severityScoreImpact.containsKey(sev.name())}"
+                      class="severity-score-impact"
+                      th:text="${#numbers.formatDecimal(-severityScoreImpact.get(sev.name()), 1, 1)} + '%'"></span>
             </label>
             <label class="severity-filter-item">
                 <input type="checkbox" class="severity-filter-value" value="COMPLIANT" checked>

@@ -173,6 +173,7 @@ public class SpecController {
             model.addAttribute("responseFindings", ComponentFindings.byComponent("responses", validation.violations()));
             model.addAttribute("generalFindings", GeneralFindings.unattributed(validation.violations()));
             model.addAttribute("severityLabels", severityLabelsOf(pluginId));
+            model.addAttribute("severityScoreImpact", severityScoreImpactOf(validation));
         }
         populateSidebar(model, q, entity.getId());
         return "result";
@@ -382,6 +383,13 @@ public class SpecController {
             labels.put(severity.name(), safeSeverityLabel(plugin, severity));
         }
         return labels;
+    }
+
+    /** {@link AggregatedValidationResult#severityScoreImpact()}, keyed by {@link Severity#name()} for template lookup. */
+    private static Map<String, Double> severityScoreImpactOf(AggregatedValidationResult validation) {
+        Map<String, Double> impact = new LinkedHashMap<>();
+        validation.severityScoreImpact().forEach((severity, points) -> impact.put(severity.name(), points));
+        return impact;
     }
 
     private String safeSeverityLabel(SpecValidationPlugin plugin, Severity severity) {

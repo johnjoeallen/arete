@@ -1,6 +1,10 @@
 package com.speculate.plugin;
 
+import net.dublinux.speculate.validation.spi.Severity;
+
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The combined outcome of running every enabled validator plugin against a
@@ -27,5 +31,33 @@ public record AggregatedValidationResult(
 
     public boolean isEmpty() {
         return pluginSummaries.isEmpty();
+    }
+
+    /**
+     * How many score points each {@link Severity} is currently costing —
+     * i.e. the sum of {@link net.dublinux.speculate.validation.spi.Violation#getScoreImprovement()}
+     * across that severity's violations, deduped by rule id first (since
+     * that value is per-rule, not per-finding — see that method's javadoc).
+     * A severity with no violations, or whose violations never report a
+     * score, is simply absent from the map rather than present with a
+     * {@code 0}/{@code NaN} entry — the host must treat "absent" as "not
+     * computed" the same way it treats {@link Double#NaN} elsewhere.
+     */
+    public Map<Severity, Double> severityScoreImpact() {
+        Map<Severity, Map<String, Double>> impactByRulePerSeverity = new LinkedHashMap<>();
+        for (AttributedViolation av : violations) {
+            double improvement = av.violation().getScoreImprovement();
+            if (Double.isNaN(improvement)) {
+                continue;
+            }
+            impactByRulePerSeverity
+                    .computeIfAbsent(av.violation().getSeverity(), s -> new LinkedHashMap<>())
+                    .put(av.violation().getRuleId(), improvement);
+        }
+        Map<Severity, Double> impactBySeverity = new LinkedHashMap<>();
+        for (Map.Entry<Severity, Map<String, Double>> entry : impactByRulePerSeverity.entrySet()) {
+            impactBySeverity.put(entry.getKey(), entry.getValue().values().stream().mapToDouble(Double::doubleValue).sum());
+        }
+        return impactBySeverity;
     }
 }
