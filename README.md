@@ -113,16 +113,31 @@ directory you launch the script from:
 ## Custom Validation
 
 Validation is on-demand, not automatic: opening a spec doesn't run anything
-by itself. A "Validation" picker on the spec's page lets you choose exactly
-one enabled plugin and one of its rule sets, then **Analyse** to run it —
-nothing runs until you do. Each endpoint whose findings map to a specific
-operation shows a severity-count badge (❌ error, ⚠️ warning, ℹ️ info, 💡 hint)
-in its header; expanding the endpoint lists those findings in full —
-severity, rule ID, finding, [JSON Pointer](https://www.rfc-editor.org/rfc/rfc6901)
-location, which plugin reported it, and a "Learn more" link out to the
-plugin's own rule documentation when it provides one (e.g. Zally links back
-to the relevant section of the Zalando API guidelines; an organization's own
-plugin could just as well link to an internal wiki page).
+by itself. A "Validation" picker on the spec's page lists every globally
+enabled plugin as its own row — a checkbox plus that plugin's own rule-set
+dropdown — so more than one plugin can run together, e.g. a general
+API-guidelines linter alongside a specialised, organization-specific
+plugin (a breaking-changes checker, say). Click **Analyse** to run every
+checked plugin — nothing runs until you do. Which plugins are checked is
+remembered per spec in the database (a plugin's global enabled/disabled
+state in **Settings** still governs whether it shows up in the picker at
+all), so re-opening a spec later starts from the same selection.
+
+Findings from every plugin that ran are merged into the same view: each
+endpoint whose findings map to a specific operation shows a combined
+severity-count badge (❌ error, ⚠️ warning, ℹ️ info, 💡 hint) in its header;
+expanding the endpoint lists those findings in full — severity, rule ID,
+finding, [JSON Pointer](https://www.rfc-editor.org/rfc/rfc6901) location,
+which plugin reported it, and a "Learn more" link out to the plugin's own
+rule documentation when it provides one (e.g. Zally links back to the
+relevant section of the Zalando API guidelines; an organization's own
+plugin could just as well link to an internal wiki page). A plugin may
+optionally report an overall compliance score (0–100) and, per violation,
+how many points fixing it would recover — Speculate shows these as
+percentages when present, but only ever from a single plugin's own
+scoring model: with more than one plugin checked, the score is hidden
+rather than combining two unrelated models into a number that wouldn't
+mean anything.
 
 Plugins are `.jar` files, discovered from two folders at startup:
 
@@ -138,16 +153,19 @@ Plugins are `.jar` files, discovered from two folders at startup:
   ruleset, packaged the same way as the bundled one but with its own
   `getId()`, so it runs alongside rather than replacing it.
 
-Enable or disable individual plugins from **Settings**; a disabled plugin
-stays loaded but is skipped during validation, so re-enabling it doesn't
-need a restart.
+Enable or disable individual plugins globally from **Settings**; a disabled
+plugin stays loaded but never appears in a spec's picker and is skipped
+during validation, so re-enabling it doesn't need a restart. Per-spec, the
+picker's checkbox is a narrower, additional on/off switch scoped to that
+one spec — e.g. running a specialised plugin only against the APIs it's
+relevant to, while it stays off elsewhere — layered on top of the global
+setting rather than replacing it.
 
 A plugin can declare more than one named rule set — e.g. an
 `internal`/`external` split for an organization that lints differently
-depending on API audience. Every enabled plugin appears in the picker's
-plugin dropdown regardless of how many rule sets it has; picking one
-populates the second dropdown with just that plugin's own rule sets (a
-plugin with only the implicit default set just has one entry there). The
+depending on API audience. Every enabled plugin gets its own row in the
+picker with its own rule-set dropdown (a plugin with only the implicit
+default set just has one entry there). The
 bundled `zally-core` plugin has two — `Strict` (report every violation)
 and `Relaxed` (only the `MUST`-severity ones) — as a working reference for
 what a plugin does with the name it's given. This is deliberately

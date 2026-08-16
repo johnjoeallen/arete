@@ -4,6 +4,7 @@ import com.speculate.domain.SpecEntity;
 import com.speculate.plugin.PluginRegistry;
 import com.speculate.plugin.PluginSettingsService;
 import com.speculate.plugin.PluginValidationService;
+import com.speculate.plugin.SpecPluginSettingsService;
 import com.speculate.service.ParsedSpec;
 import com.speculate.service.SpecFileWatcher;
 import com.speculate.service.SpecParserService;
@@ -54,6 +55,9 @@ class SpecControllerLoadFileTest {
 
     @MockitoBean
     private PluginSettingsService pluginSettingsService;
+
+    @MockitoBean
+    private SpecPluginSettingsService specPluginSettingsService;
 
     @Test
     void loadingAFileFromAConfirmedAbsolutePathReadsItAndSavesItAsFileSourced(@TempDir Path tempDir) throws Exception {

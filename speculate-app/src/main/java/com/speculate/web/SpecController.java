@@ -7,14 +7,16 @@ import com.speculate.plugin.ComponentFindings;
 import com.speculate.plugin.EndpointFindings;
 import com.speculate.plugin.GeneralFindings;
 import com.speculate.plugin.PluginRegistry;
+import com.speculate.plugin.PluginRunRequest;
 import com.speculate.plugin.PluginSettingsService;
 import com.speculate.plugin.PluginValidationService;
+import com.speculate.plugin.SpecPluginSettingsService;
 import com.speculate.service.EndpointGrouper;
 import com.speculate.service.ParsedSpec;
 import com.speculate.service.SpecFileWatcher;
 import com.speculate.service.SpecParserService;
 import com.speculate.service.SpecStorageService;
-import com.speculate.web.dto.PluginRuleSetChoice;
+import com.speculate.web.dto.SpecPluginRunChoice;
 import com.speculate.web.dto.SpecSummary;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
@@ -45,6 +47,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 @Controller
 public class SpecController {
@@ -57,16 +60,19 @@ public class SpecController {
     private final SpecFileWatcher specFileWatcher;
     private final PluginRegistry pluginRegistry;
     private final PluginSettingsService pluginSettingsService;
+    private final SpecPluginSettingsService specPluginSettingsService;
 
     public SpecController(SpecParserService specParserService, SpecStorageService specStorageService,
             PluginValidationService pluginValidationService, SpecFileWatcher specFileWatcher,
-            PluginRegistry pluginRegistry, PluginSettingsService pluginSettingsService) {
+            PluginRegistry pluginRegistry, PluginSettingsService pluginSettingsService,
+            SpecPluginSettingsService specPluginSettingsService) {
         this.specParserService = specParserService;
         this.specStorageService = specStorageService;
         this.pluginValidationService = pluginValidationService;
         this.specFileWatcher = specFileWatcher;
         this.pluginRegistry = pluginRegistry;
         this.pluginSettingsService = pluginSettingsService;
+        this.specPluginSettingsService = specPluginSettingsService;
     }
 
     @GetMapping("/")
@@ -138,17 +144,26 @@ public class SpecController {
 
     /**
      * Renders a spec's docs. Validation is on-demand, not automatic — see
-     * {@link PluginValidationService} — so {@code pluginId}/{@code ruleSet}
-     * are absent on a plain open (nothing runs, just the picker/Refresh
-     * control shows) and present when the Refresh form resubmits here.
+     * {@link PluginValidationService} — so {@code ran} is absent on a plain
+     * open (nothing runs, the picker just reflects each plugin's persisted
+     * per-spec enabled state) and present when the Analyse form resubmits
+     * here. {@code plugin} is the checked plugin ids from that form — a
+     * plugin present in {@code allParams} (i.e. rendered as a picker row)
+     * but absent from {@code plugin} was unchecked, per HTML's normal
+     * "an unchecked checkbox submits nothing" behaviour.
      *
-     * <p>{@code ruleSet} is the rule set's <em>position</em> in the picker
-     * (e.g. {@code "0"}), not its name — see {@link #resolveRuleSet}.
+     * <p>Every candidate plugin's per-spec enabled state is persisted from
+     * {@code plugin} before running anything, so the checkbox state
+     * survives a later plain reopen of this page.
+     *
+     * <p>Each row's rule set is submitted as {@code ruleSet_<pluginId>},
+     * valued by its <em>position</em> in that plugin's rule sets (e.g.
+     * {@code "0"}), not its name — see {@link #resolveRuleSet}.
      */
     @GetMapping("/spec/{id}")
     public String open(@PathVariable Long id, @RequestParam(required = false) String q,
-            @RequestParam(required = false) String pluginId, @RequestParam(required = false) String ruleSet,
-            Model model) {
+            @RequestParam(required = false) String ran, @RequestParam(required = false) List<String> plugin,
+            @RequestParam Map<String, String> allParams, Model model) {
         SpecEntity entity = specStorageService.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Spec not found"));
 
@@ -161,21 +176,37 @@ public class SpecController {
         model.addAttribute("parseErrors", parsed.messages());
         model.addAttribute("specTitle", entity.getTitle());
         model.addAttribute("specFilePath", entity.getFilePath());
-        model.addAttribute("selectedPluginId", pluginId);
-        model.addAttribute("selectedRuleSet", ruleSet);
-        if (pluginId != null && !pluginId.isBlank()) {
-            AggregatedValidationResult validation =
-                    pluginValidationService.validateOne(entity.getRawContent(), pluginId, resolveRuleSet(pluginId, ruleSet));
-            model.addAttribute("validation", validation);
-            model.addAttribute("endpointFindings", EndpointFindings.byEndpoint(validation.violations()));
-            model.addAttribute("schemaFindings", ComponentFindings.byComponent("schemas", validation.violations()));
-            model.addAttribute("requestBodyFindings", ComponentFindings.byComponent("requestBodies", validation.violations()));
-            model.addAttribute("responseFindings", ComponentFindings.byComponent("responses", validation.violations()));
-            model.addAttribute("generalFindings", GeneralFindings.unattributed(validation.violations()));
-            model.addAttribute("severityLabels", severityLabelsOf(pluginId));
-            model.addAttribute("severityScoreImpact", severityScoreImpactOf(validation));
+
+        if (ran != null) {
+            Set<String> checkedPluginIds = plugin == null ? Set.of() : Set.copyOf(plugin);
+            List<PluginRunRequest> requests = new ArrayList<>();
+            for (SpecValidationPlugin candidate : pluginRegistry.getPlugins()) {
+                if (!pluginSettingsService.isEnabled(candidate.getId())) {
+                    continue;
+                }
+                boolean enabledForSpec = checkedPluginIds.contains(candidate.getId());
+                specPluginSettingsService.setEnabledForSpec(id, candidate.getId(), enabledForSpec);
+                if (enabledForSpec) {
+                    requests.add(new PluginRunRequest(candidate.getId(),
+                            resolveRuleSet(candidate.getId(), allParams.get("ruleSet_" + candidate.getId()))));
+                }
+            }
+            if (!requests.isEmpty()) {
+                AggregatedValidationResult validation = pluginValidationService.validateMany(entity.getRawContent(), requests);
+                model.addAttribute("validation", validation);
+                model.addAttribute("endpointFindings", EndpointFindings.byEndpoint(validation.violations()));
+                model.addAttribute("schemaFindings", ComponentFindings.byComponent("schemas", validation.violations()));
+                model.addAttribute("requestBodyFindings", ComponentFindings.byComponent("requestBodies", validation.violations()));
+                model.addAttribute("responseFindings", ComponentFindings.byComponent("responses", validation.violations()));
+                model.addAttribute("generalFindings", GeneralFindings.unattributed(validation.violations()));
+                model.addAttribute("severityLabels",
+                        severityLabelsOf(requests.stream().map(PluginRunRequest::pluginId).toList()));
+                model.addAttribute("severityScoreImpact", severityScoreImpactOf(validation));
+            }
         }
+
         populateSidebar(model, q, entity.getId());
+        model.addAttribute("pluginChoices", pluginChoices(id, allParams));
         return "result";
     }
 
@@ -255,7 +286,7 @@ public class SpecController {
         model.addAttribute("specs", toSummaries(specStorageService.findAll(), q));
         model.addAttribute("q", q);
         model.addAttribute("specId", activeId);
-        model.addAttribute("enabledPlugins", enabledPluginChoices());
+        model.addAttribute("pluginChoices", pluginChoices(activeId, Map.of()));
     }
 
     private static List<SpecSummary> toSummaries(List<SpecEntity> entities, String q) {
@@ -300,17 +331,46 @@ public class SpecController {
         return combined;
     }
 
-    /** Every enabled plugin with its declared rule sets, for the view page's plugin/rule-set picker. */
-    private List<PluginRuleSetChoice> enabledPluginChoices() {
-        List<PluginRuleSetChoice> choices = new ArrayList<>();
+    /**
+     * Every globally-enabled plugin, for the view page's plugin picker: its
+     * declared rule sets, whether it's checked (its persisted per-spec
+     * state, unless overridden below), and which rule set is selected.
+     *
+     * @param specId          nullable — no spec context (e.g. the sidebar on
+     *                        the index page) means every row defaults to
+     *                        checked, matching {@link SpecPluginSettingsService}'s
+     *                        own no-override-means-enabled default
+     * @param ruleSetSelections {@code ruleSet_<pluginId>} request params to
+     *                        read the selected index from, keyed exactly as
+     *                        the picker form submits them; a plugin with no
+     *                        entry here (or an out-of-range/non-numeric one)
+     *                        defaults to index 0
+     */
+    private List<SpecPluginRunChoice> pluginChoices(Long specId, Map<String, String> ruleSetSelections) {
+        List<SpecPluginRunChoice> choices = new ArrayList<>();
         for (SpecValidationPlugin plugin : pluginRegistry.getPlugins()) {
             if (!pluginSettingsService.isEnabled(plugin.getId())) {
                 continue;
             }
-            choices.add(new PluginRuleSetChoice(plugin.getId(), plugin.getName(), safeRuleSets(plugin)));
+            List<String> ruleSets = safeRuleSets(plugin);
+            boolean enabledForSpec = specId == null || specPluginSettingsService.isEnabledForSpec(specId, plugin.getId());
+            int selectedIndex = parseRuleSetIndex(ruleSetSelections.get("ruleSet_" + plugin.getId()), ruleSets.size());
+            choices.add(new SpecPluginRunChoice(plugin.getId(), plugin.getName(), ruleSets, enabledForSpec, selectedIndex));
         }
-        choices.sort(Comparator.comparing(PluginRuleSetChoice::pluginName, String.CASE_INSENSITIVE_ORDER));
+        choices.sort(Comparator.comparing(SpecPluginRunChoice::pluginName, String.CASE_INSENSITIVE_ORDER));
         return choices;
+    }
+
+    private static int parseRuleSetIndex(String value, int ruleSetCount) {
+        if (value == null) {
+            return 0;
+        }
+        try {
+            int index = Integer.parseInt(value.trim());
+            return index >= 0 && index < ruleSetCount ? index : 0;
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 
     /**
@@ -370,14 +430,17 @@ public class SpecController {
     }
 
     /**
-     * Display text for each of the four {@link Severity} levels, as the
-     * given plugin would label them (e.g. zally-core's Must/Should/May/Hint)
-     * — see {@link SpecValidationPlugin#getSeverityLabel}. Falls back to the
-     * SPI's own default labels for an absent/unknown/disabled plugin, or one
-     * that throws.
+     * Display text for each of the four {@link Severity} levels. With
+     * exactly one active plugin, uses that plugin's own vocabulary (e.g.
+     * zally-core's Must/Should/May/Hint) — see {@link
+     * SpecValidationPlugin#getSeverityLabel}. With zero or several active
+     * plugins there's no single vocabulary to prefer (two plugins may label
+     * the same {@link Severity} differently), so this falls back to the
+     * SPI's own default labels, same as for an absent/unknown/disabled
+     * plugin or one that throws.
      */
-    private Map<String, String> severityLabelsOf(String pluginId) {
-        SpecValidationPlugin plugin = findEnabledPlugin(pluginId);
+    private Map<String, String> severityLabelsOf(List<String> activePluginIds) {
+        SpecValidationPlugin plugin = activePluginIds.size() == 1 ? findEnabledPlugin(activePluginIds.get(0)) : null;
         Map<String, String> labels = new LinkedHashMap<>();
         for (Severity severity : Severity.values()) {
             labels.put(severity.name(), safeSeverityLabel(plugin, severity));

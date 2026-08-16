@@ -68,7 +68,7 @@
     <p class="lede" style="margin-top: 2.2rem;">Schemas, request bodies, and responses live in their own Model tab — sub-tabbed the same way — so validation findings against your data model show up next to the shape they're about, not mixed in with the endpoints.</p>
     <img class="screenshot" src="screenshot-model.png" alt="Speculate's Model tab showing a Book schema with validation findings and its property tree">
 
-    <p class="lede" style="margin-top: 2.2rem;">Pick a plugin and rule set, click Analyse, and findings appear as badges on exactly the endpoint or schema they apply to — filter by severity, in the plugin's own vocabulary, down to just what needs attention.</p>
+    <p class="lede" style="margin-top: 2.2rem;">Check off which plugins to run and pick each one's rule set, click Analyse, and findings from all of them appear merged as badges on exactly the endpoint or schema they apply to — filter by severity, in the plugin's own vocabulary, down to just what needs attention.</p>
     <img class="screenshot" src="screenshot-validation.png" alt="Speculate's validation picker with a plugin and rule set selected, and a GET /books endpoint showing two findings">
   </section>
 
@@ -97,7 +97,7 @@
       </div>
       <div class="feature-card">
         <h3>Pluggable custom validation</h3>
-        <p>Pick a plugin and rule set on any spec's page and click Analyse — findings show up right where they apply: on the endpoint, schema, request body, or response they're about, with a severity filter (in the plugin's own vocabulary) to focus on just what matters. Ships with Zalando's Zally API-guidelines linter built in; write your own against a small SPI, or drop a jar into <code>~/.speculate/plugins</code>.</p>
+        <p>Check off one or more plugins and their rule sets on any spec's page and click Analyse — findings from all of them show up merged, right where they apply: on the endpoint, schema, request body, or response they're about, with a severity filter (in each plugin's own vocabulary) to focus on just what matters. Ships with Zalando's Zally API-guidelines linter built in; write your own against a small SPI, or drop a jar into <code>~/.speculate/plugins</code>.</p>
       </div>
       <div class="feature-card">
         <h3>Light and dark themes</h3>
@@ -126,16 +126,20 @@
     <p class="lede">
       Define your own rules — naming conventions, required fields, security
       scheme enforcement, and similar house-style checks. Validation is
-      on-demand: a picker on each spec's page lets you choose exactly one
-      enabled plugin and one of its rule sets, then Analyse to run it —
-      findings land right on the endpoint, schema, request body, or response
-      they're about, alongside the parser's own messages. Plugins are
-      discovered from two folders: the bundled
+      on-demand: a picker on each spec's page lists every enabled plugin
+      with a checkbox and its own rule-set dropdown, so several plugins can
+      run together — a general linter alongside a specialised,
+      organization-specific one, say. Click Analyse to run whichever are
+      checked — findings from all of them land merged right on the
+      endpoint, schema, request body, or response they're about, alongside
+      the parser's own messages. Which plugins are checked is remembered
+      per spec, so re-opening it later starts from the same selection.
+      Plugins are discovered from two folders: the bundled
       <code>plugins/</code> next to <code>speculate.jar</code> (which ships
       with <a href="https://github.com/zalando/zally">Zally</a>, Zalando's
       API guidelines linter, as the default) and
       <code>~/.speculate/plugins</code> for your own — an organization-specific
-      ruleset, for instance — toggleable per-plugin from Settings without a
+      ruleset, for instance — toggleable globally from Settings without a
       restart. See the
       <a href="https://github.com/johnjoeallen/speculate#custom-validation">README</a>
       for how to write one.

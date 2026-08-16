@@ -44,34 +44,74 @@ public class PluginValidationService {
      *                  values, or {@link SpecValidationPlugin#DEFAULT_RULE_SET}
      */
     public AggregatedValidationResult validateOne(String rawSpec, String pluginId, String ruleSet) {
-        SpecValidationPlugin plugin = findEnabled(pluginId);
-        if (plugin == null) {
+        if (pluginId == null || pluginId.isBlank()) {
             return new AggregatedValidationResult(List.of(), List.of(), -1, Double.NaN, Double.NaN);
         }
+        return validateMany(rawSpec, List.of(new PluginRunRequest(pluginId, ruleSet)));
+    }
 
-        SpecInput input = SpecInput.builder()
-                .content(rawSpec)
-                .format(detectFormat(rawSpec))
-                .ruleSet(ruleSet == null || ruleSet.isBlank() ? SpecValidationPlugin.DEFAULT_RULE_SET : ruleSet)
-                .build();
-        ValidationResult result = runOne(plugin, input);
-        ValidationSummary summary = toSummary(plugin, result);
-
+    /**
+     * Runs every requested plugin against the same spec and merges the
+     * results: {@link AggregatedValidationResult#pluginSummaries()} keeps
+     * one entry per plugin (so a caller can tell which one, say, errored),
+     * while {@link AggregatedValidationResult#violations()} is the
+     * flattened, plugin-tagged union — this is what lets an endpoint's
+     * findings table show a general linter's complaints side by side with a
+     * specialised plugin's (e.g. a breaking-changes checker) without either
+     * needing to know the other exists. A {@code pluginId} that isn't
+     * loaded/enabled is silently skipped, same as {@link #validateOne}.
+     *
+     * <p>{@code overallScore}/{@code overallScoreWithoutBlockers} are only
+     * ever taken from a single plugin's own result, never combined —
+     * averaging (or otherwise merging) two unrelated scoring models'
+     * outputs into one number wouldn't mean anything, so a run with more
+     * than one plugin reporting a score leaves both {@link Double#NaN}
+     * ("not computed") rather than fabricate a combined figure.
+     */
+    public AggregatedValidationResult validateMany(String rawSpec, List<PluginRunRequest> requests) {
+        SpecFormat format = detectFormat(rawSpec);
+        List<ValidationSummary> summaries = new ArrayList<>();
         List<AttributedViolation> violations = new ArrayList<>();
-        int rulesEvaluatedCount = -1;
-        double overallScore = Double.NaN;
-        double overallScoreWithoutBlockers = Double.NaN;
-        if (result.getStatus() == ValidationResult.Status.SUCCESS) {
-            for (Violation violation : result.getViolations()) {
-                violations.add(new AttributedViolation(plugin.getId(), plugin.getName(), violation));
+        List<ValidationResult> successfulResults = new ArrayList<>();
+
+        for (PluginRunRequest request : requests) {
+            SpecValidationPlugin plugin = findEnabled(request.pluginId());
+            if (plugin == null) {
+                continue;
             }
-            rulesEvaluatedCount = result.getRulesEvaluatedCount();
-            overallScore = result.getOverallScore();
-            overallScoreWithoutBlockers = result.getOverallScoreWithoutBlockers();
+            String ruleSet = request.ruleSet();
+            SpecInput input = SpecInput.builder()
+                    .content(rawSpec)
+                    .format(format)
+                    .ruleSet(ruleSet == null || ruleSet.isBlank() ? SpecValidationPlugin.DEFAULT_RULE_SET : ruleSet)
+                    .build();
+            ValidationResult result = runOne(plugin, input);
+            summaries.add(toSummary(plugin, result));
+            if (result.getStatus() == ValidationResult.Status.SUCCESS) {
+                for (Violation violation : result.getViolations()) {
+                    violations.add(new AttributedViolation(plugin.getId(), plugin.getName(), violation));
+                }
+                successfulResults.add(result);
+            }
         }
 
-        return new AggregatedValidationResult(
-                List.of(summary), violations, rulesEvaluatedCount, overallScore, overallScoreWithoutBlockers);
+        int rulesEvaluatedCount = combinedRulesEvaluatedCount(successfulResults);
+        double overallScore = successfulResults.size() == 1 ? successfulResults.get(0).getOverallScore() : Double.NaN;
+        double overallScoreWithoutBlockers =
+                successfulResults.size() == 1 ? successfulResults.get(0).getOverallScoreWithoutBlockers() : Double.NaN;
+
+        return new AggregatedValidationResult(summaries, violations, rulesEvaluatedCount, overallScore, overallScoreWithoutBlockers);
+    }
+
+    /** Sums whichever results actually reported a count; {@code -1} ("unknown") if none did. */
+    private static int combinedRulesEvaluatedCount(List<ValidationResult> results) {
+        int total = -1;
+        for (ValidationResult result : results) {
+            if (result.getRulesEvaluatedCount() >= 0) {
+                total = (total < 0 ? 0 : total) + result.getRulesEvaluatedCount();
+            }
+        }
+        return total;
     }
 
     private SpecValidationPlugin findEnabled(String pluginId) {
