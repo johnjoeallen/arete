@@ -101,9 +101,12 @@
             <label class="severity-filter-item" th:each="sev : ${T(net.dublinux.speculate.validation.spi.Severity).values()}">
                 <input type="checkbox" class="severity-filter-value" th:value="${sev.name()}" checked>
                 <span th:text="${severityLabels.get(sev.name())}">Error</span>
-                <span th:if="${severityScoreImpact != null and severityScoreImpact.containsKey(sev.name())}"
-                      class="severity-score-impact"
-                      th:text="${#numbers.formatDecimal(-severityScoreImpact.get(sev.name()), 1, 1)} + '%'"></span>
+                <th:block th:if="${severityScoreImpact != null and severityScoreImpact.containsKey(sev.name())}"
+                          th:with="severityImpactStr=${#numbers.formatDecimal(-severityScoreImpact.get(sev.name()), 1, 1)}">
+                    <span th:if="${severityImpactStr != '0.0' and severityImpactStr != '-0.0'}"
+                          class="severity-score-impact"
+                          th:text="${severityImpactStr} + '%'"></span>
+                </th:block>
             </label>
             <label class="severity-filter-item">
                 <input type="checkbox" class="severity-filter-value" value="COMPLIANT" checked>
