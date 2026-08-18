@@ -186,6 +186,7 @@ public class SpecController {
         String currentContentHash = SpecValidationResultService.contentHashOf(entity.getRawContent());
 
         if (ran != null) {
+            model.addAttribute("activateAudit", true);
             Set<String> checkedPluginIds = plugin == null ? Set.of() : Set.copyOf(plugin);
             List<PluginRunRequest> requests = new ArrayList<>();
             for (SpecValidationPlugin candidate : pluginRegistry.getPlugins()) {
@@ -202,16 +203,16 @@ public class SpecController {
             }
             if (requests.isEmpty()) {
                 specValidationResultService.deleteForSpec(id);
-                model.addAttribute("resultUpToDate", false);
+                model.addAttribute("hasBeenAnalysed", false);
             } else {
                 AggregatedValidationResult validation = pluginValidationService.validateMany(entity.getRawContent(), requests);
                 List<String> activePluginIds = requests.stream().map(PluginRunRequest::pluginId).toList();
                 specValidationResultService.save(id, currentContentHash, validation, activePluginIds);
                 populateValidationModel(model, validation, activePluginIds);
-                model.addAttribute("resultUpToDate", true);
             }
         } else {
-            populateCachedValidation(model, id, currentContentHash);
+            model.addAttribute("activateAudit", false);
+            populateCachedValidation(model, id);
         }
 
         populateSidebar(model, q, entity.getId());
@@ -220,14 +221,13 @@ public class SpecController {
     }
 
     /**
-     * Loads whatever the last Analyse run for this spec found, if any, and
-     * whether it's still current for {@code currentContentHash} — used
+     * Loads whatever the last Analyse run for this spec found, if any — used
      * whenever a spec is shown without a fresh run having just happened
      * (a plain reopen, or right after saving a pasted/loaded spec whose
      * title reused an existing row's id).
      */
-    private void populateCachedValidation(Model model, Long specId, String currentContentHash) {
-        model.addAttribute("resultUpToDate", specValidationResultService.isUpToDate(specId, currentContentHash));
+    private void populateCachedValidation(Model model, Long specId) {
+        model.addAttribute("hasBeenAnalysed", false);
         specValidationResultService.findForSpec(specId).ifPresent(cached -> {
             populateValidationModel(model, cached.result(), cached.activePluginIds());
             model.addAttribute("resultFromCache", true);
@@ -235,6 +235,7 @@ public class SpecController {
     }
 
     private void populateValidationModel(Model model, AggregatedValidationResult validation, List<String> activePluginIds) {
+        model.addAttribute("hasBeenAnalysed", true);
         model.addAttribute("validation", validation);
         model.addAttribute("endpointFindings", EndpointFindings.byEndpoint(validation.violations()));
         model.addAttribute("schemaFindings", ComponentFindings.byComponent("schemas", validation.violations()));
@@ -295,6 +296,8 @@ public class SpecController {
      * view page's Refresh control (see {@link #open}).
      */
     private SpecEntity parseAndSave(String content, String filePath, Model model) {
+        model.addAttribute("activateAudit", false);
+        model.addAttribute("hasBeenAnalysed", false);
         try {
             ParsedSpec parsed = specParserService.parse(content);
             model.addAttribute("openApi", parsed.openApi());
@@ -312,7 +315,7 @@ public class SpecController {
                     model.addAttribute("parseErrors", parsed.messages());
                     model.addAttribute("specTitle", saved.getTitle());
                     model.addAttribute("specFilePath", saved.getFilePath());
-                    populateCachedValidation(model, saved.getId(), SpecValidationResultService.contentHashOf(content));
+                    populateCachedValidation(model, saved.getId());
                     populateSidebar(model, null, saved.getId());
                     return saved;
                 } else {

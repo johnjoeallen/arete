@@ -27,70 +27,6 @@
         </ul>
     </div>
 
-    <div th:if="${pluginChoices != null and !pluginChoices.isEmpty() and specId != null}" class="validation-picker-wrapper">
-        <h2>Validation</h2>
-        <form method="get" th:action="@{/spec/{id}(id=${specId})}" class="validation-picker" id="validation-picker-form"
-              th:attr="data-result-up-to-date=${resultUpToDate}">
-            <input type="hidden" name="ran" value="1">
-            <table class="plugin-picker-table">
-                <thead>
-                    <tr><th></th><th>Plugin</th><th>Rule set</th></tr>
-                </thead>
-                <tbody>
-                    <tr th:each="pc : ${pluginChoices}">
-                        <td><input type="checkbox" name="plugin" th:value="${pc.pluginId()}" th:checked="${pc.enabled()}"></td>
-                        <td th:text="${pc.pluginName()}"></td>
-                        <td>
-                            <select th:name="'ruleSet_' + ${pc.pluginId()}">
-                                <option th:each="rs, rsStat : ${pc.ruleSets()}" th:value="${rsStat.index}" th:text="${rs}"
-                                        th:selected="${rsStat.index == pc.selectedRuleSetIndex()}"></option>
-                            </select>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <button type="submit" th:disabled="${resultUpToDate}">Analyse</button>
-        </form>
-    </div>
-
-    <div th:if="${validation != null and !validation.isEmpty()}" class="validation-results">
-        <p th:if="${resultFromCache}" class="validation-summary-line validation-cached-note">Showing results from the last Analyse run.</p>
-        <p th:if="${validation.rulesEvaluatedCount() >= 0}" class="validation-summary-line"
-           th:text="${validation.rulesEvaluatedCount()} + ' rule(s) checked across ' + ${validation.pluginSummaries().size()} + ' validator(s).'"></p>
-        <p th:if="${!T(java.lang.Double).isNaN(validation.overallScore())}" class="validation-summary-line validation-score-line">
-            Score: <span th:text="${#numbers.formatDecimal(validation.overallScore(), 1, 1)}"></span>%
-            <span th:if="${!T(java.lang.Double).isNaN(validation.overallScoreWithoutBlockers())}"
-                  th:text="'(' + ${#numbers.formatDecimal(validation.overallScoreWithoutBlockers(), 1, 1)} + '% without blockers)'"></span>
-        </p>
-        <ul class="plugin-outcomes">
-            <li th:each="s : ${validation.pluginSummaries()}">
-                <span th:text="${s.pluginName()}"></span>:
-                <span th:if="${s.status() == 'SUCCESS'}" th:text="${s.violationCount()} + ' violation(s)'"></span>
-                <span th:unless="${s.status() == 'SUCCESS'}" class="plugin-error" th:text="${s.status()} + ' - ' + ${s.errorMessage()}"></span>
-            </li>
-        </ul>
-        <div class="severity-filter">
-            <label class="severity-filter-item severity-filter-item-all">
-                <input type="checkbox" class="severity-filter-all" checked>
-                All
-            </label>
-            <label class="severity-filter-item" th:each="sev : ${T(net.dublinux.speculate.validation.spi.Severity).values()}">
-                <input type="checkbox" class="severity-filter-value" th:value="${sev.name()}" checked>
-                <span th:text="${severityLabels.get(sev.name())}">Error</span>
-                <th:block th:if="${severityScoreImpact != null and severityScoreImpact.containsKey(sev.name())}"
-                          th:with="severityImpactStr=${#numbers.formatDecimal(-severityScoreImpact.get(sev.name()), 1, 1)}">
-                    <span th:if="${severityImpactStr != '0.0' and severityImpactStr != '-0.0'}"
-                          class="severity-score-impact"
-                          th:text="${severityImpactStr} + '%'"></span>
-                </th:block>
-            </label>
-            <label class="severity-filter-item">
-                <input type="checkbox" class="severity-filter-value" value="COMPLIANT" checked>
-                Compliant
-            </label>
-        </div>
-    </div>
-
     <div th:if="${openApi == null}">
         <p>Could not parse the pasted spec.</p>
     </div>
@@ -105,160 +41,92 @@
         </p>
         <div th:if="${openApi.info != null and openApi.info.description != null}" th:with="renderedDescription=${@markdownRenderer.render(openApi.info.description)}" class="markdown-body" th:utext="${renderedDescription}"></div>
 
-        <div class="tabset top-level-tabset">
+        <div class="tabset top-level-tabset explore-audit-tabset">
             <div class="tabset-nav">
-                <button type="button" class="tab-btn active">Interface</button>
-                <button type="button" class="tab-btn">Model</button>
-                <button type="button" class="tab-btn" th:if="${generalFindings != null and !generalFindings.violations().isEmpty()}">General</button>
+                <button type="button" class="tab-btn" th:classappend="${!activateAudit} ? ' active'">Explore</button>
+                <button type="button" class="tab-btn" th:classappend="${activateAudit} ? ' active'">Audit</button>
             </div>
             <div class="tabset-panels">
-            <div class="tab-panel active">
-            <p th:if="${tagGroups == null or tagGroups.isEmpty()}" class="empty-note">No endpoints defined in this spec.</p>
-            <div th:if="${tagGroups != null}" th:each="group : ${tagGroups}" class="tag-group">
-            <div class="tag-group-header">
-                <h2 class="tag-group-name" th:text="${group.name}">tag</h2>
-                <button type="button" class="toggle-all-btn" data-toggle-all>Expand all</button>
-            </div>
-            <div th:if="${group.description != null}" th:with="renderedDescription=${@markdownRenderer.render(group.description)}" class="tag-group-description markdown-body" th:utext="${renderedDescription}"></div>
-
-            <div th:each="endpoint : ${group.endpoints}" class="endpoint collapsed"
-                 th:with="findings=${endpointFindings != null ? endpointFindings.get(endpoint.method + ' ' + endpoint.path) : null}"
-                 th:attr="data-has-findings=${findings != null and findings.counts().total() > 0}">
-                <h2 class="endpoint-toggle">
-                    <span class="toggle-indicator">&#9662;</span>
-                    <span class="method" th:classappend="'method-' + ${#strings.toLowerCase(endpoint.method)}" th:text="${endpoint.method}">GET</span>
-                    <code th:text="${endpoint.path}">/path</code>
-                    <span th:replace="~{fragments/findings :: findingBadges(${findings})}"></span>
-                </h2>
-                <div class="endpoint-body">
-                <p th:if="${endpoint.operation.summary != null}" th:text="${endpoint.operation.summary}"></p>
-                <div th:if="${endpoint.operation.description != null}" th:with="renderedDescription=${@markdownRenderer.render(endpoint.operation.description)}" class="markdown-body" th:utext="${renderedDescription}"></div>
-                <p th:if="${endpoint.operation.operationId != null}"><em>operationId: </em><code th:text="${endpoint.operation.operationId}"></code></p>
-
-                <div th:replace="~{fragments/findings :: findingsTable(${findings}, ${severityLabels})}"></div>
-
-                <div th:if="${endpoint.operation.parameters != null and !endpoint.operation.parameters.isEmpty()}">
-                    <h3>Parameters</h3>
-                    <table class="params">
-                        <thead>
-                            <tr><th>Name</th><th>In</th><th>Required</th><th>Type</th><th>Description</th></tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="opParam : ${endpoint.operation.parameters}">
-                                <td><code th:text="${opParam.name}"></code></td>
-                                <td th:text="${opParam.in}"></td>
-                                <td th:text="${opParam.required != null and opParam.required ? 'yes' : 'no'}"></td>
-                                <td><div th:insert="~{fragments/schema :: schemaView(${opParam.schema}, 0, true)}"></div></td>
-                                <td th:with="renderedDescription=${@markdownRenderer.render(opParam.description)}" class="markdown-body" th:utext="${renderedDescription}"></td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="tab-panel" th:classappend="${!activateAudit} ? ' active'">
+                    <div th:replace="~{fragments/specbody :: specBody(${tagGroups}, ${componentSchemas}, ${componentRequestBodies}, ${componentResponses}, ${generalFindings}, ${endpointFindings}, ${schemaFindings}, ${requestBodyFindings}, ${responseFindings}, ${severityLabels}, 'viewer')}"></div>
                 </div>
 
-                <div class="section" th:if="${endpoint.operation.requestBody != null and endpoint.operation.requestBody.content != null and !endpoint.operation.requestBody.content.isEmpty()}">
-                    <h3 class="section-toggle"><span class="toggle-indicator">&#9662;</span> Request</h3>
-                    <div class="section-body">
-                        <div th:replace="~{fragments/contenttabs :: contentTabs(${endpoint.operation.requestBody.content})}"></div>
+                <div class="tab-panel" th:classappend="${activateAudit} ? ' active'">
+                    <div th:if="${pluginChoices != null and !pluginChoices.isEmpty() and specId != null}" class="validation-picker-wrapper">
+                        <h2>Validation</h2>
+                        <form method="get" th:action="@{/spec/{id}(id=${specId})}" class="validation-picker" id="validation-picker-form">
+                            <input type="hidden" name="ran" value="1">
+                            <table class="plugin-picker-table">
+                                <thead>
+                                    <tr><th></th><th>Plugin</th><th>Rule set</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="pc : ${pluginChoices}">
+                                        <td><input type="checkbox" name="plugin" th:value="${pc.pluginId()}" th:checked="${pc.enabled()}"></td>
+                                        <td th:text="${pc.pluginName()}"></td>
+                                        <td>
+                                            <select th:name="'ruleSet_' + ${pc.pluginId()}">
+                                                <option th:each="rs, rsStat : ${pc.ruleSets()}" th:value="${rsStat.index}" th:text="${rs}"
+                                                        th:selected="${rsStat.index == pc.selectedRuleSetIndex()}"></option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <button type="submit">Analyse</button>
+                        </form>
                     </div>
-                </div>
 
-                <div class="section collapsed" th:if="${endpoint.operation.responses != null and !endpoint.operation.responses.isEmpty()}">
-                    <h3 class="section-toggle"><span class="toggle-indicator">&#9662;</span> Responses</h3>
-                    <div class="section-body">
-                        <div th:each="respEntry : ${endpoint.operation.responses}" class="response-block">
-                            <h4>
-                                <span th:text="${respEntry.key}">200</span>
-                                <span th:if="${respEntry.value.description != null}" th:text="'- ' + ${respEntry.value.description}"></span>
-                            </h4>
-                            <div th:if="${respEntry.value.content != null and !respEntry.value.content.isEmpty()}"
-                                 th:replace="~{fragments/contenttabs :: contentTabs(${respEntry.value.content})}"></div>
+                    <div class="audit-lower-panel">
+                        <div th:if="${!hasBeenAnalysed}" class="audit-empty-state" role="img" aria-label="No analysis results">
+                            <span class="audit-empty-icon">&#128683;</span>
+                            <p>Run Analyse to see validation results.</p>
                         </div>
-                    </div>
-                </div>
-                </div>
-            </div>
-            </div>
-            </div>
 
-            <div class="tab-panel">
-                <div class="tabset model-subtabset">
-                    <div class="tabset-nav">
-                        <button type="button" class="tab-btn active">Schemas</button>
-                        <button type="button" class="tab-btn">Request Bodies</button>
-                        <button type="button" class="tab-btn">Responses</button>
-                    </div>
-                    <div class="tabset-panels">
-                        <div class="tab-panel active">
-                            <p th:if="${componentSchemas == null or componentSchemas.isEmpty()}" class="empty-note">No component schemas defined in this spec.</p>
-                            <div th:if="${componentSchemas != null and !componentSchemas.isEmpty()}" class="tag-group">
-                                <button type="button" class="toggle-all-btn" data-toggle-all>Expand all</button>
-                                <div th:each="schemaEntry : ${componentSchemas}" class="endpoint collapsed"
-                                     th:with="findings=${schemaFindings != null ? schemaFindings.get(schemaEntry.key) : null}"
-                                     th:attr="data-has-findings=${findings != null and findings.counts().total() > 0}">
-                                    <h2 class="endpoint-toggle">
-                                        <span class="toggle-indicator">&#9662;</span>
-                                        <code th:text="${schemaEntry.key}">SchemaName</code>
-                                        <span th:replace="~{fragments/findings :: findingBadges(${findings})}"></span>
-                                    </h2>
-                                    <div class="endpoint-body">
-                                        <div th:replace="~{fragments/findings :: findingsTable(${findings}, ${severityLabels})}"></div>
-                                        <div th:insert="~{fragments/schema :: schemaView(${schemaEntry.value}, 0, true)}"></div>
-                                    </div>
+                        <div th:if="${hasBeenAnalysed}">
+                            <div class="validation-results">
+                                <p th:if="${resultFromCache}" class="validation-summary-line validation-cached-note">Showing results from the last Analyse run.</p>
+                                <p th:if="${validation.rulesEvaluatedCount() >= 0}" class="validation-summary-line"
+                                   th:text="${validation.rulesEvaluatedCount()} + ' rule(s) checked across ' + ${validation.pluginSummaries().size()} + ' validator(s).'"></p>
+                                <p th:if="${!T(java.lang.Double).isNaN(validation.overallScore())}" class="validation-summary-line validation-score-line">
+                                    Score: <span th:text="${#numbers.formatDecimal(validation.overallScore(), 1, 1)}"></span>%
+                                    <span th:if="${!T(java.lang.Double).isNaN(validation.overallScoreWithoutBlockers())}"
+                                          th:text="'(' + ${#numbers.formatDecimal(validation.overallScoreWithoutBlockers(), 1, 1)} + '% without blockers)'"></span>
+                                </p>
+                                <p th:if="${validation.violations().isEmpty()}" class="validation-summary-line validation-clean-note">No issues found.</p>
+                                <ul class="plugin-outcomes">
+                                    <li th:each="s : ${validation.pluginSummaries()}">
+                                        <span th:text="${s.pluginName()}"></span>:
+                                        <span th:if="${s.status() == 'SUCCESS'}" th:text="${s.violationCount()} + ' violation(s)'"></span>
+                                        <span th:unless="${s.status() == 'SUCCESS'}" class="plugin-error" th:text="${s.status()} + ' - ' + ${s.errorMessage()}"></span>
+                                    </li>
+                                </ul>
+                                <div class="severity-filter">
+                                    <label class="severity-filter-item severity-filter-item-all">
+                                        <input type="checkbox" class="severity-filter-all" checked>
+                                        All
+                                    </label>
+                                    <label class="severity-filter-item" th:each="sev : ${T(net.dublinux.speculate.validation.spi.Severity).values()}">
+                                        <input type="checkbox" class="severity-filter-value" th:value="${sev.name()}" checked>
+                                        <span th:text="${severityLabels.get(sev.name())}">Error</span>
+                                        <th:block th:if="${severityScoreImpact != null and severityScoreImpact.containsKey(sev.name())}"
+                                                  th:with="severityImpactStr=${#numbers.formatDecimal(-severityScoreImpact.get(sev.name()), 1, 1)}">
+                                            <span th:if="${severityImpactStr != '0.0' and severityImpactStr != '-0.0'}"
+                                                  class="severity-score-impact"
+                                                  th:text="${severityImpactStr} + '%'"></span>
+                                        </th:block>
+                                    </label>
+                                    <label class="severity-filter-item">
+                                        <input type="checkbox" class="severity-filter-value" value="COMPLIANT" checked>
+                                        Compliant
+                                    </label>
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="tab-panel">
-                            <p th:if="${componentRequestBodies == null or componentRequestBodies.isEmpty()}" class="empty-note">No reusable request bodies defined in this spec.</p>
-                            <div th:if="${componentRequestBodies != null and !componentRequestBodies.isEmpty()}" class="tag-group">
-                                <button type="button" class="toggle-all-btn" data-toggle-all>Expand all</button>
-                                <div th:each="rbEntry : ${componentRequestBodies}" class="endpoint collapsed"
-                                     th:with="findings=${requestBodyFindings != null ? requestBodyFindings.get(rbEntry.key) : null}"
-                                     th:attr="data-has-findings=${findings != null and findings.counts().total() > 0}">
-                                    <h2 class="endpoint-toggle">
-                                        <span class="toggle-indicator">&#9662;</span>
-                                        <code th:text="${rbEntry.key}">RequestBodyName</code>
-                                        <span th:replace="~{fragments/findings :: findingBadges(${findings})}"></span>
-                                    </h2>
-                                    <div class="endpoint-body">
-                                        <div th:replace="~{fragments/findings :: findingsTable(${findings}, ${severityLabels})}"></div>
-                                        <p th:if="${rbEntry.value.description != null}" th:with="renderedDescription=${@markdownRenderer.render(rbEntry.value.description)}" class="markdown-body" th:utext="${renderedDescription}"></p>
-                                        <div th:if="${rbEntry.value.content != null and !rbEntry.value.content.isEmpty()}"
-                                             th:replace="~{fragments/contenttabs :: contentTabs(${rbEntry.value.content})}"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="tab-panel">
-                            <p th:if="${componentResponses == null or componentResponses.isEmpty()}" class="empty-note">No reusable responses defined in this spec.</p>
-                            <div th:if="${componentResponses != null and !componentResponses.isEmpty()}" class="tag-group">
-                                <button type="button" class="toggle-all-btn" data-toggle-all>Expand all</button>
-                                <div th:each="respEntry : ${componentResponses}" class="endpoint collapsed"
-                                     th:with="findings=${responseFindings != null ? responseFindings.get(respEntry.key) : null}"
-                                     th:attr="data-has-findings=${findings != null and findings.counts().total() > 0}">
-                                    <h2 class="endpoint-toggle">
-                                        <span class="toggle-indicator">&#9662;</span>
-                                        <code th:text="${respEntry.key}">ResponseName</code>
-                                        <span th:replace="~{fragments/findings :: findingBadges(${findings})}"></span>
-                                    </h2>
-                                    <div class="endpoint-body">
-                                        <div th:replace="~{fragments/findings :: findingsTable(${findings}, ${severityLabels})}"></div>
-                                        <p th:if="${respEntry.value.description != null}" th:with="renderedDescription=${@markdownRenderer.render(respEntry.value.description)}" class="markdown-body" th:utext="${renderedDescription}"></p>
-                                        <div th:if="${respEntry.value.content != null and !respEntry.value.content.isEmpty()}"
-                                             th:replace="~{fragments/contenttabs :: contentTabs(${respEntry.value.content})}"></div>
-                                    </div>
-                                </div>
-                            </div>
+                            <div th:replace="~{fragments/specbody :: specBody(${tagGroups}, ${componentSchemas}, ${componentRequestBodies}, ${componentResponses}, ${generalFindings}, ${endpointFindings}, ${schemaFindings}, ${requestBodyFindings}, ${responseFindings}, ${severityLabels}, 'analyser')}"></div>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <div class="tab-panel" th:if="${generalFindings != null and !generalFindings.violations().isEmpty()}">
-                <p class="empty-note">Findings not tied to a specific endpoint or schema — e.g. against <code>info</code>, <code>servers</code>, <code>security</code>, or other shared components.</p>
-                <div th:replace="~{fragments/findings :: findingsTable(${generalFindings}, ${severityLabels})}"></div>
-            </div>
             </div>
         </div>
     </div>

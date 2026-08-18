@@ -61,19 +61,6 @@ public class SpecValidationResultService {
         return repository.findById(specId).map(entity -> fromJson(entity.getResultJson()));
     }
 
-    /**
-     * {@code true} only when a cached result exists <em>and</em> was
-     * computed from exactly this content — the host uses this to decide
-     * whether the Analyse button should start disabled (re-running would
-     * reproduce what's already shown, until either the spec's content or
-     * the picker's own selection changes — see {@code interactivity.js}).
-     */
-    public boolean isUpToDate(Long specId, String currentContentHash) {
-        return repository.findById(specId)
-                .map(entity -> entity.getContentHash().equals(currentContentHash))
-                .orElse(false);
-    }
-
     @Transactional
     public void deleteForSpec(Long specId) {
         repository.deleteBySpecId(specId);

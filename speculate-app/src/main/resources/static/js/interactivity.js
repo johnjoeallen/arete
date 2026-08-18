@@ -1,35 +1,5 @@
 (function () {
 
-    // Analyse button: disabled whenever no plugin row is checked (submitting
-    // with nothing checked would just persist "everything off" and run
-    // nothing), and also disabled up front if the server says the currently
-    // shown results already reflect this exact spec content — re-running
-    // would just reproduce them. That "up to date" state is a one-way latch:
-    // touching any checkbox or rule-set select releases it for the rest of
-    // this page view, on the assumption the visitor is deliberately picking
-    // a different combination worth (re-)running, even back to one that
-    // happens to match what's already shown.
-    var pickerForm = document.getElementById('validation-picker-form');
-    if (pickerForm) {
-        var pluginCheckboxes = Array.prototype.slice.call(pickerForm.querySelectorAll('input[name="plugin"]'));
-        var ruleSetSelects = Array.prototype.slice.call(pickerForm.querySelectorAll('select'));
-        var analyseBtn = pickerForm.querySelector('button[type="submit"]');
-        if (analyseBtn) {
-            var resultUpToDate = pickerForm.getAttribute('data-result-up-to-date') === 'true';
-            function updateAnalyseDisabled() {
-                var anyChecked = pluginCheckboxes.some(function (cb) { return cb.checked; });
-                analyseBtn.disabled = resultUpToDate || !anyChecked;
-            }
-            pluginCheckboxes.concat(ruleSetSelects).forEach(function (control) {
-                control.addEventListener('change', function () {
-                    resultUpToDate = false;
-                    updateAnalyseDisabled();
-                });
-            });
-            updateAnalyseDisabled();
-        }
-    }
-
     // Collapsible endpoint sections, with an expand/collapse-all button
     // scoped to each tag section.
     document.querySelectorAll('.tag-group').forEach(function (group) {
@@ -131,11 +101,11 @@
         function applyFilter() {
             var active = valueCheckboxes.filter(function (cb) { return cb.checked; }).map(function (cb) { return cb.value; });
 
-            document.querySelectorAll('.endpoint-findings tbody tr[data-severity]').forEach(function (row) {
+            document.querySelectorAll('[data-view-mode="analyser"] .endpoint-findings tbody tr[data-severity]').forEach(function (row) {
                 row.style.display = active.indexOf(row.getAttribute('data-severity')) === -1 ? 'none' : '';
             });
 
-            document.querySelectorAll('.endpoint').forEach(function (card) {
+            document.querySelectorAll('[data-view-mode="analyser"] .endpoint').forEach(function (card) {
                 if (card.getAttribute('data-has-findings') === 'false') {
                     card.style.display = active.indexOf('COMPLIANT') === -1 ? 'none' : '';
                     return;

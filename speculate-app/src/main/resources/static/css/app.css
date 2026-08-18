@@ -264,6 +264,7 @@ th { background: var(--surface); font-family: var(--font-heading); font-weight: 
 .validation-summary-line { color: var(--muted-fg); margin-top: 0; }
 .validation-score-line { font-weight: 600; }
 .validation-cached-note { font-style: italic; }
+.validation-clean-note { color: var(--success); font-weight: 600; }
 .plugin-outcomes { list-style: none; padding: 0; margin: 0 0 0.8em; font-size: 0.92em; }
 .plugin-outcomes .plugin-error { color: var(--danger); }
 
@@ -306,6 +307,19 @@ table.endpoint-findings { width: 100%; }
 
 .top-level-tabset { margin-top: 1.25em; }
 .top-level-tabset > .tabset-nav .tab-btn { font-size: 1.05em; padding: 0.5em 1.1em; }
+
+/* The shared spec-body fragment is analysis-agnostic — it always emits
+   finding badges/tables and data-has-findings attributes. The Explore
+   instance's container carries data-view-mode="viewer", which is what
+   suppresses that decoration here, at the container level rather than on
+   each indicator element individually. */
+[data-view-mode="viewer"] .finding-badges,
+[data-view-mode="viewer"] .validation-findings-section,
+[data-view-mode="viewer"] .general-tab-btn,
+[data-view-mode="viewer"] .general-tab-panel { display: none; }
+
+.audit-empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.6em; padding: 4em 1em; color: var(--muted-fg); text-align: center; }
+.audit-empty-icon { font-size: 3em; line-height: 1; opacity: 0.6; }
 
 .empty-note { color: var(--muted-fg); }
 
