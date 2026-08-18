@@ -308,6 +308,14 @@ table.endpoint-findings { width: 100%; }
 .top-level-tabset { margin-top: 1.25em; }
 .top-level-tabset > .tabset-nav .tab-btn { font-size: 1.05em; padding: 0.5em 1.1em; }
 
+.explore-audit-tabset > .tabset-panels > .tab-panel {
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: var(--shadow-card);
+    padding: 1.25em 1.5em;
+}
+
 /* The shared spec-body fragment is analysis-agnostic — it always emits
    finding badges/tables and data-has-findings attributes. The Explore
    instance's container carries data-view-mode="viewer", which is what
