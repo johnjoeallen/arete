@@ -27,6 +27,11 @@ rules:
   JSON009: rules/JSON009.md
   HTTP004: rules/HTTP004.md
   HTTP005: rules/HTTP005.md
+  HTTP001: rules/HTTP001.md
+  HTTP002: rules/HTTP002.md
+  HTTP003: rules/HTTP003.md
+  HTTP006: rules/HTTP006.md
+  HTTP008: rules/HTTP008.md
   UPDATE002: rules/UPDATE002.md
 
 policies:
@@ -38,3 +43,4 @@ detectors:
   text-style: detectors/text-style/Detector.md
   naming: detectors/naming/Detector.md
   schema: detectors/schema/Detector.md
+  operation-semantics: detectors/operation-semantics/Detector.md
