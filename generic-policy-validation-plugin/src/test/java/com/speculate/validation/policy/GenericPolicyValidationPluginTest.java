@@ -72,6 +72,9 @@ class GenericPolicyValidationPluginTest {
                   properties:
                     customer_name: { type: string }
                     customer: { type: array, items: { type: string } }
+                    status: { type: string, enum: [ACTIVE, DISABLED] }
+                    rank: { type: integer, enum: [1, 2] }
+                    legacy: { type: string, nullable: true }
             """;
 
     @Test
@@ -210,6 +213,18 @@ class GenericPolicyValidationPluginTest {
     }
 
     @Test
+    void schemaDetectorUsesOnlyStablePrimitivePropertyFacts() {
+        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
+                .readContents(NAMING_SPEC, null, new ParseOptions()).getOpenAPI());
+        GroovyDetectorRuntime runtime = new GroovyDetectorRuntime();
+
+        assertEquals(1, runtime.execute(bundle.detectors().get("schema"), api, bundle.rules().get("JSON006")).size());
+        assertEquals(1, runtime.execute(bundle.detectors().get("schema"), api, bundle.rules().get("JSON007")).size());
+        assertEquals(1, runtime.execute(bundle.detectors().get("schema"), api, bundle.rules().get("JSON009")).size());
+    }
+
+    @Test
     void packagesTheStarterBundleResources() {
         assertResource("api-policy/PolicyBundle.yaml");
         assertResource("api-policy/rules/REST001.md");
@@ -234,7 +249,7 @@ class GenericPolicyValidationPluginTest {
 
     private static Map<String, String> bundledResources() {
         Map<String, String> resources = new LinkedHashMap<>();
-        for (String path : new String[] {"PolicyBundle.yaml", "rules/REST001.md", "rules/DOC001.md", "rules/DOC002.md", "rules/DOC003.md", "rules/DOC004.md", "rules/DOC005.md", "rules/DOC009.md", "rules/CASE001.md", "rules/CASE002.md", "rules/CASE003.md", "rules/CASE004.md", "rules/CASE005.md", "rules/REST002.md", "rules/REST005.md", "rules/REST006.md", "rules/JSON003.md", "rules/JSON004.md", "policies/Starter.md", "detectors/resource-path/Detector.md", "detectors/resource-path/Detector.groovy", "detectors/operation/Detector.md", "detectors/operation/Detector.groovy", "detectors/text-style/Detector.md", "detectors/text-style/Detector.groovy", "detectors/naming/Detector.md", "detectors/naming/Detector.groovy"}) {
+        for (String path : new String[] {"PolicyBundle.yaml", "rules/REST001.md", "rules/DOC001.md", "rules/DOC002.md", "rules/DOC003.md", "rules/DOC004.md", "rules/DOC005.md", "rules/DOC009.md", "rules/CASE001.md", "rules/CASE002.md", "rules/CASE003.md", "rules/CASE004.md", "rules/CASE005.md", "rules/REST002.md", "rules/REST005.md", "rules/REST006.md", "rules/JSON003.md", "rules/JSON004.md", "rules/JSON006.md", "rules/JSON007.md", "rules/JSON009.md", "policies/Starter.md", "detectors/resource-path/Detector.md", "detectors/resource-path/Detector.groovy", "detectors/operation/Detector.md", "detectors/operation/Detector.groovy", "detectors/text-style/Detector.md", "detectors/text-style/Detector.groovy", "detectors/naming/Detector.md", "detectors/naming/Detector.groovy", "detectors/schema/Detector.md", "detectors/schema/Detector.groovy"}) {
             resources.put(path, readResource("api-policy/" + path));
         }
         return resources;

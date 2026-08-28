@@ -70,6 +70,9 @@ final class OpenApiMapAdapter {
                         propertyMap.put("pointer", schemaMap.get("pointer") + "/properties/" + propertyName.replace("~", "~0").replace("/", "~1"));
                         propertyMap.put("type", property.getType());
                         propertyMap.put("format", property.getFormat());
+                        propertyMap.put("nullable", Boolean.TRUE.equals(property.getNullable()));
+                        propertyMap.put("required", schema.getRequired() != null && schema.getRequired().contains(propertyName));
+                        propertyMap.put("enumPresent", property.getEnum() != null && !property.getEnum().isEmpty());
                         properties.add(propertyMap);
                     }
                 }

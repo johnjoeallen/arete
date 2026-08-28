@@ -20,6 +20,9 @@ rules:
   REST006: rules/REST006.md
   JSON003: rules/JSON003.md
   JSON004: rules/JSON004.md
+  JSON006: rules/JSON006.md
+  JSON007: rules/JSON007.md
+  JSON009: rules/JSON009.md
 
 policies:
   Starter: policies/Starter.md
@@ -29,3 +32,4 @@ detectors:
   operation: detectors/operation/Detector.md
   text-style: detectors/text-style/Detector.md
   naming: detectors/naming/Detector.md
+  schema: detectors/schema/Detector.md
