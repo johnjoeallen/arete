@@ -3,8 +3,7 @@ bundleId: speculate-starter-policy
 bundleVersion: 0.1.0
 
 rules:
-  RPOV: rules/RPOV.md
-  RPQP: rules/RPQP.md
+  REST001: rules/REST001.md
 
 policies:
   Starter: policies/Starter.md

@@ -71,7 +71,11 @@ public final class GenericPolicyValidationPlugin implements SpecValidationPlugin
             rulesEvaluated++;
             List<Occurrence> occurrences;
             try {
-                occurrences = detectorRuntime.execute(currentBundle.detectors().get(rule.detector()), api, rule);
+                Detector detector = currentBundle.detectors().get(rule.detector());
+                if (detector == null) {
+                    return ValidationResult.pluginError("Detector '" + rule.detector() + "' required by " + rule.id() + " is not available in this bundle");
+                }
+                occurrences = detectorRuntime.execute(detector, api, rule);
             } catch (DetectorException e) {
                 return ValidationResult.pluginError("Detector '" + rule.detector() + "' failed for " + rule.id() + ": " + e.getMessage());
             }

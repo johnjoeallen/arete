@@ -51,8 +51,10 @@ final class PolicyBundleLoader {
             Rule rule = parseRule(path, resources.read(path));
             if (!entry.getKey().equals(rule.id())) throw new BundleValidationException(path + ": manifest rule id does not match rule id");
             Detector detector = detectors.get(rule.detector());
-            if (detector == null) throw new BundleValidationException(path + ": unknown detector '" + rule.detector() + "'");
-            validateRule(path, rule, detector);
+            // A catalogue can document rules before their reusable detector
+            // ships. Keep those rules loadable, but only validate parameters
+            // for detector capabilities that are currently available.
+            if (detector != null) validateRule(path, rule, detector);
             rules.put(rule.id(), rule);
         }
 

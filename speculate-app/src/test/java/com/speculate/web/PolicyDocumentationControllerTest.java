@@ -33,9 +33,9 @@ class PolicyDocumentationControllerTest {
     @Test
     void rendersDocumentationFromAPluginAtItsStableUrl() throws Exception {
         when(pluginRegistry.getPlugins()).thenReturn(List.of(new DocumentedPlugin()));
-        when(markdownRenderer.render("# RPQP\n\nRule text.")).thenReturn("<h1>RPQP</h1><p>Rule text.</p>");
+        when(markdownRenderer.render("# REST001\n\nRule text.")).thenReturn("<h1>REST001</h1><p>Rule text.</p>");
 
-        mockMvc.perform(get("/plugins/generic-policy/rules/RPQP"))
+        mockMvc.perform(get("/plugins/generic-policy/rules/REST001"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Rule text.")));
     }
@@ -56,7 +56,7 @@ class PolicyDocumentationControllerTest {
         @Override public void configure(Map<String, String> config) { }
         @Override public ValidationResult validate(SpecInput input) { return ValidationResult.success(List.of(), 0); }
         @Override public Optional<RuleDocumentation> getRuleDocumentation(String ruleId) {
-            return "RPQP".equals(ruleId) ? Optional.of(new RuleDocumentation("RPQP", "# RPQP\n\nRule text.")) : Optional.empty();
+            return "REST001".equals(ruleId) ? Optional.of(new RuleDocumentation("REST001", "# REST001\n\nRule text.")) : Optional.empty();
         }
     }
 }

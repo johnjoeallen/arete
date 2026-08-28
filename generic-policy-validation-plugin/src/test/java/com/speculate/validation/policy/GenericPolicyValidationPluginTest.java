@@ -11,6 +11,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -36,18 +37,6 @@ class GenericPolicyValidationPluginTest {
                     '200': { description: OK }
             """;
 
-    private static final String QUERY_PREDICATE_SPEC = """
-            openapi: 3.0.0
-            info:
-              title: Test API
-              version: 1.0.0
-            paths:
-              /pet/findByStatus:
-                get:
-                  responses:
-                    '200': { description: OK }
-            """;
-
     @Test
     void executesTheBundledGroovyDetectorAndDeductsOnlyOncePerRule() {
         GenericPolicyValidationPlugin plugin = new GenericPolicyValidationPlugin();
@@ -56,16 +45,16 @@ class GenericPolicyValidationPluginTest {
         ValidationResult result = plugin.validate(input(ACTION_PATH_SPEC));
 
         assertEquals(ValidationResult.Status.SUCCESS, result.getStatus());
-        assertEquals(2, result.getRulesEvaluatedCount());
+        assertEquals(1, result.getRulesEvaluatedCount());
         assertEquals(2, result.getViolations().size());
-        assertEquals("RPOV", result.getViolations().get(0).getRuleId());
+        assertEquals("REST001", result.getViolations().get(0).getRuleId());
         assertEquals(90, result.getOverallScore());
         assertEquals(90, result.getOverallScoreWithoutBlockers());
         assertEquals(10, result.getViolations().get(0).getScoreImprovement());
         assertEquals(10, result.getViolations().get(1).getScoreImprovement());
-        assertEquals("http://localhost:6809/plugins/generic-policy/rules/RPOV",
+        assertEquals("http://localhost:6809/plugins/generic-policy/rules/REST001",
                 result.getViolations().get(0).getDocumentationUrl());
-        assertTrue(plugin.getRuleDocumentation("RPOV").orElseThrow().markdown().contains("GET /customers"));
+        assertTrue(plugin.getRuleDocumentation("REST001").orElseThrow().markdown().contains("GET /customers"));
     }
 
     @Test
@@ -81,24 +70,9 @@ class GenericPolicyValidationPluginTest {
     }
 
     @Test
-    void reportsQueryPredicatePathsAgainstTheirAffectedOperation() {
-        GenericPolicyValidationPlugin plugin = new GenericPolicyValidationPlugin();
-        plugin.configure(Map.of());
-
-        ValidationResult result = plugin.validate(input(QUERY_PREDICATE_SPEC));
-
-        assertEquals(ValidationResult.Status.SUCCESS, result.getStatus());
-        assertEquals(1, result.getViolations().size());
-        assertEquals("RPQP", result.getViolations().get(0).getRuleId());
-        assertEquals("/paths/~1pet~1findByStatus/get", result.getViolations().get(0).getPointer());
-        assertEquals(java.util.List.of("GET /pet/findByStatus"), result.getViolations().get(0).getPaths());
-        assertEquals(95, result.getOverallScore());
-    }
-
-    @Test
     void rejectsAnUnknownRuleParameterWhileLoadingTheBundle() {
         Map<String, String> resources = bundledResources();
-        resources.put("rules/RPOV.md", resources.get("rules/RPOV.md").replace("match: operation-verb", "match: operation-verb\n  banana: true"));
+        resources.put("rules/REST001.md", resources.get("rules/REST001.md").replace("match: operation-verb", "match: operation-verb\n  banana: true"));
 
         BundleValidationException error = assertThrows(BundleValidationException.class,
                 () -> new PolicyBundleLoader().load(resources::get));
@@ -109,7 +83,7 @@ class GenericPolicyValidationPluginTest {
     @Test
     void rejectsAMissingRequiredRuleParameterWhileLoadingTheBundle() {
         Map<String, String> resources = bundledResources();
-        resources.put("rules/RPOV.md", resources.get("rules/RPOV.md").replace("parameters:\n  match: operation-verb\n", "parameters: {}\n"));
+        resources.put("rules/REST001.md", resources.get("rules/REST001.md").replace("parameters:\n  match: operation-verb\n", "parameters: {}\n"));
 
         BundleValidationException error = assertThrows(BundleValidationException.class,
                 () -> new PolicyBundleLoader().load(resources::get));
@@ -129,10 +103,30 @@ class GenericPolicyValidationPluginTest {
     }
 
     @Test
+    void acceptsCatalogueRulesWhoseDetectorIsNotYetBundled() {
+        Map<String, String> resources = bundledResources();
+        resources.put("PolicyBundle.yaml", resources.get("PolicyBundle.yaml")
+                .replace("  REST001: rules/REST001.md", "  REST001: rules/REST001.md\n  DOC001: rules/DOC001.md"));
+        resources.put("rules/DOC001.md", """
+                ---
+                id: DOC001
+                category: Documentation
+                detector: operation
+                scope: operation
+                parameters:
+                  summary: absent
+                ---
+
+                # DOC001 — Operation summary is missing
+                """);
+
+        assertDoesNotThrow(() -> new PolicyBundleLoader().load(resources::get));
+    }
+
+    @Test
     void packagesTheStarterBundleResources() {
         assertResource("api-policy/PolicyBundle.yaml");
-        assertResource("api-policy/rules/RPOV.md");
-        assertResource("api-policy/rules/RPQP.md");
+        assertResource("api-policy/rules/REST001.md");
         assertResource("api-policy/policies/Starter.md");
         assertResource("api-policy/detectors/resource-path/Detector.md");
         assertResource("api-policy/detectors/resource-path/Detector.groovy");
@@ -144,7 +138,7 @@ class GenericPolicyValidationPluginTest {
 
     private static Map<String, String> bundledResources() {
         Map<String, String> resources = new LinkedHashMap<>();
-        for (String path : new String[] {"PolicyBundle.yaml", "rules/RPOV.md", "rules/RPQP.md", "policies/Starter.md", "detectors/resource-path/Detector.md", "detectors/resource-path/Detector.groovy"}) {
+        for (String path : new String[] {"PolicyBundle.yaml", "rules/REST001.md", "policies/Starter.md", "detectors/resource-path/Detector.md", "detectors/resource-path/Detector.groovy"}) {
             resources.put(path, readResource("api-policy/" + path));
         }
         return resources;
