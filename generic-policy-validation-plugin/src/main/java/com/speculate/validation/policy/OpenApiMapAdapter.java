@@ -41,6 +41,10 @@ final class OpenApiMapAdapter {
                         detail.put("pointer", path.get("pointer") + "/" + operationEntry.getKey().name().toLowerCase());
                         detail.put("summary", operation == null ? null : operation.getSummary());
                         detail.put("requestBodyPresent", operation != null && operation.getRequestBody() != null);
+                        List<String> mediaTypes = new ArrayList<>();
+                        if (operation != null && operation.getRequestBody() != null && operation.getRequestBody().getContent() != null) {
+                            mediaTypes.addAll(operation.getRequestBody().getContent().keySet());
+                        }
                         List<Map<String, Object>> responses = new ArrayList<>();
                         if (operation != null && operation.getResponses() != null) {
                             for (Map.Entry<String, ?> responseEntry : operation.getResponses().entrySet()) {
@@ -50,10 +54,13 @@ final class OpenApiMapAdapter {
                                 responseMap.put("description", responseProperty(response, "getDescription"));
                                 Object headers = responseProperty(response, "getHeaders");
                                 responseMap.put("headers", headers instanceof Map<?, ?> map ? new ArrayList<>(map.keySet()) : List.of());
+                                Object content = responseProperty(response, "getContent");
+                                if (content instanceof Map<?, ?> map) mediaTypes.addAll(map.keySet().stream().map(Object::toString).toList());
                                 responses.add(responseMap);
                             }
                         }
                         detail.put("responses", responses);
+                        detail.put("mediaTypes", mediaTypes);
                         List<Map<String, Object>> parameters = new ArrayList<>();
                         addParameters(parameters, entry.getValue().getParameters(), path.get("pointer") + "/parameters");
                         if (operation != null) addParameters(parameters, operation.getParameters(), detail.get("pointer") + "/parameters");

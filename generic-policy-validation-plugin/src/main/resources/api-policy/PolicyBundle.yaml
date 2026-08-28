@@ -38,6 +38,11 @@ rules:
   BULK001: rules/BULK001.md
   BULK002: rules/BULK002.md
   BULK003: rules/BULK003.md
+  VERSION001: rules/VERSION001.md
+  VERSION002: rules/VERSION002.md
+  VERSION003: rules/VERSION003.md
+  VERSION004: rules/VERSION004.md
+  COMPAT001: rules/COMPAT001.md
   STATUS001: rules/STATUS001.md
   STATUS002: rules/STATUS002.md
   STATUS003: rules/STATUS003.md
@@ -56,5 +61,7 @@ detectors:
   operation-semantics: detectors/operation-semantics/Detector.md
   manual: detectors/manual/Detector.md
   bulk-operation: detectors/bulk-operation/Detector.md
+  versioning: detectors/versioning/Detector.md
+  compatibility: detectors/compatibility/Detector.md
   response-code: detectors/response-code/Detector.md
   response-header: detectors/response-header/Detector.md
