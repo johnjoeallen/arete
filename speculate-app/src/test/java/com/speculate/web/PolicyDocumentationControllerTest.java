@@ -37,7 +37,8 @@ class PolicyDocumentationControllerTest {
 
         mockMvc.perform(get("/plugins/generic-policy/rules/REST001"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("Rule text.")));
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Rule text.")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("openapi-viewer:theme")));
     }
 
     @Test
