@@ -64,12 +64,12 @@
         if (parameters.convention == 'sentence-case') {
             // Avoid false confidence: acronym handling needs an explicit policy
             // capability, so an internal all-caps word is non-conforming today.
-            if (!Character.isUpperCase(summary.charAt(0)) || summary ==~ /.*\\b[A-Z]{2,}\\b.*/) return false
+            if (Character.isUpperCase(summary.charAt(0)) && !(summary ==~ /.*\\b[A-Z]{2,}\\b.*/)) return false
         }
         if (parameters['trailing-period'] == 'present' && !summary.endsWith('.')) return false
         if (parameters['trailing-period'] == 'absent' && summary.endsWith('.')) return false
         if (parameters.containsKey('maximum-length') && summary.length() <= parameters['maximum-length']) return false
-        if (parameters.match == 'non-action-oriented' && !actionVerbs.any { verb -> summary == verb || summary.startsWith(verb + ' ') }) return false
+        if (parameters.match == 'non-action-oriented' && actionVerbs.any { verb -> summary == verb || summary.startsWith(verb + ' ') }) return false
         true
     }
 

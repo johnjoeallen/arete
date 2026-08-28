@@ -111,7 +111,7 @@ final class PolicyBundleLoader {
             else if ("PROHIBITED".equals(value)) dispositions.put(entry.getKey(), new Prohibited());
             else throw new BundleValidationException(path + ": " + entry.getKey() + " must be an integer from 0 to 100 or PROHIBITED");
         }
-        return new Policy(requiredString(path, "id", data.get("id")), Map.copyOf(dispositions));
+        return new Policy(requiredString(path, "id", data.get("id")), dispositions);
     }
 
     private static void validateRule(String path, Rule rule, Detector detector) {

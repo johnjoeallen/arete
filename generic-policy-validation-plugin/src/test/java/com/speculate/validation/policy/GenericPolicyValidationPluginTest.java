@@ -39,6 +39,20 @@ class GenericPolicyValidationPluginTest {
                     '200': { description: OK }
             """;
 
+    private static final String COMPLIANT_STARTER_SPEC = """
+            openapi: 3.0.0
+            info: { title: Test API, version: 1.0.0 }
+            paths:
+              /customers:
+                get:
+                  summary: Get customers
+                  responses: { '200': { description: OK } }
+              /orders:
+                get:
+                  summary: Get orders
+                  responses: { '200': { description: OK } }
+            """;
+
     private static final String SUMMARY_STYLE_SPEC = """
             openapi: 3.0.0
             info: { title: Test API, version: 1.0.0 }
@@ -85,11 +99,12 @@ class GenericPolicyValidationPluginTest {
         ValidationResult result = plugin.validate(input(ACTION_PATH_SPEC));
 
         assertEquals(ValidationResult.Status.SUCCESS, result.getStatus());
-        assertEquals(1, result.getRulesEvaluatedCount());
-        assertEquals(2, result.getViolations().size());
+        assertEquals(20, result.getRulesEvaluatedCount());
+        assertEquals(8, result.getViolations().size());
         assertEquals("REST001", result.getViolations().get(0).getRuleId());
-        assertEquals(90, result.getOverallScore());
-        assertEquals(90, result.getOverallScoreWithoutBlockers());
+        assertEquals(2, result.getViolations().stream().filter(violation -> violation.getRuleId().equals("REST001")).count());
+        assertEquals(60, result.getOverallScore());
+        assertEquals(60, result.getOverallScoreWithoutBlockers());
         assertEquals(10, result.getViolations().get(0).getScoreImprovement());
         assertEquals(10, result.getViolations().get(1).getScoreImprovement());
         assertEquals("http://localhost:6809/plugins/generic-policy/rules/REST001",
@@ -98,14 +113,15 @@ class GenericPolicyValidationPluginTest {
     }
 
     @Test
-    void returnsAFullScoreWhenTheRuleDoesNotMatch() {
+    void returnsAFullScoreWhenNoStarterRuleMatches() {
         GenericPolicyValidationPlugin plugin = new GenericPolicyValidationPlugin();
         plugin.configure(Map.of());
 
-        ValidationResult result = plugin.validate(input(ACTION_PATH_SPEC.replace("/getAllCustomers", "/customers-list").replace("/deleteCustomer", "/customer")));
+        ValidationResult result = plugin.validate(input(COMPLIANT_STARTER_SPEC));
 
         assertEquals(ValidationResult.Status.SUCCESS, result.getStatus());
-        assertTrue(result.getViolations().isEmpty());
+        assertEquals(20, result.getRulesEvaluatedCount());
+        assertTrue(result.getViolations().isEmpty(), () -> result.getViolations().stream().map(violation -> violation.getRuleId()).toList().toString());
         assertEquals(100, result.getOverallScore());
     }
 

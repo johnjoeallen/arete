@@ -24,7 +24,13 @@ record Rule(String id, String title, String category, String detector, String sc
 
 record Detector(String id, String language, String source, List<String> scopes, Map<String, ParameterDefinition> parameters) { }
 record ParameterDefinition(String type, boolean required, List<String> values) { }
-record Policy(String id, Map<String, PolicyDisposition> dispositions) { }
+record Policy(String id, Map<String, PolicyDisposition> dispositions) {
+    Policy {
+        // Policy declaration order is report order. Map.copyOf deliberately
+        // makes no iteration-order promise, so retain the YAML LinkedHashMap.
+        dispositions = Collections.unmodifiableMap(new LinkedHashMap<>(dispositions));
+    }
+}
 sealed interface PolicyDisposition permits Deduction, Prohibited { }
 record Deduction(int points) implements PolicyDisposition { }
 record Prohibited() implements PolicyDisposition { }

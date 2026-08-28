@@ -27,7 +27,7 @@ public final class GenericPolicyValidationPlugin implements SpecValidationPlugin
     private final GroovyDetectorRuntime detectorRuntime = new GroovyDetectorRuntime();
 
     @Override public String getId() { return "generic-policy"; }
-    @Override public String getName() { return "Speculate Policy Driven"; }
+    @Override public String getName() { return "Speculate Policy Engine"; }
     @Override public String getVersion() { return "0.1.0-SNAPSHOT"; }
 
     @Override

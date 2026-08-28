@@ -77,7 +77,10 @@
         if (parameters.convention && parameters.match == 'non-conforming' && conforms(name, parameters.convention)) return false
         if (parameters.match == 'unsupported-character' && name ==~ /[A-Za-z][A-Za-z0-9_-]*/) return false
         if (parameters.suffix && parameters.match == 'present' && !name.endsWith(parameters.suffix)) return false
-        if (parameters.semantic == 'collection' && !plural(name)) return false
+        // `collection` identifies the resource context: report its name only
+        // when it is singular. `singular` and `plural` identify the undesirable
+        // name form directly for property-oriented rules.
+        if (parameters.semantic == 'collection' && plural(name)) return false
         if (parameters.semantic == 'singular' && plural(name)) return false
         if (parameters.semantic == 'plural' && !plural(name)) return false
         if (parameters['schema-type'] == 'array' && candidate.type != 'array') return false
