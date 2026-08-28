@@ -23,7 +23,7 @@ public final class GenericPolicyValidationPlugin implements SpecValidationPlugin
     private final GroovyDetectorRuntime detectorRuntime = new GroovyDetectorRuntime();
 
     @Override public String getId() { return "generic-policy"; }
-    @Override public String getName() { return "Generic API Policy"; }
+    @Override public String getName() { return "Speculate Policy Driven"; }
     @Override public String getVersion() { return "0.1.0-SNAPSHOT"; }
 
     @Override
@@ -83,6 +83,7 @@ public final class GenericPolicyValidationPlugin implements SpecValidationPlugin
                         .severity(disposition instanceof Prohibited ? Severity.ERROR : Severity.WARNING)
                         .scoreImprovement(disposition instanceof Deduction deduction ? deduction.points() : 0);
                 if (occurrence.pointer() != null) violation.pointer(occurrence.pointer());
+                if (occurrence.path() != null) violation.paths(List.of(occurrence.path()));
                 violations.add(violation.build());
             }
         }

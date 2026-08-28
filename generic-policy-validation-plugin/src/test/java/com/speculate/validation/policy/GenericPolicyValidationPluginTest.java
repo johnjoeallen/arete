@@ -36,6 +36,18 @@ class GenericPolicyValidationPluginTest {
                     '200': { description: OK }
             """;
 
+    private static final String QUERY_PREDICATE_SPEC = """
+            openapi: 3.0.0
+            info:
+              title: Test API
+              version: 1.0.0
+            paths:
+              /pet/findByStatus:
+                get:
+                  responses:
+                    '200': { description: OK }
+            """;
+
     @Test
     void executesTheBundledGroovyDetectorAndDeductsOnlyOncePerRule() {
         GenericPolicyValidationPlugin plugin = new GenericPolicyValidationPlugin();
@@ -44,7 +56,7 @@ class GenericPolicyValidationPluginTest {
         ValidationResult result = plugin.validate(input(ACTION_PATH_SPEC));
 
         assertEquals(ValidationResult.Status.SUCCESS, result.getStatus());
-        assertEquals(1, result.getRulesEvaluatedCount());
+        assertEquals(2, result.getRulesEvaluatedCount());
         assertEquals(2, result.getViolations().size());
         assertEquals("REST001", result.getViolations().get(0).getRuleId());
         assertEquals(90, result.getOverallScore());
@@ -63,6 +75,21 @@ class GenericPolicyValidationPluginTest {
         assertEquals(ValidationResult.Status.SUCCESS, result.getStatus());
         assertTrue(result.getViolations().isEmpty());
         assertEquals(100, result.getOverallScore());
+    }
+
+    @Test
+    void reportsQueryPredicatePathsAgainstTheirAffectedOperation() {
+        GenericPolicyValidationPlugin plugin = new GenericPolicyValidationPlugin();
+        plugin.configure(Map.of());
+
+        ValidationResult result = plugin.validate(input(QUERY_PREDICATE_SPEC));
+
+        assertEquals(ValidationResult.Status.SUCCESS, result.getStatus());
+        assertEquals(1, result.getViolations().size());
+        assertEquals("REST002", result.getViolations().get(0).getRuleId());
+        assertEquals("/paths/~1pet~1findByStatus/get", result.getViolations().get(0).getPointer());
+        assertEquals(java.util.List.of("GET /pet/findByStatus"), result.getViolations().get(0).getPaths());
+        assertEquals(95, result.getOverallScore());
     }
 
     @Test
@@ -113,7 +140,7 @@ class GenericPolicyValidationPluginTest {
 
     private static Map<String, String> bundledResources() {
         Map<String, String> resources = new LinkedHashMap<>();
-        for (String path : new String[] {"PolicyBundle.yaml", "rules/REST001.md", "policies/Starter.md", "detectors/resource-path/Detector.md", "detectors/resource-path/Detector.groovy"}) {
+        for (String path : new String[] {"PolicyBundle.yaml", "rules/REST001.md", "rules/REST002.md", "policies/Starter.md", "detectors/resource-path/Detector.md", "detectors/resource-path/Detector.groovy"}) {
             resources.put(path, readResource("api-policy/" + path));
         }
         return resources;
