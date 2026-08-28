@@ -16,6 +16,8 @@ rules:
   CASE004: rules/CASE004.md
   CASE005: rules/CASE005.md
   REST002: rules/REST002.md
+  REST003: rules/REST003.md
+  REST004: rules/REST004.md
   REST005: rules/REST005.md
   REST006: rules/REST006.md
   JSON003: rules/JSON003.md
@@ -23,6 +25,9 @@ rules:
   JSON006: rules/JSON006.md
   JSON007: rules/JSON007.md
   JSON009: rules/JSON009.md
+  HTTP004: rules/HTTP004.md
+  HTTP005: rules/HTTP005.md
+  UPDATE002: rules/UPDATE002.md
 
 policies:
   Starter: policies/Starter.md

@@ -39,6 +39,25 @@ class GenericPolicyValidationPluginTest {
                     '200': { description: OK }
             """;
 
+    private static final String METHOD_AND_ACTION_SPEC = """
+            openapi: 3.0.0
+            info: { title: Test API, version: 1.0.0 }
+            paths:
+              /customer/get:
+                post: { responses: { '200': { description: OK } } }
+              /customers/123/actions/activate:
+                post: { responses: { '200': { description: OK } } }
+              /customers:
+                get:
+                  requestBody: { required: true, content: { application/json: { schema: { type: object } } } }
+                  responses: { '200': { description: OK } }
+                delete:
+                  requestBody: { required: true, content: { application/json: { schema: { type: object } } } }
+                  responses: { '204': { description: Deleted } }
+              /orders/123:
+                patch: { responses: { '200': { description: OK } } }
+            """;
+
     private static final String COMPLIANT_STARTER_SPEC = """
             openapi: 3.0.0
             info: { title: Test API, version: 1.0.0 }
@@ -99,7 +118,7 @@ class GenericPolicyValidationPluginTest {
         ValidationResult result = plugin.validate(input(ACTION_PATH_SPEC));
 
         assertEquals(ValidationResult.Status.SUCCESS, result.getStatus());
-        assertEquals(20, result.getRulesEvaluatedCount());
+        assertEquals(25, result.getRulesEvaluatedCount());
         assertEquals(8, result.getViolations().size());
         assertEquals("REST001", result.getViolations().get(0).getRuleId());
         assertEquals(2, result.getViolations().stream().filter(violation -> violation.getRuleId().equals("REST001")).count());
@@ -120,7 +139,7 @@ class GenericPolicyValidationPluginTest {
         ValidationResult result = plugin.validate(input(COMPLIANT_STARTER_SPEC));
 
         assertEquals(ValidationResult.Status.SUCCESS, result.getStatus());
-        assertEquals(20, result.getRulesEvaluatedCount());
+        assertEquals(25, result.getRulesEvaluatedCount());
         assertTrue(result.getViolations().isEmpty(), () -> result.getViolations().stream().map(violation -> violation.getRuleId()).toList().toString());
         assertEquals(100, result.getOverallScore());
     }
@@ -241,6 +260,20 @@ class GenericPolicyValidationPluginTest {
     }
 
     @Test
+    void existingDetectorsCoverTheNextFiveCataloguedRules() {
+        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
+                .readContents(METHOD_AND_ACTION_SPEC, null, new ParseOptions()).getOpenAPI());
+        GroovyDetectorRuntime runtime = new GroovyDetectorRuntime();
+
+        assertEquals(1, runtime.execute(bundle.detectors().get("resource-path"), api, bundle.rules().get("REST003")).size());
+        assertEquals(1, runtime.execute(bundle.detectors().get("resource-path"), api, bundle.rules().get("REST004")).size());
+        assertEquals(1, runtime.execute(bundle.detectors().get("operation"), api, bundle.rules().get("HTTP004")).size());
+        assertEquals(1, runtime.execute(bundle.detectors().get("operation"), api, bundle.rules().get("HTTP005")).size());
+        assertEquals(1, runtime.execute(bundle.detectors().get("operation"), api, bundle.rules().get("UPDATE002")).size());
+    }
+
+    @Test
     void packagesTheStarterBundleResources() {
         assertResource("api-policy/PolicyBundle.yaml");
         assertResource("api-policy/rules/REST001.md");
@@ -265,7 +298,7 @@ class GenericPolicyValidationPluginTest {
 
     private static Map<String, String> bundledResources() {
         Map<String, String> resources = new LinkedHashMap<>();
-        for (String path : new String[] {"PolicyBundle.yaml", "rules/REST001.md", "rules/DOC001.md", "rules/DOC002.md", "rules/DOC003.md", "rules/DOC004.md", "rules/DOC005.md", "rules/DOC009.md", "rules/CASE001.md", "rules/CASE002.md", "rules/CASE003.md", "rules/CASE004.md", "rules/CASE005.md", "rules/REST002.md", "rules/REST005.md", "rules/REST006.md", "rules/JSON003.md", "rules/JSON004.md", "rules/JSON006.md", "rules/JSON007.md", "rules/JSON009.md", "policies/Starter.md", "detectors/resource-path/Detector.md", "detectors/resource-path/Detector.groovy", "detectors/operation/Detector.md", "detectors/operation/Detector.groovy", "detectors/text-style/Detector.md", "detectors/text-style/Detector.groovy", "detectors/naming/Detector.md", "detectors/naming/Detector.groovy", "detectors/schema/Detector.md", "detectors/schema/Detector.groovy"}) {
+        for (String path : new String[] {"PolicyBundle.yaml", "rules/REST001.md", "rules/REST002.md", "rules/REST003.md", "rules/REST004.md", "rules/REST005.md", "rules/REST006.md", "rules/HTTP004.md", "rules/HTTP005.md", "rules/UPDATE002.md", "rules/DOC001.md", "rules/DOC002.md", "rules/DOC003.md", "rules/DOC004.md", "rules/DOC005.md", "rules/DOC009.md", "rules/CASE001.md", "rules/CASE002.md", "rules/CASE003.md", "rules/CASE004.md", "rules/CASE005.md", "rules/JSON003.md", "rules/JSON004.md", "rules/JSON006.md", "rules/JSON007.md", "rules/JSON009.md", "policies/Starter.md", "detectors/resource-path/Detector.md", "detectors/resource-path/Detector.groovy", "detectors/operation/Detector.md", "detectors/operation/Detector.groovy", "detectors/text-style/Detector.md", "detectors/text-style/Detector.groovy", "detectors/naming/Detector.md", "detectors/naming/Detector.groovy", "detectors/schema/Detector.md", "detectors/schema/Detector.groovy"}) {
             resources.put(path, readResource("api-policy/" + path));
         }
         return resources;

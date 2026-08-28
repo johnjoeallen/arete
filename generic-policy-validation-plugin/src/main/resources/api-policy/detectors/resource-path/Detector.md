@@ -4,6 +4,7 @@ language: groovy
 source: Detector.groovy
 scopes:
   - path
+  - operation
 parameters:
   match:
     type: enum
@@ -11,6 +12,9 @@ parameters:
     values:
       - operation-verb
       - query-predicate
+      - rpc-style
+      - custom-action
+      - action-style
 ---
 
 # Resource-path detector

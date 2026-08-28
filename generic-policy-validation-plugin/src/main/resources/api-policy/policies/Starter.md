@@ -14,6 +14,8 @@ rules:
   CASE004: 10
   CASE005: 10
   REST002: 10
+  REST003: 10
+  REST004: 10
   REST005: 10
   REST006: 10
   JSON003: 10
@@ -21,6 +23,9 @@ rules:
   JSON006: 10
   JSON007: 10
   JSON009: 10
+  HTTP004: 10
+  HTTP005: 10
+  UPDATE002: 10
 ---
 
 # Speculate Starter Policy

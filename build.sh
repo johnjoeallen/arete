@@ -10,12 +10,6 @@ if [ -z "$JAR" ]; then
   exit 1
 fi
 
-ZALLY_PLUGIN_JAR=$(ls "$DIR"/zally-validation-plugin/target/zally-validation-plugin-*.jar 2>/dev/null | head -1)
-if [ -z "$ZALLY_PLUGIN_JAR" ]; then
-  echo "Build succeeded but no plugin JAR found in zally-validation-plugin/target/" >&2
-  exit 1
-fi
-
 GENERIC_POLICY_PLUGIN_JAR=$(ls "$DIR"/generic-policy-validation-plugin/target/generic-policy-validation-plugin-*.jar 2>/dev/null | head -1)
 if [ -z "$GENERIC_POLICY_PLUGIN_JAR" ]; then
   echo "Build succeeded but no plugin JAR found in generic-policy-validation-plugin/target/" >&2
@@ -24,6 +18,5 @@ fi
 
 cp "$JAR" "$DIR/scripts/speculate.jar"
 mkdir -p "$DIR/scripts/plugins"
-cp "$ZALLY_PLUGIN_JAR" "$DIR/scripts/plugins/zally-validation-plugin.jar"
 cp "$GENERIC_POLICY_PLUGIN_JAR" "$DIR/scripts/plugins/generic-policy-validation-plugin.jar"
 echo "Built: scripts/speculate.jar (+ bundled validation plugins)"

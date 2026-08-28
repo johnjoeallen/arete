@@ -26,7 +26,8 @@
  * Supported rule parameter
  * ------------------------
  *
- *   parameters.match: "operation-verb" | "query-predicate"
+ *   parameters.match: "operation-verb" | "query-predicate" | "rpc-style"
+ *                     | "custom-action" | "action-style"
  *
  * The descriptor in Detector.md is the authoritative validation schema.
  * The switch's default is deliberately a no-match as a defensive backstop;
@@ -60,13 +61,28 @@
                 // catalogue rule even though the bundled Starter policy
                 // currently contains REST001 only.
                 return terminalSegment ==~ /(?i).*(find|get|search)By[A-Z].*/
+            case 'rpc-style':
+                // A verb-like terminal segment beneath another resource is a
+                // transparent first-pass signal of an RPC-shaped endpoint:
+                // /customer/get or /customer/update.
+                return path.path.tokenize('/').size() > 1 && verbs.contains(terminalSegment.toLowerCase())
+            case 'custom-action':
+                // Explicit /actions/{verb} collections encode an action as a
+                // sub-path rather than a resource representation.
+                return path.path ==~ /(?i).*\/actions(?:\/[^\/]+)?/
+            case 'action-style':
+                return path.path ==~ /(?i).*\/actions(?:\/[^\/]+)?/ || verbs.any { verb -> terminalSegment.toLowerCase().startsWith(verb) }
             default:
                 return false
         }
     }
-    def message = rule.parameters.match == 'query-predicate'
-        ? 'Resource path contains a query predicate'
-        : 'Resource path contains an operation verb'
+    def message = switch (rule.parameters.match) {
+        case 'query-predicate' -> 'Resource path contains a query predicate'
+        case 'rpc-style' -> 'API uses RPC-style resource design'
+        case 'custom-action' -> 'Custom action resource is used'
+        case 'action-style' -> 'Action-style endpoint is used'
+        default -> 'Resource path contains an operation verb'
+    }
 
     api.paths.findAll(matches).collectMany { path ->
         path.operations.collect { method ->
