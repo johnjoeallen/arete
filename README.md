@@ -144,10 +144,12 @@ Plugins are `.jar` files, discovered from two folders at startup:
 - `plugins/`, next to `speculate.jar` — this is where the release zip ships
   bundled default plugins: `zally-validation-plugin`, which wraps Zalando's
   [Zally](https://github.com/zalando/zally) linter, and
-  `generic-policy-validation-plugin`, the starter for externally configured
-  API policies. Not created automatically if missing, since in a from-source
-  dev run this resolves under `target/classes` and shouldn't be conjured out
-  of thin air there.
+  `generic-policy-validation-plugin`, which currently ships a Starter policy
+  with a Groovy resource-path detector. Detectors are trusted extension code:
+  run only bundles whose publisher you trust locally, or deploy Speculate in
+  Docker when host containment is desired. Not created automatically if
+  missing, since in a from-source dev run this resolves under `target/classes`
+  and shouldn't be conjured out of thin air there.
 - `~/.speculate/plugins` — a stable location independent of where
   Speculate is installed, created automatically if it doesn't exist.
   Drop your own plugin jars here — e.g. an organization-specific Zally

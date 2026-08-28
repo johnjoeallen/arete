@@ -1,0 +1,12 @@
+formatVersion: 1
+bundleId: speculate-starter-policy
+bundleVersion: 0.1.0
+
+rules:
+  REST001: rules/REST001.md
+
+policies:
+  Starter: policies/Starter.md
+
+detectors:
+  resource-path: detectors/resource-path/Detector.md

@@ -1,9 +1,0 @@
-{
-  "bundleId": "speculate-starter-policy",
-  "bundleVersion": "0.1.0",
-  "rules": "Rules.md",
-  "policies": {
-    "Starter": "policies/Starter.md"
-  },
-  "detectors": {}
-}
