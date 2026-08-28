@@ -14,6 +14,7 @@
 
     <modules>
         <module>speculate-validation-spi</module>
+        <module>generic-policy-validation-plugin</module>
         <module>zally-validation-plugin</module>
         <module>speculate-app</module>
     </modules>
