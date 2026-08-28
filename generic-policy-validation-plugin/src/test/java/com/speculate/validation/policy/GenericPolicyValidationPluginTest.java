@@ -53,6 +53,27 @@ class GenericPolicyValidationPluginTest {
                   responses: { '200': { description: OK } }
             """;
 
+    private static final String NAMING_SPEC = """
+            openapi: 3.0.0
+            info: { title: Test API, version: 1.0.0 }
+            paths:
+              /customerOrders/{customerId}:
+                parameters:
+                  - { name: customerId, in: path, required: true, schema: { type: string } }
+                get:
+                  parameters:
+                    - { name: customerStatus, in: query, schema: { type: string } }
+                    - { name: XCustomHeader, in: header, schema: { type: string } }
+                  responses: { '200': { description: OK } }
+            components:
+              schemas:
+                CreateCustomerRequest:
+                  type: object
+                  properties:
+                    customer_name: { type: string }
+                    customer: { type: array, items: { type: string } }
+            """;
+
     @Test
     void executesTheBundledGroovyDetectorAndDeductsOnlyOncePerRule() {
         GenericPolicyValidationPlugin plugin = new GenericPolicyValidationPlugin();
@@ -173,6 +194,22 @@ class GenericPolicyValidationPluginTest {
     }
 
     @Test
+    void namingDetectorInspectsStableParameterAndSchemaMaps() {
+        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
+                .readContents(NAMING_SPEC, null, new ParseOptions()).getOpenAPI());
+        GroovyDetectorRuntime runtime = new GroovyDetectorRuntime();
+
+        assertEquals(1, runtime.execute(bundle.detectors().get("naming"), api, bundle.rules().get("CASE001")).size());
+        assertEquals(1, runtime.execute(bundle.detectors().get("naming"), api, bundle.rules().get("CASE002")).size());
+        assertEquals(1, runtime.execute(bundle.detectors().get("naming"), api, bundle.rules().get("CASE003")).size());
+        assertEquals(1, runtime.execute(bundle.detectors().get("naming"), api, bundle.rules().get("CASE004")).size());
+        assertEquals(1, runtime.execute(bundle.detectors().get("naming"), api, bundle.rules().get("CASE005")).size());
+        assertEquals(1, runtime.execute(bundle.detectors().get("naming"), api, bundle.rules().get("REST005")).size());
+        assertEquals(1, runtime.execute(bundle.detectors().get("naming"), api, bundle.rules().get("JSON004")).size());
+    }
+
+    @Test
     void packagesTheStarterBundleResources() {
         assertResource("api-policy/PolicyBundle.yaml");
         assertResource("api-policy/rules/REST001.md");
@@ -197,7 +234,7 @@ class GenericPolicyValidationPluginTest {
 
     private static Map<String, String> bundledResources() {
         Map<String, String> resources = new LinkedHashMap<>();
-        for (String path : new String[] {"PolicyBundle.yaml", "rules/REST001.md", "rules/DOC001.md", "rules/DOC002.md", "rules/DOC003.md", "rules/DOC004.md", "rules/DOC005.md", "rules/DOC009.md", "policies/Starter.md", "detectors/resource-path/Detector.md", "detectors/resource-path/Detector.groovy", "detectors/operation/Detector.md", "detectors/operation/Detector.groovy", "detectors/text-style/Detector.md", "detectors/text-style/Detector.groovy"}) {
+        for (String path : new String[] {"PolicyBundle.yaml", "rules/REST001.md", "rules/DOC001.md", "rules/DOC002.md", "rules/DOC003.md", "rules/DOC004.md", "rules/DOC005.md", "rules/DOC009.md", "rules/CASE001.md", "rules/CASE002.md", "rules/CASE003.md", "rules/CASE004.md", "rules/CASE005.md", "rules/REST002.md", "rules/REST005.md", "rules/REST006.md", "rules/JSON003.md", "rules/JSON004.md", "policies/Starter.md", "detectors/resource-path/Detector.md", "detectors/resource-path/Detector.groovy", "detectors/operation/Detector.md", "detectors/operation/Detector.groovy", "detectors/text-style/Detector.md", "detectors/text-style/Detector.groovy", "detectors/naming/Detector.md", "detectors/naming/Detector.groovy"}) {
             resources.put(path, readResource("api-policy/" + path));
         }
         return resources;

@@ -10,6 +10,16 @@ rules:
   DOC004: rules/DOC004.md
   DOC005: rules/DOC005.md
   DOC009: rules/DOC009.md
+  CASE001: rules/CASE001.md
+  CASE002: rules/CASE002.md
+  CASE003: rules/CASE003.md
+  CASE004: rules/CASE004.md
+  CASE005: rules/CASE005.md
+  REST002: rules/REST002.md
+  REST005: rules/REST005.md
+  REST006: rules/REST006.md
+  JSON003: rules/JSON003.md
+  JSON004: rules/JSON004.md
 
 policies:
   Starter: policies/Starter.md
@@ -18,3 +28,4 @@ detectors:
   resource-path: detectors/resource-path/Detector.md
   operation: detectors/operation/Detector.md
   text-style: detectors/text-style/Detector.md
+  naming: detectors/naming/Detector.md
