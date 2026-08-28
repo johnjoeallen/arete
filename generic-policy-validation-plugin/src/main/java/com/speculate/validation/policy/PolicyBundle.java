@@ -17,7 +17,8 @@ record PolicyBundle(Map<String, Rule> rules, Map<String, Policy> policies, Map<S
     }
 }
 
-record Rule(String id, String title, String category, String detector, String scope, Map<String, Object> parameters) {
+record Rule(String id, String title, String category, String detector, String scope, Map<String, Object> parameters,
+            String documentationMarkdown) {
     Map<String, Object> asMap() { return Map.of("id", id, "scope", scope, "parameters", parameters); }
 }
 

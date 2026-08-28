@@ -1,8 +1,8 @@
 ---
 id: Starter
 rules:
-  REST001: 10
-  REST002: 5
+  RPOV: 10
+  RPQP: 5
 ---
 
 # Starter API Policy

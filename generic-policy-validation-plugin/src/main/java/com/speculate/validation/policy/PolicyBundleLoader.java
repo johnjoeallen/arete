@@ -86,7 +86,7 @@ final class PolicyBundleLoader {
     private Rule parseRule(String path, String content) {
         Map<String, Object> data = frontMatter(path, content);
         rejectUnknown(path, data, Set.of("id", "category", "detector", "scope", "parameters"));
-        return new Rule(requiredString(path, "id", data.get("id")), title(path, content), requiredString(path, "category", data.get("category")), requiredString(path, "detector", data.get("detector")), requiredString(path, "scope", data.get("scope")), Map.copyOf(map(path, "parameters", data.get("parameters"))));
+        return new Rule(requiredString(path, "id", data.get("id")), title(path, content), requiredString(path, "category", data.get("category")), requiredString(path, "detector", data.get("detector")), requiredString(path, "scope", data.get("scope")), Map.copyOf(map(path, "parameters", data.get("parameters"))), markdownBody(path, content));
     }
 
     private Policy parsePolicy(String path, String content) {
@@ -123,6 +123,15 @@ final class PolicyBundleLoader {
         for (int index = 1; index < lines.length; index++) if ("---".equals(lines[index])) { end = index; break; }
         if (end < 0) throw new BundleValidationException(path + ": unterminated YAML front matter");
         return yamlMap(path, String.join("\n", Arrays.copyOfRange(lines, 1, end)));
+    }
+
+    private static String markdownBody(String path, String content) {
+        String[] lines = content.replace("\r\n", "\n").split("\n", -1);
+        if (lines.length < 3 || !"---".equals(lines[0])) throw new BundleValidationException(path + ": expected YAML front matter starting with ---");
+        for (int index = 1; index < lines.length; index++) {
+            if ("---".equals(lines[index])) return String.join("\n", Arrays.copyOfRange(lines, index + 1, lines.length)).trim();
+        }
+        throw new BundleValidationException(path + ": unterminated YAML front matter");
     }
 
     private Map<String, Object> yamlMap(String path, String document) {

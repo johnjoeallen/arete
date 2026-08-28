@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${documentationTitle} + ' - Speculate'">Rule documentation - Speculate</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+<main class="main-content">
+    <article class="markdown-body" th:utext="${renderedDocumentation}"></article>
+</main>
+</body>
+</html>

@@ -7,6 +7,8 @@ import net.dublinux.speculate.validation.spi.Severity;
 import net.dublinux.speculate.validation.spi.SpecFormat;
 import net.dublinux.speculate.validation.spi.SpecInput;
 import net.dublinux.speculate.validation.spi.SpecValidationPlugin;
+import net.dublinux.speculate.validation.spi.RuleDocumentation;
+import net.dublinux.speculate.validation.spi.RuleDocumentationProvider;
 import net.dublinux.speculate.validation.spi.ValidationResult;
 import net.dublinux.speculate.validation.spi.Violation;
 
@@ -14,10 +16,12 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /** First working implementation of the bundled generic policy engine. */
-public final class GenericPolicyValidationPlugin implements SpecValidationPlugin {
+public final class GenericPolicyValidationPlugin implements SpecValidationPlugin, RuleDocumentationProvider {
+    private static final String DOCUMENTATION_BASE_URL = "http://localhost:6809/plugins/generic-policy/rules/";
     private volatile PolicyBundle bundle;
     private final PolicyBundleLoader bundleLoader = new PolicyBundleLoader();
     private final GroovyDetectorRuntime detectorRuntime = new GroovyDetectorRuntime();
@@ -81,7 +85,8 @@ public final class GenericPolicyValidationPlugin implements SpecValidationPlugin
                 Violation.Builder violation = Violation.builder()
                         .ruleId(rule.id()).title(rule.title()).description(occurrence.message())
                         .severity(disposition instanceof Prohibited ? Severity.ERROR : Severity.WARNING)
-                        .scoreImprovement(disposition instanceof Deduction deduction ? deduction.points() : 0);
+                        .scoreImprovement(disposition instanceof Deduction deduction ? deduction.points() : 0)
+                        .documentationUrl(DOCUMENTATION_BASE_URL + rule.id());
                 if (occurrence.pointer() != null) violation.pointer(occurrence.pointer());
                 if (occurrence.path() != null) violation.paths(List.of(occurrence.path()));
                 violations.add(violation.build());
@@ -104,5 +109,11 @@ public final class GenericPolicyValidationPlugin implements SpecValidationPlugin
             }
         }
         return current;
+    }
+
+    @Override
+    public Optional<RuleDocumentation> getRuleDocumentation(String ruleId) {
+        Rule rule = activeBundle().rules().get(ruleId);
+        return rule == null ? Optional.empty() : Optional.of(new RuleDocumentation(rule.title(), rule.documentationMarkdown()));
     }
 }
