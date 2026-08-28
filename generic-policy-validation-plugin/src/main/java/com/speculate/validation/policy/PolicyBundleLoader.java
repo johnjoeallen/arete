@@ -78,8 +78,18 @@ final class PolicyBundleLoader {
             rejectUnknown(path, definition, Set.of("type", "required", "values"));
             String type = requiredString(path, "parameters." + entry.getKey() + ".type", definition.get("type"));
             if (!(definition.get("required") instanceof Boolean required)) throw new BundleValidationException(path + ": parameters." + entry.getKey() + ".required must be boolean");
-            List<String> values = stringList(path, "parameters." + entry.getKey() + ".values", definition.get("values"));
-            if (!"enum".equals(type) || values.isEmpty()) throw new BundleValidationException(path + ": only non-empty enum parameter definitions are supported initially");
+            List<String> values = definition.containsKey("values")
+                    ? stringList(path, "parameters." + entry.getKey() + ".values", definition.get("values"))
+                    : List.of();
+            if ("enum".equals(type) && values.isEmpty()) {
+                throw new BundleValidationException(path + ": enum parameter '" + entry.getKey() + "' requires non-empty values");
+            }
+            if (("string".equals(type) || "integer".equals(type) || "boolean".equals(type)) && !values.isEmpty()) {
+                throw new BundleValidationException(path + ": " + type + " parameter '" + entry.getKey() + "' must not declare values");
+            }
+            if (!Set.of("enum", "string", "integer", "boolean").contains(type)) {
+                throw new BundleValidationException(path + ": unsupported parameter type '" + type + "'");
+            }
             parameters.put(entry.getKey(), new ParameterDefinition(type, required, values));
         }
         return new Detector(requiredString(path, "id", data.get("id")), requiredString(path, "language", data.get("language")), requiredString(path, "source", data.get("source")), stringList(path, "scopes", data.get("scopes")), Map.copyOf(parameters));
@@ -109,13 +119,26 @@ final class PolicyBundleLoader {
         for (Map.Entry<String, Object> parameter : rule.parameters().entrySet()) {
             ParameterDefinition definition = detector.parameters().get(parameter.getKey());
             if (definition == null) throw new BundleValidationException(path + ": unknown parameter '" + parameter.getKey() + "' for detector '" + detector.id() + "'");
-            if (!(parameter.getValue() instanceof String value) || !definition.values().contains(value)) throw new BundleValidationException(path + ": invalid value for parameter '" + parameter.getKey() + "'");
+            if (!validParameterValue(definition, parameter.getValue())) {
+                throw new BundleValidationException(path + ": invalid " + definition.type() + " value for parameter '" + parameter.getKey() + "'");
+            }
         }
         for (Map.Entry<String, ParameterDefinition> parameter : detector.parameters().entrySet()) {
             if (parameter.getValue().required() && !rule.parameters().containsKey(parameter.getKey())) {
                 throw new BundleValidationException(path + ": missing required parameter '" + parameter.getKey() + "' for detector '" + detector.id() + "'");
             }
         }
+    }
+
+    /** Validates values before script execution so scripts can rely on their descriptor contract. */
+    private static boolean validParameterValue(ParameterDefinition definition, Object value) {
+        return switch (definition.type()) {
+            case "enum" -> value instanceof String text && definition.values().contains(text);
+            case "string" -> value instanceof String text && !text.isBlank();
+            case "boolean" -> value instanceof Boolean;
+            case "integer" -> value instanceof Number number && number.doubleValue() == Math.rint(number.doubleValue());
+            default -> false; // parseDetector rejects unknown types; retain defensive behaviour here.
+        };
     }
 
     private Map<String, Object> frontMatter(String path, String content) {

@@ -39,6 +39,20 @@ class GenericPolicyValidationPluginTest {
                     '200': { description: OK }
             """;
 
+    private static final String SUMMARY_STYLE_SPEC = """
+            openapi: 3.0.0
+            info: { title: Test API, version: 1.0.0 }
+            paths:
+              /customers:
+                get:
+                  summary: get customers.
+                  responses: { '200': { description: OK } }
+              /orders:
+                get:
+                  summary: This is a deliberately very long operation summary that is designed to exceed the configured maximum length for concise API documentation.
+                  responses: { '200': { description: OK } }
+            """;
+
     @Test
     void executesTheBundledGroovyDetectorAndDeductsOnlyOncePerRule() {
         GenericPolicyValidationPlugin plugin = new GenericPolicyValidationPlugin();
@@ -108,18 +122,18 @@ class GenericPolicyValidationPluginTest {
     void acceptsCatalogueRulesWhoseDetectorIsNotYetBundled() {
         Map<String, String> resources = bundledResources();
         resources.put("PolicyBundle.yaml", resources.get("PolicyBundle.yaml")
-                .replace("  DOC001: rules/DOC001.md", "  DOC001: rules/DOC001.md\n  DOC002: rules/DOC002.md"));
-        resources.put("rules/DOC002.md", """
+                .replace("  DOC009: rules/DOC009.md", "  DOC009: rules/DOC009.md\n  FUTURE001: rules/FUTURE001.md"));
+        resources.put("rules/FUTURE001.md", """
                 ---
-                id: DOC002
+                id: FUTURE001
                 category: Documentation
-                detector: text-style
+                detector: future-detector
                 scope: operation
                 parameters:
                   initial-capital: false
                 ---
 
-                # DOC002 — Operation summary does not begin with a capital letter
+                # FUTURE001 — A future catalogue rule
                 """);
 
         assertDoesNotThrow(() -> new PolicyBundleLoader().load(resources::get));
@@ -142,15 +156,39 @@ class GenericPolicyValidationPluginTest {
     }
 
     @Test
+    void textStyleDetectorUsesTypedRuleParameters() {
+        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
+                .readContents(SUMMARY_STYLE_SPEC, null, new ParseOptions()).getOpenAPI());
+
+        java.util.List<Occurrence> initialCapital = new GroovyDetectorRuntime()
+                .execute(bundle.detectors().get("text-style"), api, bundle.rules().get("DOC002"));
+        java.util.List<Occurrence> tooLong = new GroovyDetectorRuntime()
+                .execute(bundle.detectors().get("text-style"), api, bundle.rules().get("DOC005"));
+
+        assertEquals(1, initialCapital.size());
+        assertEquals("GET /customers", initialCapital.get(0).path());
+        assertEquals(1, tooLong.size());
+        assertEquals("GET /orders", tooLong.get(0).path());
+    }
+
+    @Test
     void packagesTheStarterBundleResources() {
         assertResource("api-policy/PolicyBundle.yaml");
         assertResource("api-policy/rules/REST001.md");
         assertResource("api-policy/rules/DOC001.md");
+        assertResource("api-policy/rules/DOC002.md");
+        assertResource("api-policy/rules/DOC003.md");
+        assertResource("api-policy/rules/DOC004.md");
+        assertResource("api-policy/rules/DOC005.md");
+        assertResource("api-policy/rules/DOC009.md");
         assertResource("api-policy/policies/Starter.md");
         assertResource("api-policy/detectors/resource-path/Detector.md");
         assertResource("api-policy/detectors/resource-path/Detector.groovy");
         assertResource("api-policy/detectors/operation/Detector.md");
         assertResource("api-policy/detectors/operation/Detector.groovy");
+        assertResource("api-policy/detectors/text-style/Detector.md");
+        assertResource("api-policy/detectors/text-style/Detector.groovy");
     }
 
     private static SpecInput input(String content) {
@@ -159,7 +197,7 @@ class GenericPolicyValidationPluginTest {
 
     private static Map<String, String> bundledResources() {
         Map<String, String> resources = new LinkedHashMap<>();
-        for (String path : new String[] {"PolicyBundle.yaml", "rules/REST001.md", "rules/DOC001.md", "policies/Starter.md", "detectors/resource-path/Detector.md", "detectors/resource-path/Detector.groovy", "detectors/operation/Detector.md", "detectors/operation/Detector.groovy"}) {
+        for (String path : new String[] {"PolicyBundle.yaml", "rules/REST001.md", "rules/DOC001.md", "rules/DOC002.md", "rules/DOC003.md", "rules/DOC004.md", "rules/DOC005.md", "rules/DOC009.md", "policies/Starter.md", "detectors/resource-path/Detector.md", "detectors/resource-path/Detector.groovy", "detectors/operation/Detector.md", "detectors/operation/Detector.groovy", "detectors/text-style/Detector.md", "detectors/text-style/Detector.groovy"}) {
             resources.put(path, readResource("api-policy/" + path));
         }
         return resources;
