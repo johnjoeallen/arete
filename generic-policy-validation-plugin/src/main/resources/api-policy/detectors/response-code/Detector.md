@@ -10,6 +10,9 @@ parameters:
     type: enum
     required: false
     values: [create, identifiable-resource-retrieval]
+  required-status:
+    type: integer
+    required: false
   status:
     type: integer
     required: false
