@@ -73,6 +73,8 @@ final class OpenApiMapAdapter {
                 schemaMap.put("name", entry.getKey());
                 schemaMap.put("pointer", "/components/schemas/" + entry.getKey().replace("~", "~0").replace("/", "~1"));
                 schemaMap.put("type", schema == null ? null : schema.getType());
+                schemaMap.put("array", schema != null && "array".equals(schema.getType()));
+                schemaMap.put("maxItems", schema == null ? null : schema.getMaxItems());
                 List<Map<String, Object>> properties = new ArrayList<>();
                 if (schema != null && schema.getProperties() != null) {
                     for (Object propertyEntryObject : schema.getProperties().entrySet()) {
@@ -82,6 +84,8 @@ final class OpenApiMapAdapter {
                         propertyMap.put("name", propertyName);
                         propertyMap.put("pointer", schemaMap.get("pointer") + "/properties/" + propertyName.replace("~", "~0").replace("/", "~1"));
                         propertyMap.put("type", property.getType());
+                        propertyMap.put("array", property != null && "array".equals(property.getType()));
+                        propertyMap.put("maxItems", property.getMaxItems());
                         propertyMap.put("format", property.getFormat());
                         propertyMap.put("nullable", Boolean.TRUE.equals(property.getNullable()));
                         propertyMap.put("required", schema.getRequired() != null && schema.getRequired().contains(propertyName));

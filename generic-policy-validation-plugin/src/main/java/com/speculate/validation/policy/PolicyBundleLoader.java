@@ -98,7 +98,9 @@ final class PolicyBundleLoader {
     private Rule parseRule(String path, String content) {
         Map<String, Object> data = frontMatter(path, content);
         rejectUnknown(path, data, Set.of("id", "category", "detector", "scope", "parameters"));
-        return new Rule(requiredString(path, "id", data.get("id")), title(path, content), requiredString(path, "category", data.get("category")), requiredString(path, "detector", data.get("detector")), requiredString(path, "scope", data.get("scope")), Map.copyOf(map(path, "parameters", data.get("parameters"))), markdownBody(path, content));
+        Object rawParameters = data.get("parameters");
+        Map<String, Object> parameters = rawParameters == null ? Map.of() : map(path, "parameters", rawParameters);
+        return new Rule(requiredString(path, "id", data.get("id")), title(path, content), requiredString(path, "category", data.get("category")), requiredString(path, "detector", data.get("detector")), requiredString(path, "scope", data.get("scope")), Map.copyOf(parameters), markdownBody(path, content));
     }
 
     private Policy parsePolicy(String path, String content) {

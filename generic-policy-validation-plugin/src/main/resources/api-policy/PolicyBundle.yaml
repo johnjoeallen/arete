@@ -33,6 +33,11 @@ rules:
   HTTP006: rules/HTTP006.md
   HTTP008: rules/HTTP008.md
   UPDATE002: rules/UPDATE002.md
+  UPDATE001: rules/UPDATE001.md
+  UPDATE003: rules/UPDATE003.md
+  BULK001: rules/BULK001.md
+  BULK002: rules/BULK002.md
+  BULK003: rules/BULK003.md
   STATUS001: rules/STATUS001.md
   STATUS002: rules/STATUS002.md
   STATUS003: rules/STATUS003.md
@@ -49,5 +54,7 @@ detectors:
   naming: detectors/naming/Detector.md
   schema: detectors/schema/Detector.md
   operation-semantics: detectors/operation-semantics/Detector.md
+  manual: detectors/manual/Detector.md
+  bulk-operation: detectors/bulk-operation/Detector.md
   response-code: detectors/response-code/Detector.md
   response-header: detectors/response-header/Detector.md

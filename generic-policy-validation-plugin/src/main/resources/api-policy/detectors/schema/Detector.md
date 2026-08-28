@@ -12,6 +12,7 @@ parameters:
       - string
       - integer
       - number
+      - array
   enum:
     type: enum
     required: false
@@ -29,6 +30,10 @@ parameters:
     required: false
     values:
       - undefined
+  max-items:
+    type: enum
+    required: false
+    values: [absent, present]
 ---
 
 # Schema detector
