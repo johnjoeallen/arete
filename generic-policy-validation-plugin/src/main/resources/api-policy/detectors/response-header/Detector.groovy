@@ -13,7 +13,9 @@
                 response.status.toString() == p.status.toString() &&
                     p.required && !response.headers.any { header -> header.toString().equalsIgnoreCase(p.header.toString()) }
             }.collect { response ->
-                [pointer: operation.pointer, path: operation.method + ' ' + path.path, message: 'Created response lacks Location header']
+                def qualifier = p.required ? 'lacks' : 'contains an unexpected'
+                [pointer: operation.pointer, path: operation.method + ' ' + path.path,
+                 message: 'Response ' + response.status + ' ' + qualifier + ' ' + p.header + ' header']
             }
         }
     }
