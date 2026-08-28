@@ -31,6 +31,11 @@ rules:
   HTTP006: 10
   HTTP008: 10
   UPDATE002: 10
+  STATUS001: 10
+  STATUS002: 10
+  STATUS003: 10
+  STATUS004: 10
+  STATUS005: 10
 ---
 
 # Speculate Starter Policy

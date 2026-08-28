@@ -41,6 +41,19 @@ final class OpenApiMapAdapter {
                         detail.put("pointer", path.get("pointer") + "/" + operationEntry.getKey().name().toLowerCase());
                         detail.put("summary", operation == null ? null : operation.getSummary());
                         detail.put("requestBodyPresent", operation != null && operation.getRequestBody() != null);
+                        List<Map<String, Object>> responses = new ArrayList<>();
+                        if (operation != null && operation.getResponses() != null) {
+                            for (Map.Entry<String, ?> responseEntry : operation.getResponses().entrySet()) {
+                                Object response = responseEntry.getValue();
+                                Map<String, Object> responseMap = new LinkedHashMap<>();
+                                responseMap.put("status", responseEntry.getKey());
+                                responseMap.put("description", responseProperty(response, "getDescription"));
+                                Object headers = responseProperty(response, "getHeaders");
+                                responseMap.put("headers", headers instanceof Map<?, ?> map ? new ArrayList<>(map.keySet()) : List.of());
+                                responses.add(responseMap);
+                            }
+                        }
+                        detail.put("responses", responses);
                         List<Map<String, Object>> parameters = new ArrayList<>();
                         addParameters(parameters, entry.getValue().getParameters(), path.get("pointer") + "/parameters");
                         if (operation != null) addParameters(parameters, operation.getParameters(), detail.get("pointer") + "/parameters");
@@ -90,5 +103,12 @@ final class OpenApiMapAdapter {
             if (parameter == null || parameter.getName() == null || parameter.getIn() == null) continue;
             destination.add(Map.of("name", parameter.getName(), "in", parameter.getIn(), "pointer", pointer + "/" + index));
         }
+    }
+
+    /** Reads parser response properties without exposing the parser response type to Groovy. */
+    private static Object responseProperty(Object response, String getter) {
+        if (response == null) return null;
+        try { return response.getClass().getMethod(getter).invoke(response); }
+        catch (ReflectiveOperationException ignored) { return null; }
     }
 }
