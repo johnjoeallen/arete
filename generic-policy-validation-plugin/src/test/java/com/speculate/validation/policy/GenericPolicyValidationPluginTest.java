@@ -3,6 +3,8 @@ package com.speculate.validation.policy;
 import net.dublinux.speculate.validation.spi.SpecFormat;
 import net.dublinux.speculate.validation.spi.SpecInput;
 import net.dublinux.speculate.validation.spi.ValidationResult;
+import io.swagger.v3.parser.OpenAPIV3Parser;
+import io.swagger.v3.parser.core.models.ParseOptions;
 import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
@@ -106,30 +108,49 @@ class GenericPolicyValidationPluginTest {
     void acceptsCatalogueRulesWhoseDetectorIsNotYetBundled() {
         Map<String, String> resources = bundledResources();
         resources.put("PolicyBundle.yaml", resources.get("PolicyBundle.yaml")
-                .replace("  REST001: rules/REST001.md", "  REST001: rules/REST001.md\n  DOC001: rules/DOC001.md"));
-        resources.put("rules/DOC001.md", """
+                .replace("  DOC001: rules/DOC001.md", "  DOC001: rules/DOC001.md\n  DOC002: rules/DOC002.md"));
+        resources.put("rules/DOC002.md", """
                 ---
-                id: DOC001
+                id: DOC002
                 category: Documentation
-                detector: operation
+                detector: text-style
                 scope: operation
                 parameters:
-                  summary: absent
+                  initial-capital: false
                 ---
 
-                # DOC001 — Operation summary is missing
+                # DOC002 — Operation summary does not begin with a capital letter
                 """);
 
         assertDoesNotThrow(() -> new PolicyBundleLoader().load(resources::get));
     }
 
     @Test
+    void operationDetectorReportsOperationsWhoseSummaryIsMissing() {
+        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        Rule rule = bundle.rules().get("DOC001");
+        Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
+                .readContents(ACTION_PATH_SPEC, null, new ParseOptions()).getOpenAPI());
+
+        java.util.List<Occurrence> occurrences = new GroovyDetectorRuntime()
+                .execute(bundle.detectors().get("operation"), api, rule);
+
+        assertEquals(3, occurrences.size());
+        assertEquals("/paths/~1getAllCustomers/get", occurrences.get(0).pointer());
+        assertEquals("GET /getAllCustomers", occurrences.get(0).path());
+        assertEquals("Operation summary is missing", occurrences.get(0).message());
+    }
+
+    @Test
     void packagesTheStarterBundleResources() {
         assertResource("api-policy/PolicyBundle.yaml");
         assertResource("api-policy/rules/REST001.md");
+        assertResource("api-policy/rules/DOC001.md");
         assertResource("api-policy/policies/Starter.md");
         assertResource("api-policy/detectors/resource-path/Detector.md");
         assertResource("api-policy/detectors/resource-path/Detector.groovy");
+        assertResource("api-policy/detectors/operation/Detector.md");
+        assertResource("api-policy/detectors/operation/Detector.groovy");
     }
 
     private static SpecInput input(String content) {
@@ -138,7 +159,7 @@ class GenericPolicyValidationPluginTest {
 
     private static Map<String, String> bundledResources() {
         Map<String, String> resources = new LinkedHashMap<>();
-        for (String path : new String[] {"PolicyBundle.yaml", "rules/REST001.md", "policies/Starter.md", "detectors/resource-path/Detector.md", "detectors/resource-path/Detector.groovy"}) {
+        for (String path : new String[] {"PolicyBundle.yaml", "rules/REST001.md", "rules/DOC001.md", "policies/Starter.md", "detectors/resource-path/Detector.md", "detectors/resource-path/Detector.groovy", "detectors/operation/Detector.md", "detectors/operation/Detector.groovy"}) {
             resources.put(path, readResource("api-policy/" + path));
         }
         return resources;

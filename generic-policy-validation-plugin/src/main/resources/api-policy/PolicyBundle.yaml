@@ -4,9 +4,11 @@ bundleVersion: 0.1.0
 
 rules:
   REST001: rules/REST001.md
+  DOC001: rules/DOC001.md
 
 policies:
   Starter: policies/Starter.md
 
 detectors:
   resource-path: detectors/resource-path/Detector.md
+  operation: detectors/operation/Detector.md

@@ -1,6 +1,7 @@
 package com.speculate.validation.policy;
 
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 
 import java.util.ArrayList;
@@ -22,6 +23,19 @@ final class OpenApiMapAdapter {
                 List<String> operations = entry.getValue() == null ? List.of() : entry.getValue().readOperationsMap().keySet().stream()
                         .map(method -> method.name()).toList();
                 path.put("operations", operations);
+                List<Map<String, Object>> operationDetails = new ArrayList<>();
+                if (entry.getValue() != null) {
+                    for (Map.Entry<PathItem.HttpMethod, Operation> operationEntry : entry.getValue().readOperationsMap().entrySet()) {
+                        Operation operation = operationEntry.getValue();
+                        Map<String, Object> detail = new LinkedHashMap<>();
+                        detail.put("method", operationEntry.getKey().name());
+                        detail.put("pointer", path.get("pointer") + "/" + operationEntry.getKey().name().toLowerCase());
+                        detail.put("summary", operation == null ? null : operation.getSummary());
+                        detail.put("requestBodyPresent", operation != null && operation.getRequestBody() != null);
+                        operationDetails.add(detail);
+                    }
+                }
+                path.put("operationDetails", operationDetails);
                 paths.add(path);
             }
         }
