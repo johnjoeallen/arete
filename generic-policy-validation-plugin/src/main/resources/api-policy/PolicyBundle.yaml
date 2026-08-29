@@ -69,6 +69,8 @@ rules:
   SEC008: rules/SEC008.md
   SEC004: rules/SEC004.md
   SEC005: rules/SEC005.md
+  SEC006: rules/SEC006.md
+  SEC007: rules/SEC007.md
   HTTP004: rules/HTTP004.md
   HTTP005: rules/HTTP005.md
   HTTP001: rules/HTTP001.md
@@ -131,3 +133,4 @@ detectors:
   authentication-error: detectors/authentication-error/Detector.md
   sensitive-data: detectors/sensitive-data/Detector.md
   sensitive-search: detectors/sensitive-search/Detector.md
+  identifier: detectors/identifier/Detector.md

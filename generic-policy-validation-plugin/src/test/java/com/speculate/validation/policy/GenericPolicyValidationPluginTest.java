@@ -461,6 +461,30 @@ class GenericPolicyValidationPluginTest {
     }
 
     @Test
+    void identifierDetectorChecksTypeAndFormatSeparately() {
+        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        String spec = """
+                openapi: 3.0.0
+                info: { title: Test API, version: 1.0.0 }
+                paths: {}
+                components:
+                  schemas:
+                    Customer:
+                      type: object
+                      properties:
+                        id: { type: integer }
+                        customer_id: { type: string }
+                        displayName: { type: string }
+                """;
+        Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
+                .readContents(spec, null, new ParseOptions()).getOpenAPI());
+        StarlarkDetectorRuntime runtime = new StarlarkDetectorRuntime();
+
+        assertEquals(1, runtime.execute(bundle.detectors().get("identifier"), api, bundle.rules().get("SEC006")).size());
+        assertEquals(2, runtime.execute(bundle.detectors().get("identifier"), api, bundle.rules().get("SEC007")).size());
+    }
+
+    @Test
     void securityDetectorUsesOperationSecurityAndGlobalFallback() {
         PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
         String spec = """
@@ -718,10 +742,13 @@ class GenericPolicyValidationPluginTest {
         resources.put("rules/SEC004.md", readResource("api-policy/rules/SEC004.md"));
         resources.put("rules/SEC005.md", readResource("api-policy/rules/SEC005.md"));
         resources.put("detectors/sensitive-search/Detector.md", readResource("api-policy/detectors/sensitive-search/Detector.md"));
+        resources.put("rules/SEC006.md", readResource("api-policy/rules/SEC006.md"));
+        resources.put("rules/SEC007.md", readResource("api-policy/rules/SEC007.md"));
+        resources.put("detectors/identifier/Detector.md", readResource("api-policy/detectors/identifier/Detector.md"));
         for (String detectorId : new String[] {"resource-path", "operation", "text-style", "naming", "schema",
                 "operation-semantics", "response-code", "response-header", "proprietary-header", "query-collection",
                 "security", "manual", "bulk-operation", "versioning", "compatibility", "metadata", "openapi-version",
-                "media-type", "date-time-name", "common-field", "path-count", "hostname", "error-response", "authentication-error", "sensitive-data", "sensitive-search"}) {
+                "media-type", "date-time-name", "common-field", "path-count", "hostname", "error-response", "authentication-error", "sensitive-data", "sensitive-search", "identifier"}) {
             resources.put("detectors/" + detectorId + "/Detector.star",
                     readResource("api-policy/detectors/" + detectorId + "/Detector.star"));
         }
