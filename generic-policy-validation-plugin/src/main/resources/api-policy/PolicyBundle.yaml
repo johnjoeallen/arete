@@ -62,6 +62,8 @@ rules:
 policies:
   Strict: policies/Strict.md
   "Mastercard Core": policies/MastercardCore.md
+  Zalando: policies/Zalando.md
+  "Zalando Extended": policies/ZalandoExtended.md
 
 detectors:
   resource-path: detectors/resource-path/Detector.md

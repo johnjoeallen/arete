@@ -329,6 +329,8 @@ class GenericPolicyValidationPluginTest {
         resources.put("rules/DOC008.md", readResource("api-policy/rules/DOC008.md"));
         resources.put("rules/STANDARD001.md", readResource("api-policy/rules/STANDARD001.md"));
         resources.put("rules/STANDARD002.md", readResource("api-policy/rules/STANDARD002.md"));
+        resources.put("policies/Zalando.md", readResource("api-policy/policies/Zalando.md"));
+        resources.put("policies/ZalandoExtended.md", readResource("api-policy/policies/ZalandoExtended.md"));
         resources.put("detectors/hostname/Detector.md", readResource("api-policy/detectors/hostname/Detector.md"));
         resources.put("detectors/hostname/Detector.groovy", readResource("api-policy/detectors/hostname/Detector.groovy"));
         return resources;
