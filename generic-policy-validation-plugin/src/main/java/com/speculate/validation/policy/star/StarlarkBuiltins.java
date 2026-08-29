@@ -4,6 +4,7 @@ import com.google.re2j.Pattern;
 import net.starlark.java.annot.Param;
 import net.starlark.java.annot.StarlarkMethod;
 import net.starlark.java.eval.Starlark;
+import net.starlark.java.eval.StarlarkInt;
 import net.starlark.java.eval.StarlarkList;
 import net.starlark.java.eval.StarlarkValue;
 
@@ -65,6 +66,21 @@ public final class StarlarkBuiltins implements StarlarkValue {
             tokens.add(tokenizer.nextToken());
         }
         return StarlarkList.immutableCopyOf(tokens);
+    }
+
+    @StarlarkMethod(
+            name = "parse_int",
+            doc = "Parses text as a base-10 integer, or returns fallback if it is not one (Groovy Integer.parseInt + catch).",
+            parameters = {
+                    @Param(name = "text"),
+                    @Param(name = "fallback"),
+            })
+    public StarlarkInt parseInt(String text, StarlarkInt fallback) {
+        try {
+            return StarlarkInt.of(Integer.parseInt(text));
+        } catch (NumberFormatException e) {
+            return fallback;
+        }
     }
 
     @StarlarkMethod(

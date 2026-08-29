@@ -5,6 +5,7 @@ import net.starlark.java.eval.EvalException;
 import net.starlark.java.eval.Module;
 import net.starlark.java.eval.Mutability;
 import net.starlark.java.eval.Starlark;
+import net.starlark.java.eval.StarlarkFloat;
 import net.starlark.java.eval.StarlarkInt;
 import net.starlark.java.eval.StarlarkList;
 import net.starlark.java.eval.StarlarkSemantics;
@@ -109,9 +110,13 @@ public final class StarlarkDetectorRuntime {
         if (value instanceof Long l) {
             return StarlarkInt.of(l);
         }
+        if (value instanceof java.math.BigInteger big) {
+            return StarlarkInt.of(big);
+        }
         if (value instanceof Number n) {
-            // POC: no current detector does arithmetic on doubles/enum numbers.
-            return String.valueOf(n);
+            // Enum values, numeric literals: keep them numeric so detectors
+            // can distinguish int/float exactly as the Groovy `instanceof` checks do.
+            return StarlarkFloat.of(n.doubleValue());
         }
         if (value instanceof Map<?, ?> map) {
             LinkedHashMap<String, Object> converted = new LinkedHashMap<>();
