@@ -237,6 +237,63 @@ class SiftParityTest {
                 Map.of("name-pattern", "(^|[-_])(filter)([-_]|$)", "check", "string"), false);
     }
 
+    @Test void paginationOperationMissing() {
+        assertParity("pagination", "operation",
+                Map.of("name-pattern", "(^|[-_])(page|offset|cursor)([-_]|$)", "check", "present"), true);
+    }
+
+    @Test void paginationParamInteger() {
+        assertParity("pagination", "query-parameter",
+                Map.of("name-pattern", "(^|[-_])(search)([-_]|$)", "check", "string"), false);
+    }
+
+    @Test void paginationLinkHeader() {
+        assertParity("pagination", "response",
+                Map.of("name-pattern", "(^|[-_])(page)([-_]|$)"), true);
+    }
+
+    @Test void resourcePathOperationVerb() {
+        assertParity("resource-path", "path", Map.of("match", "operation-verb"), false);
+    }
+
+    @Test void resourcePathRpcStyle() {
+        assertParity("resource-path", "operation", Map.of("match", "rpc-style"), false);
+    }
+
+    @Test void resourcePathTrailingSlash() {
+        assertParity("resource-path", "path", Map.of("match", "trailing-slash"), false);
+    }
+
+    @Test void resourcePathEmbeddedId() {
+        assertParity("resource-path", "path", Map.of("match", "embedded-identifier"), false);
+    }
+
+    @Test void resourcePathCustomAction() {
+        assertParity("resource-path", "path", Map.of("match", "custom-action"), false);
+    }
+
+    @Test void errorResponseRequiredClass() {
+        assertParity("error-response", "operation", Map.of("required-class", "success"), false);
+    }
+
+    @Test void errorResponseDescription() {
+        assertParity("error-response", "response", Map.of("require-description", true), false);
+    }
+
+    @Test void errorResponseHeader() {
+        assertParity("error-response", "response",
+                Map.of("status", 500, "required-header", "Retry-After"), true);
+    }
+
+    @Test void authErrorOperation() {
+        assertParity("authentication-error", "operation", Map.of("required-status", 401), false);
+    }
+
+    @Test void authErrorResponseHeader() {
+        assertParity("authentication-error", "response",
+                Map.of("required-status", 500, "required-header", "WWW-Authenticate"), true);
+    }
+
     // --- harness ---------------------------------------------------------
 
     private void assertParity(String detectorId, String scope, Map<String, Object> parameters) {
