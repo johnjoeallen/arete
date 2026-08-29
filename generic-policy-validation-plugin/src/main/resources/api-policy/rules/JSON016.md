@@ -58,3 +58,36 @@ responses:
 
 Responses without a documented schema are not flagged by this rule: the
 detector cannot infer a top-level shape that the contract does not declare.
+
+## Payload examples
+
+### Bad — top-level array
+
+```json
+[
+  { "id": "c-123", "name": "Alice" },
+  { "id": "c-456", "name": "Bob" }
+]
+```
+
+### Bad — top-level scalar
+
+```json
+"created"
+```
+
+### Good — object envelope
+
+```json
+{
+  "customers": [
+    { "id": "c-123", "name": "Alice" },
+    { "id": "c-456", "name": "Bob" }
+  ],
+  "count": 2
+}
+```
+
+The object envelope leaves room for fields such as `count`, pagination links,
+or warnings to be added without changing the response from an array or scalar
+into a different top-level JSON shape.
