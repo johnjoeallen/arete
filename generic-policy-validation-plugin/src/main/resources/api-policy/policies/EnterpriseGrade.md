@@ -87,7 +87,11 @@ rules:
 
 # Enterprise Grade Policy
 
-This policy enables the Enterprise Grade rules that are currently bundled.
+The default policy: it enables every generally-applicable bundled rule, with a
+few detector parameters calibrated for a typical enterprise API (allow-listed
+proprietary headers, expected OAuth2 scopes, standard rate-limit headers).
+
 Each matched rule deducts half a point once, regardless of how many occurrences
-it reports. Additional requested rules will be included when their catalogue
-definitions and detectors are bundled.
+it reports — a deliberately simple, uniform baseline. Organisations should
+publish their own policy with calibrated deductions and `PROHIBITED`
+dispositions rather than relying on this one unchanged.

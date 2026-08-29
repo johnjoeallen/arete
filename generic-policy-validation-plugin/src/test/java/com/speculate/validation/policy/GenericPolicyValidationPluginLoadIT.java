@@ -40,12 +40,12 @@ class GenericPolicyValidationPluginLoadIT {
                                 '200': { description: OK }
                         """)
                 .format(SpecFormat.OPENAPI3)
-                .ruleSet("Strict")
+                .ruleSet("Enterprise Grade")
                 .build());
 
         assertEquals(ValidationResult.Status.SUCCESS, result.getStatus());
-        assertEquals(3, result.getViolations().size());
-        assertEquals(98.5, result.getOverallScore());
+        assertEquals(13, result.getViolations().size());
+        assertEquals(95.0, result.getOverallScore());
     }
 
     private static File findBuiltJar() {

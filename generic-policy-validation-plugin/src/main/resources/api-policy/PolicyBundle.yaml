@@ -114,7 +114,6 @@ rules:
   STATUS005: rules/STATUS005.md
 
 policies:
-  Strict: policies/Strict.md
   "Enterprise Grade": policies/EnterpriseGrade.md
   Zalando: policies/Zalando.md
   "Zalando Extended": policies/ZalandoExtended.md
