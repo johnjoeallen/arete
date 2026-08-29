@@ -1049,6 +1049,10 @@ on making detector pipelines feel natural to Java developers while retaining a
 small, controlled operation set.</p>
 <p>The language precedence and Groovy opt-in switches are documented in the
 <a href="../policy-engine/#detector-languages">policy engine guide</a>.</p>
+<p>Whichever language a bundle picks, the findings are the same: <code>SiftParityTest</code>
+pins every <code>Detector.sift</code> to its <code>Detector.star</code>, and <code>GroovyStarlarkParityTest</code>
+sweeps every bundle rule against both runtimes so a <code>Detector.groovy</code> can never
+drift from its Starlark twin.</p>
 <h2 id="sift-coverage">Sift coverage<a class="headerlink" href="#sift-coverage" title="Permanent link">&para;</a></h2>
 <p>Sift is expression-only: a single <code>return</code>, closures with one parameter and a
 one-expression body, no local variables or helper functions. Beyond the core
