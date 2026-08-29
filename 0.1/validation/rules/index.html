@@ -1113,8 +1113,8 @@
 by category. A rule is only evaluated when a <a href="../policies/">policy</a> references
 it. See <a href="../policy-engine/">the policy engine</a> for how rules, detectors, and
 policies fit together.</p>
-<p>There are <strong>123 rules</strong> across <strong>20 categories</strong>, built on
-<strong>38 detectors</strong>.</p>
+<p>There are <strong>130 rules</strong> across <strong>20 categories</strong>, built on
+<strong>42 detectors</strong>.</p>
 <div class="admonition note">
 <p class="admonition-title">Reading the policy columns</p>
 <p>A number is the point deduction applied once if the rule matches;
@@ -1485,6 +1485,22 @@ a blank cell means that policy does not include the rule.</p>
 <td><code>DOC012</code></td>
 <td>API title does not follow the naming convention</td>
 <td><code>api-title</code></td>
+<td>0.5</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>DOC013</code></td>
+<td>Schema property lacks a description or example</td>
+<td><code>documentation-completeness</code></td>
+<td>0.5</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>DOC014</code></td>
+<td>Parameter lacks a description or example</td>
+<td><code>documentation-completeness</code></td>
 <td>0.5</td>
 <td></td>
 <td></td>
@@ -2290,6 +2306,46 @@ a blank cell means that policy does not include the rule.</p>
 <td><code>STANDARD017</code></td>
 <td>Response header has no schema</td>
 <td><code>header-schema</code></td>
+<td>0.5</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>STANDARD018</code></td>
+<td>Non-standard specification extension</td>
+<td><code>extensions</code></td>
+<td>0.5</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>STANDARD019</code></td>
+<td>Inline composition member</td>
+<td><code>schema-composition</code></td>
+<td>0.5</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>STANDARD020</code></td>
+<td>Request or response body uses an inline object schema</td>
+<td><code>schema-composition</code></td>
+<td>0.5</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>STANDARD021</code></td>
+<td>Unresolved reference</td>
+<td><code>document-lint</code></td>
+<td>0.5</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>STANDARD022</code></td>
+<td>HTTP status keys are bare numbers</td>
+<td><code>document-lint</code></td>
 <td>0.5</td>
 <td></td>
 <td></td>

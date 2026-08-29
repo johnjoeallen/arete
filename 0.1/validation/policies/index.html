@@ -745,7 +745,7 @@ listed here is the default when an unknown rule set is requested.</p>
 <h2 id="enterprise-grade">Enterprise Grade<a class="headerlink" href="#enterprise-grade" title="Permanent link">&para;</a></h2>
 <p>The default policy: it enables every generally-applicable bundled rule, with a few detector parameters calibrated for a typical enterprise API (allow-listed proprietary headers, expected OAuth2 scopes, standard rate-limit headers).</p>
 <ul>
-<li><strong>87</strong> rules active</li>
+<li><strong>94</strong> rules active</li>
 </ul>
 <p>Parameter overrides:</p>
 <table>
@@ -771,7 +771,7 @@ listed here is the default when an unknown rule set is requested.</p>
 </tbody>
 </table>
 <details class="example">
-<summary>All 87 rules in Enterprise Grade</summary>
+<summary>All 94 rules in Enterprise Grade</summary>
 <table>
 <thead>
 <tr>
@@ -1215,6 +1215,41 @@ listed here is the default when an unknown rule set is requested.</p>
 <td><code>SEC009</code></td>
 <td>−0.5</td>
 <td>Server URL exposes an internal host</td>
+</tr>
+<tr>
+<td><code>STANDARD018</code></td>
+<td>−0.5</td>
+<td>Non-standard specification extension</td>
+</tr>
+<tr>
+<td><code>STANDARD019</code></td>
+<td>−0.5</td>
+<td>Inline composition member</td>
+</tr>
+<tr>
+<td><code>STANDARD020</code></td>
+<td>−0.5</td>
+<td>Request or response body uses an inline object schema</td>
+</tr>
+<tr>
+<td><code>STANDARD021</code></td>
+<td>−0.5</td>
+<td>Unresolved reference</td>
+</tr>
+<tr>
+<td><code>STANDARD022</code></td>
+<td>−0.5</td>
+<td>HTTP status keys are bare numbers</td>
+</tr>
+<tr>
+<td><code>DOC013</code></td>
+<td>−0.5</td>
+<td>Schema property lacks a description or example</td>
+</tr>
+<tr>
+<td><code>DOC014</code></td>
+<td>−0.5</td>
+<td>Parameter lacks a description or example</td>
 </tr>
 </tbody>
 </table>
