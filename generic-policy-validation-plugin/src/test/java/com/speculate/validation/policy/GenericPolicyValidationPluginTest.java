@@ -118,7 +118,7 @@ class GenericPolicyValidationPluginTest {
         ValidationResult result = plugin.validate(input(ACTION_PATH_SPEC));
 
         assertEquals(ValidationResult.Status.SUCCESS, result.getStatus());
-        assertEquals(98, result.getRulesEvaluatedCount());
+        assertEquals(101, result.getRulesEvaluatedCount());
         assertEquals(31, result.getViolations().size());
         assertEquals("REST001", result.getViolations().get(0).getRuleId());
         assertEquals(2, result.getViolations().stream().filter(violation -> violation.getRuleId().equals("REST001")).count());
@@ -140,7 +140,7 @@ class GenericPolicyValidationPluginTest {
         ValidationResult result = plugin.validate(input(COMPLIANT_STARTER_SPEC));
 
         assertEquals(ValidationResult.Status.SUCCESS, result.getStatus());
-        assertEquals(98, result.getRulesEvaluatedCount());
+        assertEquals(101, result.getRulesEvaluatedCount());
         assertEquals(18, result.getViolations().size());
         assertEquals("DOC006", result.getViolations().get(0).getRuleId());
         assertEquals(95.0, result.getOverallScore());
@@ -936,7 +936,7 @@ class GenericPolicyValidationPluginTest {
         resources.put("detectors/pagination/Detector.md", readResource("api-policy/detectors/pagination/Detector.md"));
         for (String ruleId : new String[] {"STANDARD011", "STANDARD012", "STANDARD013", "STANDARD014", "STANDARD015",
                 "STANDARD016", "STANDARD017", "STANDARD018", "STANDARD019", "STANDARD020", "STANDARD021", "STANDARD022",
-                "HTTP009", "DOC010", "DOC011", "DOC012", "DOC013", "DOC014", "CASE006", "CASE007", "JSON017", "JSON018", "JSON019", "DOC015", "SEC009",
+                "HTTP009", "DOC010", "DOC011", "DOC012", "DOC013", "DOC014", "CASE006", "CASE007", "JSON017", "JSON018", "JSON019", "JSON020", "DOC015", "DOC016", "ERROR011", "SEC009",
                 "STATUS008"}) {
             resources.put("rules/" + ruleId + ".md", readResource("api-policy/rules/" + ruleId + ".md"));
         }
@@ -945,7 +945,7 @@ class GenericPolicyValidationPluginTest {
                 "security", "manual", "bulk-operation", "versioning", "compatibility", "metadata", "openapi-version",
                 "media-type", "date-time-name", "common-field", "path-count", "hostname", "error-response", "authentication-error", "sensitive-data", "sensitive-search", "identifier", "collection-capability", "pagination",
                 "parameter", "request-body", "operation-metadata", "api-title", "schema-name", "path-set", "header-schema", "enum-values", "server-url",
-                "extensions", "documentation-completeness", "schema-composition", "document-lint", "status-class"}) {
+                "extensions", "documentation-completeness", "schema-composition", "document-lint", "status-class", "example-validity", "response-example"}) {
             resources.put("detectors/" + detectorId + "/Detector.md",
                     readResource("api-policy/detectors/" + detectorId + "/Detector.md"));
             resources.put("detectors/" + detectorId + "/Detector.star",

@@ -16,7 +16,7 @@ effectiveScore = 0 if any PROHIBITED rule matched, else qualityScore
 
 The default policy: it enables every generally-applicable bundled rule, with a few detector parameters calibrated for a typical enterprise API (allow-listed proprietary headers, expected OAuth2 scopes, standard rate-limit headers).
 
-- **98** rules active
+- **101** rules active
 
 Parameter overrides:
 
@@ -26,7 +26,7 @@ Parameter overrides:
 | `STANDARD008` | `allowed` = `X-Request-Id,X-Correlation-Id,X-Trace-Id` |
 | `STATUS007` | `headers` = `RateLimit-Limit,RateLimit-Remaining` |
 
-??? example "All 98 rules in Enterprise Grade"
+??? example "All 101 rules in Enterprise Grade"
 
     | Rule | Disposition | Title |
     |---|---|---|
@@ -128,6 +128,9 @@ Parameter overrides:
     | `JSON018` | −0.5 | Integer property does not declare a format |
     | `JSON019` | −0.5 | Number property does not declare a format |
     | `DOC015` | −0.5 | Operation description is missing |
+    | `JSON020` | −0.5 | Property example violates its own constraints |
+    | `DOC016` | −0.5 | Schema example omits a required field |
+    | `ERROR011` | −0.5 | Error responses share an example payload |
 
 ## Zalando
 

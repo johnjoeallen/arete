@@ -7,8 +7,8 @@ by category. A rule is only evaluated when a [policy](policies.md) references
 it. See [the policy engine](policy-engine.md) for how rules, detectors, and
 policies fit together.
 
-There are **135 rules** across **20 categories**, built on
-**43 detectors**.
+There are **138 rules** across **20 categories**, built on
+**45 detectors**.
 
 !!! note "Reading the policy columns"
     A number is the point deduction applied once if the rule matches;
@@ -82,6 +82,7 @@ There are **135 rules** across **20 categories**, built on
 | `DOC013` | Schema property lacks a description or example | `documentation-completeness` | 0.5 |  |  |
 | `DOC014` | Parameter lacks a description or example | `documentation-completeness` | 0.5 |  |  |
 | `DOC015` | Operation description is missing | `operation` | 0.5 |  |  |
+| `DOC016` | Schema example omits a required field | `example-validity` | 0.5 |  |  |
 
 ## Error responses
 
@@ -94,6 +95,7 @@ There are **135 rules** across **20 categories**, built on
 | `ERROR005` | Error response does not declare Problem Details | `error-response` |  |  |  |
 | `ERROR006` | Unauthorized response lacks the authentication challenge | `error-response` |  |  |  |
 | `ERROR007` | Method-not-allowed response lacks Allow | `error-response` |  |  |  |
+| `ERROR011` | Error responses share an example payload | `response-example` | 0.5 |  |  |
 
 ## HTTP
 
@@ -146,6 +148,7 @@ There are **135 rules** across **20 categories**, built on
 | `JSON017` | Enum contains duplicate values | `enum-values` | 0.5 |  |  |
 | `JSON018` | Integer property does not declare a format | `schema` | 0.5 |  |  |
 | `JSON019` | Number property does not declare a format | `schema` | 0.5 |  |  |
+| `JSON020` | Property example violates its own constraints | `example-validity` | 0.5 |  |  |
 
 ## Naming
 

@@ -138,6 +138,9 @@ rules:
   JSON018: rules/JSON018.md
   JSON019: rules/JSON019.md
   DOC015: rules/DOC015.md
+  JSON020: rules/JSON020.md
+  DOC016: rules/DOC016.md
+  ERROR011: rules/ERROR011.md
 
 policies:
   "Enterprise Grade": policies/EnterpriseGrade.md
@@ -188,3 +191,5 @@ detectors:
   schema-composition: detectors/schema-composition/Detector.md
   document-lint: detectors/document-lint/Detector.md
   status-class: detectors/status-class/Detector.md
+  example-validity: detectors/example-validity/Detector.md
+  response-example: detectors/response-example/Detector.md

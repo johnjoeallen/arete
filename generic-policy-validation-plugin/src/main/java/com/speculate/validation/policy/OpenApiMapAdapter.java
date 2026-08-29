@@ -155,6 +155,9 @@ final class OpenApiMapAdapter {
                 schemaMap.put("maxItems", schema == null ? null : schema.getMaxItems());
                 schemaMap.put("description", schema == null ? null : schema.getDescription());
                 schemaMap.put("examplePresent", schema != null && schema.getExample() != null);
+                schemaMap.put("example", schema == null ? null : plainValue(schema.getExample()));
+                schemaMap.put("requiredFields", schema == null || schema.getRequired() == null
+                        ? List.of() : List.copyOf(schema.getRequired()));
                 schemaMap.put("extensionKeys", schema == null ? List.of() : extensionKeys(schema.getExtensions()));
                 schemaMap.put("compositionKind", compositionKind(schema));
                 schemaMap.put("inlineCompositionMembers", schema == null ? 0 : inlineCompositionMembers(schema));
@@ -172,6 +175,14 @@ final class OpenApiMapAdapter {
                         propertyMap.put("format", property.getFormat());
                         propertyMap.put("description", property.getDescription());
                         propertyMap.put("examplePresent", property.getExample() != null);
+                        propertyMap.put("example", plainValue(property.getExample()));
+                        propertyMap.put("pattern", property.getPattern());
+                        propertyMap.put("minLength", property.getMinLength());
+                        propertyMap.put("maxLength", property.getMaxLength());
+                        propertyMap.put("minimum", property.getMinimum() == null ? null : property.getMinimum().doubleValue());
+                        propertyMap.put("maximum", property.getMaximum() == null ? null : property.getMaximum().doubleValue());
+                        propertyMap.put("exclusiveMinimum", Boolean.TRUE.equals(property.getExclusiveMinimum()));
+                        propertyMap.put("exclusiveMaximum", Boolean.TRUE.equals(property.getExclusiveMaximum()));
                         propertyMap.put("extensionKeys", extensionKeys(property.getExtensions()));
                         propertyMap.put("nullable", Boolean.TRUE.equals(property.getNullable()));
                         propertyMap.put("required", schema.getRequired() != null && schema.getRequired().contains(propertyName));
@@ -235,6 +246,45 @@ final class OpenApiMapAdapter {
             detail.put("schemaMaximum", parameter.getSchema() == null ? null : parameter.getSchema().getMaximum());
             destination.add(detail);
         }
+    }
+
+    /**
+     * Normalises an example value (which the parser may hand back as a Jackson
+     * node) to plain {@code String} / {@code Boolean} / {@code Number} /
+     * {@code Map} / {@code List} / {@code null} so detectors see a predictable
+     * shape.
+     */
+    private static Object plainValue(Object value) {
+        if (value == null) return null;
+        if (value instanceof com.fasterxml.jackson.databind.JsonNode node) {
+            if (node.isNull() || node.isMissingNode()) return null;
+            if (node.isTextual()) return node.textValue();
+            if (node.isBoolean()) return node.booleanValue();
+            if (node.isIntegralNumber()) return node.longValue();
+            if (node.isNumber()) return node.doubleValue();
+            if (node.isArray()) {
+                List<Object> list = new ArrayList<>();
+                node.forEach(child -> list.add(plainValue(child)));
+                return list;
+            }
+            if (node.isObject()) {
+                Map<String, Object> map = new LinkedHashMap<>();
+                node.fields().forEachRemaining(field -> map.put(field.getKey(), plainValue(field.getValue())));
+                return map;
+            }
+            return node.asText();
+        }
+        if (value instanceof Map<?, ?> map) {
+            Map<String, Object> plain = new LinkedHashMap<>();
+            for (Map.Entry<?, ?> entry : map.entrySet()) plain.put(String.valueOf(entry.getKey()), plainValue(entry.getValue()));
+            return plain;
+        }
+        if (value instanceof List<?> list) {
+            List<Object> plain = new ArrayList<>();
+            for (Object element : list) plain.add(plainValue(element));
+            return plain;
+        }
+        return value;
     }
 
     /** Names of {@code x-} extension keys on a parser object, or an empty list. */

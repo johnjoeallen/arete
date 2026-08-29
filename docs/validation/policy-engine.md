@@ -228,10 +228,13 @@ api.paths[]   { path, pointer, segments[], templateParameters[], operations[], o
                           mediaTypes[], schemaInlineObject, exampleStrings[] }
       .headerDetails[]  { name, schemaPresent }
 api.schemas[]  { name, pointer, type, array, maxItems, description, examplePresent,
-                 extensionKeys[], compositionKind, inlineCompositionMembers, properties[] }
+                 example, requiredFields[], extensionKeys[], compositionKind,
+                 inlineCompositionMembers, properties[] }
   .properties[]         { name, pointer, type, array, maxItems, format, description,
-                          examplePresent, extensionKeys[], nullable, required,
-                          enumPresent, enumValues[], extensibleEnum }
+                          examplePresent, example, pattern, minLength, maxLength,
+                          minimum, maximum, exclusiveMinimum, exclusiveMaximum,
+                          extensionKeys[], nullable, required, enumPresent,
+                          enumValues[], extensibleEnum }
 ```
 
 `operationDetails[].security` is `null` unless the operation overrides the
