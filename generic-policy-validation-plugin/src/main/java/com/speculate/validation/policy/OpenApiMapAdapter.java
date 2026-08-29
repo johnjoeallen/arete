@@ -118,7 +118,8 @@ final class OpenApiMapAdapter {
             info.put("apiId", openApi.getExtensions().get("x-api-id"));
             info.put("audience", openApi.getExtensions().get("x-audience"));
         }
-        return Map.of("paths", paths, "schemas", schemas, "info", info);
+        List<String> servers = openApi.getServers() == null ? List.of() : openApi.getServers().stream().map(server -> server.getUrl()).toList();
+        return Map.of("paths", paths, "schemas", schemas, "info", info, "servers", servers);
     }
 
     private static void addParameters(List<Map<String, Object>> destination, List<Parameter> source, String pointer) {

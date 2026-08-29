@@ -118,12 +118,12 @@ class GenericPolicyValidationPluginTest {
         ValidationResult result = plugin.validate(input(ACTION_PATH_SPEC));
 
         assertEquals(ValidationResult.Status.SUCCESS, result.getStatus());
-        assertEquals(53, result.getRulesEvaluatedCount());
-        assertEquals(15, result.getViolations().size());
+        assertEquals(54, result.getRulesEvaluatedCount());
+        assertEquals(16, result.getViolations().size());
         assertEquals("REST001", result.getViolations().get(0).getRuleId());
         assertEquals(2, result.getViolations().stream().filter(violation -> violation.getRuleId().equals("REST001")).count());
-        assertEquals(96.0, result.getOverallScore());
-        assertEquals(96.0, result.getOverallScoreWithoutBlockers());
+        assertEquals(95.5, result.getOverallScore());
+        assertEquals(95.5, result.getOverallScoreWithoutBlockers());
         assertEquals(0.5, result.getViolations().get(0).getScoreImprovement());
         assertEquals(0.5, result.getViolations().get(1).getScoreImprovement());
         assertEquals("http://localhost:6809/plugins/generic-policy/rules/REST001",
@@ -139,10 +139,10 @@ class GenericPolicyValidationPluginTest {
         ValidationResult result = plugin.validate(input(COMPLIANT_STARTER_SPEC));
 
         assertEquals(ValidationResult.Status.SUCCESS, result.getStatus());
-        assertEquals(53, result.getRulesEvaluatedCount());
-        assertEquals(7, result.getViolations().size());
+        assertEquals(54, result.getRulesEvaluatedCount());
+        assertEquals(8, result.getViolations().size());
         assertEquals("DOC006", result.getViolations().get(0).getRuleId());
-        assertEquals(98.0, result.getOverallScore());
+        assertEquals(97.5, result.getOverallScore());
     }
 
     @Test
@@ -327,6 +327,9 @@ class GenericPolicyValidationPluginTest {
         }
         resources.put("rules/DOC007.md", readResource("api-policy/rules/DOC007.md"));
         resources.put("rules/DOC008.md", readResource("api-policy/rules/DOC008.md"));
+        resources.put("rules/STANDARD001.md", readResource("api-policy/rules/STANDARD001.md"));
+        resources.put("detectors/hostname/Detector.md", readResource("api-policy/detectors/hostname/Detector.md"));
+        resources.put("detectors/hostname/Detector.groovy", readResource("api-policy/detectors/hostname/Detector.groovy"));
         return resources;
     }
 
