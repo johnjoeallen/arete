@@ -745,7 +745,7 @@ listed here is the default when an unknown rule set is requested.</p>
 <h2 id="enterprise-grade">Enterprise Grade<a class="headerlink" href="#enterprise-grade" title="Permanent link">&para;</a></h2>
 <p>The default policy: it enables every generally-applicable bundled rule, with a few detector parameters calibrated for a typical enterprise API (allow-listed proprietary headers, expected OAuth2 scopes, standard rate-limit headers).</p>
 <ul>
-<li><strong>73</strong> rules active</li>
+<li><strong>87</strong> rules active</li>
 </ul>
 <p>Parameter overrides:</p>
 <table>
@@ -771,7 +771,7 @@ listed here is the default when an unknown rule set is requested.</p>
 </tbody>
 </table>
 <details class="example">
-<summary>All 73 rules in Enterprise Grade</summary>
+<summary>All 87 rules in Enterprise Grade</summary>
 <table>
 <thead>
 <tr>
@@ -1145,6 +1145,76 @@ listed here is the default when an unknown rule set is requested.</p>
 <td><code>STANDARD010</code></td>
 <td>−0.5</td>
 <td>OpenAPI version is unsupported or missing</td>
+</tr>
+<tr>
+<td><code>STANDARD011</code></td>
+<td>−0.5</td>
+<td>Operation declares too many parameters</td>
+</tr>
+<tr>
+<td><code>STANDARD012</code></td>
+<td>−0.5</td>
+<td>Path parameter is not marked required</td>
+</tr>
+<tr>
+<td><code>STANDARD013</code></td>
+<td>−0.5</td>
+<td>Path parameter does not match the path template</td>
+</tr>
+<tr>
+<td><code>STANDARD014</code></td>
+<td>−0.5</td>
+<td>Parameter has no schema or content</td>
+</tr>
+<tr>
+<td><code>STANDARD015</code></td>
+<td>−0.5</td>
+<td>Request body is not marked required</td>
+</tr>
+<tr>
+<td><code>STANDARD016</code></td>
+<td>−0.5</td>
+<td>Duplicate path structure</td>
+</tr>
+<tr>
+<td><code>STANDARD017</code></td>
+<td>−0.5</td>
+<td>Response header has no schema</td>
+</tr>
+<tr>
+<td><code>HTTP009</code></td>
+<td>−0.5</td>
+<td>DELETE operation declares a request body</td>
+</tr>
+<tr>
+<td><code>DOC010</code></td>
+<td>−0.5</td>
+<td>operationId is missing or duplicated</td>
+</tr>
+<tr>
+<td><code>DOC011</code></td>
+<td>−0.5</td>
+<td>Operation is not tagged</td>
+</tr>
+<tr>
+<td><code>DOC012</code></td>
+<td>−0.5</td>
+<td>API title does not follow the naming convention</td>
+</tr>
+<tr>
+<td><code>CASE006</code></td>
+<td>−0.5</td>
+<td>Schema name is a placeholder</td>
+</tr>
+<tr>
+<td><code>JSON017</code></td>
+<td>−0.5</td>
+<td>Enum contains duplicate values</td>
+</tr>
+<tr>
+<td><code>SEC009</code></td>
+<td>−0.5</td>
+<td>Server URL exposes an internal host</td>
 </tr>
 </tbody>
 </table>

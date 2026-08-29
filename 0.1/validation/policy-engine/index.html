@@ -1410,15 +1410,19 @@ parser:</p>
 <a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>                openapiVersion, apiId, audience }
 <a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>api.servers   [ "https://api.example.com/v1", ... ]
 <a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>api.security  [ { &lt;schemeName&gt;: [scopes...] }, ... ]  or null   # global requirement
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>api.paths[]   { path, pointer, segments[], operations[], operationDetails[] }
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>api.paths[]   { path, pointer, segments[], templateParameters[], operations[], operationDetails[] }
 <a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>  .segments[]           { name, pointer }                 # literal segments only, no {params}
-<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>  .operationDetails[]   { method, pointer, summary, requestBodyPresent, security,
-<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>                          mediaTypes[], requestMediaTypes[], parameters[], responses[] }
-<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>    .parameters[]       { name, in, pointer, style, explode, schemaType, schemaMaximum }
-<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>    .responses[]        { status, description, headers[], schemaTypes[], mediaTypes[] }
-<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>api.schemas[]  { name, pointer, type, array, maxItems, properties[] }
-<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>  .properties[]         { name, pointer, type, array, maxItems, format, nullable,
-<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>                          required, enumPresent, enumValues[], extensibleEnum }
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>  .templateParameters[] "customerId"                      # the {names} in the path string
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>  .operationDetails[]   { method, pointer, summary, operationId, tags[], security,
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>                          requestBodyPresent, requestBodyRequired,
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>                          mediaTypes[], requestMediaTypes[], parameters[], responses[] }
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>    .parameters[]       { name, in, pointer, required, schemaPresent, style, explode,
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>                          schemaType, schemaMaximum }
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>    .responses[]        { status, description, headers[], headerDetails[], schemaTypes[], mediaTypes[] }
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>      .headerDetails[]  { name, schemaPresent }
+<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>api.schemas[]  { name, pointer, type, array, maxItems, properties[] }
+<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>  .properties[]         { name, pointer, type, array, maxItems, format, nullable,
+<a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>                          required, enumPresent, enumValues[], extensibleEnum }
 </code></pre></div>
 <p><code>operationDetails[].security</code> is <code>null</code> unless the operation overrides the
 global requirement. JSON Pointers are pre-escaped and safe to return verbatim

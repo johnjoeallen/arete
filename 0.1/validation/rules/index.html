@@ -1113,8 +1113,8 @@
 by category. A rule is only evaluated when a <a href="../policies/">policy</a> references
 it. See <a href="../policy-engine/">the policy engine</a> for how rules, detectors, and
 policies fit together.</p>
-<p>There are <strong>109 rules</strong> across <strong>20 categories</strong>, built on
-<strong>29 detectors</strong>.</p>
+<p>There are <strong>123 rules</strong> across <strong>20 categories</strong>, built on
+<strong>38 detectors</strong>.</p>
 <div class="admonition note">
 <p class="admonition-title">Reading the policy columns</p>
 <p>A number is the point deduction applied once if the rule matches;
@@ -1465,6 +1465,30 @@ a blank cell means that policy does not include the rule.</p>
 <td></td>
 <td></td>
 </tr>
+<tr>
+<td><code>DOC010</code></td>
+<td>operationId is missing or duplicated</td>
+<td><code>operation-metadata</code></td>
+<td>0.5</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>DOC011</code></td>
+<td>Operation is not tagged</td>
+<td><code>operation-metadata</code></td>
+<td>0.5</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>DOC012</code></td>
+<td>API title does not follow the naming convention</td>
+<td><code>api-title</code></td>
+<td>0.5</td>
+<td></td>
+<td></td>
+</tr>
 </tbody>
 </table>
 <h2 id="error-responses">Error responses<a class="headerlink" href="#error-responses" title="Permanent link">&para;</a></h2>
@@ -1603,6 +1627,14 @@ a blank cell means that policy does not include the rule.</p>
 <td><code>HTTP008</code></td>
 <td>Supported operation semantics are unclear</td>
 <td><code>operation-semantics</code></td>
+<td>0.5</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>HTTP009</code></td>
+<td>DELETE operation declares a request body</td>
+<td><code>request-body</code></td>
 <td>0.5</td>
 <td></td>
 <td></td>
@@ -1812,6 +1844,14 @@ a blank cell means that policy does not include the rule.</p>
 <td>0.5</td>
 <td>0.5</td>
 </tr>
+<tr>
+<td><code>JSON017</code></td>
+<td>Enum contains duplicate values</td>
+<td><code>enum-values</code></td>
+<td>0.5</td>
+<td></td>
+<td></td>
+</tr>
 </tbody>
 </table>
 <h2 id="naming">Naming<a class="headerlink" href="#naming" title="Permanent link">&para;</a></h2>
@@ -1866,6 +1906,14 @@ a blank cell means that policy does not include the rule.</p>
 <td>0.5</td>
 <td>0.5</td>
 <td>0.5</td>
+</tr>
+<tr>
+<td><code>CASE006</code></td>
+<td>Schema name is a placeholder</td>
+<td><code>schema-name</code></td>
+<td>0.5</td>
+<td></td>
+<td></td>
 </tr>
 </tbody>
 </table>
@@ -2087,6 +2135,14 @@ a blank cell means that policy does not include the rule.</p>
 <td></td>
 <td></td>
 </tr>
+<tr>
+<td><code>SEC009</code></td>
+<td>Server URL exposes an internal host</td>
+<td><code>server-url</code></td>
+<td>0.5</td>
+<td></td>
+<td></td>
+</tr>
 </tbody>
 </table>
 <h2 id="standards">Standards<a class="headerlink" href="#standards" title="Permanent link">&para;</a></h2>
@@ -2181,6 +2237,62 @@ a blank cell means that policy does not include the rule.</p>
 <td>0.5</td>
 <td>0.5</td>
 <td>0.5</td>
+</tr>
+<tr>
+<td><code>STANDARD011</code></td>
+<td>Operation declares too many parameters</td>
+<td><code>parameter</code></td>
+<td>0.5</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>STANDARD012</code></td>
+<td>Path parameter is not marked required</td>
+<td><code>parameter</code></td>
+<td>0.5</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>STANDARD013</code></td>
+<td>Path parameter does not match the path template</td>
+<td><code>parameter</code></td>
+<td>0.5</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>STANDARD014</code></td>
+<td>Parameter has no schema or content</td>
+<td><code>parameter</code></td>
+<td>0.5</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>STANDARD015</code></td>
+<td>Request body is not marked required</td>
+<td><code>request-body</code></td>
+<td>0.5</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>STANDARD016</code></td>
+<td>Duplicate path structure</td>
+<td><code>path-set</code></td>
+<td>0.5</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>STANDARD017</code></td>
+<td>Response header has no schema</td>
+<td><code>header-schema</code></td>
+<td>0.5</td>
+<td></td>
+<td></td>
 </tr>
 </tbody>
 </table>
