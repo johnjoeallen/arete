@@ -10,6 +10,9 @@ parameters:
   maximum-depth:
     type: integer
     required: false
+  nested-root:
+    type: boolean
+    required: false
 ---
 
 # Path-count detector
