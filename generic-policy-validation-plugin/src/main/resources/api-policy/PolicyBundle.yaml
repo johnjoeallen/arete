@@ -20,6 +20,10 @@ rules:
   STANDARD005: rules/STANDARD005.md
   STANDARD006: rules/STANDARD006.md
   STANDARD007: rules/STANDARD007.md
+  STANDARD008: rules/STANDARD008.md
+  STANDARD009: rules/STANDARD009.md
+  SECURITY001: rules/SECURITY001.md
+  SECURITY002: rules/SECURITY002.md
   CASE001: rules/CASE001.md
   CASE002: rules/CASE002.md
   CASE003: rules/CASE003.md
@@ -43,6 +47,12 @@ rules:
   JSON015: rules/JSON015.md
   JSON016: rules/JSON016.md
   STATUS006: rules/STATUS006.md
+  STATUS007: rules/STATUS007.md
+  STANDARD010: rules/STANDARD010.md
+  CONTENT001: rules/CONTENT001.md
+  CONTENT002: rules/CONTENT002.md
+  CONTENT003: rules/CONTENT003.md
+  CONTENT004: rules/CONTENT004.md
   HTTP004: rules/HTTP004.md
   HTTP005: rules/HTTP005.md
   HTTP001: rules/HTTP001.md
@@ -96,3 +106,8 @@ detectors:
   date-time-name: detectors/date-time-name/Detector.md
   response-code: detectors/response-code/Detector.md
   response-header: detectors/response-header/Detector.md
+  proprietary-header: detectors/proprietary-header/Detector.md
+  query-collection: detectors/query-collection/Detector.md
+  security: detectors/security/Detector.md
+  openapi-version: detectors/openapi-version/Detector.md
+  media-type: detectors/media-type/Detector.md

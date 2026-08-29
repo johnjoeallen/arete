@@ -35,6 +35,18 @@ rules:
   STANDARD005: 0.5
   STANDARD006: 0.5
   STANDARD007: 0.5
+  STANDARD008:
+    points: 0.5
+    parameters:
+      allowed: X-Request-Id
+  STANDARD009: 0.5
+  SECURITY001: 0.5
+  SECURITY002:
+    points: 0.5
+    parameters:
+      scopes: read
+  STATUS007: 0.5
+  STANDARD010: 0.5
 ---
 
 # Zalando Policy

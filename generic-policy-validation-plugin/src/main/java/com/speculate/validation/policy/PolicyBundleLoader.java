@@ -61,7 +61,7 @@ final class PolicyBundleLoader {
         Map<String, Policy> policies = new LinkedHashMap<>();
         for (Map.Entry<String, String> entry : policyPaths.entrySet()) {
             String path = safePath("PolicyBundle.yaml", entry.getValue());
-            Policy policy = parsePolicy(path, resources.read(path));
+            Policy policy = parsePolicy(path, resources.read(path), rules, detectors);
             if (!entry.getKey().equals(policy.id())) throw new BundleValidationException(path + ": manifest policy id does not match policy id");
             for (String ruleId : policy.dispositions().keySet()) if (!rules.containsKey(ruleId)) throw new BundleValidationException(path + ": unknown policy rule '" + ruleId + "'");
             policies.put(policy.id(), policy);
@@ -103,17 +103,46 @@ final class PolicyBundleLoader {
         return new Rule(requiredString(path, "id", data.get("id")), title(path, content), requiredString(path, "category", data.get("category")), requiredString(path, "detector", data.get("detector")), requiredString(path, "scope", data.get("scope")), Map.copyOf(parameters), markdownBody(path, content));
     }
 
-    private Policy parsePolicy(String path, String content) {
+    private Policy parsePolicy(String path, String content, Map<String, Rule> rules, Map<String, Detector> detectors) {
         Map<String, Object> data = frontMatter(path, content);
         rejectUnknown(path, data, Set.of("id", "rules"));
         Map<String, PolicyDisposition> dispositions = new LinkedHashMap<>();
         for (Map.Entry<String, Object> entry : map(path, "rules", data.get("rules")).entrySet()) {
             Object value = entry.getValue();
-            if (value instanceof Number number && Double.isFinite(number.doubleValue()) && number.doubleValue() >= 0 && number.doubleValue() <= 100) dispositions.put(entry.getKey(), new Deduction(number.doubleValue()));
-            else if ("PROHIBITED".equals(value)) dispositions.put(entry.getKey(), new Prohibited());
-            else throw new BundleValidationException(path + ": " + entry.getKey() + " must be a number from 0 to 100 or PROHIBITED");
+            if (value instanceof Number number && validPoints(number)) {
+                dispositions.put(entry.getKey(), new Deduction(number.doubleValue()));
+            } else if ("PROHIBITED".equals(value)) {
+                dispositions.put(entry.getKey(), new Prohibited());
+            } else if (value instanceof Map<?, ?> raw) {
+                Map<String, Object> declaration = map(path, "rules." + entry.getKey(), raw);
+                rejectUnknown(path, declaration, Set.of("points", "parameters"));
+                Object points = declaration.get("points");
+                Map<String, Object> overrides = declaration.containsKey("parameters")
+                        ? map(path, "rules." + entry.getKey() + ".parameters", declaration.get("parameters"))
+                        : Map.of();
+                Rule rule = rules.get(entry.getKey());
+                Detector detector = rule == null ? null : detectors.get(rule.detector());
+                if (detector != null) validateParameterOverrides(path, entry.getKey(), overrides, detector);
+                if ("PROHIBITED".equals(points)) dispositions.put(entry.getKey(), new Prohibited(overrides));
+                else if (points instanceof Number number && validPoints(number)) dispositions.put(entry.getKey(), new Deduction(number.doubleValue(), overrides));
+                else throw new BundleValidationException(path + ": " + entry.getKey() + ".points must be a number from 0 to 100 or PROHIBITED");
+            } else throw new BundleValidationException(path + ": " + entry.getKey() + " must be a number, PROHIBITED, or a declaration with points and parameters");
         }
         return new Policy(requiredString(path, "id", data.get("id")), dispositions);
+    }
+
+    private static boolean validPoints(Number number) {
+        return Double.isFinite(number.doubleValue()) && number.doubleValue() >= 0 && number.doubleValue() <= 100;
+    }
+
+    private static void validateParameterOverrides(String path, String ruleId, Map<String, Object> overrides, Detector detector) {
+        for (Map.Entry<String, Object> parameter : overrides.entrySet()) {
+            ParameterDefinition definition = detector.parameters().get(parameter.getKey());
+            if (definition == null) throw new BundleValidationException(path + ": " + ruleId + " overrides unknown parameter '" + parameter.getKey() + "'");
+            if (!validParameterValue(definition, parameter.getValue())) {
+                throw new BundleValidationException(path + ": " + ruleId + " has invalid " + definition.type() + " override for parameter '" + parameter.getKey() + "'");
+            }
+        }
     }
 
     private static void validateRule(String path, Rule rule, Detector detector) {

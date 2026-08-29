@@ -118,12 +118,12 @@ class GenericPolicyValidationPluginTest {
         ValidationResult result = plugin.validate(input(ACTION_PATH_SPEC));
 
         assertEquals(ValidationResult.Status.SUCCESS, result.getStatus());
-        assertEquals(67, result.getRulesEvaluatedCount());
-        assertEquals(16, result.getViolations().size());
+        assertEquals(73, result.getRulesEvaluatedCount());
+        assertEquals(22, result.getViolations().size());
         assertEquals("REST001", result.getViolations().get(0).getRuleId());
         assertEquals(2, result.getViolations().stream().filter(violation -> violation.getRuleId().equals("REST001")).count());
-        assertEquals(95.5, result.getOverallScore());
-        assertEquals(95.5, result.getOverallScoreWithoutBlockers());
+        assertEquals(94.5, result.getOverallScore());
+        assertEquals(94.5, result.getOverallScoreWithoutBlockers());
         assertEquals(0.5, result.getViolations().get(0).getScoreImprovement());
         assertEquals(0.5, result.getViolations().get(1).getScoreImprovement());
         assertEquals("http://localhost:6809/plugins/generic-policy/rules/REST001",
@@ -140,10 +140,10 @@ class GenericPolicyValidationPluginTest {
         ValidationResult result = plugin.validate(input(COMPLIANT_STARTER_SPEC));
 
         assertEquals(ValidationResult.Status.SUCCESS, result.getStatus());
-        assertEquals(67, result.getRulesEvaluatedCount());
-        assertEquals(8, result.getViolations().size());
+        assertEquals(73, result.getRulesEvaluatedCount());
+        assertEquals(12, result.getViolations().size());
         assertEquals("DOC006", result.getViolations().get(0).getRuleId());
-        assertEquals(97.5, result.getOverallScore());
+        assertEquals(96.5, result.getOverallScore());
     }
 
     @Test
@@ -276,6 +276,226 @@ class GenericPolicyValidationPluginTest {
     }
 
     @Test
+    void proprietaryHeaderDetectorReportsOnlyNonAllowListedCustomHeaders() {
+        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        String spec = """
+                openapi: 3.0.0
+                info: { title: Test API, version: 1.0.0 }
+                paths:
+                  /customers:
+                    get:
+                      parameters:
+                        - { name: X-Internal-Trace, in: header, schema: { type: string } }
+                        - { name: X-Request-Id, in: header, schema: { type: string } }
+                      responses:
+                        '200':
+                          description: OK
+                          headers:
+                            X-Internal-Region: { schema: { type: string } }
+                            Content-Type: { schema: { type: string } }
+                """;
+        Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
+                .readContents(spec, null, new ParseOptions()).getOpenAPI());
+
+        java.util.List<Occurrence> occurrences = new GroovyDetectorRuntime()
+                .execute(bundle.detectors().get("proprietary-header"), api, bundle.rules().get("STANDARD008"));
+
+        assertEquals(2, occurrences.size());
+        assertTrue(occurrences.stream().anyMatch(o -> o.message().contains("X-Internal-Trace")));
+        assertTrue(occurrences.stream().anyMatch(o -> o.message().contains("X-Internal-Region")));
+    }
+
+    @Test
+    void policiesCanOverrideRuleParametersIndependently() {
+        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+
+        assertEquals("X-Request-Id", bundle.policies().get("Zalando").dispositions()
+                .get("STANDARD008").parameters().get("allowed"));
+        assertEquals("X-Request-Id,X-Correlation-Id,X-Trace-Id", bundle.policies().get("Mastercard Core").dispositions()
+                .get("STANDARD008").parameters().get("allowed"));
+        assertEquals("X-Request-Id,X-Correlation-Id", bundle.policies().get("Zalando Extended").dispositions()
+                .get("STANDARD008").parameters().get("allowed"));
+    }
+
+    @Test
+    void queryCollectionDetectorHonoursConfiguredSerialization() {
+        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        String spec = """
+                openapi: 3.0.0
+                info: { title: Test API, version: 1.0.0 }
+                paths:
+                  /customers:
+                    get:
+                      parameters:
+                        - name: tags
+                          in: query
+                          style: form
+                          explode: true
+                          schema: { type: array, items: { type: string } }
+                        - name: states
+                          in: query
+                          style: pipeDelimited
+                          explode: false
+                          schema: { type: array, items: { type: string } }
+                      responses: { '200': { description: OK } }
+                """;
+        Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
+                .readContents(spec, null, new ParseOptions()).getOpenAPI());
+        java.util.List<Occurrence> occurrences = new GroovyDetectorRuntime()
+                .execute(bundle.detectors().get("query-collection"), api, bundle.rules().get("STANDARD009"));
+
+        assertEquals(1, occurrences.size());
+        assertTrue(occurrences.get(0).message().contains("states"));
+    }
+
+    @Test
+    void securityDetectorUsesOperationSecurityAndGlobalFallback() {
+        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        String spec = """
+                openapi: 3.0.0
+                info: { title: Test API, version: 1.0.0 }
+                security:
+                  - bearerAuth: []
+                paths:
+                  /customers:
+                    get:
+                      responses: { '200': { description: OK } }
+                  /public:
+                    get:
+                      security: []
+                      responses: { '200': { description: OK } }
+                  /admin:
+                    get:
+                      security:
+                        - apiKey: []
+                      responses: { '200': { description: OK } }
+                """;
+        Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
+                .readContents(spec, null, new ParseOptions()).getOpenAPI());
+
+        java.util.List<Occurrence> occurrences = new GroovyDetectorRuntime()
+                .execute(bundle.detectors().get("security"), api, bundle.rules().get("SECURITY001"));
+
+        assertEquals(2, occurrences.size());
+        assertTrue(occurrences.stream().anyMatch(o -> o.path().equals("GET /public")));
+        assertTrue(occurrences.stream().anyMatch(o -> o.path().equals("GET /admin")));
+    }
+
+    @Test
+    void securityDetectorRequiresAllConfiguredScopes() {
+        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        String spec = """
+                openapi: 3.0.0
+                info: { title: Test API, version: 1.0.0 }
+                security:
+                  - bearerAuth: [read, write]
+                paths:
+                  /customers:
+                    get:
+                      responses: { '200': { description: OK } }
+                  /orders:
+                    get:
+                      security:
+                        - bearerAuth: [read]
+                      responses: { '200': { description: OK } }
+                  /admin:
+                    get:
+                      security:
+                        - bearerAuth: [read, write]
+                      responses: { '200': { description: OK } }
+                """;
+        Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
+                .readContents(spec, null, new ParseOptions()).getOpenAPI());
+        Rule rule = bundle.rules().get("SECURITY002");
+        Rule writeRule = new Rule(rule.id(), rule.title(), rule.category(), rule.detector(), rule.scope(),
+                Map.of("scheme", "bearerAuth", "scopes", "read,write"), rule.documentationMarkdown());
+
+        java.util.List<Occurrence> occurrences = new GroovyDetectorRuntime()
+                .execute(bundle.detectors().get("security"), api, writeRule);
+
+        assertEquals(1, occurrences.size());
+        assertTrue(occurrences.get(0).path().equals("GET /orders"));
+    }
+
+    @Test
+    void responseHeaderDetectorRequiresEveryConfiguredRateLimitHeader() {
+        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        String spec = """
+                openapi: 3.0.0
+                info: { title: Test API, version: 1.0.0 }
+                paths:
+                  /customers:
+                    get:
+                      responses:
+                        '429':
+                          description: Too many requests
+                          headers:
+                            RateLimit-Limit: { schema: { type: integer } }
+                            RateLimit-Remaining: { schema: { type: integer } }
+                """;
+        Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
+                .readContents(spec, null, new ParseOptions()).getOpenAPI());
+
+        java.util.List<Occurrence> occurrences = new GroovyDetectorRuntime()
+                .execute(bundle.detectors().get("response-header"), api, bundle.rules().get("STATUS007"));
+
+        assertEquals(1, occurrences.size());
+        assertTrue(occurrences.get(0).message().contains("RateLimit-Reset"));
+    }
+
+    @Test
+    void openApiVersionDetectorChecksPolicySupportedVersionPrefixes() {
+        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        String spec = """
+                openapi: 3.0.3
+                info: { title: Test API, version: 1.0.0 }
+                paths: {}
+                """;
+        Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
+                .readContents(spec, null, new ParseOptions()).getOpenAPI());
+        Rule rule = bundle.rules().get("STANDARD010");
+        Rule strictVersionRule = new Rule(rule.id(), rule.title(), rule.category(), rule.detector(), rule.scope(),
+                Map.of("allowed", "3.1"), rule.documentationMarkdown());
+
+        java.util.List<Occurrence> occurrences = new GroovyDetectorRuntime()
+                .execute(bundle.detectors().get("openapi-version"), api, strictVersionRule);
+
+        assertEquals(1, occurrences.size());
+        assertTrue(occurrences.get(0).message().contains("3.0.3"));
+    }
+
+    @Test
+    void mediaTypeDetectorChecksRequestAndResponseContentFacts() {
+        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        String spec = """
+                openapi: 3.0.0
+                info: { title: Test API, version: 1.0.0 }
+                paths:
+                  /customers:
+                    post:
+                      requestBody:
+                        content:
+                          application/json: { schema: { type: object } }
+                      responses:
+                        '200':
+                          description: OK
+                          content:
+                            application/*: { schema: { type: object } }
+                        '201':
+                          description: Created
+                          content:
+                            application/xml: { schema: { type: object } }
+                """;
+        Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
+                .readContents(spec, null, new ParseOptions()).getOpenAPI());
+        GroovyDetectorRuntime runtime = new GroovyDetectorRuntime();
+
+        assertTrue(runtime.execute(bundle.detectors().get("media-type"), api, bundle.rules().get("CONTENT001")).isEmpty());
+        assertEquals(1, runtime.execute(bundle.detectors().get("media-type"), api, bundle.rules().get("CONTENT003")).size());
+        assertEquals(2, runtime.execute(bundle.detectors().get("media-type"), api, bundle.rules().get("CONTENT004")).size());
+    }
+
+    @Test
     void operationSemanticsDetectorReportsOnlyDocumentedHeuristicSignals() {
         PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
         String spec = """
@@ -307,6 +527,16 @@ class GenericPolicyValidationPluginTest {
         assertResource("api-policy/rules/DOC004.md");
         assertResource("api-policy/rules/DOC005.md");
         assertResource("api-policy/rules/DOC009.md");
+        assertResource("api-policy/rules/STANDARD008.md");
+        assertResource("api-policy/rules/STANDARD009.md");
+        assertResource("api-policy/rules/SECURITY001.md");
+        assertResource("api-policy/rules/SECURITY002.md");
+        assertResource("api-policy/rules/STATUS007.md");
+        assertResource("api-policy/rules/STANDARD010.md");
+        assertResource("api-policy/rules/CONTENT001.md");
+        assertResource("api-policy/rules/CONTENT002.md");
+        assertResource("api-policy/rules/CONTENT003.md");
+        assertResource("api-policy/rules/CONTENT004.md");
         assertResource("api-policy/policies/Strict.md");
         assertResource("api-policy/policies/MastercardCore.md");
         assertResource("api-policy/detectors/resource-path/Detector.md");
@@ -315,6 +545,16 @@ class GenericPolicyValidationPluginTest {
         assertResource("api-policy/detectors/operation/Detector.groovy");
         assertResource("api-policy/detectors/text-style/Detector.md");
         assertResource("api-policy/detectors/text-style/Detector.groovy");
+        assertResource("api-policy/detectors/proprietary-header/Detector.md");
+        assertResource("api-policy/detectors/proprietary-header/Detector.groovy");
+        assertResource("api-policy/detectors/query-collection/Detector.md");
+        assertResource("api-policy/detectors/query-collection/Detector.groovy");
+        assertResource("api-policy/detectors/security/Detector.md");
+        assertResource("api-policy/detectors/security/Detector.groovy");
+        assertResource("api-policy/detectors/openapi-version/Detector.md");
+        assertResource("api-policy/detectors/openapi-version/Detector.groovy");
+        assertResource("api-policy/detectors/media-type/Detector.md");
+        assertResource("api-policy/detectors/media-type/Detector.groovy");
     }
 
     private static SpecInput input(String content) {
@@ -323,9 +563,18 @@ class GenericPolicyValidationPluginTest {
 
     private static Map<String, String> bundledResources() {
         Map<String, String> resources = new LinkedHashMap<>();
-        for (String path : new String[] {"PolicyBundle.yaml", "rules/REST001.md", "rules/REST002.md", "rules/REST003.md", "rules/REST004.md", "rules/REST005.md", "rules/REST006.md", "rules/HTTP001.md", "rules/HTTP002.md", "rules/HTTP003.md", "rules/HTTP004.md", "rules/HTTP005.md", "rules/HTTP006.md", "rules/HTTP008.md", "rules/UPDATE001.md", "rules/UPDATE002.md", "rules/UPDATE003.md", "rules/BULK001.md", "rules/BULK002.md", "rules/BULK003.md", "rules/VERSION001.md", "rules/VERSION002.md", "rules/VERSION003.md", "rules/VERSION004.md", "rules/COMPAT001.md", "rules/COMPAT002.md", "rules/COMPAT003.md", "rules/COMPAT004.md", "rules/COMPAT005.md", "rules/COMPAT006.md", "rules/STATUS001.md", "rules/STATUS002.md", "rules/STATUS003.md", "rules/STATUS004.md", "rules/STATUS005.md", "rules/DOC001.md", "rules/DOC002.md", "rules/DOC003.md", "rules/DOC004.md", "rules/DOC005.md", "rules/DOC006.md", "rules/DOC009.md", "rules/CASE001.md", "rules/CASE002.md", "rules/CASE003.md", "rules/CASE004.md", "rules/CASE005.md", "rules/JSON003.md", "rules/JSON004.md", "rules/JSON006.md", "rules/JSON007.md", "rules/JSON009.md", "policies/Strict.md", "policies/MastercardCore.md", "detectors/resource-path/Detector.md", "detectors/resource-path/Detector.groovy", "detectors/operation/Detector.md", "detectors/operation/Detector.groovy", "detectors/text-style/Detector.md", "detectors/text-style/Detector.groovy", "detectors/naming/Detector.md", "detectors/naming/Detector.groovy", "detectors/schema/Detector.md", "detectors/schema/Detector.groovy", "detectors/operation-semantics/Detector.md", "detectors/operation-semantics/Detector.groovy", "detectors/response-code/Detector.md", "detectors/response-code/Detector.groovy", "detectors/response-header/Detector.md", "detectors/response-header/Detector.groovy", "detectors/manual/Detector.md", "detectors/manual/Detector.groovy", "detectors/bulk-operation/Detector.md", "detectors/bulk-operation/Detector.groovy", "detectors/versioning/Detector.md", "detectors/versioning/Detector.groovy", "detectors/compatibility/Detector.md", "detectors/compatibility/Detector.groovy", "detectors/metadata/Detector.md", "detectors/metadata/Detector.groovy"}) {
+        for (String path : new String[] {"PolicyBundle.yaml", "rules/REST001.md", "rules/REST002.md", "rules/REST003.md", "rules/REST004.md", "rules/REST005.md", "rules/REST006.md", "rules/HTTP001.md", "rules/HTTP002.md", "rules/HTTP003.md", "rules/HTTP004.md", "rules/HTTP005.md", "rules/HTTP006.md", "rules/HTTP008.md", "rules/UPDATE001.md", "rules/UPDATE002.md", "rules/UPDATE003.md", "rules/BULK001.md", "rules/BULK002.md", "rules/BULK003.md", "rules/VERSION001.md", "rules/VERSION002.md", "rules/VERSION003.md", "rules/VERSION004.md", "rules/COMPAT001.md", "rules/COMPAT002.md", "rules/COMPAT003.md", "rules/COMPAT004.md", "rules/COMPAT005.md", "rules/COMPAT006.md", "rules/STATUS001.md", "rules/STATUS002.md", "rules/STATUS003.md", "rules/STATUS004.md", "rules/STATUS005.md", "rules/STATUS006.md", "rules/STATUS007.md", "rules/DOC001.md", "rules/DOC002.md", "rules/DOC003.md", "rules/DOC004.md", "rules/DOC005.md", "rules/DOC006.md", "rules/DOC009.md", "rules/CASE001.md", "rules/CASE002.md", "rules/CASE003.md", "rules/CASE004.md", "rules/CASE005.md", "rules/JSON003.md", "rules/JSON004.md", "rules/JSON006.md", "rules/JSON007.md", "rules/JSON009.md", "rules/STANDARD008.md", "rules/STANDARD009.md", "rules/SECURITY001.md", "rules/SECURITY002.md", "policies/Strict.md", "policies/MastercardCore.md", "detectors/resource-path/Detector.md", "detectors/resource-path/Detector.groovy", "detectors/operation/Detector.md", "detectors/operation/Detector.groovy", "detectors/text-style/Detector.md", "detectors/text-style/Detector.groovy", "detectors/naming/Detector.md", "detectors/naming/Detector.groovy", "detectors/schema/Detector.md", "detectors/schema/Detector.groovy", "detectors/operation-semantics/Detector.md", "detectors/operation-semantics/Detector.groovy", "detectors/response-code/Detector.md", "detectors/response-code/Detector.groovy", "detectors/response-header/Detector.md", "detectors/response-header/Detector.groovy", "detectors/proprietary-header/Detector.md", "detectors/proprietary-header/Detector.groovy", "detectors/query-collection/Detector.md", "detectors/query-collection/Detector.groovy", "detectors/security/Detector.md", "detectors/security/Detector.groovy", "detectors/manual/Detector.md", "detectors/manual/Detector.groovy", "detectors/bulk-operation/Detector.md", "detectors/bulk-operation/Detector.groovy", "detectors/versioning/Detector.md", "detectors/versioning/Detector.groovy", "detectors/compatibility/Detector.md", "detectors/compatibility/Detector.groovy", "detectors/metadata/Detector.md", "detectors/metadata/Detector.groovy"}) {
             resources.put(path, readResource("api-policy/" + path));
         }
+        resources.put("rules/STANDARD010.md", readResource("api-policy/rules/STANDARD010.md"));
+        resources.put("detectors/openapi-version/Detector.md", readResource("api-policy/detectors/openapi-version/Detector.md"));
+        resources.put("detectors/openapi-version/Detector.groovy", readResource("api-policy/detectors/openapi-version/Detector.groovy"));
+        resources.put("rules/CONTENT001.md", readResource("api-policy/rules/CONTENT001.md"));
+        resources.put("rules/CONTENT002.md", readResource("api-policy/rules/CONTENT002.md"));
+        resources.put("rules/CONTENT003.md", readResource("api-policy/rules/CONTENT003.md"));
+        resources.put("rules/CONTENT004.md", readResource("api-policy/rules/CONTENT004.md"));
+        resources.put("detectors/media-type/Detector.md", readResource("api-policy/detectors/media-type/Detector.md"));
+        resources.put("detectors/media-type/Detector.groovy", readResource("api-policy/detectors/media-type/Detector.groovy"));
         resources.put("rules/DOC007.md", readResource("api-policy/rules/DOC007.md"));
         resources.put("rules/DOC008.md", readResource("api-policy/rules/DOC008.md"));
         resources.put("rules/STANDARD001.md", readResource("api-policy/rules/STANDARD001.md"));

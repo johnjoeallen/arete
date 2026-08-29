@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.LinkedHashMap;
 import java.util.Optional;
 import java.util.Set;
 
@@ -75,7 +76,10 @@ public final class GenericPolicyValidationPlugin implements SpecValidationPlugin
                 if (detector == null) {
                     return ValidationResult.pluginError("Detector '" + rule.detector() + "' required by " + rule.id() + " is not available in this bundle");
                 }
-                occurrences = detectorRuntime.execute(detector, api, rule);
+                Map<String, Object> parameters = new LinkedHashMap<>(rule.parameters());
+                parameters.putAll(policyRule.getValue().parameters());
+                Rule effectiveRule = new Rule(rule.id(), rule.title(), rule.category(), rule.detector(), rule.scope(), parameters, rule.documentationMarkdown());
+                occurrences = detectorRuntime.execute(detector, api, effectiveRule);
             } catch (DetectorException e) {
                 return ValidationResult.pluginError("Detector '" + rule.detector() + "' failed for " + rule.id() + ": " + e.getMessage());
             }

@@ -31,9 +31,21 @@ record Policy(String id, Map<String, PolicyDisposition> dispositions) {
         dispositions = Collections.unmodifiableMap(new LinkedHashMap<>(dispositions));
     }
 }
-sealed interface PolicyDisposition permits Deduction, Prohibited { }
-record Deduction(double points) implements PolicyDisposition { }
-record Prohibited() implements PolicyDisposition { }
+sealed interface PolicyDisposition permits Deduction, Prohibited {
+    Map<String, Object> parameters();
+}
+record Deduction(double points, Map<String, Object> parameters) implements PolicyDisposition {
+    Deduction {
+        parameters = Map.copyOf(parameters);
+    }
+    Deduction(double points) { this(points, Map.of()); }
+}
+record Prohibited(Map<String, Object> parameters) implements PolicyDisposition {
+    Prohibited {
+        parameters = Map.copyOf(parameters);
+    }
+    Prohibited() { this(Map.of()); }
+}
 record Occurrence(String pointer, String path, String message) { }
 
 final class BundleValidationException extends RuntimeException {

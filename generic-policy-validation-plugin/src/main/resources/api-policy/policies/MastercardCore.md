@@ -18,6 +18,16 @@ rules:
   STANDARD005: 0.5
   STANDARD006: 0.5
   STANDARD007: 0.5
+  STANDARD008:
+    points: 0.5
+    parameters:
+      allowed: X-Request-Id,X-Correlation-Id,X-Trace-Id
+  STANDARD009: 0.5
+  SECURITY001: 0.5
+  SECURITY002:
+    points: 0.5
+    parameters:
+      scopes: read,write
   CASE001: 0.5
   CASE002: 0.5
   CASE003: 0.5
@@ -68,6 +78,11 @@ rules:
   STATUS004: 0.5
   STATUS005: 0.5
   STATUS006: 0.5
+  STATUS007:
+    points: 0.5
+    parameters:
+      headers: RateLimit-Limit,RateLimit-Remaining
+  STANDARD010: 0.5
 ---
 
 # Mastercard Core Policy

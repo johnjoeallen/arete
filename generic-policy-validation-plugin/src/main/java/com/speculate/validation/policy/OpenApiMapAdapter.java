@@ -41,9 +41,12 @@ final class OpenApiMapAdapter {
                         detail.put("pointer", path.get("pointer") + "/" + operationEntry.getKey().name().toLowerCase());
                         detail.put("summary", operation == null ? null : operation.getSummary());
                         detail.put("requestBodyPresent", operation != null && operation.getRequestBody() != null);
+                        detail.put("security", operation == null || operation.getSecurity() == null ? null : securityRequirements(operation.getSecurity()));
                         List<String> mediaTypes = new ArrayList<>();
+                        List<String> requestMediaTypes = new ArrayList<>();
                         if (operation != null && operation.getRequestBody() != null && operation.getRequestBody().getContent() != null) {
-                            mediaTypes.addAll(operation.getRequestBody().getContent().keySet());
+                            requestMediaTypes.addAll(operation.getRequestBody().getContent().keySet());
+                            mediaTypes.addAll(requestMediaTypes);
                         }
                         List<Map<String, Object>> responses = new ArrayList<>();
                         if (operation != null && operation.getResponses() != null) {
@@ -56,16 +59,20 @@ final class OpenApiMapAdapter {
                                 responseMap.put("headers", headers instanceof Map<?, ?> map ? new ArrayList<>(map.keySet()) : List.of());
                                 Object content = responseProperty(response, "getContent");
                                 List<String> schemaTypes = new ArrayList<>();
+                                List<String> responseMediaTypes = new ArrayList<>();
                                 if (content instanceof Map<?, ?> map) {
-                                    mediaTypes.addAll(map.keySet().stream().map(Object::toString).toList());
+                                    responseMediaTypes.addAll(map.keySet().stream().map(Object::toString).toList());
+                                    mediaTypes.addAll(responseMediaTypes);
                                     map.values().forEach(media -> { Object schema = responseProperty(media, "getSchema"); Object type = responseProperty(schema, "getType"); if (type != null) schemaTypes.add(type.toString()); });
                                 }
                                 responseMap.put("schemaTypes", schemaTypes);
+                                responseMap.put("mediaTypes", responseMediaTypes);
                                 responses.add(responseMap);
                             }
                         }
                         detail.put("responses", responses);
                         detail.put("mediaTypes", mediaTypes);
+                        detail.put("requestMediaTypes", requestMediaTypes);
                         List<Map<String, Object>> parameters = new ArrayList<>();
                         addParameters(parameters, entry.getValue().getParameters(), path.get("pointer") + "/parameters");
                         if (operation != null) addParameters(parameters, operation.getParameters(), detail.get("pointer") + "/parameters");
@@ -121,12 +128,19 @@ final class OpenApiMapAdapter {
                 info.put("contactEmail", openApi.getInfo().getContact().getEmail());
             }
         }
+        info.put("openapiVersion", openApi.getOpenapi());
         if (openApi.getExtensions() != null) {
             info.put("apiId", openApi.getExtensions().get("x-api-id"));
             info.put("audience", openApi.getExtensions().get("x-audience"));
         }
         List<String> servers = openApi.getServers() == null ? List.of() : openApi.getServers().stream().map(server -> server.getUrl()).toList();
-        return Map.of("paths", paths, "schemas", schemas, "info", info, "servers", servers);
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("paths", paths);
+        result.put("schemas", schemas);
+        result.put("info", info);
+        result.put("servers", servers);
+        result.put("security", openApi.getSecurity() == null ? null : securityRequirements(openApi.getSecurity()));
+        return result;
     }
 
     private static void addParameters(List<Map<String, Object>> destination, List<Parameter> source, String pointer) {
@@ -134,8 +148,25 @@ final class OpenApiMapAdapter {
         for (int index = 0; index < source.size(); index++) {
             Parameter parameter = source.get(index);
             if (parameter == null || parameter.getName() == null || parameter.getIn() == null) continue;
-            destination.add(Map.of("name", parameter.getName(), "in", parameter.getIn(), "pointer", pointer + "/" + index));
+            Map<String, Object> detail = new LinkedHashMap<>();
+            detail.put("name", parameter.getName());
+            detail.put("in", parameter.getIn());
+            detail.put("pointer", pointer + "/" + index);
+            detail.put("style", parameter.getStyle());
+            detail.put("explode", parameter.getExplode());
+            detail.put("schemaType", parameter.getSchema() == null ? null : parameter.getSchema().getType());
+            destination.add(detail);
         }
+    }
+
+    private static List<Map<String, Object>> securityRequirements(List<io.swagger.v3.oas.models.security.SecurityRequirement> requirements) {
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (io.swagger.v3.oas.models.security.SecurityRequirement requirement : requirements) {
+            Map<String, Object> entry = new LinkedHashMap<>();
+            requirement.forEach(entry::put);
+            result.add(entry);
+        }
+        return result;
     }
 
     /** Reads parser response properties without exposing the parser response type to Groovy. */
