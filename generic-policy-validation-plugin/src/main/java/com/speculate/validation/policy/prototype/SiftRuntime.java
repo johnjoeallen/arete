@@ -136,6 +136,15 @@ public final class SiftRuntime {
                 for (int i = 0; i < parts.size(); i++) { if (i > 0) joined.append(String.valueOf(args.get(0))); joined.append(String.valueOf(parts.get(i))); }
                 yield joined.toString();
             }
+            case "strip" -> {
+                String text = String.valueOf(args.get(0));
+                if (args.size() < 2) { yield text.trim(); }
+                String chars = String.valueOf(args.get(1));
+                int start = 0, end = text.length();
+                while (start < end && chars.indexOf(text.charAt(start)) >= 0) start++;
+                while (end > start && chars.indexOf(text.charAt(end - 1)) >= 0) end--;
+                yield text.substring(start, end);
+            }
             case "urlHost" -> {
                 try { yield new java.net.URI(String.valueOf(args.get(0))).getHost(); }
                 catch (java.net.URISyntaxException | NullPointerException e) { yield null; }

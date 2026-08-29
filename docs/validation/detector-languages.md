@@ -172,17 +172,19 @@ with `==~` / `=~`, list concatenation with `+`, `value[key]` indexing, string
 methods (`lower` `trim` `contains` `startsWith` `endsWith` `length`), sequence
 methods (`map` `filter` `expand` `any` `all` `find` `count` `toList`) and the
 functions `occurrence` `regexFullMatch` `regexSearch` `tokenize` `size`
-`distinct` `parseInt` `join` `urlHost` `last`.
+`distinct` `parseInt` `join` `urlHost` `strip` `last`.
 
 It still has **no** `type(x)` introspection, no map-key iteration, no list or
 map literals, and no cross-iteration accumulators.
 
-**29 of the 45 bundled detectors ship a `Detector.sift`**, each parity-tested
-against its `Detector.star` (see `SiftParityTest`): `authentication-error`,
-`bulk-operation`, `collection-capability`, `common-field`, `compatibility`,
-`date-time-name`, `document-lint`, `documentation-completeness`, `enum-values`,
-`error-response`, `header-schema`, `hostname`, `identifier`, `manual`,
-`media-type`, `openapi-version`, `operation`, `operation-semantics`,
-`pagination`, `parameter`, `path-set`, `request-body`, `resource-path`,
-`schema-composition`, `schema-name`, `sensitive-data`, `sensitive-search`,
-`server-url`, `status-class`.
+**37 of the 45 bundled detectors ship a `Detector.sift`**, each parity-tested
+against its `Detector.star` (see `SiftParityTest`): `api-title`,
+`authentication-error`, `bulk-operation`, `collection-capability`,
+`common-field`, `compatibility`, `date-time-name`, `document-lint`,
+`documentation-completeness`, `enum-values`, `error-response`, `extensions`,
+`header-schema`, `hostname`, `identifier`, `manual`, `media-type`, `naming`,
+`openapi-version`, `operation`, `operation-semantics`, `pagination`,
+`parameter`, `path-set`, `query-collection`, `request-body`, `resource-path`,
+`response-code`, `response-header`, `schema-composition`, `schema-name`,
+`sensitive-data`, `sensitive-search`, `server-url`, `status-class`,
+`text-style`, `versioning`.

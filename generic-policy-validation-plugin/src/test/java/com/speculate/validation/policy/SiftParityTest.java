@@ -358,6 +358,182 @@ class SiftParityTest {
                 Map.of("check", "url-pattern", "pattern", "https://(api|sandbox)\\.example\\.com/.*"), false);
     }
 
+    @Test void namingPropertyCamelCase() {
+        assertParity("naming", "property", Map.of("convention", "camelCase", "match", "non-conforming"), false);
+    }
+
+    @Test void namingPathSegmentKebab() {
+        assertParity("naming", "path-segment", Map.of("convention", "kebab-case", "match", "non-conforming"), false);
+    }
+
+    @Test void namingUnsupportedCharacter() {
+        assertParity("naming", "property", Map.of("match", "unsupported-character"), false);
+    }
+
+    @Test void namingArraySingular() {
+        assertParity("naming", "property", Map.of("schema-type", "array", "semantic", "singular"), false);
+    }
+
+    @Test void namingCollection() {
+        assertParity("naming", "path-segment", Map.of("semantic", "collection"), true);
+    }
+
+    @Test void namingSchemaSuffixRequest() {
+        assertParity("naming", "schema", Map.of("suffix", "Request", "match", "present"), true);
+    }
+
+    @Test void namingSchemaSuffixResponse() {
+        assertParity("naming", "schema", Map.of("suffix", "Response", "match", "present"), false);
+    }
+
+    @Test void namingPathParamSnake() {
+        assertParity("naming", "path-parameter", Map.of("convention", "snake_case", "match", "non-conforming"), false);
+    }
+
+    @Test void namingQueryParamSnake() {
+        assertParity("naming", "query-parameter", Map.of("convention", "snake_case", "match", "non-conforming"), false);
+    }
+
+    @Test void namingHeaderHyphenated() {
+        assertParity("naming", "header", Map.of("convention", "hyphenated", "match", "non-conforming"), false);
+    }
+
+    @Test void textStyleInitialCapital() {
+        assertParity("text-style", "operation-summary", Map.of("initial-capital", false), false);
+    }
+
+    @Test void textStyleSentenceCase() {
+        assertParity("text-style", "operation-summary", Map.of("convention", "sentence-case"), false);
+    }
+
+    @Test void textStyleTrailingPeriod() {
+        assertParity("text-style", "operation-summary", Map.of("trailing-period", "present"), false);
+    }
+
+    @Test void textStyleMaximumLength() {
+        assertParity("text-style", "operation-summary", Map.of("maximum-length", 120), false);
+    }
+
+    @Test void textStyleNonActionOriented() {
+        assertParity("text-style", "operation-summary", Map.of("match", "non-action-oriented"), true);
+    }
+
+    @Test void apiTitleHouseStyle() {
+        assertParity("api-title", "api",
+                Map.of("suffix", "API", "forbidden", "PoC,Test,WIP,Draft", "case", "title-case"), false);
+    }
+
+    @Test void extensionsAllowed() {
+        assertParity("extensions", "api", Map.of("allowed", "x-api-id,x-audience,x-extensible-enum"), false);
+    }
+
+    @Test void queryCollectionStyle() {
+        assertParity("query-collection", "query-parameter", Map.of("style", "form", "explode", true), false);
+    }
+
+    @Test void versioningUri() {
+        assertParity("versioning", "path", Map.of("location", "uri", "match", "present"), false);
+    }
+
+    @Test void versioningHeader() {
+        assertParity("versioning", "header", Map.of("location", "header", "match", "present"), false);
+    }
+
+    @Test void versioningMediaType() {
+        assertParity("versioning", "media-type", Map.of("location", "media-type", "match", "present"), false);
+    }
+
+    @Test void versioningAbsent() {
+        assertParity("versioning", "api", Map.of("match", "absent"), false);
+    }
+
+    @Test void responseHeaderOptional() {
+        assertParity("response-header", "response", Map.of("status", 200, "header", "Link", "required", false), false);
+    }
+
+    @Test void responseHeaderRequiredList() {
+        assertParity("response-header", "response",
+                Map.of("status", 429, "headers", "RateLimit-Limit,RateLimit-Remaining,RateLimit-Reset", "required", true), false);
+    }
+
+    @Test void responseHeaderCreatedLocation() {
+        assertParity("response-header", "response", Map.of("status", 201, "header", "Location", "required", true), false);
+    }
+
+    @Test void responseCodeJsonObject() {
+        assertParity("response-code", "response", Map.of("response-shape", "json-object"), false);
+    }
+
+    @Test void responseCodeProblemJson() {
+        assertParity("response-code", "response", Map.of("error-format", "problem-json"), true);
+    }
+
+    @Test void responseCodeCreateStatus() {
+        assertParity("response-code", "operation", Map.of("operation-type", "create", "required-status", 201), true);
+    }
+
+    @Test void responseCodeRetrievalStatus() {
+        assertParity("response-code", "operation",
+                Map.of("operation-type", "identifiable-resource-retrieval", "required-status", 404), true);
+    }
+
+    @Test void responseCodeSemanticConflict() {
+        assertParity("response-code", "response", Map.of("match", "semantic-conflict"), false);
+    }
+
+    private static final String HOUSE_STYLE_SPEC = """
+            openapi: 3.0.0
+            info: { title: draft payments poc, version: v2 }
+            x-weird: true
+            servers: [ { url: https://internal.corp/v2 } ]
+            paths:
+              /v2/Payments:
+                get:
+                  summary: get all the payments that exist
+                  parameters:
+                    - name: tags
+                      in: query
+                      style: spaceDelimited
+                      schema: { type: array, items: { type: string } }
+                  responses:
+                    '200':
+                      description: error occurred
+                      content: { application/json: { schema: { type: string } } }
+                    '429': { description: too many }
+                    '500': { description: boom }
+            """;
+
+    @Test void apiTitleHouseStyleViolations() {
+        assertParity("api-title", "api",
+                Map.of("suffix", "API", "forbidden", "PoC,Test,WIP,Draft", "case", "title-case"), true, HOUSE_STYLE_SPEC);
+    }
+
+    @Test void extensionsUnknownExtension() {
+        assertParity("extensions", "api", Map.of("allowed", "x-api-id"), true, HOUSE_STYLE_SPEC);
+    }
+
+    @Test void queryCollectionWrongStyle() {
+        assertParity("query-collection", "query-parameter", Map.of("style", "form", "explode", true), true, HOUSE_STYLE_SPEC);
+    }
+
+    @Test void versioningUriPresent() {
+        assertParity("versioning", "path", Map.of("location", "uri", "match", "present"), true, HOUSE_STYLE_SPEC);
+    }
+
+    @Test void responseHeaderMissingList() {
+        assertParity("response-header", "response",
+                Map.of("status", 429, "headers", "RateLimit-Limit,RateLimit-Remaining,RateLimit-Reset", "required", true),
+                true, HOUSE_STYLE_SPEC);
+    }
+
+    @Test void responseCodeJsonObjectViolation() {
+        assertParity("response-code", "response", Map.of("response-shape", "json-object"), true, HOUSE_STYLE_SPEC);
+    }
+
+    @Test void textStyleTrailingPeriodMissing() {
+        assertParity("text-style", "operation-summary", Map.of("trailing-period", "present"), false, HOUSE_STYLE_SPEC);
+    }
+
     // --- harness ---------------------------------------------------------
 
     private void assertParity(String detectorId, String scope, Map<String, Object> parameters) {
