@@ -16,7 +16,7 @@
         <link rel="prev" href="../">
       
       
-        <link rel="next" href="../zalando-rule-catalogue/">
+        <link rel="next" href="../rules/">
       
       
         
@@ -754,14 +754,42 @@
   
   
     <li class="md-nav__item">
-      <a href="../zalando-rule-catalogue/" class="md-nav__link">
+      <a href="../rules/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Zalando Rule Catalogue
+    Rule Catalogue
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../policies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Policies
   
 
     
@@ -1313,8 +1341,8 @@ it is off by default.</p>
 <a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">  </span><span class="nt">CASE001</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rules/CASE001.md</span><span class="w">      </span><span class="c1"># manifest key must equal the file's `id`</span>
 <a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">  </span><span class="nt">REST002</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rules/REST002.md</span>
 <a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="nt">policies</span><span class="p">:</span>
-<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">  </span><span class="nt">Strict</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">policies/Strict.md</span>
-<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">  </span><span class="s">"Enterprise</span><span class="nv"> </span><span class="s">Grade"</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">policies/EnterpriseGrade.md</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">  </span><span class="s">"Enterprise</span><span class="nv"> </span><span class="s">Grade"</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">policies/EnterpriseGrade.md</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">  </span><span class="nt">Zalando</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">policies/Zalando.md</span>
 <a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="nt">detectors</span><span class="p">:</span>
 <a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">  </span><span class="nt">naming</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">detectors/naming/Detector.md</span>
 </code></pre></div>
@@ -1496,14 +1524,14 @@ human explanation.</p>
 <p>A policy is the deployable artifact: the list of active rules and what each one
 costs.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>---
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>id: Strict                        # must match the manifest key (quote if it has spaces)
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>id: Enterprise Grade              # must match the manifest key (quote if it has spaces)
 <a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>rules:
 <a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>  REST001: 0.5                    # deduct 0.5 points once if this rule matches
 <a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>  CASE001: 0.5
 <a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="gu">  SEC001: PROHIBITED              # any match forces the overall score to 0</span>
 <a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="gu">---</span>
 <a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>
-<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="gh"># Speculate Strict Policy</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="gh"># Enterprise Grade Policy</span>
 <a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>
 <a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>Prose describing the policy's intent.
 </code></pre></div>
@@ -1517,9 +1545,9 @@ costs.</p>
 <li>The first policy in <code>PolicyBundle.yaml</code> is the fallback when a caller
   requests an unknown rule set.</li>
 </ul>
-<p>Bundled policies: <code>Strict</code>, <code>Enterprise Grade</code>, <code>Zalando</code>, <code>Zalando Extended</code>.
-See <a href="../zalando-rule-catalogue/"><code>zalando-rule-catalogue.md</code></a> for the
-Zalando/Zally rule mapping.</p>
+<p>Bundled policies: <code>Enterprise Grade</code> (the default), <code>Zalando</code>, and
+<code>Zalando Extended</code> — see <a href="../policies/">Policies</a>. Every rule they can reference
+is in the <a href="../rules/">Rule Catalogue</a>.</p>
 <hr />
 <h2 id="scoring">Scoring<a class="headerlink" href="#scoring" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>qualityScore   = max(0, 100 − Σ deductions for matched rules)

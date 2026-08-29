@@ -587,14 +587,42 @@
   
   
     <li class="md-nav__item">
-      <a href="zalando-rule-catalogue/" class="md-nav__link">
+      <a href="rules/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Zalando Rule Catalogue
+    Rule Catalogue
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="policies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Policies
   
 
     
@@ -853,8 +881,8 @@ audience. Every enabled plugin gets its own row in the picker with its own
 rule-set dropdown; a plugin with only the implicit default set just has one
 entry.</p>
 <p>A rule set is a <strong>plugin-chosen name</strong>, not an engine-specific concept. The
-Speculate Policy Engine exposes one rule set per bundled policy: <strong>Strict</strong>,
-<strong>Enterprise Grade</strong>, <strong>Zalando</strong>, <strong>Zalando Extended</strong>.</p>
+Speculate Policy Engine exposes one rule set per bundled <a href="policies/">policy</a>:
+<strong>Enterprise Grade</strong> (the default), <strong>Zalando</strong>, and <strong>Zalando Extended</strong>.</p>
 <div class="admonition note">
 <p class="admonition-title"><code>getRuleSets()</code> returns a <code>List</code>, not a <code>Set</code></p>
 <p>The picker submits a rule set's <strong>position</strong> in the returned list, and the
@@ -880,8 +908,9 @@ a narrower, additional switch layered on top of the global setting.</p>
 <ul>
 <li><a href="policy-engine/">Speculate Policy Engine</a> — how the bundled plugin's
   detectors, rules, and policies work, and how to extend the bundle.</li>
-<li><a href="zalando-rule-catalogue/">Zalando Rule Catalogue</a> — mapping from Zally's
-  Zalando ruleset to Speculate policy rules.</li>
+<li><a href="rules/">Rule Catalogue</a> — every rule in the bundle and which policies use it.</li>
+<li><a href="policies/">Policies</a> — the bundled Enterprise Grade, Zalando, and Zalando
+  Extended rule sets.</li>
 <li><a href="writing-a-plugin/">Writing a Plugin</a> — implement the <code>SpecValidationPlugin</code>
   SPI.</li>
 </ul>
