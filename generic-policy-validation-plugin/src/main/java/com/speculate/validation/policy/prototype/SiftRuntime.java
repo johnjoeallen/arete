@@ -114,17 +114,22 @@ public final class SiftRuntime {
     private record Token(Kind kind, String text) { }
 
     private static final class Lexer {
-        private final String source; private int cursor;
+        private final String source; private int cursor; private Token previous;
         Lexer(String source) { this.source = source; }
-        Token next() {
+        Token next() { return previous = scan(); }
+
+        private Token scan() {
             while (cursor < source.length() && Character.isWhitespace(source.charAt(cursor))) cursor++;
             if (cursor == source.length()) return new Token(Kind.EOF, "");
             char ch = source.charAt(cursor);
             if (Character.isJavaIdentifierStart(ch)) { int start = cursor++; while (cursor < source.length() && Character.isJavaIdentifierPart(source.charAt(cursor))) cursor++; return new Token(Kind.ID, source.substring(start, cursor)); }
             if (ch == '"') { StringBuilder out = new StringBuilder(); cursor++; while (cursor < source.length() && source.charAt(cursor) != '"') { if (source.charAt(cursor) == '\\') cursor++; out.append(source.charAt(cursor++)); } if (cursor == source.length()) throw error("unterminated string"); cursor++; return new Token(Kind.STRING, out.toString()); }
             if (Character.isDigit(ch)) { int start = cursor++; while (cursor < source.length() && Character.isDigit(source.charAt(cursor))) cursor++; return new Token(Kind.NUMBER, source.substring(start, cursor)); }
-            if (ch == '~' && cursor + 1 < source.length() && source.charAt(cursor + 1) == '/') {
-                cursor += 2; StringBuilder out = new StringBuilder();
+            // ~/pattern/ (explicit) or /pattern/ where an operand is expected.
+            boolean tildeSlash = ch == '~' && cursor + 1 < source.length() && source.charAt(cursor + 1) == '/';
+            if (tildeSlash || (ch == '/' && regexExpected())) {
+                cursor += tildeSlash ? 2 : 1;
+                StringBuilder out = new StringBuilder();
                 while (cursor < source.length() && source.charAt(cursor) != '/') {
                     char c = source.charAt(cursor);
                     if (c == '\\' && cursor + 1 < source.length()) {
@@ -141,6 +146,18 @@ public final class SiftRuntime {
             for (String operator : List.of("==~", "=~", "==", "!=", "&&", "||", "->")) if (source.startsWith(operator, cursor)) { cursor += operator.length(); return new Token(Kind.SYMBOL, operator); }
             cursor++; return new Token(Kind.SYMBOL, String.valueOf(ch));
         }
+
+        /** True when the next token sits where an operand (hence a regex) is expected. */
+        private boolean regexExpected() {
+            if (previous == null) return true;
+            if (previous.kind() == Kind.ID) return previous.text().equals("return");
+            if (previous.kind() == Kind.SYMBOL) return switch (previous.text()) {
+                case ")", "]", "}" -> false;
+                default -> true;
+            };
+            return false;
+        }
+
         private IllegalArgumentException error(String message) { return new IllegalArgumentException(message + " at " + cursor); }
     }
 

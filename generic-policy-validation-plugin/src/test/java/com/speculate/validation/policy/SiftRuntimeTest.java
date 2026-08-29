@@ -67,10 +67,11 @@ class SiftRuntimeTest {
 
     @Test
     void slashyRegexLiteralsAndMatchOperators() {
+        // Bare /…/ in operand position, and the explicit ~/…/ alias.
         String source = """
                 sift(api, rule) {
                     return api.paths
-                        .filter { path -> path.path =~ ~/\\/v[0-9]+\\// && !(path.path ==~ ~/(?i).*internal.*/) }
+                        .filter { path -> path.path =~ /\\/v[0-9]+\\// && !(path.path ==~ ~/(?i).*internal.*/) }
                         .map { path -> occurrence(path.pointer, path.path, "Versioned public path") };
                 }
                 """;

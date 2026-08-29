@@ -102,21 +102,21 @@ sift(api, rule) {
                 && (
                     (rule.parameters.expected == "safe"
                         && operation.method == "GET"
-                        && path.path + " " + operation.summary ==~ ~/(?i).*\b(create|update|delete|remove|activate|deactivate|cancel|change|set)\b.*/)
+                        && path.path + " " + operation.summary ==~ /(?i).*\b(create|update|delete|remove|activate|deactivate|cancel|change|set)\b.*/)
                     || (rule.parameters.match == "full-resource-replacement"
                         && operation.method == "POST"
-                        && path.path ==~ ~/.+\/\{[^}]+\}.*/
-                        && path.path + " " + operation.summary ==~ ~/(?i).*\b(replace|replacement)\b.*/)
+                        && path.path ==~ /.+\/\{[^}]+\}.*/
+                        && path.path + " " + operation.summary ==~ /(?i).*\b(replace|replacement)\b.*/)
                     || (rule.parameters.match == "partial-update"
                         && operation.method == "PUT"
-                        && path.path + " " + operation.summary ==~ ~/(?i).*\b(partial|patch|update)\b.*/)
+                        && path.path + " " + operation.summary ==~ /(?i).*\b(partial|patch|update)\b.*/)
                     || (rule.parameters.match == "inconsistent-method-resource-semantics"
                         && (
                             (operation.method == "GET"
-                                && path.path + " " + operation.summary ==~ ~/(?i).*\b(create|update|delete|remove|activate|deactivate|cancel|change|set)\b.*/)
+                                && path.path + " " + operation.summary ==~ /(?i).*\b(create|update|delete|remove|activate|deactivate|cancel|change|set)\b.*/)
                             || (operation.method == "POST"
-                                && path.path ==~ ~/.+\/\{[^}]+\}.*/
-                                && path.path + " " + operation.summary ==~ ~/(?i).*\b(replace|replacement)\b.*/)))
+                                && path.path ==~ /.+\/\{[^}]+\}.*/
+                                && path.path + " " + operation.summary ==~ /(?i).*\b(replace|replacement)\b.*/)))
                 )
             }
             .map { operation -> occurrence(
@@ -132,10 +132,13 @@ operation that turns each path into its operation collection; it is the
 Sift equivalent of Groovy `collectMany` and Starlark’s nested loop.
 
 For regular expressions Sift borrows Groovy's slashy literal and match
-operators: `~/pattern/` is a pattern (backslashes are literal, only `\/` is
-escaped), `text ==~ ~/…/` is a whole-string match and `text =~ ~/…/` is a
-search. The `regexFullMatch(pattern, text)` / `regexSearch(pattern, text)`
-functions remain available and accept either a `~/…/` literal or a string.
+operators. `/pattern/` is a pattern wherever an operand is expected — after
+`==~`, `=~`, `(`, `,`, `&&`, `||`, `return`, and so on — with backslashes
+taken literally (write `\b`, not `\\b`); only `\/` is an escaped slash. The
+explicit `~/pattern/` form is accepted anywhere. `text ==~ /…/` is a
+whole-string match, `text =~ /…/` is a search, and the
+`regexFullMatch(pattern, text)` / `regexSearch(pattern, text)` functions
+remain available and accept either a literal or a string.
 
 ## Syntax comparison
 
@@ -146,7 +149,7 @@ functions remain available and accept either a `~/…/` literal or a string.
 | Flatten nested values | `collectMany { value -> ... }` | nested `for` loop | `.expand { value -> ... }` |
 | Read a field | `value.field` | `value["field"]` | `value.field` |
 | Create a finding | `[pointer: ..., path: ..., message: ...]` | `{"pointer": ..., "path": ..., "message": ...}` | `occurrence(pointer, path, message)` |
-| Regular expressions | `~/…/` with `==~` / `=~` | `re_fullmatch(...)` | `~/…/` with `==~` / `=~` (or `regexFullMatch(...)`) |
+| Regular expressions | `/…/` with `==~` / `=~` | `re_fullmatch(...)` | `/…/` with `==~` / `=~` (or `regexFullMatch(...)`) |
 | Entry point | closure `{ Map api, Map rule -> ... }` | `detect(api, rule)` | `sift(api, rule) { ... }` |
 
 ## Choosing a language
