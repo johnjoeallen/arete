@@ -485,6 +485,34 @@ class GenericPolicyValidationPluginTest {
     }
 
     @Test
+    void collectionCapabilityDetectorChecksPresenceAndRepresentation() {
+        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        String spec = """
+                openapi: 3.0.0
+                info: { title: Test API, version: 1.0.0 }
+                paths:
+                  /customers:
+                    get:
+                      parameters:
+                        - { name: filter, in: query, schema: { type: integer } }
+                        - { name: sort, in: query, style: pipeDelimited, schema: { type: array, items: { type: string } } }
+                        - { name: fields, in: query, schema: { type: string } }
+                      responses: { '200': { description: OK } }
+                """;
+        Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
+                .readContents(spec, null, new ParseOptions()).getOpenAPI());
+        StarlarkDetectorRuntime runtime = new StarlarkDetectorRuntime();
+
+        assertEquals(0, runtime.execute(bundle.detectors().get("collection-capability"), api, bundle.rules().get("FILTER001")).size());
+        assertEquals(1, runtime.execute(bundle.detectors().get("collection-capability"), api, bundle.rules().get("FILTER002")).size());
+        assertEquals(0, runtime.execute(bundle.detectors().get("collection-capability"), api, bundle.rules().get("SORT001")).size());
+        assertEquals(1, runtime.execute(bundle.detectors().get("collection-capability"), api, bundle.rules().get("SORT002")).size());
+        assertEquals(0, runtime.execute(bundle.detectors().get("collection-capability"), api, bundle.rules().get("SORT003")).size());
+        assertEquals(1, runtime.execute(bundle.detectors().get("collection-capability"), api, bundle.rules().get("SORT004")).size());
+        assertEquals(0, runtime.execute(bundle.detectors().get("collection-capability"), api, bundle.rules().get("FIELD001")).size());
+    }
+
+    @Test
     void securityDetectorUsesOperationSecurityAndGlobalFallback() {
         PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
         String spec = """
@@ -745,10 +773,18 @@ class GenericPolicyValidationPluginTest {
         resources.put("rules/SEC006.md", readResource("api-policy/rules/SEC006.md"));
         resources.put("rules/SEC007.md", readResource("api-policy/rules/SEC007.md"));
         resources.put("detectors/identifier/Detector.md", readResource("api-policy/detectors/identifier/Detector.md"));
+        resources.put("rules/FILTER001.md", readResource("api-policy/rules/FILTER001.md"));
+        resources.put("rules/FILTER002.md", readResource("api-policy/rules/FILTER002.md"));
+        resources.put("rules/SORT001.md", readResource("api-policy/rules/SORT001.md"));
+        resources.put("rules/SORT002.md", readResource("api-policy/rules/SORT002.md"));
+        resources.put("rules/SORT003.md", readResource("api-policy/rules/SORT003.md"));
+        resources.put("rules/SORT004.md", readResource("api-policy/rules/SORT004.md"));
+        resources.put("rules/FIELD001.md", readResource("api-policy/rules/FIELD001.md"));
+        resources.put("detectors/collection-capability/Detector.md", readResource("api-policy/detectors/collection-capability/Detector.md"));
         for (String detectorId : new String[] {"resource-path", "operation", "text-style", "naming", "schema",
                 "operation-semantics", "response-code", "response-header", "proprietary-header", "query-collection",
                 "security", "manual", "bulk-operation", "versioning", "compatibility", "metadata", "openapi-version",
-                "media-type", "date-time-name", "common-field", "path-count", "hostname", "error-response", "authentication-error", "sensitive-data", "sensitive-search", "identifier"}) {
+                "media-type", "date-time-name", "common-field", "path-count", "hostname", "error-response", "authentication-error", "sensitive-data", "sensitive-search", "identifier", "collection-capability"}) {
             resources.put("detectors/" + detectorId + "/Detector.star",
                     readResource("api-policy/detectors/" + detectorId + "/Detector.star"));
         }

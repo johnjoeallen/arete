@@ -71,6 +71,13 @@ rules:
   SEC005: rules/SEC005.md
   SEC006: rules/SEC006.md
   SEC007: rules/SEC007.md
+  FILTER001: rules/FILTER001.md
+  FILTER002: rules/FILTER002.md
+  SORT001: rules/SORT001.md
+  SORT002: rules/SORT002.md
+  SORT003: rules/SORT003.md
+  SORT004: rules/SORT004.md
+  FIELD001: rules/FIELD001.md
   HTTP004: rules/HTTP004.md
   HTTP005: rules/HTTP005.md
   HTTP001: rules/HTTP001.md
@@ -134,3 +141,4 @@ detectors:
   sensitive-data: detectors/sensitive-data/Detector.md
   sensitive-search: detectors/sensitive-search/Detector.md
   identifier: detectors/identifier/Detector.md
+  collection-capability: detectors/collection-capability/Detector.md
