@@ -7,15 +7,21 @@ DATA_DIR="$HOME/.speculate/data"
 PORT=""
 WIPE=0
 GROOVY=0
+DETECTOR_LANGUAGES=""
 
 usage() {
   cat <<EOF
-Usage: $(basename "$0") [--port PORT] [--wipe-db] [--enable-groovy-detectors] [-h|--help]
+Usage: $(basename "$0") [--port PORT] [--wipe-db] [--enable-groovy-detectors] [--detector-languages LIST] [-h|--help]
 
   --port, -p PORT   Run the server on PORT instead of the configured default.
   --wipe-db         Delete the local database ($DATA_DIR) before starting.
   --enable-groovy-detectors
-                    Enable the legacy, unsandboxed Groovy detector runtime.
+                    Allow the legacy, unsandboxed Groovy detector runtime as a
+                    fallback (precedence: starlark,groovy).
+  --detector-languages LIST
+                    Comma-separated detector language precedence, e.g.
+                    "starlark,groovy" or "groovy,starlark". The first language
+                    with a source file present is used for each detector.
   -h, --help        Show this help and exit.
 EOF
 }
@@ -26,6 +32,8 @@ while [ $# -gt 0 ]; do
     --port|-p) PORT="$2"; shift 2 ;;
     --wipe-db|--reset-db) WIPE=1; shift ;;
     --enable-groovy-detectors) GROOVY=1; shift ;;
+    --detector-languages=*) DETECTOR_LANGUAGES="${1#*=}"; shift ;;
+    --detector-languages) DETECTOR_LANGUAGES="$2"; shift 2 ;;
     -h|--help) usage; exit 0 ;;
     *) echo "Unknown option: $1" >&2; usage >&2; exit 1 ;;
   esac
@@ -62,7 +70,9 @@ if [ "$WIPE" -eq 1 ]; then
 fi
 
 ARGS=()
-if [ "$GROOVY" -eq 1 ]; then
+if [ -n "$DETECTOR_LANGUAGES" ]; then
+  ARGS+=("-Dspeculate.policy.detector-languages=$DETECTOR_LANGUAGES")
+elif [ "$GROOVY" -eq 1 ]; then
   ARGS+=("-Dspeculate.policy.detector-language=groovy")
 fi
 if [ -n "$PORT" ]; then

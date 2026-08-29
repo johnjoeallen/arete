@@ -41,20 +41,58 @@ For each `validate(spec)` call:
 
 ### Detector languages
 
-The engine ships two detector runtimes. Every detector in the bundle is
-authored in **both** languages — `Detector.star` and `Detector.groovy` sit
-side by side under each detector directory — and the runtime in force decides
-which source is loaded.
+The engine ships two detector runtimes. A detector can be authored in either
+language — `Detector.star` and `Detector.groovy` sit side by side under the
+detector directory — and a configurable **language precedence** decides which
+source is loaded for each detector.
 
 | Language | Source file | Status |
 |---|---|---|
 | `starlark` | `Detector.star` | **Default.** Always available, sandboxed. |
 | `groovy` | `Detector.groovy` | **Disabled by default** — opt-in, unsandboxed. |
 
+#### Language precedence
+
+For each detector the loader walks the configured precedence list and uses the
+**first language whose source file is present**. The default precedence is
+`starlark` only, so Groovy never runs unless you opt in. Enabling Groovy adds
+it to the list:
+
+- precedence `starlark,groovy` (what `--enable-groovy-detectors` sets) — a
+  detector keeps running on Starlark wherever a `Detector.star` exists, and
+  only falls back to `Detector.groovy` when there is no Starlark source;
+- precedence `groovy,starlark` — prefer Groovy where a `Detector.groovy`
+  exists, fall back to Starlark otherwise;
+- precedence `groovy` — Groovy only; a detector with no `Detector.groovy`
+  fails the bundle.
+
+Configure it (highest precedence first):
+
+| Mechanism | Value |
+|---|---|
+| Plugin config key `detector-languages` | comma-separated list, e.g. `groovy,starlark` |
+| Plugin config key `detector-language` | a single extra language (added after `starlark`) |
+| System property `-Dspeculate.policy.detector-languages` | comma-separated list |
+| System property `-Dspeculate.policy.detector-language` | single language |
+| Launcher `--detector-languages LIST` | comma-separated list |
+| Launcher `--enable-groovy-detectors` | shorthand for `starlark,groovy` |
+
+=== "Launcher"
+
+    ```bash
+    ./speculate.sh --enable-groovy-detectors
+    ./speculate.sh --detector-languages groovy,starlark
+    ```
+
+=== "System property"
+
+    ```bash
+    java -Dspeculate.policy.detector-languages=groovy,starlark -jar speculate.jar
+    ```
+
 #### Starlark (default)
 
-Detectors run as [Starlark](https://bazel.build/rules/language) sources
-(issue #125).
+Detectors run as [Starlark](https://bazel.build/rules/language) sources.
 
 - **Safe by construction** — a Starlark detector cannot touch the filesystem,
   network, environment, threads, reflection, or any class outside the
@@ -67,34 +105,19 @@ Detectors run as [Starlark](https://bazel.build/rules/language) sources
 
 #### Groovy (disabled by default)
 
-`GroovyDetectorRuntime` runs the `Detector.groovy` sources directly in the
-plugin JVM via a bare `GroovyShell` — **with no sandbox**. It is a deliberate,
-opt-in fallback and is **disabled by default** until the detector sandbox
-described in the
+`GroovyDetectorRuntime` runs a `Detector.groovy` source directly in the plugin
+JVM via a bare `GroovyShell` — **with no sandbox**. It is a deliberate, opt-in
+fallback and is **disabled by default** until the detector sandbox described in
+the
 [sandbox plan](https://github.com/johnjoeallen/speculate/blob/main/design-notes/policy-engine-sandbox-plan.md)
 lands. It is *not* deprecated — the intent is to re-enable it as a first-class
 option once bundle-supplied Groovy can be run safely.
 
-Enabling it is a **global switch** — it swaps *every* detector to its
-`Detector.groovy` source, it is not per-detector:
-
-=== "Launcher"
-
-    ```bash
-    ./speculate.sh --enable-groovy-detectors
-    ```
-
-=== "System property"
-
-    ```bash
-    java -Dspeculate.policy.detector-language=groovy -jar speculate.jar
-    ```
-
 !!! danger "Groovy detectors are unsandboxed"
     A `Detector.groovy` runs with the full authority of the plugin JVM —
-    filesystem, network, process execution, reflection. Only turn this on for
-    a policy bundle you fully trust and control. That is why it is off unless
-    you explicitly enable it.
+    filesystem, network, process execution, reflection. Only add `groovy` to
+    the precedence for a policy bundle you fully trust and control. That is why
+    it is off by default.
 
 ---
 

@@ -6,6 +6,7 @@ set "DATA_DIR=%USERPROFILE%\.speculate\data"
 set "PORT="
 set "WIPE=0"
 set "GROOVY=0"
+set "DETECTOR_LANGUAGES="
 
 :parse
 if "%~1"=="" goto :afterparse
@@ -36,18 +37,28 @@ if /i "%~1"=="--enable-groovy-detectors" (
     shift
     goto :parse
 )
+if /i "%~1"=="--detector-languages" (
+    set "DETECTOR_LANGUAGES=%~2"
+    shift
+    shift
+    goto :parse
+)
 if /i "%~1"=="-h" goto :usage
 if /i "%~1"=="--help" goto :usage
 echo Unknown option: %~1
 goto :usage
 
 :usage
-echo Usage: %~nx0 [--port PORT] [--wipe-db] [--enable-groovy-detectors] [-h^|--help]
+echo Usage: %~nx0 [--port PORT] [--wipe-db] [--enable-groovy-detectors] [--detector-languages LIST] [-h^|--help]
 echo.
 echo   --port, -p PORT   Run the server on PORT instead of the configured default.
 echo   --wipe-db         Delete the local database ^(%DATA_DIR%^) before starting.
 echo   --enable-groovy-detectors
-echo                     Enable the legacy, unsandboxed Groovy detector runtime.
+echo                     Allow the legacy, unsandboxed Groovy runtime as a fallback
+echo                     ^(precedence: starlark,groovy^).
+echo   --detector-languages LIST
+echo                     Comma-separated detector language precedence, e.g.
+echo                     "starlark,groovy" or "groovy,starlark".
 echo   -h, --help        Show this help and exit.
 exit /b 0
 
@@ -88,7 +99,11 @@ if "%WIPE%"=="1" (
 )
 
 set "JAVA_OPTS="
-if "%GROOVY%"=="1" set "JAVA_OPTS=-Dspeculate.policy.detector-language=groovy"
+if not "%DETECTOR_LANGUAGES%"=="" (
+    set "JAVA_OPTS=-Dspeculate.policy.detector-languages=%DETECTOR_LANGUAGES%"
+) else if "%GROOVY%"=="1" (
+    set "JAVA_OPTS=-Dspeculate.policy.detector-language=groovy"
+)
 set "ARGS="
 if not "%PORT%"=="" set "ARGS=--server.port=%PORT%"
 

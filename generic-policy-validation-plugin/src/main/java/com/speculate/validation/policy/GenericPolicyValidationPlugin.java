@@ -43,18 +43,52 @@ public final class GenericPolicyValidationPlugin implements SpecValidationPlugin
         return activeBundle().policies().keySet().stream().toList();
     }
 
+    /** Detector language precedence used when nothing is configured. */
+    static final List<String> DEFAULT_LANGUAGE_PRECEDENCE = List.of("starlark");
+
     @Override
     public synchronized void configure(Map<String, String> config) {
-        String language = config == null ? null : config.get("detector-language");
-        if (language == null) language = System.getProperty("speculate.policy.detector-language", "starlark");
-        boolean forceGroovy = "groovy".equalsIgnoreCase(language);
-        if (forceGroovy) {
+        List<String> precedence = resolveLanguagePrecedence(config);
+        if (precedence.contains("groovy")) {
             LOG.log(System.Logger.Level.WARNING,
-                    "Speculate policy engine: detectors are running on the Groovy runtime "
-                            + "(detector-language=groovy). This runtime is UNSANDBOXED; only enable it for bundles you fully trust.");
+                    "Speculate policy engine: the Groovy detector runtime is enabled (detector-languages={0}). "
+                            + "This runtime is UNSANDBOXED; only enable it for bundles you fully trust.", precedence);
         }
         bundle = bundleLoader.load(new ClasspathBundleResources(getClass().getClassLoader()),
-                new PolicyBundleLoader.LoadOptions(forceGroovy));
+                new PolicyBundleLoader.LoadOptions(precedence));
+    }
+
+    /**
+     * Resolves the detector language precedence, in order of precedence:
+     * the {@code detector-languages} plugin config key (comma-separated), the
+     * {@code detector-language} key (a single language, added after Starlark),
+     * then the matching {@code speculate.policy.*} system properties, then the
+     * Starlark-only default.
+     */
+    private static List<String> resolveLanguagePrecedence(Map<String, String> config) {
+        String list = configOrProperty(config, "detector-languages", "speculate.policy.detector-languages");
+        if (list != null && !list.isBlank()) {
+            List<String> parsed = new ArrayList<>();
+            for (String token : list.split(",")) {
+                String language = token.trim().toLowerCase();
+                if (!language.isEmpty() && !parsed.contains(language)) parsed.add(language);
+            }
+            if (!parsed.isEmpty()) return List.copyOf(parsed);
+        }
+        String single = configOrProperty(config, "detector-language", "speculate.policy.detector-language");
+        if (single != null && !single.isBlank()) {
+            String language = single.trim().toLowerCase();
+            if (language.equals("starlark")) return List.of("starlark");
+            // A single non-Starlark language means "also allow this one", with
+            // Starlark still preferred where a Starlark source exists.
+            return List.of("starlark", language);
+        }
+        return DEFAULT_LANGUAGE_PRECEDENCE;
+    }
+
+    private static String configOrProperty(Map<String, String> config, String configKey, String propertyKey) {
+        String value = config == null ? null : config.get(configKey);
+        return value != null ? value : System.getProperty(propertyKey);
     }
 
     @Override

@@ -16,15 +16,39 @@ import java.util.Set;
 
 /** Loads and validates every declarative resource and detector reference. */
 final class PolicyBundleLoader {
-    private static final System.Logger LOG = System.getLogger(PolicyBundleLoader.class.getName());
-
     private final Yaml yaml;
     private final GroovyDetectorRuntime groovyRuntime = new GroovyDetectorRuntime();
     private final StarlarkDetectorRuntime starlarkRuntime = new StarlarkDetectorRuntime();
 
-    /** Selects the detector runtime while keeping Groovy opt-in only. */
-    record LoadOptions(boolean forceGroovy) {
-        static LoadOptions defaults() { return new LoadOptions(false); }
+    /** The detector source file each supported language is loaded from. */
+    private static final Map<String, String> SOURCE_FILE = Map.of(
+            "starlark", "Detector.star",
+            "groovy", "Detector.groovy");
+
+    /**
+     * Ordered list of detector languages to try for each detector. The first
+     * language in the list that has a source file present wins, so a detector
+     * shipping only {@code Detector.groovy} runs on Groovy even while a
+     * detector that also ships {@code Detector.star} stays on Starlark.
+     *
+     * <p>The default is Starlark only — Groovy is opt-in. Callers widen it
+     * (e.g. {@code ["starlark", "groovy"]} to allow Groovy as a fallback, or
+     * {@code ["groovy", "starlark"]} to prefer Groovy) via configuration.
+     */
+    record LoadOptions(List<String> languagePrecedence) {
+        LoadOptions {
+            if (languagePrecedence == null || languagePrecedence.isEmpty()) {
+                throw new BundleValidationException("detector language precedence must not be empty");
+            }
+            for (String language : languagePrecedence) {
+                if (!SOURCE_FILE.containsKey(language)) {
+                    throw new BundleValidationException("unknown detector language '" + language
+                            + "'; supported: " + SOURCE_FILE.keySet());
+                }
+            }
+            languagePrecedence = List.copyOf(languagePrecedence);
+        }
+        static LoadOptions defaults() { return new LoadOptions(List.of("starlark")); }
     }
 
     PolicyBundleLoader() {
@@ -53,26 +77,18 @@ final class PolicyBundleLoader {
             Detector descriptor = parseDetector(descriptorPath, resources.read(descriptorPath));
             if (!entry.getKey().equals(descriptor.id())) throw new BundleValidationException(descriptorPath + ": manifest detector id does not match descriptor id");
 
-            String starlarkSource = optionalRead(resources, siblingPath(descriptorPath, "Detector.star"));
-
-            Detector detector;
-            if (loadOptions.forceGroovy()) {
-                String groovySource = optionalRead(resources, siblingPath(descriptorPath, "Detector.groovy"));
-                if (groovySource != null) {
-                    detector = new Detector(descriptor.id(), "groovy", groovySource, descriptor.scopes(), descriptor.parameters());
-                    groovyRuntime.validate(detector);
-                } else if (starlarkSource != null) {
-                    LOG.log(System.Logger.Level.WARNING,
-                            "Detector ''{0}'' has no legacy Detector.groovy; using Starlark in Groovy compatibility mode.", descriptor.id());
-                    detector = new Detector(descriptor.id(), "starlark", starlarkSource, descriptor.scopes(), descriptor.parameters());
-                    starlarkRuntime.validate(detector);
-                } else {
-                    throw new BundleValidationException(descriptorPath + ": missing Detector.groovy and Detector.star");
-                }
-            } else {
-                if (starlarkSource == null) throw new BundleValidationException(descriptorPath + ": missing Detector.star");
-                detector = new Detector(descriptor.id(), "starlark", starlarkSource, descriptor.scopes(), descriptor.parameters());
-                starlarkRuntime.validate(detector);
+            Detector detector = null;
+            for (String language : loadOptions.languagePrecedence()) {
+                String source = optionalRead(resources, siblingPath(descriptorPath, SOURCE_FILE.get(language)));
+                if (source == null) continue;
+                detector = new Detector(descriptor.id(), language, source, descriptor.scopes(), descriptor.parameters());
+                if ("groovy".equals(language)) groovyRuntime.validate(detector);
+                else starlarkRuntime.validate(detector);
+                break;
+            }
+            if (detector == null) {
+                throw new BundleValidationException(descriptorPath + ": no detector source for languages "
+                        + loadOptions.languagePrecedence());
             }
             detectors.put(detector.id(), detector);
         }
