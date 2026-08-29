@@ -1,0 +1,1473 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Local-first API explorer for OpenAPI/Swagger specs with pluggable, policy-driven validation.">
+      
+      
+      
+        <link rel="canonical" href="https://johnjoeallen.github.io/speculate/0.1/validation/policy-engine/">
+      
+      
+        <link rel="prev" href="../">
+      
+      
+        <link rel="next" href="../zalando-rule-catalogue/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Speculate Policy Engine - Speculate</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#speculate-policy-engine" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Speculate" class="md-header__button md-logo" aria-label="Speculate" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Speculate
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Speculate Policy Engine
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/johnjoeallen/speculate" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    johnjoeallen/speculate
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Speculate" class="md-nav__button md-logo" aria-label="Speculate" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    Speculate
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/johnjoeallen/speculate" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    johnjoeallen/speculate
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Validation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Speculate Policy Engine
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Speculate Policy Engine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How it works
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How it works">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#detector-runtime" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Detector runtime
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-policy-bundle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The policy bundle
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The policy bundle">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#policybundleyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PolicyBundle.yaml
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#detectors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Detectors
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Detectors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#descriptor-detectormd-front-matter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Descriptor (Detector.md front matter)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-api-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The api model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#writing-a-detector-starlark" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Writing a detector (Starlark)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rules
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policies
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scoring
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adding-to-the-bundle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adding to the bundle
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Adding to the bundle">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-new-rule-existing-detector" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A new rule (existing detector)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a-new-detector" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A new detector
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a-new-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A new policy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#build-install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Build &amp; install
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation-performed-at-load-time" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation performed at load time
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../zalando-rule-catalogue/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Zalando Rule Catalogue
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../writing-a-plugin/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Writing a Plugin
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../releasing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Releasing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#how-it-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How it works
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="How it works">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#detector-runtime" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Detector runtime
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-policy-bundle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The policy bundle
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="The policy bundle">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#policybundleyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        PolicyBundle.yaml
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#detectors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Detectors
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Detectors">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#descriptor-detectormd-front-matter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Descriptor (Detector.md front matter)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-api-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The api model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#writing-a-detector-starlark" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Writing a detector (Starlark)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rules
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policies
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#scoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scoring
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adding-to-the-bundle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adding to the bundle
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Adding to the bundle">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-new-rule-existing-detector" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A new rule (existing detector)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a-new-detector" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A new detector
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#a-new-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A new policy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#build-install" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Build &amp; install
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validation-performed-at-load-time" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validation performed at load time
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/johnjoeallen/speculate/edit/main/docs/validation/policy-engine.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="speculate-policy-engine">Speculate Policy Engine<a class="headerlink" href="#speculate-policy-engine" title="Permanent link">&para;</a></h1>
+<p>The <strong>Speculate Policy Engine</strong> (<code>generic-policy-validation-plugin</code>, plugin id
+<code>generic-policy</code>) is the built-in, policy-driven validation plugin. Instead of
+hard-coding checks in Java, it ships a <strong>policy bundle</strong>: a tree of Markdown +
+YAML files describing <em>detectors</em> (how to find facts in a spec), <em>rules</em> (a
+named concern built on a detector), and <em>policies</em> (which rules are active and
+how much each one costs). Anyone can add or change a rule by editing text
+files — no host code changes.</p>
+<h2 id="how-it-works">How it works<a class="headerlink" href="#how-it-works" title="Permanent link">&para;</a></h2>
+<p>The engine is discovered by the host exactly like any other validation plugin:
+it is a shaded jar dropped in <code>~/.speculate/plugins/</code>, registered through
+<code>META-INF/services/net.dublinux.speculate.validation.spi.SpecValidationPlugin</code>,
+and loaded via <code>ServiceLoader</code> into an isolated classloader. It supports
+OpenAPI 3 and Swagger 2 input.</p>
+<p>On first use the plugin loads its <strong>policy bundle</strong> from the classpath
+(<code>api-policy/</code> inside the jar) and validates every file in it. <code>getRuleSets()</code>
+then returns one entry per policy in the bundle — these appear in the
+Speculate UI as selectable rule sets.</p>
+<p>For each <code>validate(spec)</code> call:</p>
+<ol>
+<li>The spec is parsed once (swagger-parser) and converted to a small, stable
+   <code>Map</code> model by <code>OpenApiMapAdapter</code>. Detectors never see parser types.</li>
+<li>The requested policy is resolved (<code>SpecInput.getRuleSet()</code>); if the name is
+   unknown, the <strong>first policy declared</strong> in the manifest is used as the
+   default.</li>
+<li>Each rule listed in that policy is evaluated <strong>in declaration order</strong>:</li>
+<li>the rule's detector is run against the <code>api</code> model plus the rule's own
+     <code>{id, scope, parameters}</code>;</li>
+<li>the detector returns zero or more <strong>occurrences</strong> (<code>{pointer, path,
+     message}</code>);</li>
+<li>if there is at least one occurrence, the rule's policy <strong>disposition</strong>
+     (a point deduction, or <code>PROHIBITED</code>) is applied <strong>once</strong>, and one
+     <code>Violation</code> is emitted per occurrence.</li>
+<li>A score is computed (see <a href="#scoring">Scoring</a>) and returned with the
+   violations.</li>
+</ol>
+<h3 id="detector-runtime">Detector runtime<a class="headerlink" href="#detector-runtime" title="Permanent link">&para;</a></h3>
+<p>Every detector is a <a href="https://bazel.build/rules/language">Starlark</a> source in
+<code>Detector.star</code> (issue #125). The engine loads and runs Starlark:</p>
+<ul>
+<li><strong>Safe by construction</strong> — a Starlark detector cannot touch the filesystem,
+  network, environment, threads, reflection, or any class outside the
+  whitelisted value model. It reads the immutable <code>api</code> and <code>rule</code> values and
+  returns a list of occurrence dicts. Nothing to sandbox.</li>
+<li>Regex is <a href="https://github.com/google/re2j">RE2/J</a> — linear-time, no
+  catastrophic backtracking.</li>
+<li>The Starlark ports were verified against the former Groovy implementations
+  across a corpus sweep before the legacy sources were removed.</li>
+</ul>
+<hr />
+<h2 id="the-policy-bundle">The policy bundle<a class="headerlink" href="#the-policy-bundle" title="Permanent link">&para;</a></h2>
+<p>Everything lives under <code>generic-policy-validation-plugin/src/main/resources/api-policy/</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>api-policy/
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>├── PolicyBundle.yaml            # manifest: id → file for every rule, policy, detector
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>├── detectors/
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>│   └── &lt;detector-id&gt;/
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>│       ├── Detector.md          # descriptor (YAML front matter) + prose
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>│       └── Detector.star        # the detector — Starlark
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>├── rules/
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>│   └── &lt;RULE-ID&gt;.md             # rule front matter + human documentation
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>└── policies/
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    └── &lt;Policy Name&gt;.md         # policy front matter + prose
+</code></pre></div>
+<h3 id="policybundleyaml"><code>PolicyBundle.yaml</code><a class="headerlink" href="#policybundleyaml" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nt">formatVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w">                 </span><span class="c1"># must be 1</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nt">bundleId</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">speculate-policy-bundle</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="nt">bundleVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1.0</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="nt">rules</span><span class="p">:</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">  </span><span class="nt">CASE001</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rules/CASE001.md</span><span class="w">      </span><span class="c1"># manifest key must equal the file's `id`</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">  </span><span class="nt">REST002</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rules/REST002.md</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="nt">policies</span><span class="p">:</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">  </span><span class="nt">Strict</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">policies/Strict.md</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">  </span><span class="s">"Enterprise</span><span class="nv"> </span><span class="s">Grade"</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">policies/EnterpriseGrade.md</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="nt">detectors</span><span class="p">:</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">  </span><span class="nt">naming</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">detectors/naming/Detector.md</span>
+</code></pre></div>
+<p><code>rules</code>, <code>policies</code>, and <code>detectors</code> must each be non-empty. Every referenced
+path is relative, and <code>..</code>, absolute paths, and backslashes are rejected.</p>
+<p>Each rule/policy/detector file is Markdown with a <strong>YAML front matter block</strong>
+delimited by <code>---</code> lines; the body after the closing <code>---</code> is human-readable
+documentation.</p>
+<hr />
+<h2 id="detectors">Detectors<a class="headerlink" href="#detectors" title="Permanent link">&para;</a></h2>
+<p>A detector is a reusable, parameterised fact-finder. It reports <strong>what it
+observed</strong> and takes no position on severity or score — that is the policy's
+job.</p>
+<h3 id="descriptor-detectormd-front-matter">Descriptor (<code>Detector.md</code> front matter)<a class="headerlink" href="#descriptor-detectormd-front-matter" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nn">---</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">naming</span><span class="w">                       </span><span class="c1"># must match the manifest key</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="nt">language</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">starlark</span><span class="w">                </span><span class="c1"># the detector language</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Detector.star</span><span class="w">             </span><span class="c1"># the detector source</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="nt">scopes</span><span class="p">:</span><span class="w">                          </span><span class="c1"># the scope values rules may request</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">property</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path-segment</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">query-parameter</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="nt">parameters</span><span class="p">:</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">  </span><span class="nt">convention</span><span class="p">:</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enum</span><span class="w">                   </span><span class="c1"># enum | string | integer | boolean</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">    </span><span class="nt">required</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">    </span><span class="nt">values</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">camelCase</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">snake_case</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">kebab-case</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">hyphenated</span><span class="p p-Indicator">]</span><span class="w">  </span><span class="c1"># enum only, non-empty</span>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">  </span><span class="nt">suffix</span><span class="p">:</span>
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">string</span><span class="w">                 </span><span class="c1"># string/integer/boolean must NOT declare `values`</span>
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="w">    </span><span class="nt">required</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="nn">---</span>
+</code></pre></div>
+<p>Parameter types and their accepted values (checked before the script runs, so
+scripts can trust their inputs):</p>
+<table>
+<thead>
+<tr>
+<th>type</th>
+<th>valid rule value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>enum</code></td>
+<td>a string that is one of <code>values</code></td>
+</tr>
+<tr>
+<td><code>string</code></td>
+<td>a non-blank string</td>
+</tr>
+<tr>
+<td><code>integer</code></td>
+<td>a whole number</td>
+</tr>
+<tr>
+<td><code>boolean</code></td>
+<td><code>true</code> / <code>false</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="the-api-model">The <code>api</code> model<a class="headerlink" href="#the-api-model" title="Permanent link">&para;</a></h3>
+<p><code>OpenApiMapAdapter</code> exposes only these keys — detectors are independent of the
+parser:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>api.info      { title, description, version, contactName, contactEmail,
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>                openapiVersion, apiId, audience }
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>api.servers   [ "https://api.example.com/v1", ... ]
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>api.security  [ { &lt;schemeName&gt;: [scopes...] }, ... ]  or null   # global requirement
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>api.paths[]   { path, pointer, segments[], operations[], operationDetails[] }
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>  .segments[]           { name, pointer }                 # literal segments only, no {params}
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>  .operationDetails[]   { method, pointer, summary, requestBodyPresent, security,
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>                          mediaTypes[], requestMediaTypes[], parameters[], responses[] }
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>    .parameters[]       { name, in, pointer, style, explode, schemaType, schemaMaximum }
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>    .responses[]        { status, description, headers[], schemaTypes[], mediaTypes[] }
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>api.schemas[]  { name, pointer, type, array, maxItems, properties[] }
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>  .properties[]         { name, pointer, type, array, maxItems, format, nullable,
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>                          required, enumPresent, enumValues[], extensibleEnum }
+</code></pre></div>
+<p><code>operationDetails[].security</code> is <code>null</code> unless the operation overrides the
+global requirement. JSON Pointers are pre-escaped and safe to return verbatim
+as <code>pointer</code>.</p>
+<h3 id="writing-a-detector-starlark">Writing a detector (Starlark)<a class="headerlink" href="#writing-a-detector-starlark" title="Permanent link">&para;</a></h3>
+<p><code>Detector.star</code> must define a top-level function <code>detect(api, rule)</code> that
+returns a list of occurrence dicts:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">detect</span><span class="p">(</span><span class="n">api</span><span class="p">,</span> <span class="n">rule</span><span class="p">):</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="n">suffix</span> <span class="o">=</span> <span class="n">rule</span><span class="p">[</span><span class="s2">"parameters"</span><span class="p">][</span><span class="s2">"suffix"</span><span class="p">]</span>        <span class="c1"># rule = {"id", "scope", "parameters"}</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="k">for</span> <span class="n">schema</span> <span class="ow">in</span> <span class="n">api</span><span class="p">[</span><span class="s2">"schemas"</span><span class="p">]:</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>        <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">schema</span><span class="p">[</span><span class="s2">"properties"</span><span class="p">]:</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>            <span class="k">if</span> <span class="n">prop</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">suffix</span><span class="p">):</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>                <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>                    <span class="s2">"pointer"</span><span class="p">:</span> <span class="n">prop</span><span class="p">[</span><span class="s2">"pointer"</span><span class="p">],</span>          <span class="c1"># optional, string</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>                    <span class="s2">"path"</span><span class="p">:</span> <span class="n">prop</span><span class="p">[</span><span class="s2">"name"</span><span class="p">],</span>                <span class="c1"># optional, string (shown as location)</span>
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>                    <span class="s2">"message"</span><span class="p">:</span> <span class="s2">"Property has the prohibited suffix "</span> <span class="o">+</span> <span class="n">suffix</span><span class="p">,</span>  <span class="c1"># required, non-blank</span>
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>                <span class="p">})</span>
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>    <span class="k">return</span> <span class="n">out</span>
+</code></pre></div>
+<p>Rules:</p>
+<ul>
+<li><code>message</code> is required and must be non-blank; <code>pointer</code> and <code>path</code> are
+  optional strings.</li>
+<li>Return <code>[]</code> when nothing matches — <strong>never</strong> return a score or a severity.</li>
+<li>More than 1000 occurrences is a detector error.</li>
+<li>Any error (raised, step-cap exceeded, wrong return shape) becomes a plugin
+  error for that rule's run — it does not abort the other rules.</li>
+<li>The script is compiled when the bundle loads; a compile failure fails the
+  whole bundle.</li>
+</ul>
+<p><strong>Safe by construction.</strong> <code>api</code> and <code>rule</code> are deep-immutable. The language
+has no <code>import</code>, no I/O, no reflection, no recursion, and execution is bounded
+by a hard interpreter-step cap. The only capabilities beyond core
+list/dict/string/<code>for</code>/comprehension work are these builtins:</p>
+<table>
+<thead>
+<tr>
+<th>Builtin</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>re_fullmatch(pattern, text)</code></td>
+<td>whole-string match (RE2 syntax, linear time)</td>
+</tr>
+<tr>
+<td><code>re_search(pattern, text)</code></td>
+<td>match anywhere in <code>text</code></td>
+</tr>
+<tr>
+<td><code>tokenize(text, delims)</code></td>
+<td>split on any char in <code>delims</code>, dropping empty tokens</td>
+</tr>
+<tr>
+<td><code>parse_int(text, fallback)</code></td>
+<td>base-10 int, or <code>fallback</code> if not one</td>
+</tr>
+<tr>
+<td><code>url_host(url)</code></td>
+<td>host component of a URL, or <code>None</code></td>
+</tr>
+</tbody>
+</table>
+<p>If a detector needs something outside this list, that is a deliberate,
+reviewed addition to the runtime — not a workaround in the script.</p>
+<p>The <code>manual</code> detector is the deliberate no-op (<code>def detect(api, rule): return []</code>).
+It keeps a rule in the catalogue as a checklist item that cannot be inferred
+from an OpenAPI document.</p>
+<hr />
+<h2 id="rules">Rules<a class="headerlink" href="#rules" title="Permanent link">&para;</a></h2>
+<p>A rule binds a detector to a specific scope and parameter set, and carries the
+human explanation.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>---
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>id: CASE001                       # must match the manifest key
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>category: Naming                  # free-text grouping shown in the UI
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>detector: naming                  # detector id
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>scope: property                   # must be one of that detector's <span class="sb">`scopes`</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="gu">parameters: { convention: camelCase, match: non-conforming }</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="gu">---</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="gh"># CASE001 — JSON property is not camelCase</span>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>JSON property names should use camelCase where required by policy.
+</code></pre></div>
+<ul>
+<li>The body <strong>must</strong> start with a level-one heading (<code># ...</code>); its text becomes
+  the rule title used in findings.</li>
+<li><code>{{parameter-name}}</code> placeholders in the body are interpolated with the
+  rule's parameter values when the documentation is served, e.g.
+  <code>Should not exceed {{maximum-depth}} nested levels.</code></li>
+<li><code>parameters</code> may be omitted if the detector needs none.</li>
+<li>Parameter names, value types, required-parameter presence, and the
+  scope-vs-detector match are all checked at load time — <strong>unless</strong> the
+  detector named by the rule is not yet in the bundle, in which case the rule
+  is still loaded but left unvalidated (this lets the catalogue document rules
+  ahead of their detector).</li>
+</ul>
+<p>The rule is invisible until a policy references it.</p>
+<hr />
+<h2 id="policies">Policies<a class="headerlink" href="#policies" title="Permanent link">&para;</a></h2>
+<p>A policy is the deployable artifact: the list of active rules and what each one
+costs.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>---
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>id: Strict                        # must match the manifest key (quote if it has spaces)
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>rules:
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>  REST001: 0.5                    # deduct 0.5 points once if this rule matches
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>  CASE001: 0.5
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="gu">  SEC001: PROHIBITED              # any match forces the overall score to 0</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="gu">---</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="gh"># Speculate Strict Policy</span>
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>Prose describing the policy's intent.
+</code></pre></div>
+<ul>
+<li>Each value is either a <strong>number <code>0</code>–<code>100</code></strong> (a point deduction) or the
+  literal <strong><code>PROHIBITED</code></strong>.</li>
+<li>A deduction is applied <strong>once per rule</strong>, no matter how many occurrences the
+  detector reported.</li>
+<li>Every rule id must exist in the bundle.</li>
+<li><strong>Declaration order is report order</strong> in the findings table.</li>
+<li>The first policy in <code>PolicyBundle.yaml</code> is the fallback when a caller
+  requests an unknown rule set.</li>
+</ul>
+<p>Bundled policies: <code>Strict</code>, <code>Enterprise Grade</code>, <code>Zalando</code>, <code>Zalando Extended</code>.
+See <a href="../zalando-rule-catalogue/"><code>zalando-rule-catalogue.md</code></a> for the
+Zalando/Zally rule mapping.</p>
+<hr />
+<h2 id="scoring">Scoring<a class="headerlink" href="#scoring" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>qualityScore   = max(0, 100 − Σ deductions for matched rules)
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>effectiveScore = 0 if any PROHIBITED rule matched, else qualityScore
+</code></pre></div>
+<p>The result reports <code>overallScore</code> (<code>effectiveScore</code>) and
+<code>overallScoreWithoutBlockers</code> (<code>qualityScore</code>). Severity is <code>ERROR</code> for a
+<code>PROHIBITED</code> match and <code>WARNING</code> for a deduction; each violation's
+<code>scoreImprovement</code> is the points recoverable by fixing that rule.</p>
+<hr />
+<h2 id="adding-to-the-bundle">Adding to the bundle<a class="headerlink" href="#adding-to-the-bundle" title="Permanent link">&para;</a></h2>
+<h3 id="a-new-rule-existing-detector">A new rule (existing detector)<a class="headerlink" href="#a-new-rule-existing-detector" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Create <code>rules/&lt;ID&gt;.md</code> with front matter (<code>id</code>, <code>category</code>, <code>detector</code>,
+   <code>scope</code>, <code>parameters</code>) and a <code># &lt;ID&gt; — &lt;title&gt;</code> body.</li>
+<li>Add <code>&lt;ID&gt;: rules/&lt;ID&gt;.md</code> to <code>PolicyBundle.yaml</code> under <code>rules:</code>.</li>
+<li>Reference <code>&lt;ID&gt;</code> from one or more policies with a deduction or <code>PROHIBITED</code>.</li>
+</ol>
+<h3 id="a-new-detector">A new detector<a class="headerlink" href="#a-new-detector" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Create <code>detectors/&lt;id&gt;/Detector.md</code> (descriptor) and
+   <code>detectors/&lt;id&gt;/Detector.star</code> (the <code>detect(api, rule)</code> function).</li>
+<li>Add <code>&lt;id&gt;: detectors/&lt;id&gt;/Detector.md</code> to <code>PolicyBundle.yaml</code> under
+   <code>detectors:</code>.</li>
+<li>Add rules that use it.</li>
+</ol>
+<h3 id="a-new-policy">A new policy<a class="headerlink" href="#a-new-policy" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Create <code>policies/&lt;Name&gt;.md</code> with <code>id</code> and a <code>rules:</code> map.</li>
+<li>Add <code>&lt;Name&gt;: policies/&lt;Name&gt;.md</code> to <code>PolicyBundle.yaml</code> under <code>policies:</code>.</li>
+</ol>
+<p>Rule entries may use the numeric or <code>PROHIBITED</code> shorthand, or a declaration
+when that policy needs different detector parameters:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nt">rules</span><span class="p">:</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span><span class="nt">STANDARD008</span><span class="p">:</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">    </span><span class="nt">points</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">    </span><span class="nt">parameters</span><span class="p">:</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">      </span><span class="nt">allowed</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">X-Request-Id,X-Correlation-Id</span>
+</code></pre></div>
+<p>The policy parameters are merged over the rule defaults for that run. They are
+validated against the detector descriptor at bundle load time; unknown or
+incorrectly typed overrides fail fast. The shorthand remains equivalent to a
+declaration with no overrides.</p>
+<h3 id="build-install">Build &amp; install<a class="headerlink" href="#build-install" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>mvn<span class="w"> </span>-q<span class="w"> </span>-pl<span class="w"> </span>generic-policy-validation-plugin<span class="w"> </span>-am<span class="w"> </span>package<span class="w"> </span>-DskipTests
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>cp<span class="w"> </span>generic-policy-validation-plugin/target/generic-policy-validation-plugin-*.jar<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">   </span>~/.speculate/plugins/
+</code></pre></div>
+<p><code>GenericPolicyValidationPluginTest</code> / <code>...LoadIT</code> load the real bundle and will
+fail the build on any manifest, front-matter, scope, parameter, or
+detector-compile error.</p>
+<hr />
+<h2 id="validation-performed-at-load-time">Validation performed at load time<a class="headerlink" href="#validation-performed-at-load-time" title="Permanent link">&para;</a></h2>
+<p>The bundle fails fast (<code>BundleValidationException</code>) on:</p>
+<ul>
+<li><code>formatVersion</code> ≠ 1; empty <code>rules</code>/<code>policies</code>/<code>detectors</code>; unknown top-level
+  or front-matter fields; unsafe resource paths.</li>
+<li>A manifest key that doesn't match the <code>id</code> inside the referenced file.</li>
+<li>A detector: an uncompilable <code>Detector.star</code>, a missing source, an <code>enum</code>
+  parameter with no <code>values</code>, a
+  scalar parameter that declares <code>values</code>, an unsupported parameter type.</li>
+<li>A rule: a <code>scope</code> not in the detector's <code>scopes</code>, an unknown parameter, a
+  wrong-typed parameter value, a missing required parameter, a body with no
+  <code>#</code> heading. (Skipped only when the detector isn't bundled yet.)</li>
+<li>A policy: a disposition that is neither <code>0</code>–<code>100</code> nor <code>PROHIBITED</code>, or a
+  reference to an unknown rule id.</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Apache License 2.0
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.top", "content.code.copy", "content.action.edit", "search.suggest", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
