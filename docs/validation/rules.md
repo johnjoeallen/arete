@@ -7,8 +7,8 @@ by category. A rule is only evaluated when a [policy](policies.md) references
 it. See [the policy engine](policy-engine.md) for how rules, detectors, and
 policies fit together.
 
-There are **130 rules** across **20 categories**, built on
-**42 detectors**.
+There are **132 rules** across **20 categories**, built on
+**43 detectors**.
 
 !!! note "Reading the policy columns"
     A number is the point deduction applied once if the rule matches;
@@ -117,6 +117,7 @@ There are **130 rules** across **20 categories**, built on
 | `STATUS004` | Resource retrieval lacks a not-found response | `response-code` | 0.5 | 0.5 | 0.5 |
 | `STATUS005` | Status code conflicts with operation semantics | `response-code` | 0.5 | 0.5 | 0.5 |
 | `STATUS007` | Rate-limit response lacks required headers | `response-header` | 0.5 | 0.5 | 0.5 |
+| `STATUS008` | Server-error response is documented | `status-class` | 0.5 |  |  |
 
 ## Identifiers
 
@@ -153,6 +154,7 @@ There are **130 rules** across **20 categories**, built on
 | `CASE004` | Header does not use conventional hyphenated naming | `naming` | 0.5 | 0.5 | 0.5 |
 | `CASE005` | Path segment is not kebab-case | `naming` | 0.5 | 0.5 | 0.5 |
 | `CASE006` | Schema name is a placeholder | `schema-name` | 0.5 |  |  |
+| `CASE007` | Request/response object is not PascalCase | `schema-name` |  |  |  |
 
 ## Pagination
 

@@ -104,6 +104,7 @@ rules:
   STANDARD022: 0.5
   DOC013: 0.5
   DOC014: 0.5
+  STATUS008: 0.5
 ---
 
 # Enterprise Grade Policy
