@@ -15,16 +15,27 @@ def _is_internal(host):
 
 
 def detect(api, rule):
-    check = rule["parameters"]["check"]
+    p = rule["parameters"]
+    check = p["check"]
     out = []
-    if check != "internal-host":
-        return out
-    for url in api["servers"]:
-        host = url_host(url)
-        if host and _is_internal(host):
-            out.append({
-                "pointer": "/servers",
-                "path": url,
-                "message": "Server URL points at an internal or non-routable host: " + host,
-            })
+    if check == "internal-host":
+        for url in api["servers"]:
+            host = url_host(url)
+            if host and _is_internal(host):
+                out.append({
+                    "pointer": "/servers",
+                    "path": url,
+                    "message": "Server URL points at an internal or non-routable host: " + host,
+                })
+    elif check == "url-pattern":
+        pattern = p.get("pattern")
+        if not pattern:
+            return out
+        for url in api["servers"]:
+            if not re_fullmatch(pattern, url):
+                out.append({
+                    "pointer": "/servers",
+                    "path": url,
+                    "message": "Server URL does not match the approved pattern " + pattern,
+                })
     return out

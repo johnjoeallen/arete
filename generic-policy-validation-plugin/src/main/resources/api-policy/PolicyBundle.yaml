@@ -141,6 +141,7 @@ rules:
   JSON020: rules/JSON020.md
   DOC016: rules/DOC016.md
   ERROR011: rules/ERROR011.md
+  STANDARD023: rules/STANDARD023.md
 
 policies:
   "Enterprise Grade": policies/EnterpriseGrade.md

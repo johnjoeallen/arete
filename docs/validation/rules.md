@@ -7,7 +7,7 @@ by category. A rule is only evaluated when a [policy](policies.md) references
 it. See [the policy engine](policy-engine.md) for how rules, detectors, and
 policies fit together.
 
-There are **138 rules** across **20 categories**, built on
+There are **139 rules** across **20 categories**, built on
 **45 detectors**.
 
 !!! note "Reading the policy columns"
@@ -229,6 +229,7 @@ There are **138 rules** across **20 categories**, built on
 | `STANDARD020` | Request or response body uses an inline object schema | `schema-composition` | 0.5 |  |  |
 | `STANDARD021` | Unresolved reference | `document-lint` | 0.5 |  |  |
 | `STANDARD022` | HTTP status keys are bare numbers | `document-lint` | 0.5 |  |  |
+| `STANDARD023` | Server URL is not on the approved pattern | `server-url` |  |  |  |
 
 ## Status codes
 

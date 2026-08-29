@@ -9,13 +9,24 @@
         false
     }
     def out = []
-    if (rule.parameters.check != 'internal-host') return out
-    (api.servers ?: []).each { url ->
-        def host = null
-        try { host = new URI(url as String).host } catch (ignored) { }
-        if (host && isInternal(host)) {
-            out << [pointer: '/servers', path: url,
-                    message: "Server URL points at an internal or non-routable host: ${host}"]
+    def check = rule.parameters.check
+    if (check == 'internal-host') {
+        (api.servers ?: []).each { url ->
+            def host = null
+            try { host = new URI(url as String).host } catch (ignored) { }
+            if (host && isInternal(host)) {
+                out << [pointer: '/servers', path: url,
+                        message: "Server URL points at an internal or non-routable host: ${host}"]
+            }
+        }
+    } else if (check == 'url-pattern') {
+        def pattern = rule.parameters.pattern
+        if (pattern) {
+            def compiled = ~(pattern as String)
+            (api.servers ?: []).findAll { !(it ==~ compiled) }.each { url ->
+                out << [pointer: '/servers', path: url,
+                        message: "Server URL does not match the approved pattern ${pattern}"]
+            }
         }
     }
     out

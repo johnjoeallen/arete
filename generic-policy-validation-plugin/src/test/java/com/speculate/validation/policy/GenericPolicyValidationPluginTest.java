@@ -936,7 +936,7 @@ class GenericPolicyValidationPluginTest {
         resources.put("detectors/pagination/Detector.md", readResource("api-policy/detectors/pagination/Detector.md"));
         for (String ruleId : new String[] {"STANDARD011", "STANDARD012", "STANDARD013", "STANDARD014", "STANDARD015",
                 "STANDARD016", "STANDARD017", "STANDARD018", "STANDARD019", "STANDARD020", "STANDARD021", "STANDARD022",
-                "HTTP009", "DOC010", "DOC011", "DOC012", "DOC013", "DOC014", "CASE006", "CASE007", "JSON017", "JSON018", "JSON019", "JSON020", "DOC015", "DOC016", "ERROR011", "SEC009",
+                "HTTP009", "DOC010", "DOC011", "DOC012", "DOC013", "DOC014", "CASE006", "CASE007", "JSON017", "JSON018", "JSON019", "JSON020", "DOC015", "DOC016", "ERROR011", "SEC009", "STANDARD023",
                 "STATUS008"}) {
             resources.put("rules/" + ruleId + ".md", readResource("api-policy/rules/" + ruleId + ".md"));
         }
