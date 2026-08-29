@@ -90,7 +90,7 @@
                                    th:text="${validation.rulesEvaluatedCount()} + ' rule(s) checked across ' + ${validation.pluginSummaries().size()} + ' validator(s).'"></p>
                                 <p th:if="${!T(java.lang.Double).isNaN(validation.overallScore())}" class="validation-summary-line validation-score-line">
                                     Score: <span th:text="${#numbers.formatDecimal(validation.overallScore(), 1, 1)}"></span>%
-                                    <span th:if="${!T(java.lang.Double).isNaN(validation.overallScoreWithoutBlockers())}"
+                                    <span th:if="${!T(java.lang.Double).isNaN(validation.overallScoreWithoutBlockers()) and validation.overallScore() != validation.overallScoreWithoutBlockers()}"
                                           th:text="'(' + ${#numbers.formatDecimal(validation.overallScoreWithoutBlockers(), 1, 1)} + '% without blockers)'"></span>
                                 </p>
                                 <p th:if="${validation.violations().isEmpty()}" class="validation-summary-line validation-clean-note">No issues found.</p>
