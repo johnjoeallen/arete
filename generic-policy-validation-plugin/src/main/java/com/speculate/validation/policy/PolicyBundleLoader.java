@@ -16,8 +16,16 @@ import java.util.Set;
 
 /** Loads and validates every declarative resource and detector reference. */
 final class PolicyBundleLoader {
+    private static final System.Logger LOG = System.getLogger(PolicyBundleLoader.class.getName());
+
     private final Yaml yaml;
+    private final GroovyDetectorRuntime groovyRuntime = new GroovyDetectorRuntime();
     private final StarlarkDetectorRuntime starlarkRuntime = new StarlarkDetectorRuntime();
+
+    /** Selects the detector runtime while keeping Groovy opt-in only. */
+    record LoadOptions(boolean forceGroovy) {
+        static LoadOptions defaults() { return new LoadOptions(false); }
+    }
 
     PolicyBundleLoader() {
         LoaderOptions options = new LoaderOptions();
@@ -27,6 +35,10 @@ final class PolicyBundleLoader {
     }
 
     PolicyBundle load(BundleResources resources) {
+        return load(resources, LoadOptions.defaults());
+    }
+
+    PolicyBundle load(BundleResources resources, LoadOptions loadOptions) {
         Map<String, Object> manifest = yamlMap("PolicyBundle.yaml", resources.read("PolicyBundle.yaml"));
         rejectUnknown("PolicyBundle.yaml", manifest, Set.of("formatVersion", "bundleId", "bundleVersion", "rules", "policies", "detectors"));
         if (!Integer.valueOf(1).equals(manifest.get("formatVersion"))) throw new BundleValidationException("PolicyBundle.yaml: formatVersion must be 1");
@@ -43,9 +55,25 @@ final class PolicyBundleLoader {
 
             String starlarkSource = optionalRead(resources, siblingPath(descriptorPath, "Detector.star"));
 
-            if (starlarkSource == null) throw new BundleValidationException(descriptorPath + ": missing Detector.star");
-            Detector detector = new Detector(descriptor.id(), "starlark", starlarkSource, descriptor.scopes(), descriptor.parameters());
-            starlarkRuntime.validate(detector);
+            Detector detector;
+            if (loadOptions.forceGroovy()) {
+                String groovySource = optionalRead(resources, siblingPath(descriptorPath, "Detector.groovy"));
+                if (groovySource != null) {
+                    detector = new Detector(descriptor.id(), "groovy", groovySource, descriptor.scopes(), descriptor.parameters());
+                    groovyRuntime.validate(detector);
+                } else if (starlarkSource != null) {
+                    LOG.log(System.Logger.Level.WARNING,
+                            "Detector ''{0}'' has no legacy Detector.groovy; using Starlark in Groovy compatibility mode.", descriptor.id());
+                    detector = new Detector(descriptor.id(), "starlark", starlarkSource, descriptor.scopes(), descriptor.parameters());
+                    starlarkRuntime.validate(detector);
+                } else {
+                    throw new BundleValidationException(descriptorPath + ": missing Detector.groovy and Detector.star");
+                }
+            } else {
+                if (starlarkSource == null) throw new BundleValidationException(descriptorPath + ": missing Detector.star");
+                detector = new Detector(descriptor.id(), "starlark", starlarkSource, descriptor.scopes(), descriptor.parameters());
+                starlarkRuntime.validate(detector);
+            }
             detectors.put(detector.id(), detector);
         }
 

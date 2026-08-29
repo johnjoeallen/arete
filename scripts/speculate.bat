@@ -5,6 +5,7 @@ set "JAR=%~dp0speculate.jar"
 set "DATA_DIR=%USERPROFILE%\.speculate\data"
 set "PORT="
 set "WIPE=0"
+set "GROOVY=0"
 
 :parse
 if "%~1"=="" goto :afterparse
@@ -30,16 +31,23 @@ if /i "%~1"=="--reset-db" (
     shift
     goto :parse
 )
+if /i "%~1"=="--enable-groovy-detectors" (
+    set "GROOVY=1"
+    shift
+    goto :parse
+)
 if /i "%~1"=="-h" goto :usage
 if /i "%~1"=="--help" goto :usage
 echo Unknown option: %~1
 goto :usage
 
 :usage
-echo Usage: %~nx0 [--port PORT] [--wipe-db] [-h^|--help]
+echo Usage: %~nx0 [--port PORT] [--wipe-db] [--enable-groovy-detectors] [-h^|--help]
 echo.
 echo   --port, -p PORT   Run the server on PORT instead of the configured default.
 echo   --wipe-db         Delete the local database ^(%DATA_DIR%^) before starting.
+echo   --enable-groovy-detectors
+echo                     Enable the legacy, unsandboxed Groovy detector runtime.
 echo   -h, --help        Show this help and exit.
 exit /b 0
 
@@ -79,7 +87,9 @@ if "%WIPE%"=="1" (
     rmdir /s /q "%DATA_DIR%" 2>nul
 )
 
+set "JAVA_OPTS="
+if "%GROOVY%"=="1" set "JAVA_OPTS=-Dspeculate.policy.detector-language=groovy"
 set "ARGS="
 if not "%PORT%"=="" set "ARGS=--server.port=%PORT%"
 
-java -jar "%JAR%" %ARGS%
+java %JAVA_OPTS% -jar "%JAR%" %ARGS%

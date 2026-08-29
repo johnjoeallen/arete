@@ -97,6 +97,11 @@ scripts\speculate.bat
 ./scripts/speculate.sh --wipe-db
 ```
 
+The legacy Groovy detector runtime can be enabled explicitly for a trusted
+bundle with `--enable-groovy-detectors`. Starlark remains the default; Groovy
+detectors execute unsandboxed and should only be enabled when the detector
+sources are trusted.
+
 The launcher scripts respect `JAVA_HOME` if it's set — checked before `java`
 is resolved from `PATH`, so a machine with multiple JDKs installed uses the
 one you point at instead of whichever `java` happens to be first on `PATH`.

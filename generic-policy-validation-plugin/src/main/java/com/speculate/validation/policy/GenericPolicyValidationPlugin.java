@@ -26,6 +26,7 @@ public final class GenericPolicyValidationPlugin implements SpecValidationPlugin
     private static final System.Logger LOG = System.getLogger(GenericPolicyValidationPlugin.class.getName());
     private volatile PolicyBundle bundle;
     private final PolicyBundleLoader bundleLoader = new PolicyBundleLoader();
+    private final GroovyDetectorRuntime groovyRuntime = new GroovyDetectorRuntime();
     private final StarlarkDetectorRuntime starlarkRuntime = new StarlarkDetectorRuntime();
 
     @Override public String getId() { return "generic-policy"; }
@@ -44,7 +45,16 @@ public final class GenericPolicyValidationPlugin implements SpecValidationPlugin
 
     @Override
     public synchronized void configure(Map<String, String> config) {
-        bundle = bundleLoader.load(new ClasspathBundleResources(getClass().getClassLoader()));
+        String language = config == null ? null : config.get("detector-language");
+        if (language == null) language = System.getProperty("speculate.policy.detector-language", "starlark");
+        boolean forceGroovy = "groovy".equalsIgnoreCase(language);
+        if (forceGroovy) {
+            LOG.log(System.Logger.Level.WARNING,
+                    "Speculate policy engine: detectors are running on the Groovy runtime "
+                            + "(detector-language=groovy). This runtime is UNSANDBOXED; only enable it for bundles you fully trust.");
+        }
+        bundle = bundleLoader.load(new ClasspathBundleResources(getClass().getClassLoader()),
+                new PolicyBundleLoader.LoadOptions(forceGroovy));
     }
 
     @Override
@@ -80,7 +90,9 @@ public final class GenericPolicyValidationPlugin implements SpecValidationPlugin
                 Map<String, Object> parameters = new LinkedHashMap<>(rule.parameters());
                 parameters.putAll(policyRule.getValue().parameters());
                 Rule effectiveRule = new Rule(rule.id(), rule.title(), rule.category(), rule.detector(), rule.scope(), parameters, rule.documentationMarkdown());
-                occurrences = starlarkRuntime.execute(detector, api, effectiveRule);
+                occurrences = "groovy".equals(detector.language())
+                        ? groovyRuntime.execute(detector, api, effectiveRule)
+                        : starlarkRuntime.execute(detector, api, effectiveRule);
             } catch (DetectorException e) {
                 return ValidationResult.pluginError("Detector '" + rule.detector() + "' failed for " + rule.id() + ": " + e.getMessage());
             }

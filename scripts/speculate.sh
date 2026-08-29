@@ -6,13 +6,16 @@ JAR="$DIR/speculate.jar"
 DATA_DIR="$HOME/.speculate/data"
 PORT=""
 WIPE=0
+GROOVY=0
 
 usage() {
   cat <<EOF
-Usage: $(basename "$0") [--port PORT] [--wipe-db] [-h|--help]
+Usage: $(basename "$0") [--port PORT] [--wipe-db] [--enable-groovy-detectors] [-h|--help]
 
   --port, -p PORT   Run the server on PORT instead of the configured default.
   --wipe-db         Delete the local database ($DATA_DIR) before starting.
+  --enable-groovy-detectors
+                    Enable the legacy, unsandboxed Groovy detector runtime.
   -h, --help        Show this help and exit.
 EOF
 }
@@ -22,6 +25,7 @@ while [ $# -gt 0 ]; do
     --port=*) PORT="${1#*=}"; shift ;;
     --port|-p) PORT="$2"; shift 2 ;;
     --wipe-db|--reset-db) WIPE=1; shift ;;
+    --enable-groovy-detectors) GROOVY=1; shift ;;
     -h|--help) usage; exit 0 ;;
     *) echo "Unknown option: $1" >&2; usage >&2; exit 1 ;;
   esac
@@ -58,8 +62,11 @@ if [ "$WIPE" -eq 1 ]; then
 fi
 
 ARGS=()
+if [ "$GROOVY" -eq 1 ]; then
+  ARGS+=("-Dspeculate.policy.detector-language=groovy")
+fi
 if [ -n "$PORT" ]; then
   ARGS+=("--server.port=$PORT")
 fi
 
-exec java -jar "$JAR" "${ARGS[@]}"
+exec java "${ARGS[@]}" -jar "$JAR"

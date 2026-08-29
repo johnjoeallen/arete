@@ -17,6 +17,7 @@
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <junit.version>5.10.2</junit.version>
+        <groovy.version>4.0.30</groovy.version>
         <swagger.parser.version>2.1.42</swagger.parser.version>
         <snakeyaml.version>2.6</snakeyaml.version>
     </properties>
@@ -28,6 +29,12 @@
             <artifactId>speculate-validation-spi</artifactId>
             <version>0.1.0-SNAPSHOT</version>
             <scope>provided</scope>
+        </dependency>
+        <!-- Used only by the explicit legacy Groovy detector opt-in. -->
+        <dependency>
+            <groupId>org.apache.groovy</groupId>
+            <artifactId>groovy</artifactId>
+            <version>${groovy.version}</version>
         </dependency>
         <!-- POC (issue #125): safe-by-construction detector language.
              The eed3si9n build is a community repackage of Bazel's
