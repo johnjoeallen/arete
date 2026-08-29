@@ -1,76 +1,71 @@
-# POC results — Starlark detector language (issue #125)
+# Starlark detector port (issue #125)
 
-Status: **spike complete** · Branch: `worktree-starlark-detector-poc`
+Status: **all 22 detectors ported and parity-verified**
 
-Proves the [research note](policy-engine-dsl-research.md) recommendation: the
-three most regex-heavy detectors, ported to Starlark + RE2/J, produce
-**identical** occurrences to the trusted-Groovy runtime, while being safe by
-construction.
+Realises the [research note](policy-engine-dsl-research.md): every bundled
+detector, rewritten in Starlark + RE2/J, produces **identical** occurrences to
+the trusted-Groovy runtime, while being safe by construction.
 
 ## What was built
 
 | File | Purpose |
 |---|---|
-| `generic-policy-validation-plugin/.../star/StarlarkDetectorRuntime.java` | Loads a `detect(api, rule)` Starlark function, deep-converts the host model to **immutable** Starlark values, runs it with a hard step cap, normalises the result. |
-| `.../star/StarlarkBuiltins.java` | The entire extra capability surface: `re_fullmatch`, `re_search` (RE2/J), `tokenize` (Groovy `String.tokenize` semantics), `url_host`. |
-| `src/test/resources/star-poc/{resource-path,operation-semantics,versioning}.star` | Line-for-line ports of the Groovy detectors. |
-| `src/test/java/.../StarlarkDetectorPocTest.java` | Runs Groovy vs Starlark for the same rules/specs; asserts equal `(pointer, path, message)` rows. Plus a hostile-input suite. |
+| `generic-policy-validation-plugin/.../star/StarlarkDetectorRuntime.java` | Loads a `detect(api, rule)` Starlark function, deep-converts the host model to **immutable** Starlark values (int/float/bool/str/list/dict), runs it with a hard step cap, normalises the result to occurrence maps. |
+| `.../star/StarlarkBuiltins.java` | The entire extra capability surface: `re_fullmatch`, `re_search` (RE2/J), `tokenize` (Groovy `String.tokenize` semantics), `parse_int`, `url_host`. |
+| `.../api-policy/detectors/*/Detector.star` (×22) | Ports of every `Detector.groovy`, sitting next to the originals in the bundle. |
+| `.../StarlarkParityTest.java` | Drives the whole bundle the way `GenericPolicyValidationPlugin.validate` does — every policy, every disposition, effective (rule + policy-override) params, plus a direct per-rule sweep — over a 10-spec messy corpus, asserting Groovy and Starlark occurrence lists are byte-identical. |
 
 Dependencies added: `com.eed3si9n.starlark:starlark:4.2.1` (community repackage
-of Bazel's `net.starlark.java`, used only for the spike) and
-`com.google.re2j:re2j:1.7`.
+of Bazel's `net.starlark.java`, spike-only) and `com.google.re2j:re2j:1.7`.
 
 ## Results
 
-- **Parity**: `StarlarkDetectorPocTest` — 5/5 green. `resource-path`
-  (REST001/003/004), `operation-semantics` (HTTP001/002/003/006/008), and
-  `versioning` (VERSION001–004) match the Groovy oracle exactly, including the
-  empty-result and multi-occurrence cases.
-- **Full module suite**: 18/18 green — the existing 13 Groovy tests are
-  unaffected.
-- **Safe by construction** — each of these is rejected, as a language
-  property rather than a filtered call:
-  - `load(...)` — no module loading
-  - `open("/etc/passwd").read()` — no I/O (name simply unbound)
-  - `str(type(api))` — no runtime introspection
-  - `1 // 0` — surfaces as a `DetectorScriptException`, not a host crash
-  - `for i in range(100000000)` — hits `setMaxExecutionSteps`, deterministic
-- Recursion is disallowed by default; the input model is deep-immutable so a
-  detector cannot mutate `api`.
+- **Parity: all 22 detectors, 0 mismatches.** The sweep runs >900 (spec ×
+  policy × rule) comparisons plus a per-rule pass. Every detector except the
+  two intentionally-empty ones (`manual`, `compatibility`) is exercised
+  non-vacuously — the test fails if any detector is only checked on empty
+  output.
+- **Full module suite: 24/24 green** — the 21 existing Groovy tests are
+  untouched.
+- **Safe by construction** — rejected as language properties, not filtered
+  calls: `load(...)`, `open("/etc/passwd")`, reflection/introspection,
+  `1 // 0` (→ `DetectorScriptException`), `for i in range(1e8)` (step cap).
+  Recursion disallowed; the input model is deep-immutable.
 
 ## Port notes (Groovy → Starlark)
 
-- `collectMany{…}` / `findAll{…}` → nested `for` + list-comprehension `if`;
-  reads about the same length.
-- `def matches = { … }` nested helper closures → module-level `def _matches(…)`
-  with parameters passed explicitly (no closure-over-locals).
-- `==~ /re/` (anchored) → `re_fullmatch(r"re", s)`. Inline `(?i)` mid-pattern
-  hoisted to the front — equivalent for these patterns and cleaner.
-- Groovy `String.tokenize('/')` **drops empty tokens**; Python-style `split`
-  keeps them, hence the `tokenize` builtin.
-- `x ?: y` → `x or y` (same truthiness for our string/None cases).
-- No detector needed dates, arithmetic beyond compare, or object
-  construction — the `new URI(url)` in the hostname detector becomes the
-  `url_host` builtin (no `OpenApiMapAdapter` change).
+- `collectMany{…}` / `findAll{…}` → nested `for` + comprehension `if`.
+- `def x = { … }` nested helper closures → module-level `def _x(…)` with
+  params passed explicitly (Starlark has no closure-over-locals in module fns).
+- `switch` → `if`/`elif` chains, usually extracted to a `_message()` helper.
+- `==~ /re/` → `re_fullmatch(r"re", s)`; `(x =~ /re/).find()` → `re_search`.
+  Inline `(?i)` hoisted to the front. **Deliberate quirks preserved**: three
+  Groovy regexes carry doubled backslashes (`\\b`, `\\.`) from slashy-string
+  escaping and so never match as intended — the ports keep the exact same
+  literal so results match (`metadata` semver, `text-style` all-caps,
+  `response-code` semantic-conflict).
+- `String.tokenize('/')` drops empty tokens → `tokenize` builtin (Python
+  `split` keeps them).
+- `x ?: y` → `x or y`; `?.` → `dict.get()` / explicit `!= None`.
+- Enum value type checks (`v instanceof Integer/Number/String`) → `type(v)`
+  after the runtime converts Java numbers to `StarlarkInt` / `StarlarkFloat`.
+- `Integer.parseInt` + catch → `parse_int(s, fallback)` builtin.
+- `new URI(url).host` → `url_host` builtin — **no `OpenApiMapAdapter` change**.
 
-RE2/J covered every pattern in the three detectors (`\b`, `(?i)`,
-alternation, non-capturing groups, `{2,}`). No backreferences or lookaround
-were used — and both stay unavailable, which is the point.
+RE2/J accepted every pattern in the bundle (`\b`, `(?i)`, alternation,
+`(?:)`, `{n,}`, character classes). No backreferences or lookaround are used,
+and both stay unavailable.
 
-## Caveats / not done
+## Not done (follow-ups on issue #125)
 
-- `com.eed3si9n.starlark:starlark:4.2.1` bundles **Guava 27.1 (2019)**.
-  Production must vendor a current `net/starlark/java/**` from upstream Bazel
-  (issue #125) — the spike deliberately took the fast path.
-- No timeout wrapper yet (step cap only); no compiled-`Program` cache; the
-  runtime returns plain maps rather than wiring into `ValidationResult`.
-- Only 3 of 17 detectors ported. The remaining 14 use a strict subset of what
-  these three exercise (the `naming`/`schema` ones are simpler), so no new
-  blocker is expected — but that is the next step, not a proven fact.
-
-## Recommendation
-
-Proceed with issue #125 as written. The spike found no blocker: Starlark
-expresses the detectors cleanly, RE2/J removes the ReDoS concern, and the
-capability surface is a 4-function file instead of a two-layer sandbox to
-keep correct forever.
+- **Vendor Starlark.** `com.eed3si9n.starlark:starlark:4.2.1` bundles Guava
+  27.1 (2019) and pulls a JNI CPU-profiler stub that logs a native-access
+  warning. Production vendors a current `net/starlark/java/**` (runtime subset
+  only — exclude `cmd`, `JNI`, `CpuProfiler`).
+- **Wire `language: starlark`** into the descriptor + `PolicyBundleLoader` so
+  the engine actually runs the `.star` files; then retire `Detector.groovy`
+  and drop the `org.apache.groovy` dependency.
+- Timeout wrapper (step cap only today); compiled-`Program` cache;
+  `ValidationResult.pluginError` wiring.
+- Layers C/§10 of the [sandbox plan](policy-engine-sandbox-plan.md) for remote
+  bundles remain as scoped there.
