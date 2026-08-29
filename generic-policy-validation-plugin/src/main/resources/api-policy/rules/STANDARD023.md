@@ -46,5 +46,5 @@ The rule has `api` scope and uses the `server-url` detector with
 
 `pattern` is a policy parameter and is expected to be overridden. This rule
 is **not** part of the default Enterprise Grade policy — enable it in a
-policy that carries your organisation's URL pattern (this is how the
-Mastercard-style "correct server environments" requirement is expressed).
+policy that carries your organisation's approved production / sandbox URL
+convention.
