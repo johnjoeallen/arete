@@ -12,7 +12,8 @@ files — no host code changes.
 - [The policy bundle](#the-policy-bundle)
 - [Detectors](#detectors)
   - [The `api` model](#the-api-model)
-  - [Writing a detector](#writing-a-detector)
+  - [Writing a detector (Starlark)](#writing-a-detector-starlark)
+  - [The Groovy fallback (deprecated)](#the-groovy-fallback-deprecated)
 - [Rules](#rules)
 - [Policies](#policies)
 - [Scoring](#scoring)
@@ -42,8 +43,8 @@ For each `validate(spec)` call:
    unknown, the **first policy declared** in the manifest is used as the
    default.
 3. Each rule listed in that policy is evaluated **in declaration order**:
-   - the rule's detector closure is run against the `api` model plus the
-     rule's own `{id, scope, parameters}`;
+   - the rule's detector is run against the `api` model plus the rule's own
+     `{id, scope, parameters}`;
    - the detector returns zero or more **occurrences** (`{pointer, path,
      message}`);
    - if there is at least one occurrence, the rule's policy **disposition**
@@ -88,7 +89,8 @@ api-policy/
 ├── detectors/
 │   └── <detector-id>/
 │       ├── Detector.md          # descriptor (YAML front matter) + prose
-│       └── Detector.groovy      # the detector closure
+│       ├── Detector.star        # the detector — Starlark, the default runtime
+│       └── Detector.groovy      # the same detector in Groovy (deprecated fallback)
 ├── rules/
 │   └── <RULE-ID>.md             # rule front matter + human documentation
 └── policies/
@@ -132,8 +134,8 @@ job.
 ```yaml
 ---
 id: naming                       # must match the manifest key
-language: groovy                 # only groovy is supported
-source: Detector.groovy          # sibling file, resolved next to Detector.md
+language: groovy                 # descriptor field; the loader still prefers Detector.star
+source: Detector.groovy          # the Groovy sibling; Detector.star is found automatically
 scopes:                          # the scope values rules may request
   - property
   - path-segment
@@ -165,39 +167,43 @@ scripts can trust their inputs):
 parser:
 
 ```
-api.info            { title, description, version, contactName, contactEmail, apiId, audience }
-api.servers         [ "https://api.example.com/v1", ... ]
-api.paths[]         { path, pointer, segments[], operations[], operationDetails[] }
-  .segments[]       { name, pointer }                       # literal segments only, no {params}
-  .operationDetails[] { method, pointer, summary, requestBodyPresent,
-                        mediaTypes[], parameters[], responses[] }
-    .parameters[]   { name, in, pointer }                   # path-item + operation params
-    .responses[]    { status, description, headers[], schemaTypes[] }
-api.schemas[]       { name, pointer, type, array, maxItems, properties[] }
-  .properties[]     { name, pointer, type, array, maxItems, format, nullable,
-                      required, enumPresent, enumValues[], extensibleEnum }
+api.info      { title, description, version, contactName, contactEmail,
+                openapiVersion, apiId, audience }
+api.servers   [ "https://api.example.com/v1", ... ]
+api.security  [ { <schemeName>: [scopes...] }, ... ]  or null   # global requirement
+api.paths[]   { path, pointer, segments[], operations[], operationDetails[] }
+  .segments[]           { name, pointer }                 # literal segments only, no {params}
+  .operationDetails[]   { method, pointer, summary, requestBodyPresent, security,
+                          mediaTypes[], requestMediaTypes[], parameters[], responses[] }
+    .parameters[]       { name, in, pointer, style, explode, schemaType }
+    .responses[]        { status, description, headers[], schemaTypes[], mediaTypes[] }
+api.schemas[]  { name, pointer, type, array, maxItems, properties[] }
+  .properties[]         { name, pointer, type, array, maxItems, format, nullable,
+                          required, enumPresent, enumValues[], extensibleEnum }
 ```
 
-JSON Pointers are pre-escaped and safe to return verbatim as `pointer`.
+`operationDetails[].security` is `null` unless the operation overrides the
+global requirement. JSON Pointers are pre-escaped and safe to return verbatim
+as `pointer`.
 
-### Writing a detector
+### Writing a detector (Starlark)
 
-`Detector.groovy` must **evaluate to a closure** taking two maps and returning
-a `Collection` of occurrence maps:
+`Detector.star` must define a top-level function `detect(api, rule)` that
+returns a list of occurrence dicts:
 
-```groovy
-{ Map api, Map rule ->
-    def params = rule.parameters ?: [:]        // rule = { id, scope, parameters }
-
-    api.schemas
-       .collectMany { it.properties ?: [] }
-       .findAll { prop -> prop.name.endsWith(params.suffix) }
-       .collect { prop ->
-           [ pointer: prop.pointer,            // optional, string
-             path:    prop.name,               // optional, string (shown as location)
-             message: "Property '${prop.name}' has the prohibited suffix" ]  // required, non-blank
-       }
-}
+```python
+def detect(api, rule):
+    suffix = rule["parameters"]["suffix"]        # rule = {"id", "scope", "parameters"}
+    out = []
+    for schema in api["schemas"]:
+        for prop in schema["properties"]:
+            if prop["name"].endswith(suffix):
+                out.append({
+                    "pointer": prop["pointer"],          # optional, string
+                    "path": prop["name"],                # optional, string (shown as location)
+                    "message": "Property has the prohibited suffix " + suffix,  # required, non-blank
+                })
+    return out
 ```
 
 Rules:
@@ -205,18 +211,43 @@ Rules:
 - `message` is required and must be non-blank; `pointer` and `path` are
   optional strings.
 - Return `[]` when nothing matches — **never** return a score or a severity.
-- More than 1000 occurrences is treated as a detector error.
-- A thrown exception becomes a plugin error for that run.
+- More than 1000 occurrences is a detector error.
+- Any error (raised, step-cap exceeded, wrong return shape) becomes a plugin
+  error for that rule's run — it does not abort the other rules.
 - The script is compiled when the bundle loads; a compile failure fails the
   whole bundle.
-- **Stay inside the contract.** Operate only on the `api` and `rule` maps and
-  plain collections/strings/regex. Do not touch the filesystem, network,
-  system properties, environment, threads, or reflection — detectors have no
-  need for any of it, and the upcoming sandbox will reject scripts that try.
 
-The `manual` detector is the deliberate no-op: `{ Map api, Map rule -> [] }`.
+**Safe by construction.** `api` and `rule` are deep-immutable. The language
+has no `import`, no I/O, no reflection, no recursion, and execution is bounded
+by a hard interpreter-step cap. The only capabilities beyond core
+list/dict/string/`for`/comprehension work are these builtins:
+
+| Builtin | Purpose |
+|---|---|
+| `re_fullmatch(pattern, text)` | whole-string match (RE2 syntax, linear time) |
+| `re_search(pattern, text)` | match anywhere in `text` |
+| `tokenize(text, delims)` | split on any char in `delims`, dropping empty tokens |
+| `parse_int(text, fallback)` | base-10 int, or `fallback` if not one |
+| `url_host(url)` | host component of a URL, or `None` |
+
+If a detector needs something outside this list, that is a deliberate,
+reviewed addition to the runtime — not a workaround in the script.
+
+The `manual` detector is the deliberate no-op (`def detect(api, rule): return []`).
 It keeps a rule in the catalogue as a checklist item that cannot be inferred
 from an OpenAPI document.
+
+### The Groovy fallback (deprecated)
+
+Each detector also ships a `Detector.groovy` — a closure
+`{ Map api, Map rule -> [ [pointer:…, path:…, message:…] ] }` that is kept
+byte-for-byte equivalent to the `.star` version (`StarlarkParityTest`). It
+runs in a bare `GroovyShell` in the plugin JVM: **trusted and unsandboxed.**
+
+The engine uses it only when you opt in with `detector-language=groovy` in the
+plugin config (or `-Dspeculate.policy.detector-language=groovy`), which logs a
+warning, or when a detector has no `Detector.star` at all. This path will be
+removed once nothing depends on it.
 
 ---
 
@@ -314,8 +345,10 @@ The result reports `overallScore` (`effectiveScore`) and
 
 ### A new detector
 
-1. Create `detectors/<id>/Detector.md` (descriptor) and
-   `detectors/<id>/Detector.groovy` (closure).
+1. Create `detectors/<id>/Detector.md` (descriptor), `detectors/<id>/Detector.star`
+   (the `detect(api, rule)` function), and — until the Groovy fallback is
+   retired — a matching `detectors/<id>/Detector.groovy` that the parity test
+   holds equivalent.
 2. Add `<id>: detectors/<id>/Detector.md` to `PolicyBundle.yaml` under
    `detectors:`.
 3. Add rules that use it.
@@ -351,7 +384,8 @@ cp generic-policy-validation-plugin/target/generic-policy-validation-plugin-*.ja
 
 `GenericPolicyValidationPluginTest` / `...LoadIT` load the real bundle and will
 fail the build on any manifest, front-matter, scope, parameter, or
-Groovy-compile error.
+detector-compile error. `StarlarkParityTest` additionally fails the build if a
+`.star` detector's output diverges from its `.groovy` twin.
 
 ---
 
@@ -362,9 +396,9 @@ The bundle fails fast (`BundleValidationException`) on:
 - `formatVersion` ≠ 1; empty `rules`/`policies`/`detectors`; unknown top-level
   or front-matter fields; unsafe resource paths.
 - A manifest key that doesn't match the `id` inside the referenced file.
-- A detector: non-`groovy` language, missing/uncompilable source, an `enum`
-  parameter with no `values`, a scalar parameter that declares `values`, an
-  unsupported parameter type.
+- A detector: an uncompilable `Detector.star` (or `Detector.groovy` when
+  Groovy is forced), a missing source, an `enum` parameter with no `values`, a
+  scalar parameter that declares `values`, an unsupported parameter type.
 - A rule: a `scope` not in the detector's `scopes`, an unknown parameter, a
   wrong-typed parameter value, a missing required parameter, a body with no
   `#` heading. (Skipped only when the detector isn't bundled yet.)

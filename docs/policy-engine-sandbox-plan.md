@@ -1,7 +1,17 @@
 # Plan — Sandboxing detector scripts
 
-Status: **proposal** · Owner: policy engine · Target module:
+Status: **superseded for local bundles** · Target module:
 `generic-policy-validation-plugin`
+
+> **What actually shipped.** Rather than sandbox Groovy (Layers A + B below),
+> the detector language was replaced with Starlark, which is safe by
+> construction — see [`policy-engine-dsl-research.md`](policy-engine-dsl-research.md)
+> and [`policy-engine-dsl-poc.md`](policy-engine-dsl-poc.md). The engine now
+> runs Starlark by default; Groovy is a deprecated opt-in. Layers A + B are
+> therefore moot. **Layer C (§9, out-of-process isolation) and §10
+> (supply-chain verification) still stand** as the requirements before remote
+> bundle loading ships — a pure interpreter with step caps is a much smaller
+> RCE target than Groovy, but it is still in-process.
 
 ## 1. Problem
 

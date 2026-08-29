@@ -1,7 +1,10 @@
 # Research — a restricted detector language instead of a Groovy sandbox
 
-Status: **research** · Companion to
-[`policy-engine-sandbox-plan.md`](policy-engine-sandbox-plan.md)
+Status: **adopted** — Starlark is the default detector runtime. See
+[`policy-engine-dsl-poc.md`](policy-engine-dsl-poc.md) for the implementation
+and [`policy-engine.md`](policy-engine.md#writing-a-detector-starlark) for how
+to write one. Companion to
+[`policy-engine-sandbox-plan.md`](policy-engine-sandbox-plan.md).
 
 The sandbox plan hobbles a general-purpose language (Groovy) down to a safe
 subset with two enforcement layers plus, for remote bundles, a worker
