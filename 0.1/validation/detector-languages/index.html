@@ -1055,22 +1055,26 @@ one-expression body, no local variables or helper functions. Beyond the core
 operators it has <code>&lt; &lt;= &gt; &gt;=</code>, unary <code>-</code>, <code>true</code> / <code>false</code>, <code>/regex/</code> literals
 with <code>==~</code> / <code>=~</code>, list concatenation with <code>+</code>, <code>value[key]</code> indexing, string
 methods (<code>lower</code> <code>trim</code> <code>contains</code> <code>startsWith</code> <code>endsWith</code> <code>length</code>), sequence
-methods (<code>map</code> <code>filter</code> <code>expand</code> <code>any</code> <code>all</code> <code>find</code> <code>count</code> <code>toList</code>) and the
-functions <code>occurrence</code> <code>regexFullMatch</code> <code>regexSearch</code> <code>tokenize</code> <code>size</code>
-<code>distinct</code> <code>parseInt</code> <code>join</code> <code>urlHost</code> <code>strip</code> <code>last</code>.</p>
-<p>It still has <strong>no</strong> <code>type(x)</code> introspection, no map-key iteration, no list or
-map literals, and no cross-iteration accumulators.</p>
-<p><strong>37 of the 45 bundled detectors ship a <code>Detector.sift</code></strong>, each parity-tested
+methods (<code>map</code> <code>filter</code> <code>expand</code> <code>any</code> <code>all</code> <code>find</code> <code>count</code> <code>toList</code>), list
+literals (<code>["a", "b"]</code>), map-key iteration (<code>someMap.keys</code> / <code>.values</code>) and
+the functions <code>occurrence</code> <code>regexFullMatch</code> <code>regexSearch</code> <code>tokenize</code> <code>size</code>
+<code>distinct</code> <code>parseInt</code> <code>join</code> <code>urlHost</code> <code>strip</code> <code>last</code> <code>type</code> <code>truthy</code>.</p>
+<p>It still has <strong>no</strong> map literals and no cross-iteration accumulators.</p>
+<p><strong>42 of the 45 bundled detectors ship a <code>Detector.sift</code></strong>, each parity-tested
 against its <code>Detector.star</code> (see <code>SiftParityTest</code>): <code>api-title</code>,
 <code>authentication-error</code>, <code>bulk-operation</code>, <code>collection-capability</code>,
 <code>common-field</code>, <code>compatibility</code>, <code>date-time-name</code>, <code>document-lint</code>,
-<code>documentation-completeness</code>, <code>enum-values</code>, <code>error-response</code>, <code>extensions</code>,
-<code>header-schema</code>, <code>hostname</code>, <code>identifier</code>, <code>manual</code>, <code>media-type</code>, <code>naming</code>,
-<code>openapi-version</code>, <code>operation</code>, <code>operation-semantics</code>, <code>pagination</code>,
-<code>parameter</code>, <code>path-set</code>, <code>query-collection</code>, <code>request-body</code>, <code>resource-path</code>,
-<code>response-code</code>, <code>response-header</code>, <code>schema-composition</code>, <code>schema-name</code>,
-<code>sensitive-data</code>, <code>sensitive-search</code>, <code>server-url</code>, <code>status-class</code>,
-<code>text-style</code>, <code>versioning</code>.</p>
+<code>documentation-completeness</code>, <code>enum-values</code>, <code>error-response</code>,
+<code>example-validity</code>, <code>extensions</code>, <code>header-schema</code>, <code>hostname</code>, <code>identifier</code>,
+<code>manual</code>, <code>media-type</code>, <code>metadata</code>, <code>naming</code>, <code>openapi-version</code>, <code>operation</code>,
+<code>operation-semantics</code>, <code>pagination</code>, <code>parameter</code>, <code>path-set</code>,
+<code>proprietary-header</code>, <code>query-collection</code>, <code>request-body</code>, <code>resource-path</code>,
+<code>response-code</code>, <code>response-header</code>, <code>schema</code>, <code>schema-composition</code>,
+<code>schema-name</code>, <code>security</code>, <code>sensitive-data</code>, <code>sensitive-search</code>,
+<code>server-url</code>, <code>status-class</code>, <code>text-style</code>, <code>versioning</code>.</p>
+<p>The three still on Starlark only are <code>operation-metadata</code> and
+<code>response-example</code> (need a cross-iteration accumulator) and <code>path-count</code>
+(a Sift parser limitation with deeply nested calls inside <code>&amp;&amp;</code>).</p>
 
 
 
