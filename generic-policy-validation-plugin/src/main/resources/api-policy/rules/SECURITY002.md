@@ -33,3 +33,22 @@ security:
 
 The scheme and required scopes are policy parameters and may be overridden per
 policy.
+
+## Detection and scope
+
+The rule has `operation` scope and uses the `security` detector. For each
+operation, it evaluates operation-level security when present; otherwise it
+uses the document-level security requirement. An operation-level declaration
+replaces, rather than augments, the global declaration. At least one security
+requirement object must contain the configured scheme and every configured
+scope.
+
+## Configuration and limitations
+
+`scheme: bearerAuth` and `scopes: read` are the default rule parameters. A
+policy may override the scheme or provide comma-separated required scopes.
+Security requirement objects remain alternatives, so one object satisfying
+all scopes is sufficient. The detector does not inspect the security-scheme
+definition, token contents, issuer, runtime authentication, or authorization
+logic, and it cannot verify that a scope grants the intended business access.
+Missing or empty effective security requirements produce a candidate finding.
