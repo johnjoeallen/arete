@@ -150,8 +150,8 @@ rules:
   CASE001: rules/CASE001.md      # manifest key must equal the file's `id`
   REST002: rules/REST002.md
 policies:
-  Strict: policies/Strict.md
   "Enterprise Grade": policies/EnterpriseGrade.md
+  Zalando: policies/Zalando.md
 detectors:
   naming: detectors/naming/Detector.md
 ```
@@ -323,14 +323,14 @@ costs.
 
 ```markdown
 ---
-id: Strict                        # must match the manifest key (quote if it has spaces)
+id: Enterprise Grade              # must match the manifest key (quote if it has spaces)
 rules:
   REST001: 0.5                    # deduct 0.5 points once if this rule matches
   CASE001: 0.5
   SEC001: PROHIBITED              # any match forces the overall score to 0
 ---
 
-# Speculate Strict Policy
+# Enterprise Grade Policy
 
 Prose describing the policy's intent.
 ```
@@ -344,9 +344,9 @@ Prose describing the policy's intent.
 - The first policy in `PolicyBundle.yaml` is the fallback when a caller
   requests an unknown rule set.
 
-Bundled policies: `Strict`, `Enterprise Grade`, `Zalando`, `Zalando Extended`.
-See [`zalando-rule-catalogue.md`](zalando-rule-catalogue.md) for the
-Zalando/Zally rule mapping.
+Bundled policies: `Enterprise Grade` (the default), `Zalando`, and
+`Zalando Extended` — see [Policies](policies.md). Every rule they can reference
+is in the [Rule Catalogue](rules.md).
 
 ---
 

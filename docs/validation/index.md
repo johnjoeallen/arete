@@ -61,8 +61,8 @@ rule-set dropdown; a plugin with only the implicit default set just has one
 entry.
 
 A rule set is a **plugin-chosen name**, not an engine-specific concept. The
-Speculate Policy Engine exposes one rule set per bundled policy: **Strict**,
-**Enterprise Grade**, **Zalando**, **Zalando Extended**.
+Speculate Policy Engine exposes one rule set per bundled [policy](policies.md):
+**Enterprise Grade** (the default), **Zalando**, and **Zalando Extended**.
 
 !!! note "`getRuleSets()` returns a `List`, not a `Set`"
     The picker submits a rule set's **position** in the returned list, and the
@@ -90,7 +90,8 @@ a narrower, additional switch layered on top of the global setting.
 
 - [Speculate Policy Engine](policy-engine.md) — how the bundled plugin's
   detectors, rules, and policies work, and how to extend the bundle.
-- [Zalando Rule Catalogue](zalando-rule-catalogue.md) — mapping from Zally's
-  Zalando ruleset to Speculate policy rules.
+- [Rule Catalogue](rules.md) — every rule in the bundle and which policies use it.
+- [Policies](policies.md) — the bundled Enterprise Grade, Zalando, and Zalando
+  Extended rule sets.
 - [Writing a Plugin](writing-a-plugin.md) — implement the `SpecValidationPlugin`
   SPI.

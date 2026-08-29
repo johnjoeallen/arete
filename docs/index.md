@@ -56,8 +56,8 @@ delete it.
 
 Validation is **on-demand and pluggable**. Speculate ships the
 [Speculate Policy Engine](validation/policy-engine.md) — a policy-driven plugin
-that lints a spec against a bundle of text-defined rules and policies (Strict,
-Enterprise Grade, Zalando, Zalando Extended) — and you can drop in your own
+that lints a spec against a bundle of text-defined rules and policies
+(Enterprise Grade, Zalando, Zalando Extended) — and you can drop in your own
 validation plugins alongside it. See
 [Validation overview](validation/index.md).
 

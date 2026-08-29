@@ -1,0 +1,223 @@
+# Rule Catalogue
+
+Every rule in the bundled **Speculate Policy Engine** policy bundle, grouped
+by category. A rule is only evaluated when a [policy](policies.md) references
+it. See [the policy engine](policy-engine.md) for how rules, detectors, and
+policies fit together.
+
+There are **109 rules** across **20 categories**, built on
+**29 detectors**.
+
+!!! note "Reading the policy columns"
+    A number is the point deduction applied once if the rule matches;
+    **P** marks a `PROHIBITED` disposition (any match forces the score to 0);
+    a blank cell means that policy does not include the rule.
+
+## Authentication errors
+
+| Rule | Title | Detector | Enterprise | Zalando | Zal. Ext. |
+|---|---|---|---|---|---|
+| `ERROR008` | Secured operation lacks an authentication failure response | `authentication-error` |  |  |  |
+| `ERROR009` | Secured operation lacks an authorization failure response | `authentication-error` |  |  |  |
+| `ERROR010` | Authorization failure must not issue an authentication challenge | `authentication-error` |  |  |  |
+
+## Bulk operations
+
+| Rule | Title | Detector | Enterprise | Zalando | Zal. Ext. |
+|---|---|---|---|---|---|
+| `BULK001` | Bulk creation is not represented as POST of a collection | `bulk-operation` | 0.5 |  |  |
+| `BULK002` | Bulk request array has no maximum size | `schema` | 0.5 |  |  |
+| `BULK003` | Bulk mutation uses search criteria in PUT | `bulk-operation` | 0.5 |  |  |
+
+## Collection capabilities
+
+| Rule | Title | Detector | Enterprise | Zalando | Zal. Ext. |
+|---|---|---|---|---|---|
+| `FIELD001` | Collection lacks a field-selection capability | `collection-capability` |  |  |  |
+| `FILTER001` | Collection lacks a filter capability | `collection-capability` |  |  |  |
+| `FILTER002` | Filter parameter is not a string expression | `collection-capability` |  |  |  |
+| `SORT001` | Collection lacks a sort capability | `collection-capability` |  |  |  |
+| `SORT002` | Sort parameter is not a string expression | `collection-capability` |  |  |  |
+| `SORT003` | Multi-field sort parameter is not an array | `collection-capability` |  |  |  |
+| `SORT004` | Sort parameter does not use form serialization | `collection-capability` |  |  |  |
+
+## Compatibility
+
+| Rule | Title | Detector | Enterprise | Zalando | Zal. Ext. |
+|---|---|---|---|---|---|
+| `COMPAT001` | Existing service or interface is removed | `compatibility` | 0.5 |  |  |
+| `COMPAT002` | Existing field is removed | `compatibility` | 0.5 |  |  |
+| `COMPAT003` | Existing field is renamed | `compatibility` | 0.5 |  |  |
+| `COMPAT004` | Existing operation is removed | `compatibility` | 0.5 |  |  |
+| `COMPAT005` | Existing enum value is removed | `compatibility` | 0.5 |  |  |
+| `COMPAT006` | HTTP binding is changed | `compatibility` | 0.5 |  |  |
+
+## Content
+
+| Rule | Title | Detector | Enterprise | Zalando | Zal. Ext. |
+|---|---|---|---|---|---|
+| `CONTENT001` | Request body has no documented media type | `media-type` |  |  |  |
+| `CONTENT002` | Response has no documented media type | `media-type` |  |  |  |
+| `CONTENT003` | Wildcard media type is used | `media-type` |  |  |  |
+| `CONTENT004` | Media type is outside the configured allow-list | `media-type` |  |  |  |
+
+## Documentation
+
+| Rule | Title | Detector | Enterprise | Zalando | Zal. Ext. |
+|---|---|---|---|---|---|
+| `DOC001` | Operation summary is missing | `operation` | 0.5 |  |  |
+| `DOC002` | Operation summary does not begin with a capital letter | `text-style` | 0.5 |  |  |
+| `DOC003` | Operation summary is not sentence case | `text-style` | 0.5 |  |  |
+| `DOC004` | Operation summary ends with an unnecessary period | `text-style` | 0.5 |  |  |
+| `DOC005` | Operation summary is excessively long | `text-style` | 0.5 |  |  |
+| `DOC006` | API metadata is incomplete | `metadata` | 0.5 | 0.5 | 0.5 |
+| `DOC007` | API identifier is missing | `metadata` | 0.5 | 0.5 | 0.5 |
+| `DOC008` | API audience is missing | `metadata` | 0.5 | 0.5 | 0.5 |
+| `DOC009` | Operation summary is not action-oriented | `text-style` | 0.5 |  |  |
+
+## Error responses
+
+| Rule | Title | Detector | Enterprise | Zalando | Zal. Ext. |
+|---|---|---|---|---|---|
+| `ERROR001` | Operation lacks a success response | `error-response` |  |  |  |
+| `ERROR002` | Operation lacks a client-error response | `error-response` |  |  |  |
+| `ERROR003` | Operation lacks a server-error response | `error-response` |  |  |  |
+| `ERROR004` | Error response lacks a description | `error-response` |  |  |  |
+| `ERROR005` | Error response does not declare Problem Details | `error-response` |  |  |  |
+| `ERROR006` | Unauthorized response lacks the authentication challenge | `error-response` |  |  |  |
+| `ERROR007` | Method-not-allowed response lacks Allow | `error-response` |  |  |  |
+
+## HTTP
+
+| Rule | Title | Detector | Enterprise | Zalando | Zal. Ext. |
+|---|---|---|---|---|---|
+| `HTTP001` | GET operation appears to mutate state | `operation-semantics` | 0.5 |  |  |
+| `HTTP002` | POST is used for complete resource replacement | `operation-semantics` | 0.5 |  |  |
+| `HTTP003` | PUT appears to perform a partial modification | `operation-semantics` |  |  |  |
+| `HTTP004` | DELETE operation has a request body | `operation` | 0.5 |  |  |
+| `HTTP005` | GET operation has a request body | `operation` | 0.5 |  |  |
+| `HTTP006` | HTTP method and resource semantics are inconsistent | `operation-semantics` | 0.5 |  |  |
+| `HTTP008` | Supported operation semantics are unclear | `operation-semantics` | 0.5 |  |  |
+
+## HTTP status
+
+| Rule | Title | Detector | Enterprise | Zalando | Zal. Ext. |
+|---|---|---|---|---|---|
+| `STATUS001` | Creation operation lacks an appropriate success status | `response-code` | 0.5 | 0.5 | 0.5 |
+| `STATUS002` | Created resource response lacks location information | `response-header` | 0.5 | 0.5 | 0.5 |
+| `STATUS003` | Authentication failure uses an inappropriate status | `response-code` | 0.5 | 0.5 | 0.5 |
+| `STATUS004` | Resource retrieval lacks a not-found response | `response-code` | 0.5 | 0.5 | 0.5 |
+| `STATUS005` | Status code conflicts with operation semantics | `response-code` | 0.5 | 0.5 | 0.5 |
+| `STATUS007` | Rate-limit response lacks required headers | `response-header` | 0.5 | 0.5 | 0.5 |
+
+## Identifiers
+
+| Rule | Title | Detector | Enterprise | Zalando | Zal. Ext. |
+|---|---|---|---|---|---|
+| `SEC006` | Identifier property is not a string | `identifier` |  |  |  |
+| `SEC007` | Identifier property lacks the required format | `identifier` |  |  |  |
+
+## JSON
+
+| Rule | Title | Detector | Enterprise | Zalando | Zal. Ext. |
+|---|---|---|---|---|---|
+| `JSON003` | Property name contains unsupported characters | `naming` | 0.5 | 0.5 | 0.5 |
+| `JSON004` | Array property has a singular name | `naming` | 0.5 | 0.5 | 0.5 |
+| `JSON006` | Optional property explicitly models null without defined semantics | `schema` | 0.5 |  |  |
+| `JSON007` | Closed string enum is used | `schema` | 0.5 |  |  |
+| `JSON009` | Numeric enum is used | `schema` | 0.5 | 0.5 | 0.5 |
+| `JSON010` | Common field has an inconsistent type | `common-field` | 0.5 | 0.5 | 0.5 |
+| `JSON011` | Date-time property name lacks the configured suffix | `date-time-name` | 0.5 | 0.5 | 0.5 |
+| `JSON012` | Numeric property has no format | `schema` | 0.5 | 0.5 | 0.5 |
+| `JSON013` | Enum values do not match the property type | `schema` | 0.5 | 0.5 | 0.5 |
+| `JSON014` | Closed enum should be extensible | `schema` | 0.5 | 0.5 | 0.5 |
+| `JSON015` | Enum values are not UPPER_SNAKE_CASE | `schema` | 0.5 | 0.5 | 0.5 |
+| `JSON016` | Successful response is not a JSON object | `response-code` | 0.5 | 0.5 | 0.5 |
+
+## Naming
+
+| Rule | Title | Detector | Enterprise | Zalando | Zal. Ext. |
+|---|---|---|---|---|---|
+| `CASE001` | JSON property is not camelCase | `naming` | 0.5 | 0.5 | 0.5 |
+| `CASE002` | Path parameter is not snake_case | `naming` | 0.5 |  |  |
+| `CASE003` | Query parameter is not snake_case | `naming` | 0.5 | 0.5 | 0.5 |
+| `CASE004` | Header does not use conventional hyphenated naming | `naming` | 0.5 | 0.5 | 0.5 |
+| `CASE005` | Path segment is not kebab-case | `naming` | 0.5 | 0.5 | 0.5 |
+
+## Pagination
+
+| Rule | Title | Detector | Enterprise | Zalando | Zal. Ext. |
+|---|---|---|---|---|---|
+| `PAGE001` | Collection lacks a pagination control | `pagination` |  |  |  |
+| `PAGE002` | Page or offset parameter is not an integer | `pagination` |  |  |  |
+| `PAGE003` | Page-size parameter is not an integer | `pagination` |  |  |  |
+| `PAGE004` | Page-size parameter lacks a safe maximum | `pagination` |  |  |  |
+| `PAGE005` | Paginated response lacks navigation links | `pagination` |  |  |  |
+| `PAGE006` | Cursor parameter is not a string | `pagination` |  |  |  |
+
+## Resource design
+
+| Rule | Title | Detector | Enterprise | Zalando | Zal. Ext. |
+|---|---|---|---|---|---|
+| `REST001` | Resource path contains an operation verb | `resource-path` | 0.5 |  |  |
+| `REST002` | Collection resource uses a singular noun | `naming` | 0.5 | 0.5 | 0.5 |
+| `REST003` | API uses RPC-style resource design | `resource-path` | 0.5 | 0.5 | 0.5 |
+| `REST004` | Custom action resource is used | `resource-path` | 0.5 | 0.5 | 0.5 |
+| `REST005` | Schema name ends in Request | `naming` | 0.5 |  |  |
+| `REST006` | Schema name ends in Response | `naming` | 0.5 |  |  |
+
+## Security
+
+| Rule | Title | Detector | Enterprise | Zalando | Zal. Ext. |
+|---|---|---|---|---|---|
+| `SECURITY001` | Operation does not require the configured security scheme | `security` | 0.5 | 0.5 | 0.5 |
+| `SECURITY002` | Operation security requirement lacks the configured scopes | `security` | 0.5 | 0.5 | 0.5 |
+
+## Sensitive data
+
+| Rule | Title | Detector | Enterprise | Zalando | Zal. Ext. |
+|---|---|---|---|---|---|
+| `SEC001` | Sensitive schema property is exposed by name | `sensitive-data` |  |  |  |
+| `SEC002` | Sensitive data is accepted in a query parameter | `sensitive-data` |  |  |  |
+| `SEC003` | Sensitive data is embedded in a path parameter | `sensitive-data` |  |  |  |
+| `SEC004` | Search query input may carry sensitive data | `sensitive-search` |  |  |  |
+| `SEC005` | Operation permits searching sensitive fields | `sensitive-search` |  |  |  |
+| `SEC008` | Sensitive data is carried in a custom header | `sensitive-data` |  |  |  |
+
+## Standards
+
+| Rule | Title | Detector | Enterprise | Zalando | Zal. Ext. |
+|---|---|---|---|---|---|
+| `STANDARD001` | Server hostname is not functionally named | `hostname` | 0.5 | 0.5 | 0.5 |
+| `STANDARD002` | Resource path has a trailing slash | `resource-path` | 0.5 | 0.5 | 0.5 |
+| `STANDARD003` | Response contains a Link header | `response-header` | 0.5 | 0.5 | 0.5 |
+| `STANDARD004` | API has too many top-level resource types | `path-count` | 0.5 | 0.5 | 0.5 |
+| `STANDARD005` | Resource path is too deeply nested | `path-count` | 0.5 | 0.5 | 0.5 |
+| `STANDARD006` | Nested resource should be exposed at the root | `path-count` | 0.5 | 0.5 | 0.5 |
+| `STANDARD007` | Resource identifier is embedded in a path segment | `resource-path` | 0.5 | 0.5 | 0.5 |
+| `STANDARD008` | Proprietary header is not allow-listed | `proprietary-header` | 0.5 | 0.5 | 0.5 |
+| `STANDARD009` | Collection query parameter uses the wrong serialization | `query-collection` | 0.5 | 0.5 | 0.5 |
+| `STANDARD010` | OpenAPI version is unsupported or missing | `openapi-version` | 0.5 | 0.5 | 0.5 |
+
+## Status codes
+
+| Rule | Title | Detector | Enterprise | Zalando | Zal. Ext. |
+|---|---|---|---|---|---|
+| `STATUS006` | Error response lacks Problem Details | `response-code` | 0.5 | 0.5 | 0.5 |
+
+## Update semantics
+
+| Rule | Title | Detector | Enterprise | Zalando | Zal. Ext. |
+|---|---|---|---|---|---|
+| `UPDATE001` | PUT appears to perform a partial update | `operation-semantics` | 0.5 |  |  |
+| `UPDATE002` | PATCH is used | `operation` | 0.5 |  |  |
+| `UPDATE003` | Update could be represented as a sub-resource | `manual` | 0.5 |  |  |
+
+## Versioning
+
+| Rule | Title | Detector | Enterprise | Zalando | Zal. Ext. |
+|---|---|---|---|---|---|
+| `VERSION001` | Version appears in the URI | `versioning` | 0.5 | 0.5 | 0.5 |
+| `VERSION002` | Version appears in a header | `versioning` | 0.5 |  |  |
+| `VERSION003` | Version appears in the media type | `versioning` | 0.5 |  |  |
+| `VERSION004` | Interface is unversioned | `versioning` | 0.5 |  |  |

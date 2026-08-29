@@ -1,0 +1,219 @@
+# Policies
+
+A **policy** is the deployable rule set: the list of active [rules](rules.md)
+and what each one costs. The Speculate Policy Engine exposes one rule set per
+policy in the bundle; pick one in the validation picker. The first policy
+listed here is the default when an unknown rule set is requested.
+
+```
+qualityScore   = max(0, 100 − Σ deductions for matched rules)
+effectiveScore = 0 if any PROHIBITED rule matched, else qualityScore
+```
+
+## Enterprise Grade
+
+The default policy: it enables every generally-applicable bundled rule, with a few detector parameters calibrated for a typical enterprise API (allow-listed proprietary headers, expected OAuth2 scopes, standard rate-limit headers).
+
+- **73** rules active
+
+Parameter overrides:
+
+| Rule | Overrides |
+|---|---|
+| `SECURITY002` | `scopes` = `read,write` |
+| `STANDARD008` | `allowed` = `X-Request-Id,X-Correlation-Id,X-Trace-Id` |
+| `STATUS007` | `headers` = `RateLimit-Limit,RateLimit-Remaining` |
+
+??? example "All 73 rules in Enterprise Grade"
+
+    | Rule | Disposition | Title |
+    |---|---|---|
+    | `REST001` | −0.5 | Resource path contains an operation verb |
+    | `DOC001` | −0.5 | Operation summary is missing |
+    | `DOC002` | −0.5 | Operation summary does not begin with a capital letter |
+    | `DOC003` | −0.5 | Operation summary is not sentence case |
+    | `DOC004` | −0.5 | Operation summary ends with an unnecessary period |
+    | `DOC005` | −0.5 | Operation summary is excessively long |
+    | `DOC006` | −0.5 | API metadata is incomplete |
+    | `DOC007` | −0.5 | API identifier is missing |
+    | `DOC008` | −0.5 | API audience is missing |
+    | `DOC009` | −0.5 | Operation summary is not action-oriented |
+    | `STANDARD001` | −0.5 | Server hostname is not functionally named |
+    | `STANDARD002` | −0.5 | Resource path has a trailing slash |
+    | `STANDARD003` | −0.5 | Response contains a Link header |
+    | `STANDARD004` | −0.5 | API has too many top-level resource types |
+    | `STANDARD005` | −0.5 | Resource path is too deeply nested |
+    | `STANDARD006` | −0.5 | Nested resource should be exposed at the root |
+    | `STANDARD007` | −0.5 | Resource identifier is embedded in a path segment |
+    | `STANDARD008` | −0.5 | Proprietary header is not allow-listed |
+    | `STANDARD009` | −0.5 | Collection query parameter uses the wrong serialization |
+    | `SECURITY001` | −0.5 | Operation does not require the configured security scheme |
+    | `SECURITY002` | −0.5 | Operation security requirement lacks the configured scopes |
+    | `CASE001` | −0.5 | JSON property is not camelCase |
+    | `CASE002` | −0.5 | Path parameter is not snake_case |
+    | `CASE003` | −0.5 | Query parameter is not snake_case |
+    | `CASE004` | −0.5 | Header does not use conventional hyphenated naming |
+    | `CASE005` | −0.5 | Path segment is not kebab-case |
+    | `REST002` | −0.5 | Collection resource uses a singular noun |
+    | `REST003` | −0.5 | API uses RPC-style resource design |
+    | `REST004` | −0.5 | Custom action resource is used |
+    | `REST005` | −0.5 | Schema name ends in Request |
+    | `REST006` | −0.5 | Schema name ends in Response |
+    | `JSON003` | −0.5 | Property name contains unsupported characters |
+    | `JSON004` | −0.5 | Array property has a singular name |
+    | `JSON006` | −0.5 | Optional property explicitly models null without defined semantics |
+    | `JSON007` | −0.5 | Closed string enum is used |
+    | `JSON009` | −0.5 | Numeric enum is used |
+    | `JSON010` | −0.5 | Common field has an inconsistent type |
+    | `JSON011` | −0.5 | Date-time property name lacks the configured suffix |
+    | `JSON012` | −0.5 | Numeric property has no format |
+    | `JSON013` | −0.5 | Enum values do not match the property type |
+    | `JSON014` | −0.5 | Closed enum should be extensible |
+    | `JSON015` | −0.5 | Enum values are not UPPER_SNAKE_CASE |
+    | `JSON016` | −0.5 | Successful response is not a JSON object |
+    | `HTTP004` | −0.5 | DELETE operation has a request body |
+    | `HTTP005` | −0.5 | GET operation has a request body |
+    | `HTTP001` | −0.5 | GET operation appears to mutate state |
+    | `HTTP002` | −0.5 | POST is used for complete resource replacement |
+    | `HTTP006` | −0.5 | HTTP method and resource semantics are inconsistent |
+    | `HTTP008` | −0.5 | Supported operation semantics are unclear |
+    | `UPDATE002` | −0.5 | PATCH is used |
+    | `UPDATE001` | −0.5 | PUT appears to perform a partial update |
+    | `UPDATE003` | −0.5 | Update could be represented as a sub-resource |
+    | `BULK001` | −0.5 | Bulk creation is not represented as POST of a collection |
+    | `BULK002` | −0.5 | Bulk request array has no maximum size |
+    | `BULK003` | −0.5 | Bulk mutation uses search criteria in PUT |
+    | `VERSION001` | −0.5 | Version appears in the URI |
+    | `VERSION002` | −0.5 | Version appears in a header |
+    | `VERSION003` | −0.5 | Version appears in the media type |
+    | `VERSION004` | −0.5 | Interface is unversioned |
+    | `COMPAT001` | −0.5 | Existing service or interface is removed |
+    | `COMPAT002` | −0.5 | Existing field is removed |
+    | `COMPAT003` | −0.5 | Existing field is renamed |
+    | `COMPAT004` | −0.5 | Existing operation is removed |
+    | `COMPAT005` | −0.5 | Existing enum value is removed |
+    | `COMPAT006` | −0.5 | HTTP binding is changed |
+    | `STATUS001` | −0.5 | Creation operation lacks an appropriate success status |
+    | `STATUS002` | −0.5 | Created resource response lacks location information |
+    | `STATUS003` | −0.5 | Authentication failure uses an inappropriate status |
+    | `STATUS004` | −0.5 | Resource retrieval lacks a not-found response |
+    | `STATUS005` | −0.5 | Status code conflicts with operation semantics |
+    | `STATUS006` | −0.5 | Error response lacks Problem Details |
+    | `STATUS007` | −0.5 | Rate-limit response lacks required headers |
+    | `STANDARD010` | −0.5 | OpenAPI version is unsupported or missing |
+
+## Zalando
+
+Contains only implemented rules mapped to the supplied Zalando rule catalogue. No generic-only or Enterprise Grade-specific rule is enabled here.
+
+- **40** rules active
+
+Parameter overrides:
+
+| Rule | Overrides |
+|---|---|
+| `SECURITY002` | `scopes` = `read` |
+| `STANDARD008` | `allowed` = `X-Request-Id` |
+
+??? example "All 40 rules in Zalando"
+
+    | Rule | Disposition | Title |
+    |---|---|---|
+    | `DOC006` | −0.5 | API metadata is incomplete |
+    | `DOC007` | −0.5 | API identifier is missing |
+    | `DOC008` | −0.5 | API audience is missing |
+    | `CASE001` | −0.5 | JSON property is not camelCase |
+    | `CASE003` | −0.5 | Query parameter is not snake_case |
+    | `CASE004` | −0.5 | Header does not use conventional hyphenated naming |
+    | `CASE005` | −0.5 | Path segment is not kebab-case |
+    | `JSON003` | −0.5 | Property name contains unsupported characters |
+    | `JSON004` | −0.5 | Array property has a singular name |
+    | `JSON009` | −0.5 | Numeric enum is used |
+    | `JSON010` | −0.5 | Common field has an inconsistent type |
+    | `JSON011` | −0.5 | Date-time property name lacks the configured suffix |
+    | `JSON012` | −0.5 | Numeric property has no format |
+    | `JSON013` | −0.5 | Enum values do not match the property type |
+    | `JSON014` | −0.5 | Closed enum should be extensible |
+    | `JSON015` | −0.5 | Enum values are not UPPER_SNAKE_CASE |
+    | `JSON016` | −0.5 | Successful response is not a JSON object |
+    | `REST002` | −0.5 | Collection resource uses a singular noun |
+    | `REST003` | −0.5 | API uses RPC-style resource design |
+    | `REST004` | −0.5 | Custom action resource is used |
+    | `VERSION001` | −0.5 | Version appears in the URI |
+    | `STATUS001` | −0.5 | Creation operation lacks an appropriate success status |
+    | `STATUS002` | −0.5 | Created resource response lacks location information |
+    | `STATUS003` | −0.5 | Authentication failure uses an inappropriate status |
+    | `STATUS004` | −0.5 | Resource retrieval lacks a not-found response |
+    | `STATUS005` | −0.5 | Status code conflicts with operation semantics |
+    | `STATUS006` | −0.5 | Error response lacks Problem Details |
+    | `STANDARD001` | −0.5 | Server hostname is not functionally named |
+    | `STANDARD002` | −0.5 | Resource path has a trailing slash |
+    | `STANDARD003` | −0.5 | Response contains a Link header |
+    | `STANDARD004` | −0.5 | API has too many top-level resource types |
+    | `STANDARD005` | −0.5 | Resource path is too deeply nested |
+    | `STANDARD006` | −0.5 | Nested resource should be exposed at the root |
+    | `STANDARD007` | −0.5 | Resource identifier is embedded in a path segment |
+    | `STANDARD008` | −0.5 | Proprietary header is not allow-listed |
+    | `STANDARD009` | −0.5 | Collection query parameter uses the wrong serialization |
+    | `SECURITY001` | −0.5 | Operation does not require the configured security scheme |
+    | `SECURITY002` | −0.5 | Operation security requirement lacks the configured scopes |
+    | `STATUS007` | −0.5 | Rate-limit response lacks required headers |
+    | `STANDARD010` | −0.5 | OpenAPI version is unsupported or missing |
+
+## Zalando Extended
+
+Contains only implemented Zalando-catalogue rules. It will gain the ten Zally-extension-only rules when those rule definitions and detectors exist.
+
+- **40** rules active
+
+Parameter overrides:
+
+| Rule | Overrides |
+|---|---|
+| `SECURITY002` | `scopes` = `read` |
+| `STANDARD008` | `allowed` = `X-Request-Id,X-Correlation-Id` |
+
+??? example "All 40 rules in Zalando Extended"
+
+    | Rule | Disposition | Title |
+    |---|---|---|
+    | `DOC006` | −0.5 | API metadata is incomplete |
+    | `DOC007` | −0.5 | API identifier is missing |
+    | `DOC008` | −0.5 | API audience is missing |
+    | `CASE001` | −0.5 | JSON property is not camelCase |
+    | `CASE003` | −0.5 | Query parameter is not snake_case |
+    | `CASE004` | −0.5 | Header does not use conventional hyphenated naming |
+    | `CASE005` | −0.5 | Path segment is not kebab-case |
+    | `JSON003` | −0.5 | Property name contains unsupported characters |
+    | `JSON004` | −0.5 | Array property has a singular name |
+    | `JSON009` | −0.5 | Numeric enum is used |
+    | `JSON010` | −0.5 | Common field has an inconsistent type |
+    | `JSON011` | −0.5 | Date-time property name lacks the configured suffix |
+    | `JSON012` | −0.5 | Numeric property has no format |
+    | `JSON013` | −0.5 | Enum values do not match the property type |
+    | `JSON014` | −0.5 | Closed enum should be extensible |
+    | `JSON015` | −0.5 | Enum values are not UPPER_SNAKE_CASE |
+    | `JSON016` | −0.5 | Successful response is not a JSON object |
+    | `REST002` | −0.5 | Collection resource uses a singular noun |
+    | `REST003` | −0.5 | API uses RPC-style resource design |
+    | `REST004` | −0.5 | Custom action resource is used |
+    | `VERSION001` | −0.5 | Version appears in the URI |
+    | `STATUS001` | −0.5 | Creation operation lacks an appropriate success status |
+    | `STATUS002` | −0.5 | Created resource response lacks location information |
+    | `STATUS003` | −0.5 | Authentication failure uses an inappropriate status |
+    | `STATUS004` | −0.5 | Resource retrieval lacks a not-found response |
+    | `STATUS005` | −0.5 | Status code conflicts with operation semantics |
+    | `STATUS006` | −0.5 | Error response lacks Problem Details |
+    | `STANDARD001` | −0.5 | Server hostname is not functionally named |
+    | `STANDARD002` | −0.5 | Resource path has a trailing slash |
+    | `STANDARD003` | −0.5 | Response contains a Link header |
+    | `STANDARD004` | −0.5 | API has too many top-level resource types |
+    | `STANDARD005` | −0.5 | Resource path is too deeply nested |
+    | `STANDARD006` | −0.5 | Nested resource should be exposed at the root |
+    | `STANDARD007` | −0.5 | Resource identifier is embedded in a path segment |
+    | `STANDARD008` | −0.5 | Proprietary header is not allow-listed |
+    | `STANDARD009` | −0.5 | Collection query parameter uses the wrong serialization |
+    | `SECURITY001` | −0.5 | Operation does not require the configured security scheme |
+    | `SECURITY002` | −0.5 | Operation security requirement lacks the configured scopes |
+    | `STATUS007` | −0.5 | Rate-limit response lacks required headers |
+    | `STANDARD010` | −0.5 | OpenAPI version is unsupported or missing |

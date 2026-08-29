@@ -67,6 +67,7 @@ nav:
   - Validation:
       - Overview: validation/index.md
       - Speculate Policy Engine: validation/policy-engine.md
-      - Zalando Rule Catalogue: validation/zalando-rule-catalogue.md
+      - Rule Catalogue: validation/rules.md
+      - Policies: validation/policies.md
       - Writing a Plugin: validation/writing-a-plugin.md
   - Releasing: releasing.md
