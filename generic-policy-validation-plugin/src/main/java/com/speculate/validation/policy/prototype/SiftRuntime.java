@@ -42,6 +42,20 @@ public final class SiftRuntime {
         return null;
     }
 
+    /** {@code value[key]}: string keys index maps, integer keys index lists (negative counts from the end). */
+    private static Object index(Object value, Object key) {
+        if (value == null) return null;
+        if (value instanceof Map<?, ?> map) return map.get(String.valueOf(key));
+        if (value instanceof Iterable<?> && key instanceof Number number) {
+            List<Object> list = iterableOf(value);
+            int position = number.intValue();
+            if (position < 0) position += list.size();
+            return position >= 0 && position < list.size() ? list.get(position) : null;
+        }
+        if (value instanceof String text) return member(text, String.valueOf(key));
+        return null;
+    }
+
     private static Object call(Object receiver, String name, List<Object> args) {
         if (receiver instanceof String text) return switch (name) {
             case "lower" -> text.toLowerCase();
@@ -198,7 +212,17 @@ public final class SiftRuntime {
             return env -> env.get(name);
         }
         private Expr postfix(Expr value) {
-            while (accept(".")) { String name = expectId(); if (accept("(")) { List<Expr> args = arguments(); Expr receiver = value; value = env -> call(receiver.eval(env), name, args.stream().map(a -> a.eval(env)).toList()); } else if (token.text().equals("{")) { ParsedClosure closure = closure(); Expr receiver = value; value = env -> call(receiver.eval(env), name, List.of((Closure) argument -> closure.body().eval(with(env, closure.parameter(), argument)))); } else { Expr receiver = value; value = env -> member(receiver.eval(env), name); } }
+            while (token.text().equals(".") || token.text().equals("[")) {
+                if (accept(".")) {
+                    String name = expectId();
+                    if (accept("(")) { List<Expr> args = arguments(); Expr receiver = value; value = env -> call(receiver.eval(env), name, args.stream().map(a -> a.eval(env)).toList()); }
+                    else if (token.text().equals("{")) { ParsedClosure closure = closure(); Expr receiver = value; value = env -> call(receiver.eval(env), name, List.of((Closure) argument -> closure.body().eval(with(env, closure.parameter(), argument)))); }
+                    else { Expr receiver = value; value = env -> member(receiver.eval(env), name); }
+                } else {
+                    expect("["); Expr key = expression(); expect("]"); Expr receiver = value;
+                    value = env -> index(receiver.eval(env), key.eval(env));
+                }
+            }
             return value;
         }
         private ParsedClosure closure() { expect("{"); String parameter = expectId(); expect("->"); Expr body = expression(); expect("}"); return new ParsedClosure(parameter, body); }

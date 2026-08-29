@@ -46,6 +46,21 @@ class SiftParityTest {
                       content:
                         text/xml: { schema: { type: string } }
                         '*/*': { schema: { type: string } }
+              /reports:
+                get:
+                  parameters:
+                    - { name: search, in: query, schema: { type: string } }
+                    - { name: fields, in: query, schema: { type: object } }
+                  responses:
+                    '200': { description: OK }
+              /bulk-create/orders/{batchId}:
+                post:
+                  summary: Bulk create orders
+                  responses: { '200': { description: OK } }
+              /catalog/searchByName:
+                put:
+                  summary: Search catalog by criteria
+                  responses: { '200': { description: OK } }
               /things/{thingKey}:
                 get:
                   parameters:
@@ -174,6 +189,52 @@ class SiftParityTest {
 
     @Test void mediaTypeRequestAbsent() {
         assertParity("media-type", "media-type", Map.of("location", "request", "match", "absent"), true);
+    }
+
+    @Test void operationSummaryAbsent() {
+        assertParity("operation", "operation", Map.of("summary", "absent"), true);
+    }
+
+    @Test void identifierNotString() {
+        assertParity("identifier", "property",
+                Map.of("name-pattern", "(^|[-_])(id|identifier|uuid)([-_]|$)", "check", "string"), true);
+    }
+
+    @Test void identifierMissingFormat() {
+        assertParity("identifier", "property",
+                Map.of("name-pattern", "(^|[-_])(id|identifier|uuid)([-_]|$)", "check", "format", "format", "uuid"), true);
+    }
+
+    @Test void bulkCreate() {
+        assertParity("bulk-operation", "operation",
+                Map.of("operation-type", "create", "expected-method", "POST", "payload", "collection"), true);
+    }
+
+    @Test void bulkSearchCriteria() {
+        assertParity("bulk-operation", "operation",
+                Map.of("method", "PUT", "target-selection", "search-criteria"), true);
+    }
+
+    @Test void sensitiveSearchQueryParam() {
+        assertParity("sensitive-search", "query-parameter",
+                Map.of("search-pattern", "(^|[-_])(q|query|search|term|text)([-_]|$)",
+                        "sensitive-pattern", SENSITIVE_PATTERN), true);
+    }
+
+    @Test void sensitiveSearchOperation() {
+        assertParity("sensitive-search", "operation",
+                Map.of("search-pattern", "(^|[-_])(q|query|search|term|text)([-_]|$)",
+                        "sensitive-pattern", SENSITIVE_PATTERN), false);
+    }
+
+    @Test void collectionCapabilityMissing() {
+        assertParity("collection-capability", "operation",
+                Map.of("name-pattern", "(^|[-_])(sort|order)([-_]|$)", "check", "present"), true);
+    }
+
+    @Test void collectionCapabilityRepresentation() {
+        assertParity("collection-capability", "query-parameter",
+                Map.of("name-pattern", "(^|[-_])(filter)([-_]|$)", "check", "string"), false);
     }
 
     // --- harness ---------------------------------------------------------
