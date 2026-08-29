@@ -44,3 +44,21 @@ parameters:
 
 The expected style and explode value are policy parameters and may be
 overridden per policy.
+
+## Detection and scope
+
+The rule has `query-parameter` scope and uses the `query-collection` detector.
+It examines only query parameters whose normalised schema type is `array`.
+When `style` is omitted, the detector applies the OpenAPI default `form`; when
+`explode` is omitted, it defaults to true for form style and false otherwise.
+An array parameter is reported when either effective value differs from the
+configured policy value.
+
+## Configuration and limitations
+
+The default policy requires `style: form` and `explode: true`, but both values
+may be overridden per policy. The detector does not inspect scalar parameters,
+actual URL encoding, delimiters in runtime requests, request bodies, or server
+parsers. Referenced parameters count only after host normalisation. The rule
+checks serialization declarations, not whether a client actually sends the
+declared representation.

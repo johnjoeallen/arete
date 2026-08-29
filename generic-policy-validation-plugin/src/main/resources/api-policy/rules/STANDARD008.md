@@ -41,3 +41,21 @@ paths:
           name: X-Request-Id
           schema: { type: string }
 ```
+
+## Detection and scope
+
+The rule has `header` scope and uses the `proprietary-header` detector. It
+checks request header parameters and response header declarations. A header is
+considered proprietary when its case-insensitive name is not in the detector’s
+standard-header list and begins with `X-` or `X_`. Such a header is reported
+unless its lowercased name occurs in the comma-separated `allowed` list.
+
+## Configuration and limitations
+
+`allowed` defaults to `X-Request-Id,X-Correlation-Id` and can be overridden per
+policy. Matching is case-insensitive and applies separately to request and
+response declarations. The detector does not inspect ordinary non-`X-`
+extension names, runtime traffic, header values, registration status, or
+descriptions. Referenced operations and responses count only after host
+normalisation. Findings are allow-list policy candidates, not proof that a
+header is unsafe.
