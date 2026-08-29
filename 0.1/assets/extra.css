@@ -1,0 +1,11 @@
+/* Speculate logo to the left of every page's top-level heading. */
+.md-typeset h1::before {
+  content: "";
+  display: inline-block;
+  width: 1.4em;
+  height: 1.4em;
+  margin-right: 0.5em;
+  vertical-align: -0.35em;
+  background: url("logo.png") no-repeat center center;
+  background-size: contain;
+}
