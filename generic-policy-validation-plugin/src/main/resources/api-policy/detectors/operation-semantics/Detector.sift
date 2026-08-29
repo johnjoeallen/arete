@@ -1,4 +1,4 @@
-detector(api, rule) {
+sift(api, rule) {
     return api.paths
         .expand { path -> path.operationDetails
             .filter { operation ->

@@ -11,8 +11,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 
-/** Small experimental interpreter for the Java-shaped fluent policy syntax. */
-public final class FluentPolicyRuntime {
+/** Interpreter for Sift, the Java-shaped fluent detector language (Detector.sift). */
+public final class SiftRuntime {
     public List<Occurrence> execute(String source, Map<String, Object> api, Map<String, Object> rule) {
         return new Parser(source).parse().apply(Map.of("api", api, "rule", rule));
     }
@@ -123,7 +123,7 @@ public final class FluentPolicyRuntime {
     private static final class Parser {
         private final Lexer lexer; private Token token;
         Parser(String source) { lexer = new Lexer(source); token = lexer.next(); }
-        Program parse() { expect("detector"); expect("("); String api = expectId(); expect(","); String rule = expectId(); expect(")"); expect("{"); expect("return"); Expr expression = expression(); expect(";"); expect("}"); expectKind(Kind.EOF); return new Program(expression); }
+        Program parse() { expect("sift"); expect("("); String api = expectId(); expect(","); String rule = expectId(); expect(")"); expect("{"); expect("return"); Expr expression = expression(); expect(";"); expect("}"); expectKind(Kind.EOF); return new Program(expression); }
         private Expr expression() { Expr condition = or(); if (accept("?")) { Expr whenTrue = expression(); expect(":"); Expr whenFalse = expression(); return env -> truthy(condition.eval(env)) ? whenTrue.eval(env) : whenFalse.eval(env); } return condition; }
         private Expr or() { Expr left = and(); while (accept("||")) { Expr right = and(); left = binary(left, right, "||"); } return left; }
         private Expr and() { Expr left = equality(); while (accept("&&")) { Expr right = equality(); left = binary(left, right, "&&"); } return left; }

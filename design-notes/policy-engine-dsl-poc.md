@@ -29,7 +29,7 @@ of Bazel's `net.starlark.java`, spike-only) and `com.google.re2j:re2j:1.7`.
   untouched.
 - **Safe by construction** — rejected as language properties, not filtered
   calls: `load(...)`, `open("/etc/passwd")`, reflection/introspection,
-  `1 // 0` (→ `DetectorScriptException`), `for i in range(1e8)` (step cap).
+  `1 // 0` (→ `DetectorException`), `for i in range(1e8)` (step cap).
   Recursion disallowed; the input model is deep-immutable.
 
 ## Port notes (Groovy → Starlark)

@@ -169,7 +169,7 @@ class GenericPolicyValidationPluginTest {
     }
 
     @Test
-    void rejectsABrokenStarlarkDetectorScriptWhileLoadingTheBundle() {
+    void rejectsABrokenStarlarkDetectorSourceWhileLoadingTheBundle() {
         Map<String, String> resources = bundledResources();
         resources.put("detectors/resource-path/Detector.star", "def detect(api, rule)\n    this is not valid Starlark");
 

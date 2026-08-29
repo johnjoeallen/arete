@@ -11,13 +11,13 @@ import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class FluentPolicyRuntimeTest {
-    private final FluentPolicyRuntime runtime = new FluentPolicyRuntime();
+class SiftRuntimeTest {
+    private final SiftRuntime runtime = new SiftRuntime();
 
     @Test
     void nestedExpandFilterAndMapMatchOperationSemantics() {
         String source = """
-                detector(api, rule) {
+                sift(api, rule) {
                     return api.paths
                         .expand { path -> path.operationDetails
                             .filter { operation -> operation.method == rule.parameters.method
@@ -40,8 +40,8 @@ class FluentPolicyRuntimeTest {
     }
 
     @Test
-    void operationSemanticsDetectorScriptMatchesAllConfiguredModes() {
-        String source = readResource("api-policy/detectors/operation-semantics/Detector.ds");
+    void operationSemanticsSiftScriptMatchesAllConfiguredModes() {
+        String source = readResource("api-policy/detectors/operation-semantics/Detector.sift");
         Map<String, Object> api = api("""
                 openapi: 3.0.0
                 info: { title: Test, version: 1.0.0 }
@@ -68,7 +68,7 @@ class FluentPolicyRuntimeTest {
     @Test
     void nestedExpandAndMapMatchResourcePaths() {
         String source = """
-                detector(api, rule) {
+                sift(api, rule) {
                     return api.paths
                         .filter { path -> regexFullMatch("(?i).*/actions(?:/[^/]+)?", path.path) }
                         .expand { path -> path.operations
@@ -91,7 +91,7 @@ class FluentPolicyRuntimeTest {
     @Test
     void filterAndMapMatchUriVersioning() {
         String source = """
-                detector(api, rule) {
+                sift(api, rule) {
                     return api.paths
                         .filter { path -> regexFullMatch(".*/(v[0-9]+|version[0-9]+)(/.*)?", path.path) }
                         .map { path -> occurrence(path.pointer, path.path, "Interface version is exposed through uri") };
@@ -115,7 +115,7 @@ class FluentPolicyRuntimeTest {
     }
 
     private static String readResource(String path) {
-        try (InputStream stream = FluentPolicyRuntimeTest.class.getClassLoader().getResourceAsStream(path)) {
+        try (InputStream stream = SiftRuntimeTest.class.getClassLoader().getResourceAsStream(path)) {
             if (stream == null) throw new IllegalArgumentException("missing resource " + path);
             return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
         } catch (java.io.IOException e) {

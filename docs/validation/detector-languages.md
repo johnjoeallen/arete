@@ -1,7 +1,7 @@
 # Detector languages
 
 Speculate currently demonstrates the operation-semantics detector in three
-styles: Groovy, Starlark, and the experimental DetectorScript (`.ds`) syntax.
+styles: Groovy, Starlark, and the experimental Sift (`.sift`) syntax.
 All three examples express the same core pipeline: visit paths, flatten their
 operations, retain matching operations, and create occurrences.
 
@@ -91,10 +91,10 @@ def detect(api, rule):
 Starlark makes the data model and control flow explicit. It is the default
 runtime and is sandboxed by construction.
 
-### DetectorScript
+### Sift
 
 ```java
-detector(api, rule) {
+sift(api, rule) {
     return api.paths
         .expand { path -> path.operationDetails
             .filter { operation ->
@@ -133,14 +133,14 @@ detector(api, rule) {
 }
 ```
 
-DetectorScript keeps Java-shaped operators and declarations while using
+Sift keeps Java-shaped operators and declarations while using
 Groovy-like trailing closures for collection pipelines. `expand` names the
 operation that turns each path into its operation collection; it is the
-DetectorScript equivalent of Groovy `collectMany` and Starlark’s nested loop.
+Sift equivalent of Groovy `collectMany` and Starlark’s nested loop.
 
 ## Syntax comparison
 
-| Operation | Groovy | Starlark | DetectorScript |
+| Operation | Groovy | Starlark | Sift |
 |---|---|---|---|
 | Transform values | `collect { value -> ... }` | list comprehension or loop | `.map { value -> ... }` |
 | Keep matching values | `findAll { value -> ... }` | `if` in a comprehension or loop | `.filter { value -> ... }` |
@@ -148,13 +148,13 @@ DetectorScript equivalent of Groovy `collectMany` and Starlark’s nested loop.
 | Read a field | `value.field` | `value["field"]` | `value.field` |
 | Create a finding | `[pointer: ..., path: ..., message: ...]` | `{"pointer": ..., "path": ..., "message": ...}` | `occurrence(pointer, path, message)` |
 | Regular expressions | Groovy regex literals and `==~` | `re_fullmatch(...)` | `regexFullMatch(...)` |
-| Entry point | closure `{ Map api, Map rule -> ... }` | `detect(api, rule)` | `detector(api, rule) { ... }` |
+| Entry point | closure `{ Map api, Map rule -> ... }` | `detect(api, rule)` | `sift(api, rule) { ... }` |
 
 ## Choosing a language
 
 Starlark is the default for bundled detectors because it provides a restricted,
 deterministic execution environment. Groovy remains available as an explicit,
-unsandboxed fallback for compatibility. DetectorScript is a prototype focused
+unsandboxed fallback for compatibility. Sift is a prototype focused
 on making detector pipelines feel natural to Java developers while retaining a
 small, controlled operation set.
 
