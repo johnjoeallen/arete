@@ -7,7 +7,7 @@ by category. A rule is only evaluated when a [policy](policies.md) references
 it. See [the policy engine](policy-engine.md) for how rules, detectors, and
 policies fit together.
 
-There are **132 rules** across **20 categories**, built on
+There are **135 rules** across **20 categories**, built on
 **43 detectors**.
 
 !!! note "Reading the policy columns"
@@ -81,6 +81,7 @@ There are **132 rules** across **20 categories**, built on
 | `DOC012` | API title does not follow the naming convention | `api-title` | 0.5 |  |  |
 | `DOC013` | Schema property lacks a description or example | `documentation-completeness` | 0.5 |  |  |
 | `DOC014` | Parameter lacks a description or example | `documentation-completeness` | 0.5 |  |  |
+| `DOC015` | Operation description is missing | `operation` | 0.5 |  |  |
 
 ## Error responses
 
@@ -143,6 +144,8 @@ There are **132 rules** across **20 categories**, built on
 | `JSON015` | Enum values are not UPPER_SNAKE_CASE | `schema` | 0.5 | 0.5 | 0.5 |
 | `JSON016` | Successful response is not a JSON object | `response-code` | 0.5 | 0.5 | 0.5 |
 | `JSON017` | Enum contains duplicate values | `enum-values` | 0.5 |  |  |
+| `JSON018` | Integer property does not declare a format | `schema` | 0.5 |  |  |
+| `JSON019` | Number property does not declare a format | `schema` | 0.5 |  |  |
 
 ## Naming
 

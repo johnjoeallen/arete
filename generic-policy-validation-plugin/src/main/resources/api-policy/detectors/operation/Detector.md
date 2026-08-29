@@ -22,6 +22,12 @@ parameters:
     values:
       - present
       - absent
+  description:
+    type: enum
+    required: false
+    values:
+      - present
+      - absent
   request-body:
     type: enum
     required: false

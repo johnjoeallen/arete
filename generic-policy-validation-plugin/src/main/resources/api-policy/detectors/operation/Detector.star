@@ -12,6 +12,11 @@ def _matches(op, p):
         return False
     if p.get("summary") == "absent" and trimmed:
         return False
+    description = op["description"].strip() if op.get("description") != None else ""
+    if p.get("description") == "present" and not description:
+        return False
+    if p.get("description") == "absent" and description:
+        return False
     if p.get("request-body") == "present" and not op["requestBodyPresent"]:
         return False
     if p.get("request-body") == "absent" and op["requestBodyPresent"]:
@@ -21,6 +26,8 @@ def _matches(op, p):
 def _message(p):
     if p.get("summary") == "absent":
         return "Operation summary is missing"
+    if p.get("description") == "absent":
+        return "Operation description is missing"
     if p.get("request-body") == "present":
         return "Operation has a request body"
     if p.get("request-body") == "absent":

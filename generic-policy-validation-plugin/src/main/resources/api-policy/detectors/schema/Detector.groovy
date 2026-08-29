@@ -51,6 +51,7 @@
         : parameters.enum == 'absent' ? 'Property does not use an enum'
         : parameters.containsKey('nullable') && parameters.required == false ? 'Optional property explicitly permits null'
         : parameters['max-items'] == 'absent' ? 'Array property has no maximum item count'
+        : parameters.format == 'absent' ? 'Numeric property does not declare a format'
         : 'Property matches the configured schema rule'
 
     api.schemas.collectMany { schema -> schema.properties ?: [] }

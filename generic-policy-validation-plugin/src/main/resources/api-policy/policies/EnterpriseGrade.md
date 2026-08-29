@@ -105,6 +105,9 @@ rules:
   DOC013: 0.5
   DOC014: 0.5
   STATUS008: 0.5
+  JSON018: 0.5
+  JSON019: 0.5
+  DOC015: 0.5
 ---
 
 # Enterprise Grade Policy

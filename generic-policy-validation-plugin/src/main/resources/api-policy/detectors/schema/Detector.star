@@ -63,6 +63,8 @@ def _message(p):
         return "Optional property explicitly permits null"
     if p.get("max-items") == "absent":
         return "Array property has no maximum item count"
+    if p.get("format") == "absent":
+        return "Numeric property does not declare a format"
     return "Property matches the configured schema rule"
 
 def detect(api, rule):
