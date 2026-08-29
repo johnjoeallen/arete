@@ -65,7 +65,7 @@ final class PolicyBundleLoader {
                 starlarkRuntime.validate(detector);
             } else {
                 LOG.log(System.Logger.Level.WARNING,
-                        "Detector ''{0}'' has no Detector.star; falling back to the deprecated Groovy runtime.", descriptor.id());
+                        "Detector ''{0}'' has no Detector.star; falling back to the UNSANDBOXED Groovy runtime.", descriptor.id());
                 detector = new Detector(descriptor.id(), "groovy", groovySource, descriptor.scopes(), descriptor.parameters());
                 groovyRuntime.validate(detector);
             }

@@ -13,7 +13,7 @@ files — no host code changes.
 - [Detectors](#detectors)
   - [The `api` model](#the-api-model)
   - [Writing a detector (Starlark)](#writing-a-detector-starlark)
-  - [The Groovy fallback (deprecated)](#the-groovy-fallback-deprecated)
+  - [The Groovy runtime (disabled by default)](#the-groovy-runtime-disabled-by-default)
 - [Rules](#rules)
 - [Policies](#policies)
 - [Scoring](#scoring)
@@ -68,14 +68,15 @@ Every detector ships **twice**: as `Detector.groovy` (the original) and
 - The two ports are verified byte-for-byte equal against the Groovy runtime
   across a corpus sweep (`StarlarkParityTest`).
 
-**Groovy is deprecated but still available.** It is `GroovyShell` in the
-plugin JVM — trusted, unsandboxed, build-time only. Opt back in with
+**The Groovy runtime is disabled by default — not deprecated.** It is a bare
+`GroovyShell` in the plugin JVM, so it is unsandboxed; it stays off until the
+[detector sandbox](policy-engine-sandbox-plan.md) is available, at which point
+it can be re-enabled safely. Until then it is an escape hatch: opt in with
 `detector-language=groovy` in the plugin config (or
-`-Dspeculate.policy.detector-language=groovy`); the engine logs a warning on
-startup. A detector with no `Detector.star` falls back to Groovy with a
-per-detector warning. See the
-[sandbox plan](policy-engine-sandbox-plan.md) and
-[DSL research](policy-engine-dsl-research.md).
+`-Dspeculate.policy.detector-language=groovy`) and the engine logs a warning
+on startup. A detector with no `Detector.star` also falls back to Groovy, with
+a per-detector warning. Its `.groovy` files stay in the bundle, held
+parity-equivalent to the `.star` versions.
 
 ---
 
@@ -90,7 +91,7 @@ api-policy/
 │   └── <detector-id>/
 │       ├── Detector.md          # descriptor (YAML front matter) + prose
 │       ├── Detector.star        # the detector — Starlark, the default runtime
-│       └── Detector.groovy      # the same detector in Groovy (deprecated fallback)
+│       └── Detector.groovy      # the same detector in Groovy (opt-in, disabled by default)
 ├── rules/
 │   └── <RULE-ID>.md             # rule front matter + human documentation
 └── policies/
@@ -237,17 +238,20 @@ The `manual` detector is the deliberate no-op (`def detect(api, rule): return []
 It keeps a rule in the catalogue as a checklist item that cannot be inferred
 from an OpenAPI document.
 
-### The Groovy fallback (deprecated)
+### The Groovy runtime (disabled by default)
 
 Each detector also ships a `Detector.groovy` — a closure
-`{ Map api, Map rule -> [ [pointer:…, path:…, message:…] ] }` that is kept
-byte-for-byte equivalent to the `.star` version (`StarlarkParityTest`). It
-runs in a bare `GroovyShell` in the plugin JVM: **trusted and unsandboxed.**
+`{ Map api, Map rule -> [ [pointer:…, path:…, message:…] ] }` kept byte-for-byte
+equivalent to the `.star` version (`StarlarkParityTest`). It runs in a bare
+`GroovyShell` in the plugin JVM: **unsandboxed.**
 
-The engine uses it only when you opt in with `detector-language=groovy` in the
-plugin config (or `-Dspeculate.policy.detector-language=groovy`), which logs a
-warning, or when a detector has no `Detector.star` at all. This path will be
-removed once nothing depends on it.
+Because it is unsandboxed, the engine does not use it unless you opt in with
+`detector-language=groovy` in the plugin config (or
+`-Dspeculate.policy.detector-language=groovy`), which logs a warning — or a
+detector has no `Detector.star` at all. This is **not** a deprecation: the
+Groovy runtime is expected to come back as a first-class option once the
+[detector sandbox](policy-engine-sandbox-plan.md) makes it safe to run
+untrusted bundles.
 
 ---
 
@@ -346,9 +350,9 @@ The result reports `overallScore` (`effectiveScore`) and
 ### A new detector
 
 1. Create `detectors/<id>/Detector.md` (descriptor), `detectors/<id>/Detector.star`
-   (the `detect(api, rule)` function), and — until the Groovy fallback is
-   retired — a matching `detectors/<id>/Detector.groovy` that the parity test
-   holds equivalent.
+   (the `detect(api, rule)` function), and a matching
+   `detectors/<id>/Detector.groovy` that the parity test holds equivalent (the
+   Groovy runtime is disabled by default but still supported).
 2. Add `<id>: detectors/<id>/Detector.md` to `PolicyBundle.yaml` under
    `detectors:`.
 3. Add rules that use it.

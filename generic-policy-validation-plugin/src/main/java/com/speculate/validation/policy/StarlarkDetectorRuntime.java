@@ -22,7 +22,8 @@ import java.util.Map;
 
 /**
  * Runs a detector written in Starlark. This is the default detector runtime;
- * see {@link GroovyDetectorRuntime} for the deprecated, opt-in Groovy path.
+ * {@link GroovyDetectorRuntime} is an opt-in fallback, disabled by default
+ * until the detector sandbox lands because it is unsandboxed.
  *
  * <p>A detector source defines a top-level function {@code detect(api, rule)}
  * that returns a list of occurrence dicts ({@code pointer?}, {@code path?},

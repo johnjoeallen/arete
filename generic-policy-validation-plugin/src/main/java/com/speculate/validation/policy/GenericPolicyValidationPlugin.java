@@ -52,8 +52,9 @@ public final class GenericPolicyValidationPlugin implements SpecValidationPlugin
         boolean forceGroovy = "groovy".equalsIgnoreCase(language);
         if (forceGroovy) {
             LOG.log(System.Logger.Level.WARNING,
-                    "Speculate policy engine: detectors are running on the DEPRECATED, UNSANDBOXED Groovy runtime "
-                            + "(detector-language=groovy). Migrate to the Starlark detectors; this path will be removed.");
+                    "Speculate policy engine: detectors are running on the Groovy runtime "
+                            + "(detector-language=groovy). This runtime is UNSANDBOXED and is disabled by default "
+                            + "until the detector sandbox is available; only enable it for bundles you fully trust.");
         }
         bundle = bundleLoader.load(new ClasspathBundleResources(getClass().getClassLoader()),
                 new PolicyBundleLoader.LoadOptions(forceGroovy));
