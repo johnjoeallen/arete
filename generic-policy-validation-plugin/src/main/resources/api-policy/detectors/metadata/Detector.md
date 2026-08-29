@@ -7,7 +7,7 @@ parameters:
   required:
     type: enum
     required: true
-    values: [complete, identifier]
+    values: [complete, identifier, audience]
 ---
 
 # Metadata detector
