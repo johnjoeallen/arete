@@ -10,7 +10,7 @@
     <packaging>jar</packaging>
 
     <name>generic-policy-validation-plugin</name>
-    <description>Starter generic API policy validation plugin for Speculate</description>
+    <description>Generic API policy validation plugin for Speculate</description>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>

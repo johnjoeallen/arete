@@ -40,7 +40,7 @@ class GenericPolicyValidationPluginLoadIT {
                                 '200': { description: OK }
                         """)
                 .format(SpecFormat.OPENAPI3)
-                .ruleSet("Starter")
+                .ruleSet("Strict")
                 .build());
 
         assertEquals(ValidationResult.Status.SUCCESS, result.getStatus());

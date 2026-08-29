@@ -1,5 +1,5 @@
 ---
-id: Starter
+id: Strict
 rules:
   REST001: 0.5
   DOC001: 0.5
@@ -53,9 +53,9 @@ rules:
   STATUS005: 0.5
 ---
 
-# Speculate Starter Policy
+# Speculate Strict Policy
 
-This initial policy enables every currently bundled rule. Each matched rule
+This policy enables every currently bundled rule. Each matched rule
 deducts half a point once, regardless of how many occurrences it reports. It is
 a deliberately simple baseline; organisations should publish their own policy
 with calibrated deductions and prohibited dispositions.

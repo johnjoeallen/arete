@@ -1,5 +1,5 @@
 formatVersion: 1
-bundleId: speculate-starter-policy
+bundleId: speculate-policy-bundle
 bundleVersion: 0.1.0
 
 rules:
@@ -55,7 +55,8 @@ rules:
   STATUS005: rules/STATUS005.md
 
 policies:
-  Starter: policies/Starter.md
+  Strict: policies/Strict.md
+  Mastercard: policies/Mastercard.md
 
 detectors:
   resource-path: detectors/resource-path/Detector.md

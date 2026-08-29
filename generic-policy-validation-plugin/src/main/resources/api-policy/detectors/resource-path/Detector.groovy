@@ -58,7 +58,7 @@
                 return verbs.any { verb -> terminalSegment.toLowerCase().startsWith(verb) }
             case 'query-predicate':
                 // e.g. /pet/findByStatus. This is available for a future
-                // catalogue rule even though the bundled Starter policy
+                // catalogue rule even though the bundled Strict policy
                 // currently contains REST001 only.
                 return terminalSegment ==~ /(?i).*(find|get|search)By[A-Z].*/
             case 'rpc-style':
