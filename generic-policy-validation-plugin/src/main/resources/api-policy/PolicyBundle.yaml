@@ -36,6 +36,7 @@ rules:
   JSON007: rules/JSON007.md
   JSON009: rules/JSON009.md
   JSON010: rules/JSON010.md
+  JSON011: rules/JSON011.md
   HTTP004: rules/HTTP004.md
   HTTP005: rules/HTTP005.md
   HTTP001: rules/HTTP001.md
@@ -86,5 +87,6 @@ detectors:
   hostname: detectors/hostname/Detector.md
   path-count: detectors/path-count/Detector.md
   common-field: detectors/common-field/Detector.md
+  date-time-name: detectors/date-time-name/Detector.md
   response-code: detectors/response-code/Detector.md
   response-header: detectors/response-header/Detector.md
