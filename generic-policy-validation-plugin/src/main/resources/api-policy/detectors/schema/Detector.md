@@ -31,6 +31,10 @@ parameters:
     type: enum
     required: false
     values: [required]
+  enum-case:
+    type: enum
+    required: false
+    values: [upper-snake-case]
   nullable:
     type: boolean
     required: false
