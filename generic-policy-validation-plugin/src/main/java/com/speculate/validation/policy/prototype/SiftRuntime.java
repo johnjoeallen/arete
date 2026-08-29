@@ -78,6 +78,13 @@ public final class SiftRuntime {
 
     private static boolean truthy(Object value) { return value instanceof Boolean b ? b : value != null; }
 
+    /** Ordering for {@code < <= > >=}: numeric by value, otherwise lexicographic. */
+    private static int compare(Object a, Object b) {
+        if (a instanceof Number x && b instanceof Number y) return Double.compare(x.doubleValue(), y.doubleValue());
+        if (a instanceof String x && b instanceof String y) return x.compareTo(y);
+        throw new IllegalArgumentException("cannot order " + a + " and " + b);
+    }
+
     /** A {@code ~/pattern/} literal; stringifies to the raw pattern. */
     private record Regex(String pattern) { public String toString() { return pattern; } }
 
@@ -93,6 +100,11 @@ public final class SiftRuntime {
             case "regexFullMatch" -> regexFullMatch(args.get(0), args.get(1));
             case "tokenize" -> List.of(String.valueOf(args.get(1)).split(java.util.regex.Pattern.quote(String.valueOf(args.get(0)))));
             case "last" -> { List<Object> values = iterableOf(args.get(0)); yield values.isEmpty() ? "" : values.get(values.size() - 1); }
+            case "size" -> (long) iterableOf(args.get(0)).size();
+            case "parseInt" -> {
+                try { yield Long.parseLong(String.valueOf(args.get(0)).trim()); }
+                catch (NumberFormatException e) { yield args.size() > 1 ? args.get(1) : -1L; }
+            }
             case "occurrence" -> new Occurrence(string(args, 0), string(args, 1), string(args, 2));
             case "operationMessage" -> operationMessage(args.get(0));
             default -> throw new IllegalArgumentException("unknown function: " + name);
@@ -143,7 +155,7 @@ public final class SiftRuntime {
                 if (cursor == source.length()) throw error("unterminated regex");
                 cursor++; return new Token(Kind.REGEX, out.toString());
             }
-            for (String operator : List.of("==~", "=~", "==", "!=", "&&", "||", "->")) if (source.startsWith(operator, cursor)) { cursor += operator.length(); return new Token(Kind.SYMBOL, operator); }
+            for (String operator : List.of("==~", "=~", "==", "!=", "<=", ">=", "&&", "||", "->")) if (source.startsWith(operator, cursor)) { cursor += operator.length(); return new Token(Kind.SYMBOL, operator); }
             cursor++; return new Token(Kind.SYMBOL, String.valueOf(ch));
         }
 
@@ -168,9 +180,14 @@ public final class SiftRuntime {
         private Expr expression() { Expr condition = or(); if (accept("?")) { Expr whenTrue = expression(); expect(":"); Expr whenFalse = expression(); return env -> truthy(condition.eval(env)) ? whenTrue.eval(env) : whenFalse.eval(env); } return condition; }
         private Expr or() { Expr left = and(); while (accept("||")) { Expr right = and(); left = binary(left, right, "||"); } return left; }
         private Expr and() { Expr left = equality(); while (accept("&&")) { Expr right = equality(); left = binary(left, right, "&&"); } return left; }
-        private Expr equality() { Expr left = additive(); while (token.text().equals("==") || token.text().equals("!=") || token.text().equals("==~") || token.text().equals("=~")) { String op = token.text(); advance(); Expr right = additive(); left = binary(left, right, op); } return left; }
-        private Expr additive() { Expr left = unary(); while (accept("+")) { Expr right = unary(); Expr prior = left; left = env -> { Object a = prior.eval(env), b = right.eval(env); if (a instanceof Number x && b instanceof Number y) return x.longValue() + y.longValue(); return Objects.toString(a, "null") + Objects.toString(b, "null"); }; } return left; }
-        private Expr unary() { if (accept("!")) { Expr value = unary(); return env -> !truthy(value.eval(env)); } return postfix(primary()); }
+        private Expr equality() { Expr left = relational(); while (token.text().equals("==") || token.text().equals("!=") || token.text().equals("==~") || token.text().equals("=~")) { String op = token.text(); advance(); Expr right = relational(); left = binary(left, right, op); } return left; }
+        private Expr relational() { Expr left = additive(); while (token.text().equals("<") || token.text().equals("<=") || token.text().equals(">") || token.text().equals(">=")) { String op = token.text(); advance(); Expr right = additive(); left = binary(left, right, op); } return left; }
+        private Expr additive() { Expr left = unary(); while (accept("+")) { Expr right = unary(); Expr prior = left; left = env -> { Object a = prior.eval(env), b = right.eval(env); if (a instanceof Number x && b instanceof Number y) return x.longValue() + y.longValue(); if (a instanceof Iterable<?> && b instanceof Iterable<?>) { List<Object> merged = new ArrayList<>(iterableOf(a)); merged.addAll(iterableOf(b)); return merged; } return Objects.toString(a, "null") + Objects.toString(b, "null"); }; } return left; }
+        private Expr unary() {
+            if (accept("!")) { Expr value = unary(); return env -> !truthy(value.eval(env)); }
+            if (accept("-")) { Expr value = unary(); return env -> { Object v = value.eval(env); return v instanceof Number n ? -n.longValue() : v; }; }
+            return postfix(primary());
+        }
         private Expr primary() {
             if (accept("(")) { Expr value = expression(); expect(")"); return value; }
             if (token.kind() == Kind.STRING) { String value = token.text(); advance(); return env -> value; }
@@ -186,7 +203,7 @@ public final class SiftRuntime {
         }
         private ParsedClosure closure() { expect("{"); String parameter = expectId(); expect("->"); Expr body = expression(); expect("}"); return new ParsedClosure(parameter, body); }
         private List<Expr> arguments() { List<Expr> result = new ArrayList<>(); if (!accept(")")) { do result.add(expression()); while (accept(",")); expect(")"); } return result; }
-        private Expr binary(Expr left, Expr right, String op) { return env -> { Object a = left.eval(env), b = right.eval(env); return switch (op) { case "==" -> Objects.equals(a, b); case "!=" -> !Objects.equals(a, b); case "==~" -> regexFullMatch(b, a); case "=~" -> regexSearch(b, a); case "&&" -> truthy(a) && truthy(b); case "||" -> truthy(a) || truthy(b); default -> throw new IllegalStateException(op); }; }; }
+        private Expr binary(Expr left, Expr right, String op) { return env -> { Object a = left.eval(env), b = right.eval(env); return switch (op) { case "==" -> Objects.equals(a, b); case "!=" -> !Objects.equals(a, b); case "==~" -> regexFullMatch(b, a); case "=~" -> regexSearch(b, a); case "<" -> compare(a, b) < 0; case "<=" -> compare(a, b) <= 0; case ">" -> compare(a, b) > 0; case ">=" -> compare(a, b) >= 0; case "&&" -> truthy(a) && truthy(b); case "||" -> truthy(a) || truthy(b); default -> throw new IllegalStateException(op); }; }; }
         private static Map<String, Object> with(Map<String, Object> env, String key, Object value) { Map<String, Object> result = new LinkedHashMap<>(env); result.put(key, value); return result; }
         private boolean accept(String text) { if (token.text().equals(text)) { advance(); return true; } return false; }
         private void expect(String text) { if (!accept(text)) throw new IllegalArgumentException("expected '" + text + "', got '" + token.text() + "'"); }

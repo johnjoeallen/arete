@@ -46,6 +46,20 @@ class SiftParityTest {
                       content:
                         text/xml: { schema: { type: string } }
                         '*/*': { schema: { type: string } }
+              /things/{thingKey}:
+                get:
+                  parameters:
+                    - name: thingId
+                      in: path
+                      schema: { type: string }
+                    - { name: verbose, in: query }
+                  responses:
+                    '200':
+                      description: OK
+                      content:
+                        application/json:
+                          schema: { type: object, properties: { a: { type: string } } }
+                    '500': { description: boom }
             components:
               schemas:
                 CreateOrderRequest:
@@ -60,6 +74,11 @@ class SiftParityTest {
                   type: object
                   properties:
                     modified: { type: string, format: date-time }
+                Composed:
+                  allOf:
+                    - $ref: '#/components/schemas/order_response'
+                    - type: object
+                      properties: { extra: { type: string } }
             """;
 
     @Test void manual() { assertParity("manual", "operation", Map.of()); }
@@ -123,6 +142,34 @@ class SiftParityTest {
 
     @Test void mediaTypeResponseWildcard() {
         assertParity("media-type", "media-type", Map.of("location", "response", "match", "wildcard"), true);
+    }
+
+    @Test void statusClassServerError() {
+        assertParity("status-class", "response", Map.of("forbidden", "server-error"), true);
+    }
+
+    @Test void schemaCompositionInline() {
+        assertParity("schema-composition", "schema", Map.of("check", "inline-composition"), true);
+    }
+
+    @Test void schemaCompositionInlineBody() {
+        assertParity("schema-composition", "operation", Map.of("check", "inline-body"), true);
+    }
+
+    @Test void parameterMaxCount() {
+        assertParity("parameter", "operation", Map.of("check", "max-count", "maximum", 2), true);
+    }
+
+    @Test void parameterPathRequired() {
+        assertParity("parameter", "parameter", Map.of("check", "path-required"), true);
+    }
+
+    @Test void parameterSchemaPresent() {
+        assertParity("parameter", "parameter", Map.of("check", "schema-present"), true);
+    }
+
+    @Test void parameterTemplateMatch() {
+        assertParity("parameter", "parameter", Map.of("check", "template-match"), true);
     }
 
     @Test void mediaTypeRequestAbsent() {
