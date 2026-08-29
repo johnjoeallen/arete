@@ -50,6 +50,7 @@
  */
 { Map api, Map rule ->
     if (rule.parameters?.match == 'trailing-slash') return api.paths.findAll { it.path.size() > 1 && it.path.endsWith('/') }.collect { [pointer: it.pointer, path: it.path, message: 'Resource path has an unnecessary trailing slash'] }
+    if (rule.parameters?.match == 'embedded-identifier') return api.paths.findAll { it.path.tokenize('/').any { segment -> segment ==~ /.*(?:Id|ID|[0-9]{2,}).*/ && !segment.startsWith('{') } }.collect { [pointer: it.pointer, path: it.path, message: 'Resource identifier is embedded in a path segment'] }
     def verbs = ['get', 'list', 'create', 'update', 'delete', 'remove', 'add', 'set']
     def matches = { path ->
         def terminalSegment = path.path.tokenize('/').last() ?: ''

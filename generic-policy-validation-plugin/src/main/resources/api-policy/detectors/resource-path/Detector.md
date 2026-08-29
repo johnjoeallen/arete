@@ -16,6 +16,7 @@ parameters:
       - custom-action
       - action-style
       - trailing-slash
+      - embedded-identifier
 ---
 
 # Resource-path detector
