@@ -551,10 +551,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#detectorscript" class="md-nav__link">
+  <a href="#sift" class="md-nav__link">
     <span class="md-ellipsis">
       
-        DetectorScript
+        Sift
       
     </span>
   </a>
@@ -776,10 +776,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#detectorscript" class="md-nav__link">
+  <a href="#sift" class="md-nav__link">
     <span class="md-ellipsis">
       
-        DetectorScript
+        Sift
       
     </span>
   </a>
@@ -840,7 +840,7 @@
 
 <h1 id="detector-languages">Detector languages<a class="headerlink" href="#detector-languages" title="Permanent link">&para;</a></h1>
 <p>Speculate currently demonstrates the operation-semantics detector in three
-styles: Groovy, Starlark, and the experimental DetectorScript (<code>.ds</code>) syntax.
+styles: Groovy, Starlark, and the experimental Sift (<code>.sift</code>) syntax.
 All three examples express the same core pipeline: visit paths, flatten their
 operations, retain matching operations, and create occurrences.</p>
 <h2 id="the-same-detector-in-three-languages">The same detector in three languages<a class="headerlink" href="#the-same-detector-in-three-languages" title="Permanent link">&para;</a></h2>
@@ -920,8 +920,8 @@ it runs with the authority of the JVM and is therefore an opt-in fallback.</p>
 </code></pre></div>
 <p>Starlark makes the data model and control flow explicit. It is the default
 runtime and is sandboxed by construction.</p>
-<h3 id="detectorscript">DetectorScript<a class="headerlink" href="#detectorscript" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">detector</span><span class="p">(</span><span class="n">api</span><span class="p">,</span><span class="w"> </span><span class="n">rule</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<h3 id="sift">Sift<a class="headerlink" href="#sift" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">sift</span><span class="p">(</span><span class="n">api</span><span class="p">,</span><span class="w"> </span><span class="n">rule</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">api</span><span class="p">.</span><span class="na">paths</span>
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">        </span><span class="p">.</span><span class="na">expand</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">path</span><span class="p">.</span><span class="na">operationDetails</span>
 <a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">            </span><span class="p">.</span><span class="na">filter</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">operation</span><span class="w"> </span><span class="o">-&gt;</span>
@@ -959,10 +959,10 @@ runtime and is sandboxed by construction.</p>
 <a id="__codelineno-2-36" name="__codelineno-2-36" href="#__codelineno-2-36"></a><span class="w">            </span><span class="p">;</span>
 <a id="__codelineno-2-37" name="__codelineno-2-37" href="#__codelineno-2-37"></a><span class="p">}</span>
 </code></pre></div>
-<p>DetectorScript keeps Java-shaped operators and declarations while using
+<p>Sift keeps Java-shaped operators and declarations while using
 Groovy-like trailing closures for collection pipelines. <code>expand</code> names the
 operation that turns each path into its operation collection; it is the
-DetectorScript equivalent of Groovy <code>collectMany</code> and Starlark’s nested loop.</p>
+Sift equivalent of Groovy <code>collectMany</code> and Starlark’s nested loop.</p>
 <h2 id="syntax-comparison">Syntax comparison<a class="headerlink" href="#syntax-comparison" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -970,7 +970,7 @@ DetectorScript equivalent of Groovy <code>collectMany</code> and Starlark’s ne
 <th>Operation</th>
 <th>Groovy</th>
 <th>Starlark</th>
-<th>DetectorScript</th>
+<th>Sift</th>
 </tr>
 </thead>
 <tbody>
@@ -1014,14 +1014,14 @@ DetectorScript equivalent of Groovy <code>collectMany</code> and Starlark’s ne
 <td>Entry point</td>
 <td>closure <code>{ Map api, Map rule -&gt; ... }</code></td>
 <td><code>detect(api, rule)</code></td>
-<td><code>detector(api, rule) { ... }</code></td>
+<td><code>sift(api, rule) { ... }</code></td>
 </tr>
 </tbody>
 </table>
 <h2 id="choosing-a-language">Choosing a language<a class="headerlink" href="#choosing-a-language" title="Permanent link">&para;</a></h2>
 <p>Starlark is the default for bundled detectors because it provides a restricted,
 deterministic execution environment. Groovy remains available as an explicit,
-unsandboxed fallback for compatibility. DetectorScript is a prototype focused
+unsandboxed fallback for compatibility. Sift is a prototype focused
 on making detector pipelines feel natural to Java developers while retaining a
 small, controlled operation set.</p>
 <p>The language precedence and Groovy opt-in switches are documented in the
