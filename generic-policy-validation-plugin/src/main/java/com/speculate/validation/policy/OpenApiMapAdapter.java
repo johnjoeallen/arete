@@ -97,6 +97,7 @@ final class OpenApiMapAdapter {
                         propertyMap.put("nullable", Boolean.TRUE.equals(property.getNullable()));
                         propertyMap.put("required", schema.getRequired() != null && schema.getRequired().contains(propertyName));
                         propertyMap.put("enumPresent", property.getEnum() != null && !property.getEnum().isEmpty());
+                        propertyMap.put("enumValues", property.getEnum() == null ? List.of() : property.getEnum());
                         properties.add(propertyMap);
                     }
                 }

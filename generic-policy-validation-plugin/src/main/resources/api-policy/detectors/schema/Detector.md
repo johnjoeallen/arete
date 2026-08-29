@@ -23,6 +23,10 @@ parameters:
     values:
       - present
       - absent
+  enum-type:
+    type: enum
+    required: false
+    values: [consistent]
   nullable:
     type: boolean
     required: false
