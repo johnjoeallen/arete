@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -35,6 +37,32 @@ class FluentPolicyRuntimeTest {
 
         assertEquals(List.of(new Occurrence("/paths/~1customers/get", "GET /customers", "GET operation appears to mutate state")),
                 runtime.execute(source, api, Map.of("parameters", Map.of("method", "GET"))));
+    }
+
+    @Test
+    void operationSemanticsDetectorScriptMatchesAllConfiguredModes() {
+        String source = readResource("api-policy/detectors/operation-semantics/Detector.ds");
+        Map<String, Object> api = api("""
+                openapi: 3.0.0
+                info: { title: Test, version: 1.0.0 }
+                paths:
+                  /customers:
+                    get:
+                      summary: Delete customer
+                      responses: { '200': { description: OK } }
+                  /customers/{customer_id}:
+                    post:
+                      summary: Replace customer
+                      responses: { '200': { description: OK } }
+                    put:
+                      summary: Partially update customer
+                      responses: { '200': { description: OK } }
+                """);
+
+        assertEquals(1, runtime.execute(source, api, Map.of("parameters", Map.of("method", "GET", "expected", "safe"))).size());
+        assertEquals(1, runtime.execute(source, api, Map.of("parameters", Map.of("method", "POST", "match", "full-resource-replacement"))).size());
+        assertEquals(1, runtime.execute(source, api, Map.of("parameters", Map.of("method", "PUT", "match", "partial-update"))).size());
+        assertEquals(2, runtime.execute(source, api, Map.of("parameters", Map.of("match", "inconsistent-method-resource-semantics"))).size());
     }
 
     @Test
@@ -84,5 +112,14 @@ class FluentPolicyRuntimeTest {
 
     private static Map<String, Object> api(String content) {
         return OpenApiMapAdapter.toMap(new OpenAPIV3Parser().readContents(content, null, new ParseOptions()).getOpenAPI());
+    }
+
+    private static String readResource(String path) {
+        try (InputStream stream = FluentPolicyRuntimeTest.class.getClassLoader().getResourceAsStream(path)) {
+            if (stream == null) throw new IllegalArgumentException("missing resource " + path);
+            return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (java.io.IOException e) {
+            throw new IllegalStateException(e);
+        }
     }
 }

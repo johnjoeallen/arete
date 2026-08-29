@@ -85,8 +85,18 @@ public final class FluentPolicyRuntime {
             case "tokenize" -> List.of(String.valueOf(args.get(1)).split(java.util.regex.Pattern.quote(String.valueOf(args.get(0)))));
             case "last" -> { List<Object> values = iterableOf(args.get(0)); yield values.isEmpty() ? "" : values.get(values.size() - 1); }
             case "occurrence" -> new Occurrence(string(args, 0), string(args, 1), string(args, 2));
+            case "operationMessage" -> operationMessage(args.get(0));
             default -> throw new IllegalArgumentException("unknown function: " + name);
         };
+    }
+
+    private static String operationMessage(Object value) {
+        if (!(value instanceof Map<?, ?> parameters)) throw new IllegalArgumentException("operationMessage expects parameters");
+        if (Objects.equals(parameters.get("expected"), "safe")) return "GET operation appears to mutate state";
+        if (Objects.equals(parameters.get("match"), "full-resource-replacement")) return "POST appears to replace an identified resource";
+        if (Objects.equals(parameters.get("match"), "partial-update")) return "PUT appears to perform a partial update";
+        if (Objects.equals(parameters.get("match"), "inconsistent-method-resource-semantics")) return "HTTP method and resource semantics appear inconsistent";
+        return "Supported operation semantics are unclear";
     }
 
     private static String string(List<Object> args, int index) { return Objects.toString(args.get(index), null); }
@@ -114,7 +124,7 @@ public final class FluentPolicyRuntime {
         private final Lexer lexer; private Token token;
         Parser(String source) { lexer = new Lexer(source); token = lexer.next(); }
         Program parse() { expect("detector"); expect("("); String api = expectId(); expect(","); String rule = expectId(); expect(")"); expect("{"); expect("return"); Expr expression = expression(); expect(";"); expect("}"); expectKind(Kind.EOF); return new Program(expression); }
-        private Expr expression() { return or(); }
+        private Expr expression() { Expr condition = or(); if (accept("?")) { Expr whenTrue = expression(); expect(":"); Expr whenFalse = expression(); return env -> truthy(condition.eval(env)) ? whenTrue.eval(env) : whenFalse.eval(env); } return condition; }
         private Expr or() { Expr left = and(); while (accept("||")) { Expr right = and(); left = binary(left, right, "||"); } return left; }
         private Expr and() { Expr left = equality(); while (accept("&&")) { Expr right = equality(); left = binary(left, right, "&&"); } return left; }
         private Expr equality() { Expr left = additive(); while (token.text().equals("==") || token.text().equals("!=")) { String op = token.text(); advance(); Expr right = additive(); left = binary(left, right, op); } return left; }
