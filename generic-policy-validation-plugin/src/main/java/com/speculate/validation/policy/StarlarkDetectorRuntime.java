@@ -1,4 +1,4 @@
-package com.speculate.validation.policy.star;
+package com.speculate.validation.policy;
 
 import net.starlark.java.eval.Dict;
 import net.starlark.java.eval.EvalException;
@@ -21,17 +21,19 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * POC (issue #125) — runs a detector written in Starlark instead of Groovy.
+ * Runs a detector written in Starlark. This is the default detector runtime;
+ * see {@link GroovyDetectorRuntime} for the deprecated, opt-in Groovy path.
  *
  * <p>A detector source defines a top-level function {@code detect(api, rule)}
- * that returns a list of occurrence dicts ({@code pointer?}, {@code path},
+ * that returns a list of occurrence dicts ({@code pointer?}, {@code path?},
  * {@code message}). The {@code api} and {@code rule} values are deep-converted
- * to immutable Starlark structures, so a detector physically cannot mutate the
- * host model, perform I/O, use reflection, import anything, or recurse. The
- * only capabilities beyond pure list/dict/string work are the handful of
- * builtins in {@link StarlarkBuiltins}.
+ * to immutable Starlark structures, so a detector cannot mutate the host
+ * model, perform I/O, use reflection, import anything, or recurse. The only
+ * capabilities beyond pure list/dict/string work are the handful of builtins
+ * in {@link StarlarkBuiltins}. Execution is bounded by a hard interpreter-step
+ * cap.
  */
-public final class StarlarkDetectorRuntime {
+final class StarlarkDetectorRuntime {
 
     /** Deterministic upper bound on interpreter work per detector run. */
     private static final long MAX_EXECUTION_STEPS = 2_000_000L;
@@ -41,62 +43,69 @@ public final class StarlarkDetectorRuntime {
 
     private final ImmutableMap<String, Object> predeclared;
 
-    public StarlarkDetectorRuntime() {
+    StarlarkDetectorRuntime() {
         ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
         Starlark.addMethods(builder, new StarlarkBuiltins());
         this.predeclared = builder.build();
     }
 
-    /** Compiles the source (fails fast on a syntax error), same idea as GroovyDetectorRuntime.validate. */
-    public void validate(String source) {
+    /** Compiles the detector source, failing the bundle load on a syntax error. */
+    void validate(Detector detector) {
+        if (!"starlark".equals(detector.language())) {
+            throw new BundleValidationException("Unsupported detector language '" + detector.language() + "'");
+        }
         try (Mutability mu = Mutability.create("detector-validate")) {
             Module module = Module.withPredeclared(StarlarkSemantics.DEFAULT, predeclared);
             StarlarkThread thread = new StarlarkThread(mu, StarlarkSemantics.DEFAULT);
             thread.setMaxExecutionSteps(MAX_EXECUTION_STEPS);
-            Starlark.execFile(ParserInput.fromString(source, "Detector.star"), FileOptions.DEFAULT, module, thread);
+            Starlark.execFile(ParserInput.fromString(detector.source(), "Detector.star"),
+                    FileOptions.DEFAULT, module, thread);
             if (module.getGlobal("detect") == null) {
-                throw new DetectorScriptException("Detector.star does not define detect(api, rule)");
+                throw new BundleValidationException("Detector '" + detector.id() + "' does not define detect(api, rule)");
             }
-        } catch (DetectorScriptException e) {
+        } catch (BundleValidationException e) {
             throw e;
         } catch (Exception e) {
-            throw new DetectorScriptException("Detector.star does not compile: " + e.getMessage(), e);
+            throw new BundleValidationException("Detector '" + detector.id() + "' does not compile: " + e.getMessage());
         }
     }
 
-    /** Runs {@code detect(api, rule)} and normalises the result to plain maps. */
-    public List<Map<String, String>> execute(String source, Map<String, Object> api, Map<String, Object> rule) {
+    List<Occurrence> execute(Detector detector, Map<String, Object> api, Rule rule) {
+        if (!"starlark".equals(detector.language())) {
+            throw new DetectorException("Unsupported detector language '" + detector.language() + "'");
+        }
         try (Mutability mu = Mutability.create("detector-exec")) {
             Module module = Module.withPredeclared(StarlarkSemantics.DEFAULT, predeclared);
             StarlarkThread thread = new StarlarkThread(mu, StarlarkSemantics.DEFAULT);
             thread.setMaxExecutionSteps(MAX_EXECUTION_STEPS);
             thread.setPrintHandler((th, msg) -> { /* detectors do not print */ });
 
-            Starlark.execFile(ParserInput.fromString(source, "Detector.star"), FileOptions.DEFAULT, module, thread);
+            Starlark.execFile(ParserInput.fromString(detector.source(), "Detector.star"),
+                    FileOptions.DEFAULT, module, thread);
             Object detect = module.getGlobal("detect");
             if (detect == null) {
-                throw new DetectorScriptException("Detector.star does not define detect(api, rule)");
+                throw new DetectorException("Detector '" + detector.id() + "' does not define detect(api, rule)");
             }
 
-            Object apiValue = toStarlark(api);
-            Object ruleValue = toStarlark(rule);
-            Object result = Starlark.call(thread, detect, List.of(apiValue, ruleValue), Map.of());
+            Object result = Starlark.call(thread, detect,
+                    List.of(toStarlark(api), toStarlark(rule.asMap())), Map.of());
             return toOccurrences(result);
-        } catch (DetectorScriptException e) {
+        } catch (DetectorException e) {
             throw e;
+        } catch (net.starlark.java.syntax.SyntaxError.Exception e) {
+            throw new DetectorException("Detector does not compile: " + e.getMessage(), e);
         } catch (EvalException e) {
-            throw new DetectorScriptException("detect() failed: " + e.getMessage(), e);
+            throw new DetectorException("detect() failed: " + e.getMessage(), e);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new DetectorScriptException("detect() interrupted", e);
-        } catch (Exception e) {
-            throw new DetectorScriptException("detect() error: " + e, e);
+            throw new DetectorException("detect() interrupted", e);
+        } catch (RuntimeException e) {
+            throw new DetectorException(e.toString(), e);
         }
     }
 
-    // --- Java model -> immutable Starlark values -----------------------------
+    // --- Java model -> immutable Starlark values ---------------------------
 
-    @SuppressWarnings("unchecked")
     private static Object toStarlark(Object value) {
         if (value == null) {
             return Starlark.NONE;
@@ -115,7 +124,7 @@ public final class StarlarkDetectorRuntime {
         }
         if (value instanceof Number n) {
             // Enum values, numeric literals: keep them numeric so detectors
-            // can distinguish int/float exactly as the Groovy `instanceof` checks do.
+            // distinguish int/float exactly as the Groovy `instanceof` checks do.
             return StarlarkFloat.of(n.doubleValue());
         }
         if (value instanceof Map<?, ?> map) {
@@ -135,45 +144,39 @@ public final class StarlarkDetectorRuntime {
         return String.valueOf(value);
     }
 
-    // --- Starlark result -> plain occurrence maps ---------------------------
+    // --- Starlark result -> Occurrence list ------------------------------
 
-    private static List<Map<String, String>> toOccurrences(Object result) throws EvalException {
-        List<Map<String, String>> occurrences = new ArrayList<>();
-        Iterable<?> rows = Starlark.toIterable(result);
+    private static List<Occurrence> toOccurrences(Object result) {
+        List<Occurrence> occurrences = new ArrayList<>();
+        Iterable<?> rows;
+        try {
+            rows = Starlark.toIterable(result);
+        } catch (EvalException e) {
+            throw new DetectorException("detect() must return a list of occurrence dicts", e);
+        }
         for (Object row : rows) {
             if (!(row instanceof Dict<?, ?> dict)) {
-                throw new DetectorScriptException("detect() must return a list of dicts");
+                throw new DetectorException("detect() must return a list of occurrence dicts");
             }
             Object message = dict.get("message");
             if (!(message instanceof String text) || text.isBlank()) {
-                throw new DetectorScriptException("occurrence requires a non-blank message");
+                throw new DetectorException("Detector occurrence requires a non-blank message");
             }
-            Map<String, String> occurrence = new LinkedHashMap<>();
-            Object pointer = dict.get("pointer");
-            if (pointer instanceof String pointerText) {
-                occurrence.put("pointer", pointerText);
-            }
-            Object path = dict.get("path");
-            if (path instanceof String pathText) {
-                occurrence.put("path", pathText);
-            }
-            occurrence.put("message", text);
-            occurrences.add(occurrence);
+            occurrences.add(new Occurrence(optionalString(dict.get("pointer")), optionalString(dict.get("path")), text));
             if (occurrences.size() > MAX_OCCURRENCES) {
-                throw new DetectorScriptException("detect() returned more than " + MAX_OCCURRENCES + " occurrences");
+                throw new DetectorException("Detector returned more than " + MAX_OCCURRENCES + " occurrences");
             }
         }
         return occurrences;
     }
 
-    /** POC failure signal; the real runtime would map this to ValidationResult.pluginError. */
-    public static final class DetectorScriptException extends RuntimeException {
-        DetectorScriptException(String message) {
-            super(message);
+    private static String optionalString(Object value) {
+        if (value == null || value == Starlark.NONE) {
+            return null;
         }
-
-        DetectorScriptException(String message, Throwable cause) {
-            super(message, cause);
+        if (!(value instanceof String text)) {
+            throw new DetectorException("Detector occurrence fields must be strings");
         }
+        return text;
     }
 }

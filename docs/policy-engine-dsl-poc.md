@@ -56,16 +56,27 @@ RE2/J accepted every pattern in the bundle (`\b`, `(?i)`, alternation,
 `(?:)`, `{n,}`, character classes). No backreferences or lookaround are used,
 and both stay unavailable.
 
+## Wired in
+
+- The engine **runs Starlark by default.** `PolicyBundleLoader` loads
+  `Detector.star` for every detector; `GenericPolicyValidationPlugin`
+  dispatches per `detector.language()`.
+- **Groovy is retained but disabled** — opt back in with
+  `detector-language=groovy` (config) or
+  `-Dspeculate.policy.detector-language=groovy`; the plugin logs a warning.
+  `PolicyBundleLoader.LoadOptions(forceGroovy)` drives it. A detector missing
+  its `.star` falls back to Groovy with a per-detector warning.
+- `StarlarkDetectorRuntime` moved into `com.speculate.validation.policy` and
+  returns `List<Occurrence>` / throws `DetectorException` like the Groovy one.
+
 ## Not done (follow-ups on issue #125)
 
 - **Vendor Starlark.** `com.eed3si9n.starlark:starlark:4.2.1` bundles Guava
   27.1 (2019) and pulls a JNI CPU-profiler stub that logs a native-access
   warning. Production vendors a current `net/starlark/java/**` (runtime subset
   only — exclude `cmd`, `JNI`, `CpuProfiler`).
-- **Wire `language: starlark`** into the descriptor + `PolicyBundleLoader` so
-  the engine actually runs the `.star` files; then retire `Detector.groovy`
-  and drop the `org.apache.groovy` dependency.
-- Timeout wrapper (step cap only today); compiled-`Program` cache;
-  `ValidationResult.pluginError` wiring.
+- Retire `Detector.groovy` + drop `org.apache.groovy` once the Groovy opt-in
+  is no longer wanted.
+- Timeout wrapper (step cap only today); compiled-`Program` cache.
 - Layers C/§10 of the [sandbox plan](policy-engine-sandbox-plan.md) for remote
   bundles remain as scoped there.

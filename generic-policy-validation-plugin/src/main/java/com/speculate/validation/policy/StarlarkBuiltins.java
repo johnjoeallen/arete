@@ -1,4 +1,4 @@
-package com.speculate.validation.policy.star;
+package com.speculate.validation.policy;
 
 import com.google.re2j.Pattern;
 import net.starlark.java.annot.Param;

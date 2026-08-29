@@ -16,8 +16,16 @@ import java.util.Set;
 
 /** Loads and validates every declarative resource and detector reference. */
 final class PolicyBundleLoader {
+    private static final System.Logger LOG = System.getLogger(PolicyBundleLoader.class.getName());
+
     private final Yaml yaml;
-    private final GroovyDetectorRuntime detectorRuntime = new GroovyDetectorRuntime();
+    private final GroovyDetectorRuntime groovyRuntime = new GroovyDetectorRuntime();
+    private final StarlarkDetectorRuntime starlarkRuntime = new StarlarkDetectorRuntime();
+
+    /** How a bundle should compile its detectors. */
+    record LoadOptions(boolean forceGroovy) {
+        static LoadOptions defaults() { return new LoadOptions(false); }
+    }
 
     PolicyBundleLoader() {
         LoaderOptions options = new LoaderOptions();
@@ -27,6 +35,10 @@ final class PolicyBundleLoader {
     }
 
     PolicyBundle load(BundleResources resources) {
+        return load(resources, LoadOptions.defaults());
+    }
+
+    PolicyBundle load(BundleResources resources, LoadOptions loadOptions) {
         Map<String, Object> manifest = yamlMap("PolicyBundle.yaml", resources.read("PolicyBundle.yaml"));
         rejectUnknown("PolicyBundle.yaml", manifest, Set.of("formatVersion", "bundleId", "bundleVersion", "rules", "policies", "detectors"));
         if (!Integer.valueOf(1).equals(manifest.get("formatVersion"))) throw new BundleValidationException("PolicyBundle.yaml: formatVersion must be 1");
@@ -40,8 +52,23 @@ final class PolicyBundleLoader {
             String descriptorPath = safePath("PolicyBundle.yaml", entry.getValue());
             Detector descriptor = parseDetector(descriptorPath, resources.read(descriptorPath));
             if (!entry.getKey().equals(descriptor.id())) throw new BundleValidationException(descriptorPath + ": manifest detector id does not match descriptor id");
-            Detector detector = new Detector(descriptor.id(), descriptor.language(), resources.read(siblingPath(descriptorPath, descriptor.source())), descriptor.scopes(), descriptor.parameters());
-            detectorRuntime.validate(detector);
+
+            String groovySource = resources.read(siblingPath(descriptorPath, descriptor.source()));
+            String starlarkSource = optionalRead(resources, siblingPath(descriptorPath, "Detector.star"));
+
+            Detector detector;
+            if (loadOptions.forceGroovy()) {
+                detector = new Detector(descriptor.id(), "groovy", groovySource, descriptor.scopes(), descriptor.parameters());
+                groovyRuntime.validate(detector);
+            } else if (starlarkSource != null) {
+                detector = new Detector(descriptor.id(), "starlark", starlarkSource, descriptor.scopes(), descriptor.parameters());
+                starlarkRuntime.validate(detector);
+            } else {
+                LOG.log(System.Logger.Level.WARNING,
+                        "Detector ''{0}'' has no Detector.star; falling back to the deprecated Groovy runtime.", descriptor.id());
+                detector = new Detector(descriptor.id(), "groovy", groovySource, descriptor.scopes(), descriptor.parameters());
+                groovyRuntime.validate(detector);
+            }
             detectors.put(detector.id(), detector);
         }
 
@@ -240,6 +267,15 @@ final class PolicyBundleLoader {
     private static String siblingPath(String descriptorPath, String source) {
         int slash = descriptorPath.lastIndexOf('/');
         return safePath(descriptorPath, descriptorPath.substring(0, slash + 1) + source);
+    }
+
+    /** Reads an optional bundle resource, returning null when it is absent. */
+    private static String optionalRead(BundleResources resources, String path) {
+        try {
+            return resources.read(path);
+        } catch (RuntimeException absent) {
+            return null;
+        }
     }
 }
 

@@ -111,7 +111,7 @@ class GenericPolicyValidationPluginTest {
             """;
 
     @Test
-    void executesTheStrictGroovyDetectorAndDeductsOnlyOncePerRule() {
+    void executesTheStrictPolicyAndDeductsOnlyOncePerRule() {
         GenericPolicyValidationPlugin plugin = new GenericPolicyValidationPlugin();
         plugin.configure(Map.of());
 
@@ -169,14 +169,44 @@ class GenericPolicyValidationPluginTest {
     }
 
     @Test
-    void rejectsABrokenDetectorScriptWhileLoadingTheBundle() {
+    void rejectsABrokenStarlarkDetectorScriptWhileLoadingTheBundle() {
         Map<String, String> resources = bundledResources();
-        resources.put("detectors/resource-path/Detector.groovy", "{ api, rule -> this is not valid Groovy ) }");
+        resources.put("detectors/resource-path/Detector.star", "def detect(api, rule)\n    this is not valid Starlark");
 
         BundleValidationException error = assertThrows(BundleValidationException.class,
                 () -> new PolicyBundleLoader().load(resources::get));
 
         assertTrue(error.getMessage().contains("does not compile"));
+    }
+
+    @Test
+    void rejectsABrokenGroovyDetectorScriptWhenGroovyIsForced() {
+        Map<String, String> resources = bundledResources();
+        resources.put("detectors/resource-path/Detector.groovy", "{ api, rule -> this is not valid Groovy ) }");
+
+        BundleValidationException error = assertThrows(BundleValidationException.class,
+                () -> new PolicyBundleLoader().load(resources::get, new PolicyBundleLoader.LoadOptions(true)));
+
+        assertTrue(error.getMessage().contains("does not compile"));
+    }
+
+    @Test
+    void groovyRuntimeStaysAvailableAsAnOptIn() {
+        PolicyBundle groovyBundle = new PolicyBundleLoader()
+                .load(new ClasspathBundleResources(getClass().getClassLoader()),
+                        new PolicyBundleLoader.LoadOptions(true));
+        assertEquals("groovy", groovyBundle.detectors().get("resource-path").language());
+
+        GenericPolicyValidationPlugin plugin = new GenericPolicyValidationPlugin();
+        plugin.configure(Map.of("detector-language", "groovy"));
+        ValidationResult forced = plugin.validate(input(ACTION_PATH_SPEC));
+
+        GenericPolicyValidationPlugin starlarkPlugin = new GenericPolicyValidationPlugin();
+        starlarkPlugin.configure(Map.of());
+        ValidationResult starlark = starlarkPlugin.validate(input(ACTION_PATH_SPEC));
+
+        assertEquals(starlark.getViolations().size(), forced.getViolations().size());
+        assertEquals(starlark.getOverallScore(), forced.getOverallScore());
     }
 
     @Test
@@ -207,7 +237,7 @@ class GenericPolicyValidationPluginTest {
         Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
                 .readContents(ACTION_PATH_SPEC, null, new ParseOptions()).getOpenAPI());
 
-        java.util.List<Occurrence> occurrences = new GroovyDetectorRuntime()
+        java.util.List<Occurrence> occurrences = new StarlarkDetectorRuntime()
                 .execute(bundle.detectors().get("operation"), api, rule);
 
         assertEquals(3, occurrences.size());
@@ -222,9 +252,9 @@ class GenericPolicyValidationPluginTest {
         Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
                 .readContents(SUMMARY_STYLE_SPEC, null, new ParseOptions()).getOpenAPI());
 
-        java.util.List<Occurrence> initialCapital = new GroovyDetectorRuntime()
+        java.util.List<Occurrence> initialCapital = new StarlarkDetectorRuntime()
                 .execute(bundle.detectors().get("text-style"), api, bundle.rules().get("DOC002"));
-        java.util.List<Occurrence> tooLong = new GroovyDetectorRuntime()
+        java.util.List<Occurrence> tooLong = new StarlarkDetectorRuntime()
                 .execute(bundle.detectors().get("text-style"), api, bundle.rules().get("DOC005"));
 
         assertEquals(1, initialCapital.size());
@@ -238,7 +268,7 @@ class GenericPolicyValidationPluginTest {
         PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
         Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
                 .readContents(NAMING_SPEC, null, new ParseOptions()).getOpenAPI());
-        GroovyDetectorRuntime runtime = new GroovyDetectorRuntime();
+        StarlarkDetectorRuntime runtime = new StarlarkDetectorRuntime();
 
         assertEquals(1, runtime.execute(bundle.detectors().get("naming"), api, bundle.rules().get("CASE001")).size());
         assertEquals(1, runtime.execute(bundle.detectors().get("naming"), api, bundle.rules().get("CASE002")).size());
@@ -254,7 +284,7 @@ class GenericPolicyValidationPluginTest {
         PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
         Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
                 .readContents(NAMING_SPEC, null, new ParseOptions()).getOpenAPI());
-        GroovyDetectorRuntime runtime = new GroovyDetectorRuntime();
+        StarlarkDetectorRuntime runtime = new StarlarkDetectorRuntime();
 
         assertEquals(1, runtime.execute(bundle.detectors().get("schema"), api, bundle.rules().get("JSON006")).size());
         assertEquals(1, runtime.execute(bundle.detectors().get("schema"), api, bundle.rules().get("JSON007")).size());
@@ -266,7 +296,7 @@ class GenericPolicyValidationPluginTest {
         PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
         Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
                 .readContents(METHOD_AND_ACTION_SPEC, null, new ParseOptions()).getOpenAPI());
-        GroovyDetectorRuntime runtime = new GroovyDetectorRuntime();
+        StarlarkDetectorRuntime runtime = new StarlarkDetectorRuntime();
 
         assertEquals(1, runtime.execute(bundle.detectors().get("resource-path"), api, bundle.rules().get("REST003")).size());
         assertEquals(1, runtime.execute(bundle.detectors().get("resource-path"), api, bundle.rules().get("REST004")).size());
@@ -297,7 +327,7 @@ class GenericPolicyValidationPluginTest {
         Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
                 .readContents(spec, null, new ParseOptions()).getOpenAPI());
 
-        java.util.List<Occurrence> occurrences = new GroovyDetectorRuntime()
+        java.util.List<Occurrence> occurrences = new StarlarkDetectorRuntime()
                 .execute(bundle.detectors().get("proprietary-header"), api, bundle.rules().get("STANDARD008"));
 
         assertEquals(2, occurrences.size());
@@ -341,7 +371,7 @@ class GenericPolicyValidationPluginTest {
                 """;
         Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
                 .readContents(spec, null, new ParseOptions()).getOpenAPI());
-        java.util.List<Occurrence> occurrences = new GroovyDetectorRuntime()
+        java.util.List<Occurrence> occurrences = new StarlarkDetectorRuntime()
                 .execute(bundle.detectors().get("query-collection"), api, bundle.rules().get("STANDARD009"));
 
         assertEquals(1, occurrences.size());
@@ -373,7 +403,7 @@ class GenericPolicyValidationPluginTest {
         Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
                 .readContents(spec, null, new ParseOptions()).getOpenAPI());
 
-        java.util.List<Occurrence> occurrences = new GroovyDetectorRuntime()
+        java.util.List<Occurrence> occurrences = new StarlarkDetectorRuntime()
                 .execute(bundle.detectors().get("security"), api, bundle.rules().get("SECURITY001"));
 
         assertEquals(2, occurrences.size());
@@ -410,7 +440,7 @@ class GenericPolicyValidationPluginTest {
         Rule writeRule = new Rule(rule.id(), rule.title(), rule.category(), rule.detector(), rule.scope(),
                 Map.of("scheme", "bearerAuth", "scopes", "read,write"), rule.documentationMarkdown());
 
-        java.util.List<Occurrence> occurrences = new GroovyDetectorRuntime()
+        java.util.List<Occurrence> occurrences = new StarlarkDetectorRuntime()
                 .execute(bundle.detectors().get("security"), api, writeRule);
 
         assertEquals(1, occurrences.size());
@@ -436,7 +466,7 @@ class GenericPolicyValidationPluginTest {
         Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
                 .readContents(spec, null, new ParseOptions()).getOpenAPI());
 
-        java.util.List<Occurrence> occurrences = new GroovyDetectorRuntime()
+        java.util.List<Occurrence> occurrences = new StarlarkDetectorRuntime()
                 .execute(bundle.detectors().get("response-header"), api, bundle.rules().get("STATUS007"));
 
         assertEquals(1, occurrences.size());
@@ -457,7 +487,7 @@ class GenericPolicyValidationPluginTest {
         Rule strictVersionRule = new Rule(rule.id(), rule.title(), rule.category(), rule.detector(), rule.scope(),
                 Map.of("allowed", "3.1"), rule.documentationMarkdown());
 
-        java.util.List<Occurrence> occurrences = new GroovyDetectorRuntime()
+        java.util.List<Occurrence> occurrences = new StarlarkDetectorRuntime()
                 .execute(bundle.detectors().get("openapi-version"), api, strictVersionRule);
 
         assertEquals(1, occurrences.size());
@@ -488,7 +518,7 @@ class GenericPolicyValidationPluginTest {
                 """;
         Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
                 .readContents(spec, null, new ParseOptions()).getOpenAPI());
-        GroovyDetectorRuntime runtime = new GroovyDetectorRuntime();
+        StarlarkDetectorRuntime runtime = new StarlarkDetectorRuntime();
 
         assertTrue(runtime.execute(bundle.detectors().get("media-type"), api, bundle.rules().get("CONTENT001")).isEmpty());
         assertEquals(1, runtime.execute(bundle.detectors().get("media-type"), api, bundle.rules().get("CONTENT003")).size());
@@ -508,7 +538,7 @@ class GenericPolicyValidationPluginTest {
                     put: { summary: Partially update customer, responses: { '200': { description: OK } } }
                 """;
         Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser().readContents(spec, null, new ParseOptions()).getOpenAPI());
-        GroovyDetectorRuntime runtime = new GroovyDetectorRuntime();
+        StarlarkDetectorRuntime runtime = new StarlarkDetectorRuntime();
 
         assertEquals(1, runtime.execute(bundle.detectors().get("operation-semantics"), api, bundle.rules().get("HTTP001")).size());
         assertEquals(1, runtime.execute(bundle.detectors().get("operation-semantics"), api, bundle.rules().get("HTTP002")).size());
@@ -541,6 +571,9 @@ class GenericPolicyValidationPluginTest {
         assertResource("api-policy/policies/MastercardCore.md");
         assertResource("api-policy/detectors/resource-path/Detector.md");
         assertResource("api-policy/detectors/resource-path/Detector.groovy");
+        assertResource("api-policy/detectors/resource-path/Detector.star");
+        assertResource("api-policy/detectors/schema/Detector.star");
+        assertResource("api-policy/detectors/security/Detector.star");
         assertResource("api-policy/detectors/operation/Detector.md");
         assertResource("api-policy/detectors/operation/Detector.groovy");
         assertResource("api-policy/detectors/text-style/Detector.md");
@@ -602,6 +635,13 @@ class GenericPolicyValidationPluginTest {
         resources.put("policies/ZalandoExtended.md", readResource("api-policy/policies/ZalandoExtended.md"));
         resources.put("detectors/hostname/Detector.md", readResource("api-policy/detectors/hostname/Detector.md"));
         resources.put("detectors/hostname/Detector.groovy", readResource("api-policy/detectors/hostname/Detector.groovy"));
+        for (String detectorId : new String[] {"resource-path", "operation", "text-style", "naming", "schema",
+                "operation-semantics", "response-code", "response-header", "proprietary-header", "query-collection",
+                "security", "manual", "bulk-operation", "versioning", "compatibility", "metadata", "openapi-version",
+                "media-type", "date-time-name", "common-field", "path-count", "hostname"}) {
+            resources.put("detectors/" + detectorId + "/Detector.star",
+                    readResource("api-policy/detectors/" + detectorId + "/Detector.star"));
+        }
         return resources;
     }
 

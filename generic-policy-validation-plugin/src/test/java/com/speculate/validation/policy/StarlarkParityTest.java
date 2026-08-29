@@ -1,12 +1,9 @@
 package com.speculate.validation.policy;
 
-import com.speculate.validation.policy.star.StarlarkDetectorRuntime;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import org.junit.jupiter.api.Test;
 
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -31,6 +28,9 @@ class StarlarkParityTest {
 
     private final PolicyBundle bundle = new PolicyBundleLoader()
             .load(new ClasspathBundleResources(getClass().getClassLoader()));
+    private final PolicyBundle groovyBundle = new PolicyBundleLoader()
+            .load(new ClasspathBundleResources(getClass().getClassLoader()),
+                    new PolicyBundleLoader.LoadOptions(true));
     private final GroovyDetectorRuntime groovy = new GroovyDetectorRuntime();
     private final StarlarkDetectorRuntime starlark = new StarlarkDetectorRuntime();
 
@@ -124,23 +124,18 @@ class StarlarkParityTest {
     }
 
     @Test
-    void everyDetectorHasAStarlarkPort() {
-        for (String detectorId : bundle.detectors().keySet()) {
-            assertTrue(getClass().getClassLoader()
-                            .getResource("api-policy/detectors/" + detectorId + "/Detector.star") != null,
-                    detectorId + " is missing Detector.star");
+    void theDefaultBundleRunsEveryDetectorOnStarlark() {
+        for (Map.Entry<String, Detector> detector : bundle.detectors().entrySet()) {
+            assertEquals("starlark", detector.getValue().language(),
+                    detector.getKey() + " should have been loaded as a Starlark detector by default");
         }
     }
 
     @Test
-    void everyStarlarkPortCompiles() {
-        for (String detectorId : bundle.detectors().keySet()) {
-            String source = starSource(detectorId);
-            try {
-                starlark.validate(source);
-            } catch (RuntimeException e) {
-                fail(detectorId + "/Detector.star does not compile: " + e.getMessage());
-            }
+    void theGroovyForcedBundleKeepsEveryDetectorOnGroovy() {
+        for (Map.Entry<String, Detector> detector : groovyBundle.detectors().entrySet()) {
+            assertEquals("groovy", detector.getValue().language(),
+                    detector.getKey() + " should stay on Groovy when forced");
         }
     }
 
@@ -158,17 +153,17 @@ class StarlarkParityTest {
 
     /** Runs one detector both ways for one rule+params; null when the detector is not bundled. */
     private Result compare(Map<String, Object> api, Rule rule, Map<String, Object> parameters) {
-        Detector detector = bundle.detectors().get(rule.detector());
-        if (detector == null) {
+        Detector groovyDetector = groovyBundle.detectors().get(rule.detector());
+        Detector starlarkDetector = bundle.detectors().get(rule.detector());
+        if (groovyDetector == null || starlarkDetector == null) {
             return null;
         }
         Rule effective = new Rule(rule.id(), rule.title(), rule.category(), rule.detector(),
                 rule.scope(), parameters, rule.documentationMarkdown());
 
-        List<List<String>> expected = normalise(groovy.execute(detector, api, effective));
+        List<List<String>> expected = normalise(groovy.execute(groovyDetector, api, effective));
         try {
-            List<List<String>> actual = normaliseMaps(
-                    starlark.execute(starSource(rule.detector()), api, effective.asMap()));
+            List<List<String>> actual = normalise(starlark.execute(starlarkDetector, api, effective));
             String mismatch = expected.equals(actual)
                     ? null
                     : rule.id() + " [" + rule.detector() + "]\n    groovy=" + expected + "\n    star  =" + actual;
@@ -176,10 +171,6 @@ class StarlarkParityTest {
         } catch (RuntimeException e) {
             return new Result(!expected.isEmpty(), rule.id() + " [" + rule.detector() + "] — Starlark threw: " + e);
         }
-    }
-
-    private String starSource(String detectorId) {
-        return readResource("api-policy/detectors/" + detectorId + "/Detector.star");
     }
 
     private static List<List<String>> normalise(List<Occurrence> occurrences) {
@@ -193,29 +184,9 @@ class StarlarkParityTest {
         return rows;
     }
 
-    private static List<List<String>> normaliseMaps(List<Map<String, String>> occurrences) {
-        List<List<String>> rows = new ArrayList<>();
-        for (Map<String, String> occurrence : occurrences) {
-            rows.add(List.of(
-                    occurrence.getOrDefault("pointer", ""),
-                    occurrence.getOrDefault("path", ""),
-                    occurrence.get("message")));
-        }
-        return rows;
-    }
-
     private static Map<String, Object> apiModel(String spec) {
         return OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
                 .readContents(spec, null, new ParseOptions()).getOpenAPI());
-    }
-
-    private String readResource(String path) {
-        try (InputStream stream = getClass().getClassLoader().getResourceAsStream(path)) {
-            assertTrue(stream != null, path + " must be on the classpath");
-            return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            throw new AssertionError("Could not read " + path, e);
-        }
     }
 
     // --- corpus: deliberately non-conforming specs -----------------------
