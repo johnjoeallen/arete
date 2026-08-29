@@ -28,6 +28,8 @@ public final class GenericPolicyValidationPlugin implements SpecValidationPlugin
     private final PolicyBundleLoader bundleLoader = new PolicyBundleLoader();
     private final GroovyDetectorRuntime groovyRuntime = new GroovyDetectorRuntime();
     private final StarlarkDetectorRuntime starlarkRuntime = new StarlarkDetectorRuntime();
+    private volatile boolean forkDetectors;
+    private volatile long forkDetectorTimeoutMillis = 5000;
 
     @Override public String getId() { return "generic-policy"; }
     @Override public String getName() { return "Speculate Policy Engine"; }
@@ -56,6 +58,8 @@ public final class GenericPolicyValidationPlugin implements SpecValidationPlugin
         }
         bundle = bundleLoader.load(new ClasspathBundleResources(getClass().getClassLoader()),
                 new PolicyBundleLoader.LoadOptions(precedence));
+        forkDetectors = booleanConfig(config, "fork-detectors", "speculate.policy.fork-detectors", false);
+        forkDetectorTimeoutMillis = longConfig(config, "fork-detector-timeout-ms", "speculate.policy.fork-detector-timeout-ms", 5000);
     }
 
     /**
@@ -91,6 +95,26 @@ public final class GenericPolicyValidationPlugin implements SpecValidationPlugin
         return value != null ? value : System.getProperty(propertyKey);
     }
 
+    private static boolean booleanConfig(Map<String, String> config, String configKey, String propertyKey, boolean fallback) {
+        String value = configOrProperty(config, configKey, propertyKey);
+        if (value == null || value.isBlank()) return fallback;
+        if (value.equalsIgnoreCase("true")) return true;
+        if (value.equalsIgnoreCase("false")) return false;
+        throw new IllegalArgumentException(configKey + " must be true or false");
+    }
+
+    private static long longConfig(Map<String, String> config, String configKey, String propertyKey, long fallback) {
+        String value = configOrProperty(config, configKey, propertyKey);
+        if (value == null || value.isBlank()) return fallback;
+        try {
+            long parsed = Long.parseLong(value);
+            if (parsed < 1) throw new NumberFormatException();
+            return parsed;
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(configKey + " must be a positive integer");
+        }
+    }
+
     @Override
     public ValidationResult validate(SpecInput input) {
         PolicyBundle currentBundle;
@@ -124,7 +148,9 @@ public final class GenericPolicyValidationPlugin implements SpecValidationPlugin
                 Map<String, Object> parameters = new LinkedHashMap<>(rule.parameters());
                 parameters.putAll(policyRule.getValue().parameters());
                 Rule effectiveRule = new Rule(rule.id(), rule.title(), rule.category(), rule.detector(), rule.scope(), parameters, rule.documentationMarkdown());
-                occurrences = "groovy".equals(detector.language())
+                occurrences = forkDetectors
+                        ? new ForkedDetectorRuntime(forkDetectorTimeoutMillis).execute(detector, api, effectiveRule)
+                        : "groovy".equals(detector.language())
                         ? groovyRuntime.execute(detector, api, effectiveRule)
                         : starlarkRuntime.execute(detector, api, effectiveRule);
             } catch (DetectorException e) {

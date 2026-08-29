@@ -759,6 +759,32 @@ class GenericPolicyValidationPluginTest {
     }
 
     @Test
+    void forkedRuntimeReturnsDetectorOccurrencesThroughJsonLines() {
+        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        String spec = """
+                openapi: 3.0.0
+                info: { title: Test API, version: 1.0.0 }
+                paths:
+                  /customers:
+                    post:
+                      requestBody: { content: { application/json: { schema: { type: object } } } }
+                      responses: { '200': { description: OK } }
+                """;
+        Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
+                .readContents(spec, null, new ParseOptions()).getOpenAPI());
+
+        Rule operationRule = bundle.rules().get("HTTP005");
+        operationRule = new Rule(operationRule.id(), operationRule.title(), operationRule.category(),
+                operationRule.detector(), operationRule.scope(), Map.of("method", "POST", "request-body", "present"),
+                operationRule.documentationMarkdown());
+        java.util.List<Occurrence> occurrences = new ForkedDetectorRuntime(10000)
+                .execute(bundle.detectors().get("operation"), api, operationRule);
+
+        assertEquals(1, occurrences.size());
+        assertEquals("POST /customers", occurrences.get(0).path());
+    }
+
+    @Test
     void operationSemanticsDetectorReportsOnlyDocumentedHeuristicSignals() {
         PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
         String spec = """

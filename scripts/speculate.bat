@@ -6,6 +6,7 @@ set "DATA_DIR=%USERPROFILE%\.speculate\data"
 set "PORT="
 set "WIPE=0"
 set "GROOVY=0"
+set "FORK=0"
 set "DETECTOR_LANGUAGES="
 
 :parse
@@ -37,6 +38,11 @@ if /i "%~1"=="--enable-groovy-detectors" (
     shift
     goto :parse
 )
+if /i "%~1"=="--fork-detectors" (
+    set "FORK=1"
+    shift
+    goto :parse
+)
 if /i "%~1"=="--detector-languages" (
     set "DETECTOR_LANGUAGES=%~2"
     shift
@@ -49,13 +55,14 @@ echo Unknown option: %~1
 goto :usage
 
 :usage
-echo Usage: %~nx0 [--port PORT] [--wipe-db] [--enable-groovy-detectors] [--detector-languages LIST] [-h^|--help]
+echo Usage: %~nx0 [--port PORT] [--wipe-db] [--enable-groovy-detectors] [--fork-detectors] [--detector-languages LIST] [-h^|--help]
 echo.
 echo   --port, -p PORT   Run the server on PORT instead of the configured default.
 echo   --wipe-db         Delete the local database ^(%DATA_DIR%^) before starting.
 echo   --enable-groovy-detectors
 echo                     Allow the legacy, unsandboxed Groovy runtime as a fallback
 echo                     ^(precedence: starlark,groovy^).
+echo   --fork-detectors   Run each detector in a disposable JVM with a timeout.
 echo   --detector-languages LIST
 echo                     Comma-separated detector language precedence, e.g.
 echo                     "starlark,groovy" or "groovy,starlark".
@@ -102,8 +109,9 @@ set "JAVA_OPTS="
 if not "%DETECTOR_LANGUAGES%"=="" (
     set "JAVA_OPTS=-Dspeculate.policy.detector-languages=%DETECTOR_LANGUAGES%"
 ) else if "%GROOVY%"=="1" (
-    set "JAVA_OPTS=-Dspeculate.policy.detector-language=groovy"
+  set "JAVA_OPTS=-Dspeculate.policy.detector-language=groovy"
 )
+if "%FORK%"=="1" set "JAVA_OPTS=%JAVA_OPTS% -Dspeculate.policy.fork-detectors=true"
 set "ARGS="
 if not "%PORT%"=="" set "ARGS=--server.port=%PORT%"
 
