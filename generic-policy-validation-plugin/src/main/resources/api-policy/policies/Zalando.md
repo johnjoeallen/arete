@@ -23,6 +23,7 @@ rules:
   STANDARD001: 0.5
   STANDARD002: 0.5
   STANDARD003: 0.5
+  STANDARD004: 0.5
 ---
 
 # Zalando Policy

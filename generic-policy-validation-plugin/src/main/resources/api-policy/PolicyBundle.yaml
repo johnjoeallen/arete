@@ -16,6 +16,7 @@ rules:
   STANDARD001: rules/STANDARD001.md
   STANDARD002: rules/STANDARD002.md
   STANDARD003: rules/STANDARD003.md
+  STANDARD004: rules/STANDARD004.md
   CASE001: rules/CASE001.md
   CASE002: rules/CASE002.md
   CASE003: rules/CASE003.md
@@ -79,5 +80,6 @@ detectors:
   compatibility: detectors/compatibility/Detector.md
   metadata: detectors/metadata/Detector.md
   hostname: detectors/hostname/Detector.md
+  path-count: detectors/path-count/Detector.md
   response-code: detectors/response-code/Detector.md
   response-header: detectors/response-header/Detector.md
