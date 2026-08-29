@@ -149,8 +149,9 @@ Plugins are `.jar` files, discovered from two folders at startup:
   Mastercard Core, Zalando, and Zalando Extended policies over a bundle of
   text-defined rules and detectors. Detectors run in a **safe-by-construction
   Starlark runtime** by default (no filesystem, network, or reflection); the
-  legacy unsandboxed Groovy runtime stays available as a deprecated opt-in
-  (`detector-language=groovy`). Not created automatically if
+  unsandboxed Groovy runtime is still supported but disabled by default until a
+  detector sandbox lands (`detector-language=groovy` to opt in for trusted
+  bundles). Not created automatically if
   missing, since in a from-source dev run this resolves under `target/classes`
   and shouldn't be conjured out of thin air there.
 - `~/.speculate/plugins` — a stable location independent of where

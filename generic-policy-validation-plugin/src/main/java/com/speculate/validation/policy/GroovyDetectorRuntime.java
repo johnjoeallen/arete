@@ -8,7 +8,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-/** Runs trusted Groovy from a policy bundle directly in the plugin JVM. */
+/**
+ * Runs bundle Groovy directly in the plugin JVM via a bare {@code GroovyShell}
+ * — no sandbox. It is an opt-in fallback ({@code detector-language=groovy}),
+ * disabled by default until the detector sandbox is available. Not deprecated:
+ * kept parity-equivalent to the Starlark runtime and re-enabled once it can be
+ * run safely. See {@code docs/policy-engine-sandbox-plan.md}.
+ */
 final class GroovyDetectorRuntime {
     void validate(Detector detector) {
         if (!"groovy".equals(detector.language())) throw new BundleValidationException("Unsupported detector language '" + detector.language() + "'");

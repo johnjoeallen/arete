@@ -61,8 +61,9 @@ and both stay unavailable.
 - The engine **runs Starlark by default.** `PolicyBundleLoader` loads
   `Detector.star` for every detector; `GenericPolicyValidationPlugin`
   dispatches per `detector.language()`.
-- **Groovy is retained but disabled** — opt back in with
-  `detector-language=groovy` (config) or
+- **Groovy is supported but disabled by default** (not deprecated) — it is
+  unsandboxed, so it stays off until the sandbox plan lands, then returns as a
+  first-class option. Opt back in with `detector-language=groovy` (config) or
   `-Dspeculate.policy.detector-language=groovy`; the plugin logs a warning.
   `PolicyBundleLoader.LoadOptions(forceGroovy)` drives it. A detector missing
   its `.star` falls back to Groovy with a per-detector warning.
@@ -75,8 +76,7 @@ and both stay unavailable.
   27.1 (2019) and pulls a JNI CPU-profiler stub that logs a native-access
   warning. Production vendors a current `net/starlark/java/**` (runtime subset
   only — exclude `cmd`, `JNI`, `CpuProfiler`).
-- Retire `Detector.groovy` + drop `org.apache.groovy` once the Groovy opt-in
-  is no longer wanted.
+- Implement the [sandbox plan](policy-engine-sandbox-plan.md) Layers A + B so
+  the Groovy runtime can be re-enabled as a first-class option; Layer C + §10
+  additionally gate remote bundle loading.
 - Timeout wrapper (step cap only today); compiled-`Program` cache.
-- Layers C/§10 of the [sandbox plan](policy-engine-sandbox-plan.md) for remote
-  bundles remain as scoped there.
