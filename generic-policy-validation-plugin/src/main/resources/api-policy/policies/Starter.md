@@ -1,61 +1,61 @@
 ---
 id: Starter
 rules:
-  REST001: 10
-  DOC001: 10
-  DOC002: 10
-  DOC003: 10
-  DOC004: 10
-  DOC005: 10
-  DOC009: 10
-  CASE001: 10
-  CASE002: 10
-  CASE003: 10
-  CASE004: 10
-  CASE005: 10
-  REST002: 10
-  REST003: 10
-  REST004: 10
-  REST005: 10
-  REST006: 10
-  JSON003: 10
-  JSON004: 10
-  JSON006: 10
-  JSON007: 10
-  JSON009: 10
-  HTTP004: 10
-  HTTP005: 10
-  HTTP001: 10
-  HTTP002: 10
-  HTTP003: 10
-  HTTP006: 10
-  HTTP008: 10
-  UPDATE002: 10
-  UPDATE001: 10
-  UPDATE003: 10
-  BULK001: 10
-  BULK002: 10
-  BULK003: 10
-  VERSION001: 10
-  VERSION002: 10
-  VERSION003: 10
-  VERSION004: 10
-  COMPAT001: 10
-  COMPAT002: 10
-  COMPAT003: 10
-  COMPAT004: 10
-  COMPAT005: 10
-  COMPAT006: 10
-  STATUS001: 10
-  STATUS002: 10
-  STATUS003: 10
-  STATUS004: 10
-  STATUS005: 10
+  REST001: 0.5
+  DOC001: 0.5
+  DOC002: 0.5
+  DOC003: 0.5
+  DOC004: 0.5
+  DOC005: 0.5
+  DOC009: 0.5
+  CASE001: 0.5
+  CASE002: 0.5
+  CASE003: 0.5
+  CASE004: 0.5
+  CASE005: 0.5
+  REST002: 0.5
+  REST003: 0.5
+  REST004: 0.5
+  REST005: 0.5
+  REST006: 0.5
+  JSON003: 0.5
+  JSON004: 0.5
+  JSON006: 0.5
+  JSON007: 0.5
+  JSON009: 0.5
+  HTTP004: 0.5
+  HTTP005: 0.5
+  HTTP001: 0.5
+  HTTP002: 0.5
+  HTTP003: 0.5
+  HTTP006: 0.5
+  HTTP008: 0.5
+  UPDATE002: 0.5
+  UPDATE001: 0.5
+  UPDATE003: 0.5
+  BULK001: 0.5
+  BULK002: 0.5
+  BULK003: 0.5
+  VERSION001: 0.5
+  VERSION002: 0.5
+  VERSION003: 0.5
+  VERSION004: 0.5
+  COMPAT001: 0.5
+  COMPAT002: 0.5
+  COMPAT003: 0.5
+  COMPAT004: 0.5
+  COMPAT005: 0.5
+  COMPAT006: 0.5
+  STATUS001: 0.5
+  STATUS002: 0.5
+  STATUS003: 0.5
+  STATUS004: 0.5
+  STATUS005: 0.5
 ---
 
 # Speculate Starter Policy
 
 This initial policy enables every currently bundled rule. Each matched rule
-deducts ten points once, regardless of how many occurrences it reports. It is
+deducts half a point once, regardless of how many occurrences it reports. It is
 a deliberately simple baseline; organisations should publish their own policy
 with calibrated deductions and prohibited dispositions.

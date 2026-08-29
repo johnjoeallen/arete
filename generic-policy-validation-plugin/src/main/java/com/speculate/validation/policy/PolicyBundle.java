@@ -32,7 +32,7 @@ record Policy(String id, Map<String, PolicyDisposition> dispositions) {
     }
 }
 sealed interface PolicyDisposition permits Deduction, Prohibited { }
-record Deduction(int points) implements PolicyDisposition { }
+record Deduction(double points) implements PolicyDisposition { }
 record Prohibited() implements PolicyDisposition { }
 record Occurrence(String pointer, String path, String message) { }
 

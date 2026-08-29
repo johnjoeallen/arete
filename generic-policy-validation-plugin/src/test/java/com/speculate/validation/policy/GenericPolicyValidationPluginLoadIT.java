@@ -45,7 +45,7 @@ class GenericPolicyValidationPluginLoadIT {
 
         assertEquals(ValidationResult.Status.SUCCESS, result.getStatus());
         assertEquals(3, result.getViolations().size());
-        assertEquals(70, result.getOverallScore());
+        assertEquals(98.5, result.getOverallScore());
     }
 
     private static File findBuiltJar() {

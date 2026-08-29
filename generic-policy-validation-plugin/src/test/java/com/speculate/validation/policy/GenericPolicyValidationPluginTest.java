@@ -122,10 +122,10 @@ class GenericPolicyValidationPluginTest {
         assertEquals(9, result.getViolations().size());
         assertEquals("REST001", result.getViolations().get(0).getRuleId());
         assertEquals(2, result.getViolations().stream().filter(violation -> violation.getRuleId().equals("REST001")).count());
-        assertEquals(50, result.getOverallScore());
-        assertEquals(50, result.getOverallScoreWithoutBlockers());
-        assertEquals(10, result.getViolations().get(0).getScoreImprovement());
-        assertEquals(10, result.getViolations().get(1).getScoreImprovement());
+        assertEquals(97.5, result.getOverallScore());
+        assertEquals(97.5, result.getOverallScoreWithoutBlockers());
+        assertEquals(0.5, result.getViolations().get(0).getScoreImprovement());
+        assertEquals(0.5, result.getViolations().get(1).getScoreImprovement());
         assertEquals("http://localhost:6809/plugins/generic-policy/rules/REST001",
                 result.getViolations().get(0).getDocumentationUrl());
         assertTrue(plugin.getRuleDocumentation("REST001").orElseThrow().markdown().contains("GET /customers"));
@@ -142,7 +142,7 @@ class GenericPolicyValidationPluginTest {
         assertEquals(50, result.getRulesEvaluatedCount());
         assertEquals(1, result.getViolations().size());
         assertEquals("VERSION004", result.getViolations().get(0).getRuleId());
-        assertEquals(90, result.getOverallScore());
+        assertEquals(99.5, result.getOverallScore());
     }
 
     @Test

@@ -109,9 +109,9 @@ final class PolicyBundleLoader {
         Map<String, PolicyDisposition> dispositions = new LinkedHashMap<>();
         for (Map.Entry<String, Object> entry : map(path, "rules", data.get("rules")).entrySet()) {
             Object value = entry.getValue();
-            if (value instanceof Number number && number.intValue() == number.doubleValue() && number.intValue() >= 0 && number.intValue() <= 100) dispositions.put(entry.getKey(), new Deduction(number.intValue()));
+            if (value instanceof Number number && Double.isFinite(number.doubleValue()) && number.doubleValue() >= 0 && number.doubleValue() <= 100) dispositions.put(entry.getKey(), new Deduction(number.doubleValue()));
             else if ("PROHIBITED".equals(value)) dispositions.put(entry.getKey(), new Prohibited());
-            else throw new BundleValidationException(path + ": " + entry.getKey() + " must be an integer from 0 to 100 or PROHIBITED");
+            else throw new BundleValidationException(path + ": " + entry.getKey() + " must be a number from 0 to 100 or PROHIBITED");
         }
         return new Policy(requiredString(path, "id", data.get("id")), dispositions);
     }

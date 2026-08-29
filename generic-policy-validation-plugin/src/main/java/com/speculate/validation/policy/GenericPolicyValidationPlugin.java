@@ -62,7 +62,7 @@ public final class GenericPolicyValidationPlugin implements SpecValidationPlugin
         Policy policy = currentBundle.policyOrDefault(input.getRuleSet());
         Map<String, Object> api = OpenApiMapAdapter.toMap(parsed.getOpenAPI());
         List<Violation> violations = new ArrayList<>();
-        int deductions = 0;
+        double deductions = 0;
         boolean prohibitedMatched = false;
         int rulesEvaluated = 0;
 
@@ -97,8 +97,8 @@ public final class GenericPolicyValidationPlugin implements SpecValidationPlugin
             }
         }
 
-        int qualityScore = Math.max(0, 100 - deductions);
-        int effectiveScore = prohibitedMatched ? 0 : qualityScore;
+        double qualityScore = Math.max(0, 100 - deductions);
+        double effectiveScore = prohibitedMatched ? 0 : qualityScore;
         return ValidationResult.builder().status(ValidationResult.Status.SUCCESS).violations(violations)
                 .rulesEvaluatedCount(rulesEvaluated).overallScore(effectiveScore)
                 .overallScoreWithoutBlockers(qualityScore).build();
