@@ -15,6 +15,7 @@ parameters:
       - rpc-style
       - custom-action
       - action-style
+      - trailing-slash
 ---
 
 # Resource-path detector

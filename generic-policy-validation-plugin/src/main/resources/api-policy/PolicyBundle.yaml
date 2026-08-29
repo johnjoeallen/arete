@@ -14,6 +14,7 @@ rules:
   DOC008: rules/DOC008.md
   DOC009: rules/DOC009.md
   STANDARD001: rules/STANDARD001.md
+  STANDARD002: rules/STANDARD002.md
   CASE001: rules/CASE001.md
   CASE002: rules/CASE002.md
   CASE003: rules/CASE003.md
