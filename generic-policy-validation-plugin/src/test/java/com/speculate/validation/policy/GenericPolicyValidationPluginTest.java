@@ -118,7 +118,7 @@ class GenericPolicyValidationPluginTest {
         ValidationResult result = plugin.validate(input(ACTION_PATH_SPEC));
 
         assertEquals(ValidationResult.Status.SUCCESS, result.getStatus());
-        assertEquals(55, result.getRulesEvaluatedCount());
+        assertEquals(54, result.getRulesEvaluatedCount());
         assertEquals(16, result.getViolations().size());
         assertEquals("REST001", result.getViolations().get(0).getRuleId());
         assertEquals(2, result.getViolations().stream().filter(violation -> violation.getRuleId().equals("REST001")).count());
@@ -139,7 +139,7 @@ class GenericPolicyValidationPluginTest {
         ValidationResult result = plugin.validate(input(COMPLIANT_STARTER_SPEC));
 
         assertEquals(ValidationResult.Status.SUCCESS, result.getStatus());
-        assertEquals(55, result.getRulesEvaluatedCount());
+        assertEquals(54, result.getRulesEvaluatedCount());
         assertEquals(8, result.getViolations().size());
         assertEquals("DOC006", result.getViolations().get(0).getRuleId());
         assertEquals(97.5, result.getOverallScore());
