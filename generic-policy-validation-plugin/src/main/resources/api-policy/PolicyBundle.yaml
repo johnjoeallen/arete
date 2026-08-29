@@ -56,7 +56,7 @@ rules:
 
 policies:
   Strict: policies/Strict.md
-  Mastercard: policies/Mastercard.md
+  "Mastercard Core": policies/MastercardCore.md
 
 detectors:
   resource-path: detectors/resource-path/Detector.md

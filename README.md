@@ -144,7 +144,7 @@ Plugins are `.jar` files, discovered from two folders at startup:
 - `plugins/`, next to `speculate.jar` — this is where the release zip ships
   bundled default plugins: `zally-validation-plugin`, which wraps Zalando's
   [Zally](https://github.com/zalando/zally) linter, and
-  `generic-policy-validation-plugin`, which currently ships Strict and Mastercard policies
+  `generic-policy-validation-plugin`, which currently ships Strict and Mastercard Core policies
   with a Groovy resource-path detector. Detectors are trusted extension code:
   run only bundles whose publisher you trust locally, or deploy Speculate in
   Docker when host containment is desired. Not created automatically if

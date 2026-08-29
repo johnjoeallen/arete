@@ -1,5 +1,5 @@
 ---
-id: Mastercard
+id: Mastercard Core
 rules:
   REST001: 0.5
   DOC001: 0.5
@@ -53,7 +53,7 @@ rules:
   STATUS005: 0.5
 ---
 
-# Mastercard Policy
+# Mastercard Core Policy
 
 This policy enables the Mastercard-requested rules that are currently bundled.
 Each matched rule deducts half a point once, regardless of how many occurrences
