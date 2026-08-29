@@ -7,6 +7,7 @@ rules:
   DOC003: 0.5
   DOC004: 0.5
   DOC005: 0.5
+  DOC006: 0.5
   DOC009: 0.5
   CASE001: 0.5
   CASE002: 0.5

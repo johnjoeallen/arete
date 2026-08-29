@@ -9,6 +9,7 @@ rules:
   DOC003: rules/DOC003.md
   DOC004: rules/DOC004.md
   DOC005: rules/DOC005.md
+  DOC006: rules/DOC006.md
   DOC009: rules/DOC009.md
   CASE001: rules/CASE001.md
   CASE002: rules/CASE002.md
@@ -69,5 +70,6 @@ detectors:
   bulk-operation: detectors/bulk-operation/Detector.md
   versioning: detectors/versioning/Detector.md
   compatibility: detectors/compatibility/Detector.md
+  metadata: detectors/metadata/Detector.md
   response-code: detectors/response-code/Detector.md
   response-header: detectors/response-header/Detector.md

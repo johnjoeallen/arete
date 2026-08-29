@@ -104,7 +104,17 @@ final class OpenApiMapAdapter {
                 schemas.add(schemaMap);
             }
         }
-        return Map.of("paths", paths, "schemas", schemas);
+        Map<String, Object> info = new LinkedHashMap<>();
+        if (openApi.getInfo() != null) {
+            info.put("title", openApi.getInfo().getTitle());
+            info.put("description", openApi.getInfo().getDescription());
+            info.put("version", openApi.getInfo().getVersion());
+            if (openApi.getInfo().getContact() != null) {
+                info.put("contactName", openApi.getInfo().getContact().getName());
+                info.put("contactEmail", openApi.getInfo().getContact().getEmail());
+            }
+        }
+        return Map.of("paths", paths, "schemas", schemas, "info", info);
     }
 
     private static void addParameters(List<Map<String, Object>> destination, List<Parameter> source, String pointer) {
