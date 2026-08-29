@@ -13,6 +13,10 @@ parameters:
       - integer
       - number
       - array
+  format:
+    type: enum
+    required: false
+    values: [absent]
   enum:
     type: enum
     required: false

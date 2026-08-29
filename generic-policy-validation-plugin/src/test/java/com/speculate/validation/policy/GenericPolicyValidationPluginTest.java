@@ -118,7 +118,7 @@ class GenericPolicyValidationPluginTest {
         ValidationResult result = plugin.validate(input(ACTION_PATH_SPEC));
 
         assertEquals(ValidationResult.Status.SUCCESS, result.getStatus());
-        assertEquals(61, result.getRulesEvaluatedCount());
+        assertEquals(62, result.getRulesEvaluatedCount());
         assertEquals(16, result.getViolations().size());
         assertEquals("REST001", result.getViolations().get(0).getRuleId());
         assertEquals(2, result.getViolations().stream().filter(violation -> violation.getRuleId().equals("REST001")).count());
@@ -140,7 +140,7 @@ class GenericPolicyValidationPluginTest {
         ValidationResult result = plugin.validate(input(COMPLIANT_STARTER_SPEC));
 
         assertEquals(ValidationResult.Status.SUCCESS, result.getStatus());
-        assertEquals(61, result.getRulesEvaluatedCount());
+        assertEquals(62, result.getRulesEvaluatedCount());
         assertEquals(8, result.getViolations().size());
         assertEquals("DOC006", result.getViolations().get(0).getRuleId());
         assertEquals(97.5, result.getOverallScore());
@@ -337,6 +337,7 @@ class GenericPolicyValidationPluginTest {
         resources.put("rules/STANDARD007.md", readResource("api-policy/rules/STANDARD007.md"));
         resources.put("rules/JSON010.md", readResource("api-policy/rules/JSON010.md"));
         resources.put("rules/JSON011.md", readResource("api-policy/rules/JSON011.md"));
+        resources.put("rules/JSON012.md", readResource("api-policy/rules/JSON012.md"));
         resources.put("detectors/date-time-name/Detector.md", readResource("api-policy/detectors/date-time-name/Detector.md"));
         resources.put("detectors/date-time-name/Detector.groovy", readResource("api-policy/detectors/date-time-name/Detector.groovy"));
         resources.put("detectors/common-field/Detector.md", readResource("api-policy/detectors/common-field/Detector.md"));
