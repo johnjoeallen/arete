@@ -39,10 +39,22 @@ For each `validate(spec)` call:
 4. A score is computed (see [Scoring](#scoring)) and returned with the
    violations.
 
-### Detector runtime
+### Detector languages
 
-Every detector is a [Starlark](https://bazel.build/rules/language) source in
-`Detector.star` (issue #125). The engine loads and runs Starlark:
+The engine ships two detector runtimes. Every detector in the bundle is
+authored in **both** languages — `Detector.star` and `Detector.groovy` sit
+side by side under each detector directory — and the runtime in force decides
+which source is loaded.
+
+| Language | Source file | Status |
+|---|---|---|
+| `starlark` | `Detector.star` | **Default.** Always available, sandboxed. |
+| `groovy` | `Detector.groovy` | **Disabled by default** — opt-in, unsandboxed. |
+
+#### Starlark (default)
+
+Detectors run as [Starlark](https://bazel.build/rules/language) sources
+(issue #125).
 
 - **Safe by construction** — a Starlark detector cannot touch the filesystem,
   network, environment, threads, reflection, or any class outside the
@@ -50,8 +62,39 @@ Every detector is a [Starlark](https://bazel.build/rules/language) source in
   returns a list of occurrence dicts. Nothing to sandbox.
 - Regex is [RE2/J](https://github.com/google/re2j) — linear-time, no
   catastrophic backtracking.
-- The Starlark ports were verified against the former Groovy implementations
-  across a corpus sweep before the legacy sources were removed.
+- The Starlark detectors were verified against the Groovy implementations
+  across a corpus sweep.
+
+#### Groovy (disabled by default)
+
+`GroovyDetectorRuntime` runs the `Detector.groovy` sources directly in the
+plugin JVM via a bare `GroovyShell` — **with no sandbox**. It is a deliberate,
+opt-in fallback and is **disabled by default** until the detector sandbox
+described in the
+[sandbox plan](https://github.com/johnjoeallen/speculate/blob/main/design-notes/policy-engine-sandbox-plan.md)
+lands. It is *not* deprecated — the intent is to re-enable it as a first-class
+option once bundle-supplied Groovy can be run safely.
+
+Enabling it is a **global switch** — it swaps *every* detector to its
+`Detector.groovy` source, it is not per-detector:
+
+=== "Launcher"
+
+    ```bash
+    ./speculate.sh --enable-groovy-detectors
+    ```
+
+=== "System property"
+
+    ```bash
+    java -Dspeculate.policy.detector-language=groovy -jar speculate.jar
+    ```
+
+!!! danger "Groovy detectors are unsandboxed"
+    A `Detector.groovy` runs with the full authority of the plugin JVM —
+    filesystem, network, process execution, reflection. Only turn this on for
+    a policy bundle you fully trust and control. That is why it is off unless
+    you explicitly enable it.
 
 ---
 
@@ -65,7 +108,8 @@ api-policy/
 ├── detectors/
 │   └── <detector-id>/
 │       ├── Detector.md          # descriptor (YAML front matter) + prose
-│       └── Detector.star        # the detector — Starlark
+│       ├── Detector.star        # the detector — Starlark (default runtime)
+│       └── Detector.groovy      # the same detector — Groovy (opt-in runtime)
 ├── rules/
 │   └── <RULE-ID>.md             # rule front matter + human documentation
 └── policies/

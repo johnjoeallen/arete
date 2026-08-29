@@ -1,4 +1,4 @@
-# Speculate
+# <img src="assets/logo.png" alt="" width="48" height="48" style="vertical-align:-0.3em;margin-right:.4em"> Speculate
 
 Speculate is a **local-first API explorer** for OpenAPI/Swagger specs. Paste a
 spec, or point Speculate at one on disk, and get instant browsable docs —
