@@ -114,6 +114,7 @@ final class OpenApiMapAdapter {
                 info.put("contactEmail", openApi.getInfo().getContact().getEmail());
             }
         }
+        if (openApi.getExtensions() != null) info.put("apiId", openApi.getExtensions().get("x-api-id"));
         return Map.of("paths", paths, "schemas", schemas, "info", info);
     }
 

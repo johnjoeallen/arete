@@ -1,5 +1,8 @@
 { Map api, Map rule ->
     def info = api.info ?: [:]
+    if (rule.parameters?.required == 'identifier') {
+        return (info.apiId instanceof String && !info.apiId.trim().isEmpty()) ? [] : [[pointer: '/', path: 'API', message: 'API metadata is missing x-api-id']]
+    }
     def missing = []
     ['title': 'title', 'description': 'description', 'contactName': 'contact name', 'contactEmail': 'contact email'].each { key, label ->
         if (!(info[key] instanceof String) || info[key].trim().isEmpty()) missing << label

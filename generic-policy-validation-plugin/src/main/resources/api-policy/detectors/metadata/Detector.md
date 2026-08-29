@@ -7,10 +7,11 @@ parameters:
   required:
     type: enum
     required: true
-    values: [complete]
+    values: [complete, identifier]
 ---
 
 # Metadata detector
 
 Checks the documented OpenAPI information fields. A complete metadata record
 has a title, description, contact name and email, and a semantic version.
+It can also require the configured `x-api-id` extension.
