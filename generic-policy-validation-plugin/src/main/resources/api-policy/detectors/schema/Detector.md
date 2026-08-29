@@ -27,6 +27,10 @@ parameters:
     type: enum
     required: false
     values: [consistent]
+  extensible:
+    type: enum
+    required: false
+    values: [required]
   nullable:
     type: boolean
     required: false

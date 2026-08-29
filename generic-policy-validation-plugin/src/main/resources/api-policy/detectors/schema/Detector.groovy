@@ -37,6 +37,7 @@
         if (parameters.format == 'absent' && !(property.type in ['integer', 'number']) || parameters.format == 'present' && !(property.format)) return false
         if (parameters['enum-type'] == 'consistent' && property.enumPresent && property.enumValues.any { v -> property.type == 'string' ? !(v instanceof String) : property.type == 'integer' ? !(v instanceof Integer) : property.type == 'number' ? !(v instanceof Number) : false }) return true
         if (parameters['enum-type'] == 'consistent') return false
+        if (parameters.extensible == 'required' && property.enumPresent && !property.extensibleEnum) return true
         if (parameters['max-items'] == 'absent' && property.maxItems != null) return false
         if (parameters['max-items'] == 'present' && property.maxItems == null) return false
         if (parameters.enum == 'present' && !property.enumPresent) return false

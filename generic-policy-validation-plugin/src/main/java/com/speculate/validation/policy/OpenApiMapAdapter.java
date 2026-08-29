@@ -98,6 +98,7 @@ final class OpenApiMapAdapter {
                         propertyMap.put("required", schema.getRequired() != null && schema.getRequired().contains(propertyName));
                         propertyMap.put("enumPresent", property.getEnum() != null && !property.getEnum().isEmpty());
                         propertyMap.put("enumValues", property.getEnum() == null ? List.of() : property.getEnum());
+                        propertyMap.put("extensibleEnum", property.getExtensions() != null && property.getExtensions().containsKey("x-extensible-enum"));
                         properties.add(propertyMap);
                     }
                 }

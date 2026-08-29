@@ -39,6 +39,7 @@ rules:
   JSON011: rules/JSON011.md
   JSON012: rules/JSON012.md
   JSON013: rules/JSON013.md
+  JSON014: rules/JSON014.md
   HTTP004: rules/HTTP004.md
   HTTP005: rules/HTTP005.md
   HTTP001: rules/HTTP001.md
