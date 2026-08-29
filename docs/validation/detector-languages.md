@@ -178,6 +178,6 @@ list/map literals, no map-key iteration, no cross-iteration state, and no
 `str()` / `parse_int` / `url_host`. Those gaps decide which detectors can be
 ported: as of writing, `compatibility`, `manual`, `common-field`,
 `date-time-name`, `documentation-completeness`, `header-schema`,
-`openapi-version`, `operation-semantics`, `request-body`, `schema-name`, and
-`sensitive-data` ship a `Detector.sift`, each parity-tested against its
+`media-type`, `openapi-version`, `operation-semantics`, `request-body`,
+`schema-name` and `sensitive-data` ship a `Detector.sift`, each parity-tested against its
 `Detector.star`. The rest need one of the missing capabilities above.

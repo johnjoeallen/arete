@@ -41,7 +41,11 @@ class SiftParityTest {
                     - { name: api_key, in: query, schema: { type: string } }
                     - { name: X-SSN, in: header, schema: { type: string } }
                   responses:
-                    '200': { description: OK }
+                    '200':
+                      description: OK
+                      content:
+                        text/xml: { schema: { type: string } }
+                        '*/*': { schema: { type: string } }
             components:
               schemas:
                 CreateOrderRequest:
@@ -106,6 +110,23 @@ class SiftParityTest {
 
     @Test void documentationCompletenessParameter() {
         assertParity("documentation-completeness", "parameter", Map.of("require", "both"), true);
+    }
+
+    @Test void mediaTypeResponseAbsent() {
+        assertParity("media-type", "media-type", Map.of("location", "response", "match", "absent"), true);
+    }
+
+    @Test void mediaTypeResponseNotAllowed() {
+        assertParity("media-type", "media-type",
+                Map.of("location", "response", "match", "not-allowed", "allowed", "application/json"), true);
+    }
+
+    @Test void mediaTypeResponseWildcard() {
+        assertParity("media-type", "media-type", Map.of("location", "response", "match", "wildcard"), true);
+    }
+
+    @Test void mediaTypeRequestAbsent() {
+        assertParity("media-type", "media-type", Map.of("location", "request", "match", "absent"), true);
     }
 
     // --- harness ---------------------------------------------------------
