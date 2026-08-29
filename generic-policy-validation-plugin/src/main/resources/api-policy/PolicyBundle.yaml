@@ -78,6 +78,12 @@ rules:
   SORT003: rules/SORT003.md
   SORT004: rules/SORT004.md
   FIELD001: rules/FIELD001.md
+  PAGE001: rules/PAGE001.md
+  PAGE002: rules/PAGE002.md
+  PAGE003: rules/PAGE003.md
+  PAGE004: rules/PAGE004.md
+  PAGE005: rules/PAGE005.md
+  PAGE006: rules/PAGE006.md
   HTTP004: rules/HTTP004.md
   HTTP005: rules/HTTP005.md
   HTTP001: rules/HTTP001.md
@@ -142,3 +148,4 @@ detectors:
   sensitive-search: detectors/sensitive-search/Detector.md
   identifier: detectors/identifier/Detector.md
   collection-capability: detectors/collection-capability/Detector.md
+  pagination: detectors/pagination/Detector.md

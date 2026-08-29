@@ -155,6 +155,7 @@ final class OpenApiMapAdapter {
             detail.put("style", parameter.getStyle());
             detail.put("explode", parameter.getExplode());
             detail.put("schemaType", parameter.getSchema() == null ? null : parameter.getSchema().getType());
+            detail.put("schemaMaximum", parameter.getSchema() == null ? null : parameter.getSchema().getMaximum());
             destination.add(detail);
         }
     }

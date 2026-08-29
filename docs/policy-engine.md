@@ -164,7 +164,7 @@ api.paths[]   { path, pointer, segments[], operations[], operationDetails[] }
   .segments[]           { name, pointer }                 # literal segments only, no {params}
   .operationDetails[]   { method, pointer, summary, requestBodyPresent, security,
                           mediaTypes[], requestMediaTypes[], parameters[], responses[] }
-    .parameters[]       { name, in, pointer, style, explode, schemaType }
+    .parameters[]       { name, in, pointer, style, explode, schemaType, schemaMaximum }
     .responses[]        { status, description, headers[], schemaTypes[], mediaTypes[] }
 api.schemas[]  { name, pointer, type, array, maxItems, properties[] }
   .properties[]         { name, pointer, type, array, maxItems, format, nullable,

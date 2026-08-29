@@ -513,6 +513,39 @@ class GenericPolicyValidationPluginTest {
     }
 
     @Test
+    void paginationDetectorChecksControlsLimitsAndLinks() {
+        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        String spec = """
+                openapi: 3.0.0
+                info: { title: Test API, version: 1.0.0 }
+                paths:
+                  /customers:
+                    get:
+                      parameters:
+                        - { name: page, in: query, schema: { type: string } }
+                        - { name: limit, in: query, schema: { type: integer, maximum: 200 } }
+                        - { name: cursor, in: query, schema: { type: string } }
+                      responses:
+                        '200': { description: OK }
+                  /orders/{orderId}:
+                    get:
+                      parameters:
+                        - { name: orderId, in: path, required: true, schema: { type: string } }
+                      responses: { '200': { description: OK } }
+                """;
+        Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
+                .readContents(spec, null, new ParseOptions()).getOpenAPI());
+        StarlarkDetectorRuntime runtime = new StarlarkDetectorRuntime();
+
+        assertEquals(0, runtime.execute(bundle.detectors().get("pagination"), api, bundle.rules().get("PAGE001")).size());
+        assertEquals(1, runtime.execute(bundle.detectors().get("pagination"), api, bundle.rules().get("PAGE002")).size());
+        assertEquals(0, runtime.execute(bundle.detectors().get("pagination"), api, bundle.rules().get("PAGE003")).size());
+        assertEquals(1, runtime.execute(bundle.detectors().get("pagination"), api, bundle.rules().get("PAGE004")).size());
+        assertEquals(1, runtime.execute(bundle.detectors().get("pagination"), api, bundle.rules().get("PAGE005")).size());
+        assertEquals(0, runtime.execute(bundle.detectors().get("pagination"), api, bundle.rules().get("PAGE006")).size());
+    }
+
+    @Test
     void securityDetectorUsesOperationSecurityAndGlobalFallback() {
         PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
         String spec = """
@@ -781,10 +814,17 @@ class GenericPolicyValidationPluginTest {
         resources.put("rules/SORT004.md", readResource("api-policy/rules/SORT004.md"));
         resources.put("rules/FIELD001.md", readResource("api-policy/rules/FIELD001.md"));
         resources.put("detectors/collection-capability/Detector.md", readResource("api-policy/detectors/collection-capability/Detector.md"));
+        resources.put("rules/PAGE001.md", readResource("api-policy/rules/PAGE001.md"));
+        resources.put("rules/PAGE002.md", readResource("api-policy/rules/PAGE002.md"));
+        resources.put("rules/PAGE003.md", readResource("api-policy/rules/PAGE003.md"));
+        resources.put("rules/PAGE004.md", readResource("api-policy/rules/PAGE004.md"));
+        resources.put("rules/PAGE005.md", readResource("api-policy/rules/PAGE005.md"));
+        resources.put("rules/PAGE006.md", readResource("api-policy/rules/PAGE006.md"));
+        resources.put("detectors/pagination/Detector.md", readResource("api-policy/detectors/pagination/Detector.md"));
         for (String detectorId : new String[] {"resource-path", "operation", "text-style", "naming", "schema",
                 "operation-semantics", "response-code", "response-header", "proprietary-header", "query-collection",
                 "security", "manual", "bulk-operation", "versioning", "compatibility", "metadata", "openapi-version",
-                "media-type", "date-time-name", "common-field", "path-count", "hostname", "error-response", "authentication-error", "sensitive-data", "sensitive-search", "identifier", "collection-capability"}) {
+                "media-type", "date-time-name", "common-field", "path-count", "hostname", "error-response", "authentication-error", "sensitive-data", "sensitive-search", "identifier", "collection-capability", "pagination"}) {
             resources.put("detectors/" + detectorId + "/Detector.star",
                     readResource("api-policy/detectors/" + detectorId + "/Detector.star"));
         }
