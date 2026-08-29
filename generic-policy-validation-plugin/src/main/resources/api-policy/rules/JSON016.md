@@ -91,3 +91,14 @@ detector cannot infer a top-level shape that the contract does not declare.
 The object envelope leaves room for fields such as `count`, pagination links,
 or warnings to be added without changing the response from an array or scalar
 into a different top-level JSON shape.
+
+## Configuration, references, and limitations
+
+The rule is configured with `response-shape: json-object`; it has no threshold
+or property-list configuration. The detector uses the host’s normalised
+response schema types, so referenced schemas count only when resolved into
+those facts. A response with no schema is not flagged, and a response with
+multiple content types is reported if any exposed schema type is not
+`object`. The rule does not validate JSON syntax, media types, runtime
+payloads, nested properties, arrays inside an envelope, or whether an object
+is the best domain representation.
