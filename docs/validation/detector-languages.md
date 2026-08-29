@@ -97,13 +97,37 @@ runtime and is sandboxed by construction.
 detector(api, rule) {
     return api.paths
         .expand { path -> path.operationDetails
-            .filter { operation -> operation.method == "GET"
-                && regexFullMatch("(?i).*\\b(create|update|delete|remove|activate|deactivate|cancel|change|set)\\b.*",
-                    path.path + " " + operation.summary) }
+            .filter { operation ->
+                (rule.parameters.method == null || operation.method == rule.parameters.method)
+                && (
+                    (rule.parameters.expected == "safe"
+                        && operation.method == "GET"
+                        && regexFullMatch("(?i).*\\b(create|update|delete|remove|activate|deactivate|cancel|change|set)\\b.*",
+                            path.path + " " + operation.summary))
+                    || (rule.parameters.match == "full-resource-replacement"
+                        && operation.method == "POST"
+                        && regexFullMatch(".+/\\{[^}]+\\}.*", path.path)
+                        && regexFullMatch("(?i).*\\b(replace|replacement)\\b.*",
+                            path.path + " " + operation.summary))
+                    || (rule.parameters.match == "partial-update"
+                        && operation.method == "PUT"
+                        && regexFullMatch("(?i).*\\b(partial|patch|update)\\b.*",
+                            path.path + " " + operation.summary))
+                    || (rule.parameters.match == "inconsistent-method-resource-semantics"
+                        && (
+                            (operation.method == "GET"
+                                && regexFullMatch("(?i).*\\b(create|update|delete|remove|activate|deactivate|cancel|change|set)\\b.*",
+                                    path.path + " " + operation.summary))
+                            || (operation.method == "POST"
+                                && regexFullMatch(".+/\\{[^}]+\\}.*", path.path)
+                                && regexFullMatch("(?i).*\\b(replace|replacement)\\b.*",
+                                    path.path + " " + operation.summary)))
+                ))
+            }
             .map { operation -> occurrence(
                 operation.pointer,
                 operation.method + " " + path.path,
-                "GET operation appears to mutate state") }
+                operationMessage(rule.parameters)) }
             }
             ;
 }
