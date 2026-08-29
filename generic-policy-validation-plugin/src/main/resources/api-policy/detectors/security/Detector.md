@@ -1,7 +1,7 @@
 ---
 id: security
-language: groovy
-source: Detector.groovy
+language: starlark
+source: Detector.star
 scopes: [operation]
 parameters:
   scheme:

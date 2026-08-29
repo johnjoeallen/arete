@@ -1,7 +1,7 @@
 ---
 id: proprietary-header
-language: groovy
-source: Detector.groovy
+language: starlark
+source: Detector.star
 scopes: [header]
 parameters:
   allowed:

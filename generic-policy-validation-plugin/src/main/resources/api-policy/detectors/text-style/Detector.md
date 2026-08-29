@@ -1,7 +1,7 @@
 ---
 id: text-style
-language: groovy
-source: Detector.groovy
+language: starlark
+source: Detector.star
 scopes:
   - operation-summary
 parameters:

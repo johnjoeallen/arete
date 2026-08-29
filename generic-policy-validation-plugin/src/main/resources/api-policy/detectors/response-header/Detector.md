@@ -1,7 +1,7 @@
 ---
 id: response-header
-language: groovy
-source: Detector.groovy
+language: starlark
+source: Detector.star
 scopes: [response]
 parameters:
   status:

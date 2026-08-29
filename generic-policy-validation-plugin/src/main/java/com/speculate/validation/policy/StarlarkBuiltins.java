@@ -54,7 +54,7 @@ public final class StarlarkBuiltins implements StarlarkValue {
 
     @StarlarkMethod(
             name = "tokenize",
-            doc = "Splits text on any character in delims, dropping empty tokens (Groovy String.tokenize semantics).",
+            doc = "Splits text on any character in delims, dropping empty tokens.",
             parameters = {
                     @Param(name = "text"),
                     @Param(name = "delims"),
@@ -70,7 +70,7 @@ public final class StarlarkBuiltins implements StarlarkValue {
 
     @StarlarkMethod(
             name = "parse_int",
-            doc = "Parses text as a base-10 integer, or returns fallback if it is not one (Groovy Integer.parseInt + catch).",
+            doc = "Parses text as a base-10 integer, or returns fallback if it is not one.",
             parameters = {
                     @Param(name = "text"),
                     @Param(name = "fallback"),

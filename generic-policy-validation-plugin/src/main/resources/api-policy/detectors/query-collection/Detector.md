@@ -1,7 +1,7 @@
 ---
 id: query-collection
-language: groovy
-source: Detector.groovy
+language: starlark
+source: Detector.star
 scopes: [query-parameter]
 parameters:
   style:

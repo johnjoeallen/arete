@@ -1,7 +1,7 @@
 ---
 id: openapi-version
-language: groovy
-source: Detector.groovy
+language: starlark
+source: Detector.star
 scopes: [api]
 parameters:
   allowed:

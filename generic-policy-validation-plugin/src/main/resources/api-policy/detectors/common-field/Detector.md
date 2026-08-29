@@ -1,7 +1,7 @@
 ---
 id: common-field
-language: groovy
-source: Detector.groovy
+language: starlark
+source: Detector.star
 scopes: [property]
 parameters:
   convention:

@@ -1,7 +1,7 @@
 ---
 id: versioning
-language: groovy
-source: Detector.groovy
+language: starlark
+source: Detector.star
 scopes: [path, header, media-type, api]
 parameters:
   location:

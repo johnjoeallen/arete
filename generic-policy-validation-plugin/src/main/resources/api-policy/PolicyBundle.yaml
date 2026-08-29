@@ -53,6 +53,16 @@ rules:
   CONTENT002: rules/CONTENT002.md
   CONTENT003: rules/CONTENT003.md
   CONTENT004: rules/CONTENT004.md
+  ERROR001: rules/ERROR001.md
+  ERROR002: rules/ERROR002.md
+  ERROR003: rules/ERROR003.md
+  ERROR004: rules/ERROR004.md
+  ERROR005: rules/ERROR005.md
+  ERROR006: rules/ERROR006.md
+  ERROR007: rules/ERROR007.md
+  ERROR008: rules/ERROR008.md
+  ERROR009: rules/ERROR009.md
+  ERROR010: rules/ERROR010.md
   HTTP004: rules/HTTP004.md
   HTTP005: rules/HTTP005.md
   HTTP001: rules/HTTP001.md
@@ -111,3 +121,5 @@ detectors:
   security: detectors/security/Detector.md
   openapi-version: detectors/openapi-version/Detector.md
   media-type: detectors/media-type/Detector.md
+  error-response: detectors/error-response/Detector.md
+  authentication-error: detectors/authentication-error/Detector.md

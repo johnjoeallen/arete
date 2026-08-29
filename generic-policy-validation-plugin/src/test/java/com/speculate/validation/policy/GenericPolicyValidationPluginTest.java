@@ -180,36 +180,6 @@ class GenericPolicyValidationPluginTest {
     }
 
     @Test
-    void rejectsABrokenGroovyDetectorScriptWhenGroovyIsForced() {
-        Map<String, String> resources = bundledResources();
-        resources.put("detectors/resource-path/Detector.groovy", "{ api, rule -> this is not valid Groovy ) }");
-
-        BundleValidationException error = assertThrows(BundleValidationException.class,
-                () -> new PolicyBundleLoader().load(resources::get, new PolicyBundleLoader.LoadOptions(true)));
-
-        assertTrue(error.getMessage().contains("does not compile"));
-    }
-
-    @Test
-    void groovyRuntimeStaysAvailableAsAnOptIn() {
-        PolicyBundle groovyBundle = new PolicyBundleLoader()
-                .load(new ClasspathBundleResources(getClass().getClassLoader()),
-                        new PolicyBundleLoader.LoadOptions(true));
-        assertEquals("groovy", groovyBundle.detectors().get("resource-path").language());
-
-        GenericPolicyValidationPlugin plugin = new GenericPolicyValidationPlugin();
-        plugin.configure(Map.of("detector-language", "groovy"));
-        ValidationResult forced = plugin.validate(input(ACTION_PATH_SPEC));
-
-        GenericPolicyValidationPlugin starlarkPlugin = new GenericPolicyValidationPlugin();
-        starlarkPlugin.configure(Map.of());
-        ValidationResult starlark = starlarkPlugin.validate(input(ACTION_PATH_SPEC));
-
-        assertEquals(starlark.getViolations().size(), forced.getViolations().size());
-        assertEquals(starlark.getOverallScore(), forced.getOverallScore());
-    }
-
-    @Test
     void acceptsCatalogueRulesWhoseDetectorIsNotYetBundled() {
         Map<String, String> resources = bundledResources();
         resources.put("PolicyBundle.yaml", resources.get("PolicyBundle.yaml")
@@ -376,6 +346,58 @@ class GenericPolicyValidationPluginTest {
 
         assertEquals(1, occurrences.size());
         assertTrue(occurrences.get(0).message().contains("states"));
+    }
+
+    @Test
+    void errorResponseDetectorChecksCoverageAndProtocolDetails() {
+        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        String spec = """
+                openapi: 3.0.0
+                info: { title: Test API, version: 1.0.0 }
+                paths:
+                  /customers:
+                    get:
+                      responses:
+                        '200': { description: OK }
+                        '401': { description: Unauthorized }
+                        '405':
+                          description: Method not allowed
+                          headers: { Allow: { schema: { type: string } } }
+                          content: { application/problem+json: { schema: { type: object } } }
+                """;
+        Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
+                .readContents(spec, null, new ParseOptions()).getOpenAPI());
+        StarlarkDetectorRuntime runtime = new StarlarkDetectorRuntime();
+
+        assertEquals(1, runtime.execute(bundle.detectors().get("error-response"), api, bundle.rules().get("ERROR003")).size());
+        assertEquals(1, runtime.execute(bundle.detectors().get("error-response"), api, bundle.rules().get("ERROR005")).size());
+        assertEquals(1, runtime.execute(bundle.detectors().get("error-response"), api, bundle.rules().get("ERROR006")).size());
+        assertEquals(0, runtime.execute(bundle.detectors().get("error-response"), api, bundle.rules().get("ERROR007")).size());
+    }
+
+    @Test
+    void authenticationErrorDetectorUsesEffectiveSecurityRequirements() {
+        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        String spec = """
+                openapi: 3.0.0
+                info: { title: Test API, version: 1.0.0 }
+                security: [ { bearerAuth: [] } ]
+                paths:
+                  /customers:
+                    get:
+                      responses:
+                        '200': { description: OK }
+                        '401': { description: Unauthorized, headers: { WWW-Authenticate: { schema: { type: string } } } }
+                        '403': { description: Forbidden, headers: { WWW-Authenticate: { schema: { type: string } } } }
+                """;
+        Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
+                .readContents(spec, null, new ParseOptions()).getOpenAPI());
+        StarlarkDetectorRuntime runtime = new StarlarkDetectorRuntime();
+
+        assertEquals(0, runtime.execute(bundle.detectors().get("authentication-error"), api, bundle.rules().get("ERROR008")).size());
+        assertEquals(0, runtime.execute(bundle.detectors().get("authentication-error"), api, bundle.rules().get("ERROR009")).size());
+        java.util.List<Occurrence> forbiddenChallenge = runtime.execute(bundle.detectors().get("authentication-error"), api, bundle.rules().get("ERROR010"));
+        assertTrue(!forbiddenChallenge.isEmpty(), forbiddenChallenge.toString());
     }
 
     @Test
@@ -570,24 +592,18 @@ class GenericPolicyValidationPluginTest {
         assertResource("api-policy/policies/Strict.md");
         assertResource("api-policy/policies/EnterpriseGrade.md");
         assertResource("api-policy/detectors/resource-path/Detector.md");
-        assertResource("api-policy/detectors/resource-path/Detector.groovy");
         assertResource("api-policy/detectors/resource-path/Detector.star");
         assertResource("api-policy/detectors/schema/Detector.star");
         assertResource("api-policy/detectors/security/Detector.star");
         assertResource("api-policy/detectors/operation/Detector.md");
-        assertResource("api-policy/detectors/operation/Detector.groovy");
         assertResource("api-policy/detectors/text-style/Detector.md");
-        assertResource("api-policy/detectors/text-style/Detector.groovy");
         assertResource("api-policy/detectors/proprietary-header/Detector.md");
-        assertResource("api-policy/detectors/proprietary-header/Detector.groovy");
         assertResource("api-policy/detectors/query-collection/Detector.md");
-        assertResource("api-policy/detectors/query-collection/Detector.groovy");
         assertResource("api-policy/detectors/security/Detector.md");
-        assertResource("api-policy/detectors/security/Detector.groovy");
         assertResource("api-policy/detectors/openapi-version/Detector.md");
-        assertResource("api-policy/detectors/openapi-version/Detector.groovy");
         assertResource("api-policy/detectors/media-type/Detector.md");
-        assertResource("api-policy/detectors/media-type/Detector.groovy");
+        assertResource("api-policy/detectors/error-response/Detector.md");
+        assertResource("api-policy/detectors/error-response/Detector.star");
     }
 
     private static SpecInput input(String content) {
@@ -596,18 +612,17 @@ class GenericPolicyValidationPluginTest {
 
     private static Map<String, String> bundledResources() {
         Map<String, String> resources = new LinkedHashMap<>();
-        for (String path : new String[] {"PolicyBundle.yaml", "rules/REST001.md", "rules/REST002.md", "rules/REST003.md", "rules/REST004.md", "rules/REST005.md", "rules/REST006.md", "rules/HTTP001.md", "rules/HTTP002.md", "rules/HTTP003.md", "rules/HTTP004.md", "rules/HTTP005.md", "rules/HTTP006.md", "rules/HTTP008.md", "rules/UPDATE001.md", "rules/UPDATE002.md", "rules/UPDATE003.md", "rules/BULK001.md", "rules/BULK002.md", "rules/BULK003.md", "rules/VERSION001.md", "rules/VERSION002.md", "rules/VERSION003.md", "rules/VERSION004.md", "rules/COMPAT001.md", "rules/COMPAT002.md", "rules/COMPAT003.md", "rules/COMPAT004.md", "rules/COMPAT005.md", "rules/COMPAT006.md", "rules/STATUS001.md", "rules/STATUS002.md", "rules/STATUS003.md", "rules/STATUS004.md", "rules/STATUS005.md", "rules/STATUS006.md", "rules/STATUS007.md", "rules/DOC001.md", "rules/DOC002.md", "rules/DOC003.md", "rules/DOC004.md", "rules/DOC005.md", "rules/DOC006.md", "rules/DOC009.md", "rules/CASE001.md", "rules/CASE002.md", "rules/CASE003.md", "rules/CASE004.md", "rules/CASE005.md", "rules/JSON003.md", "rules/JSON004.md", "rules/JSON006.md", "rules/JSON007.md", "rules/JSON009.md", "rules/STANDARD008.md", "rules/STANDARD009.md", "rules/SECURITY001.md", "rules/SECURITY002.md", "policies/Strict.md", "policies/EnterpriseGrade.md", "detectors/resource-path/Detector.md", "detectors/resource-path/Detector.groovy", "detectors/operation/Detector.md", "detectors/operation/Detector.groovy", "detectors/text-style/Detector.md", "detectors/text-style/Detector.groovy", "detectors/naming/Detector.md", "detectors/naming/Detector.groovy", "detectors/schema/Detector.md", "detectors/schema/Detector.groovy", "detectors/operation-semantics/Detector.md", "detectors/operation-semantics/Detector.groovy", "detectors/response-code/Detector.md", "detectors/response-code/Detector.groovy", "detectors/response-header/Detector.md", "detectors/response-header/Detector.groovy", "detectors/proprietary-header/Detector.md", "detectors/proprietary-header/Detector.groovy", "detectors/query-collection/Detector.md", "detectors/query-collection/Detector.groovy", "detectors/security/Detector.md", "detectors/security/Detector.groovy", "detectors/manual/Detector.md", "detectors/manual/Detector.groovy", "detectors/bulk-operation/Detector.md", "detectors/bulk-operation/Detector.groovy", "detectors/versioning/Detector.md", "detectors/versioning/Detector.groovy", "detectors/compatibility/Detector.md", "detectors/compatibility/Detector.groovy", "detectors/metadata/Detector.md", "detectors/metadata/Detector.groovy"}) {
+        for (String path : new String[] {"PolicyBundle.yaml", "rules/REST001.md", "rules/REST002.md", "rules/REST003.md", "rules/REST004.md", "rules/REST005.md", "rules/REST006.md", "rules/HTTP001.md", "rules/HTTP002.md", "rules/HTTP003.md", "rules/HTTP004.md", "rules/HTTP005.md", "rules/HTTP006.md", "rules/HTTP008.md", "rules/UPDATE001.md", "rules/UPDATE002.md", "rules/UPDATE003.md", "rules/BULK001.md", "rules/BULK002.md", "rules/BULK003.md", "rules/VERSION001.md", "rules/VERSION002.md", "rules/VERSION003.md", "rules/VERSION004.md", "rules/COMPAT001.md", "rules/COMPAT002.md", "rules/COMPAT003.md", "rules/COMPAT004.md", "rules/COMPAT005.md", "rules/COMPAT006.md", "rules/STATUS001.md", "rules/STATUS002.md", "rules/STATUS003.md", "rules/STATUS004.md", "rules/STATUS005.md", "rules/STATUS006.md", "rules/STATUS007.md", "rules/DOC001.md", "rules/DOC002.md", "rules/DOC003.md", "rules/DOC004.md", "rules/DOC005.md", "rules/DOC006.md", "rules/DOC009.md", "rules/CASE001.md", "rules/CASE002.md", "rules/CASE003.md", "rules/CASE004.md", "rules/CASE005.md", "rules/JSON003.md", "rules/JSON004.md", "rules/JSON006.md", "rules/JSON007.md", "rules/JSON009.md", "rules/STANDARD008.md", "rules/STANDARD009.md", "rules/SECURITY001.md", "rules/SECURITY002.md", "rules/ERROR001.md", "rules/ERROR002.md", "rules/ERROR003.md", "rules/ERROR004.md", "rules/ERROR005.md", "rules/ERROR006.md", "rules/ERROR007.md", "policies/Strict.md", "policies/EnterpriseGrade.md", "detectors/resource-path/Detector.md", "detectors/resource-path/Detector.groovy", "detectors/operation/Detector.md", "detectors/operation/Detector.groovy", "detectors/text-style/Detector.md", "detectors/text-style/Detector.groovy", "detectors/naming/Detector.md", "detectors/naming/Detector.groovy", "detectors/schema/Detector.md", "detectors/schema/Detector.groovy", "detectors/operation-semantics/Detector.md", "detectors/operation-semantics/Detector.groovy", "detectors/response-code/Detector.md", "detectors/response-code/Detector.groovy", "detectors/response-header/Detector.md", "detectors/response-header/Detector.groovy", "detectors/proprietary-header/Detector.md", "detectors/proprietary-header/Detector.groovy", "detectors/query-collection/Detector.md", "detectors/query-collection/Detector.groovy", "detectors/security/Detector.md", "detectors/security/Detector.groovy", "detectors/manual/Detector.md", "detectors/manual/Detector.groovy", "detectors/bulk-operation/Detector.md", "detectors/bulk-operation/Detector.groovy", "detectors/versioning/Detector.md", "detectors/versioning/Detector.groovy", "detectors/compatibility/Detector.md", "detectors/compatibility/Detector.groovy", "detectors/metadata/Detector.md", "detectors/metadata/Detector.groovy", "detectors/error-response/Detector.md", "detectors/error-response/Detector.groovy"}) {
+            if (path.endsWith("Detector.groovy")) continue;
             resources.put(path, readResource("api-policy/" + path));
         }
         resources.put("rules/STANDARD010.md", readResource("api-policy/rules/STANDARD010.md"));
         resources.put("detectors/openapi-version/Detector.md", readResource("api-policy/detectors/openapi-version/Detector.md"));
-        resources.put("detectors/openapi-version/Detector.groovy", readResource("api-policy/detectors/openapi-version/Detector.groovy"));
         resources.put("rules/CONTENT001.md", readResource("api-policy/rules/CONTENT001.md"));
         resources.put("rules/CONTENT002.md", readResource("api-policy/rules/CONTENT002.md"));
         resources.put("rules/CONTENT003.md", readResource("api-policy/rules/CONTENT003.md"));
         resources.put("rules/CONTENT004.md", readResource("api-policy/rules/CONTENT004.md"));
         resources.put("detectors/media-type/Detector.md", readResource("api-policy/detectors/media-type/Detector.md"));
-        resources.put("detectors/media-type/Detector.groovy", readResource("api-policy/detectors/media-type/Detector.groovy"));
         resources.put("rules/DOC007.md", readResource("api-policy/rules/DOC007.md"));
         resources.put("rules/DOC008.md", readResource("api-policy/rules/DOC008.md"));
         resources.put("rules/STANDARD001.md", readResource("api-policy/rules/STANDARD001.md"));
@@ -626,19 +641,19 @@ class GenericPolicyValidationPluginTest {
         resources.put("rules/JSON016.md", readResource("api-policy/rules/JSON016.md"));
         resources.put("rules/STATUS006.md", readResource("api-policy/rules/STATUS006.md"));
         resources.put("detectors/date-time-name/Detector.md", readResource("api-policy/detectors/date-time-name/Detector.md"));
-        resources.put("detectors/date-time-name/Detector.groovy", readResource("api-policy/detectors/date-time-name/Detector.groovy"));
         resources.put("detectors/common-field/Detector.md", readResource("api-policy/detectors/common-field/Detector.md"));
-        resources.put("detectors/common-field/Detector.groovy", readResource("api-policy/detectors/common-field/Detector.groovy"));
         resources.put("detectors/path-count/Detector.md", readResource("api-policy/detectors/path-count/Detector.md"));
-        resources.put("detectors/path-count/Detector.groovy", readResource("api-policy/detectors/path-count/Detector.groovy"));
         resources.put("policies/Zalando.md", readResource("api-policy/policies/Zalando.md"));
         resources.put("policies/ZalandoExtended.md", readResource("api-policy/policies/ZalandoExtended.md"));
         resources.put("detectors/hostname/Detector.md", readResource("api-policy/detectors/hostname/Detector.md"));
-        resources.put("detectors/hostname/Detector.groovy", readResource("api-policy/detectors/hostname/Detector.groovy"));
+        resources.put("rules/ERROR008.md", readResource("api-policy/rules/ERROR008.md"));
+        resources.put("rules/ERROR009.md", readResource("api-policy/rules/ERROR009.md"));
+        resources.put("rules/ERROR010.md", readResource("api-policy/rules/ERROR010.md"));
+        resources.put("detectors/authentication-error/Detector.md", readResource("api-policy/detectors/authentication-error/Detector.md"));
         for (String detectorId : new String[] {"resource-path", "operation", "text-style", "naming", "schema",
                 "operation-semantics", "response-code", "response-header", "proprietary-header", "query-collection",
                 "security", "manual", "bulk-operation", "versioning", "compatibility", "metadata", "openapi-version",
-                "media-type", "date-time-name", "common-field", "path-count", "hostname"}) {
+                "media-type", "date-time-name", "common-field", "path-count", "hostname", "error-response", "authentication-error"}) {
             resources.put("detectors/" + detectorId + "/Detector.star",
                     readResource("api-policy/detectors/" + detectorId + "/Detector.star"));
         }

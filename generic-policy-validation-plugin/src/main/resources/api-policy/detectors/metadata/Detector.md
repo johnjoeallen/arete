@@ -1,7 +1,7 @@
 ---
 id: metadata
-language: groovy
-source: Detector.groovy
+language: starlark
+source: Detector.star
 scopes: [api]
 parameters:
   required:

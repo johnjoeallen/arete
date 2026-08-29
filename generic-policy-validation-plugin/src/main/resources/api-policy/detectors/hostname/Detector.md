@@ -1,7 +1,7 @@
 ---
 id: hostname
-language: groovy
-source: Detector.groovy
+language: starlark
+source: Detector.star
 scopes: [api]
 parameters:
   convention:

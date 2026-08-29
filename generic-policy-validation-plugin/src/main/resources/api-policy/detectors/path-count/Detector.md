@@ -1,7 +1,7 @@
 ---
 id: path-count
-language: groovy
-source: Detector.groovy
+language: starlark
+source: Detector.star
 scopes: [api]
 parameters:
   maximum:

@@ -1,7 +1,7 @@
 ---
 id: date-time-name
-language: groovy
-source: Detector.groovy
+language: starlark
+source: Detector.star
 scopes: [property]
 parameters:
   suffix:

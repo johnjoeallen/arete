@@ -1,7 +1,7 @@
 ---
 id: compatibility
-language: groovy
-source: Detector.groovy
+language: starlark
+source: Detector.star
 scopes: [api, operation, path, schema-property]
 parameters:
   change:

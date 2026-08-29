@@ -55,9 +55,8 @@ For each `validate(spec)` call:
 
 ### Detector runtime
 
-Every detector ships **twice**: as `Detector.groovy` (the original) and
-`Detector.star` (a [Starlark](https://bazel.build/rules/language) port, issue
-#125). By default the engine loads and runs the **Starlark** version:
+Every detector is a [Starlark](https://bazel.build/rules/language) source in
+`Detector.star` (issue #125). The engine loads and runs Starlark:
 
 - **Safe by construction** — a Starlark detector cannot touch the filesystem,
   network, environment, threads, reflection, or any class outside the
@@ -65,18 +64,8 @@ Every detector ships **twice**: as `Detector.groovy` (the original) and
   returns a list of occurrence dicts. Nothing to sandbox.
 - Regex is [RE2/J](https://github.com/google/re2j) — linear-time, no
   catastrophic backtracking.
-- The two ports are verified byte-for-byte equal against the Groovy runtime
-  across a corpus sweep (`StarlarkParityTest`).
-
-**The Groovy runtime is disabled by default — not deprecated.** It is a bare
-`GroovyShell` in the plugin JVM, so it is unsandboxed; it stays off until the
-[detector sandbox](policy-engine-sandbox-plan.md) is available, at which point
-it can be re-enabled safely. Until then it is an escape hatch: opt in with
-`detector-language=groovy` in the plugin config (or
-`-Dspeculate.policy.detector-language=groovy`) and the engine logs a warning
-on startup. A detector with no `Detector.star` also falls back to Groovy, with
-a per-detector warning. Its `.groovy` files stay in the bundle, held
-parity-equivalent to the `.star` versions.
+- The Starlark ports were verified against the former Groovy implementations
+  across a corpus sweep before the legacy sources were removed.
 
 ---
 
@@ -90,8 +79,7 @@ api-policy/
 ├── detectors/
 │   └── <detector-id>/
 │       ├── Detector.md          # descriptor (YAML front matter) + prose
-│       ├── Detector.star        # the detector — Starlark, the default runtime
-│       └── Detector.groovy      # the same detector in Groovy (opt-in, disabled by default)
+│       └── Detector.star        # the detector — Starlark
 ├── rules/
 │   └── <RULE-ID>.md             # rule front matter + human documentation
 └── policies/
@@ -135,8 +123,8 @@ job.
 ```yaml
 ---
 id: naming                       # must match the manifest key
-language: groovy                 # descriptor field; the loader still prefers Detector.star
-source: Detector.groovy          # the Groovy sibling; Detector.star is found automatically
+language: starlark                # the detector language
+source: Detector.star             # the detector source
 scopes:                          # the scope values rules may request
   - property
   - path-segment
@@ -238,21 +226,6 @@ The `manual` detector is the deliberate no-op (`def detect(api, rule): return []
 It keeps a rule in the catalogue as a checklist item that cannot be inferred
 from an OpenAPI document.
 
-### The Groovy runtime (disabled by default)
-
-Each detector also ships a `Detector.groovy` — a closure
-`{ Map api, Map rule -> [ [pointer:…, path:…, message:…] ] }` kept byte-for-byte
-equivalent to the `.star` version (`StarlarkParityTest`). It runs in a bare
-`GroovyShell` in the plugin JVM: **unsandboxed.**
-
-Because it is unsandboxed, the engine does not use it unless you opt in with
-`detector-language=groovy` in the plugin config (or
-`-Dspeculate.policy.detector-language=groovy`), which logs a warning — or a
-detector has no `Detector.star` at all. This is **not** a deprecation: the
-Groovy runtime is expected to come back as a first-class option once the
-[detector sandbox](policy-engine-sandbox-plan.md) makes it safe to run
-untrusted bundles.
-
 ---
 
 ## Rules
@@ -349,10 +322,8 @@ The result reports `overallScore` (`effectiveScore`) and
 
 ### A new detector
 
-1. Create `detectors/<id>/Detector.md` (descriptor), `detectors/<id>/Detector.star`
-   (the `detect(api, rule)` function), and a matching
-   `detectors/<id>/Detector.groovy` that the parity test holds equivalent (the
-   Groovy runtime is disabled by default but still supported).
+1. Create `detectors/<id>/Detector.md` (descriptor) and
+   `detectors/<id>/Detector.star` (the `detect(api, rule)` function).
 2. Add `<id>: detectors/<id>/Detector.md` to `PolicyBundle.yaml` under
    `detectors:`.
 3. Add rules that use it.
@@ -388,8 +359,7 @@ cp generic-policy-validation-plugin/target/generic-policy-validation-plugin-*.ja
 
 `GenericPolicyValidationPluginTest` / `...LoadIT` load the real bundle and will
 fail the build on any manifest, front-matter, scope, parameter, or
-detector-compile error. `StarlarkParityTest` additionally fails the build if a
-`.star` detector's output diverges from its `.groovy` twin.
+detector-compile error.
 
 ---
 
@@ -400,8 +370,8 @@ The bundle fails fast (`BundleValidationException`) on:
 - `formatVersion` ≠ 1; empty `rules`/`policies`/`detectors`; unknown top-level
   or front-matter fields; unsafe resource paths.
 - A manifest key that doesn't match the `id` inside the referenced file.
-- A detector: an uncompilable `Detector.star` (or `Detector.groovy` when
-  Groovy is forced), a missing source, an `enum` parameter with no `values`, a
+- A detector: an uncompilable `Detector.star`, a missing source, an `enum`
+  parameter with no `values`, a
   scalar parameter that declares `values`, an unsupported parameter type.
 - A rule: a `scope` not in the detector's `scopes`, an unknown parameter, a
   wrong-typed parameter value, a missing required parameter, a body with no

@@ -1,7 +1,7 @@
 ---
 id: bulk-operation
-language: groovy
-source: Detector.groovy
+language: starlark
+source: Detector.star
 scopes: [operation]
 parameters:
   operation-type:

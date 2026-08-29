@@ -21,9 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Runs a detector written in Starlark. This is the default detector runtime;
- * {@link GroovyDetectorRuntime} is an opt-in fallback, disabled by default
- * until the detector sandbox lands because it is unsandboxed.
+ * Runs the policy engine's Starlark detectors.
  *
  * <p>A detector source defines a top-level function {@code detect(api, rule)}
  * that returns a list of occurrence dicts ({@code pointer?}, {@code path?},
@@ -39,7 +37,7 @@ final class StarlarkDetectorRuntime {
     /** Deterministic upper bound on interpreter work per detector run. */
     private static final long MAX_EXECUTION_STEPS = 2_000_000L;
 
-    /** Mirrors the Groovy runtime's cap on returned occurrences. */
+    /** Caps returned occurrences to protect the host from runaway detectors. */
     private static final int MAX_OCCURRENCES = 1_000;
 
     private final ImmutableMap<String, Object> predeclared;
@@ -125,7 +123,7 @@ final class StarlarkDetectorRuntime {
         }
         if (value instanceof Number n) {
             // Enum values, numeric literals: keep them numeric so detectors
-            // distinguish int/float exactly as the Groovy `instanceof` checks do.
+            // Preserve the distinction between integer and floating-point values.
             return StarlarkFloat.of(n.doubleValue());
         }
         if (value instanceof Map<?, ?> map) {

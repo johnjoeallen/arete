@@ -169,7 +169,7 @@ final class OpenApiMapAdapter {
         return result;
     }
 
-    /** Reads parser response properties without exposing the parser response type to Groovy. */
+    /** Reads parser response properties without exposing parser response types to detectors. */
     private static Object responseProperty(Object response, String getter) {
         if (response == null) return null;
         try { return response.getClass().getMethod(getter).invoke(response); }

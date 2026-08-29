@@ -1,7 +1,7 @@
 ---
 id: manual
-language: groovy
-source: Detector.groovy
+language: starlark
+source: Detector.star
 scopes: [project, operation, property, schema]
 parameters: {}
 ---

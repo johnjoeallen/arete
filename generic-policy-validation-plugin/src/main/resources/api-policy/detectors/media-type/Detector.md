@@ -1,7 +1,7 @@
 ---
 id: media-type
-language: groovy
-source: Detector.groovy
+language: starlark
+source: Detector.star
 scopes: [media-type]
 parameters:
   location:
