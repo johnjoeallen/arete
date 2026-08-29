@@ -147,10 +147,10 @@ Plugins are `.jar` files, discovered from two folders at startup:
   `generic-policy-validation-plugin`, the policy-driven
   [Speculate Policy Engine](docs/policy-engine.md), which ships Strict,
   Mastercard Core, Zalando, and Zalando Extended policies over a bundle of
-  text-defined rules and Groovy detectors. Detectors are trusted extension code
-  today (a strict sandbox is planned):
-  run only bundles whose publisher you trust locally, or deploy Speculate in
-  Docker when host containment is desired. Not created automatically if
+  text-defined rules and detectors. Detectors run in a **safe-by-construction
+  Starlark runtime** by default (no filesystem, network, or reflection); the
+  legacy unsandboxed Groovy runtime stays available as a deprecated opt-in
+  (`detector-language=groovy`). Not created automatically if
   missing, since in a from-source dev run this resolves under `target/classes`
   and shouldn't be conjured out of thin air there.
 - `~/.speculate/plugins` — a stable location independent of where

@@ -52,19 +52,29 @@ For each `validate(spec)` call:
 4. A score is computed (see [Scoring](#scoring)) and returned with the
    violations.
 
-Detector scripts are currently **trusted** Groovy from the bundle and run
-directly in the plugin JVM (`GroovyShell`). The bundle is part of the build; it
-is not a place for untrusted user input.
+### Detector runtime
 
-> **Coming change — sandboxed detectors.** A future release will run detector
-> scripts inside a sandbox in the spirit of the Jenkins Groovy sandbox, but
-> **stricter**: no filesystem, network, environment, reflection, thread, or
-> system-property access, and no classes beyond the whitelisted spec-model and
-> collection types. A detector is only ever meant to read the `api` map and the
-> `rule` map it is given and return a list of occurrence maps — it needs no
-> other capability. Write detectors to that contract now and they will keep
-> working unchanged; a script that reaches for anything else will start being
-> rejected.
+Every detector ships **twice**: as `Detector.groovy` (the original) and
+`Detector.star` (a [Starlark](https://bazel.build/rules/language) port, issue
+#125). By default the engine loads and runs the **Starlark** version:
+
+- **Safe by construction** — a Starlark detector cannot touch the filesystem,
+  network, environment, threads, reflection, or any class outside the
+  whitelisted value model. It reads the immutable `api` and `rule` values and
+  returns a list of occurrence dicts. Nothing to sandbox.
+- Regex is [RE2/J](https://github.com/google/re2j) — linear-time, no
+  catastrophic backtracking.
+- The two ports are verified byte-for-byte equal against the Groovy runtime
+  across a corpus sweep (`StarlarkParityTest`).
+
+**Groovy is deprecated but still available.** It is `GroovyShell` in the
+plugin JVM — trusted, unsandboxed, build-time only. Opt back in with
+`detector-language=groovy` in the plugin config (or
+`-Dspeculate.policy.detector-language=groovy`); the engine logs a warning on
+startup. A detector with no `Detector.star` falls back to Groovy with a
+per-detector warning. See the
+[sandbox plan](policy-engine-sandbox-plan.md) and
+[DSL research](policy-engine-dsl-research.md).
 
 ---
 
