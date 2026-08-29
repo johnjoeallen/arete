@@ -213,12 +213,16 @@ api.info      { title, description, version, contactName, contactEmail,
                 openapiVersion, apiId, audience }
 api.servers   [ "https://api.example.com/v1", ... ]
 api.security  [ { <schemeName>: [scopes...] }, ... ]  or null   # global requirement
-api.paths[]   { path, pointer, segments[], operations[], operationDetails[] }
+api.paths[]   { path, pointer, segments[], templateParameters[], operations[], operationDetails[] }
   .segments[]           { name, pointer }                 # literal segments only, no {params}
-  .operationDetails[]   { method, pointer, summary, requestBodyPresent, security,
+  .templateParameters[] "customerId"                      # the {names} in the path string
+  .operationDetails[]   { method, pointer, summary, operationId, tags[], security,
+                          requestBodyPresent, requestBodyRequired,
                           mediaTypes[], requestMediaTypes[], parameters[], responses[] }
-    .parameters[]       { name, in, pointer, style, explode, schemaType, schemaMaximum }
-    .responses[]        { status, description, headers[], schemaTypes[], mediaTypes[] }
+    .parameters[]       { name, in, pointer, required, schemaPresent, style, explode,
+                          schemaType, schemaMaximum }
+    .responses[]        { status, description, headers[], headerDetails[], schemaTypes[], mediaTypes[] }
+      .headerDetails[]  { name, schemaPresent }
 api.schemas[]  { name, pointer, type, array, maxItems, properties[] }
   .properties[]         { name, pointer, type, array, maxItems, format, nullable,
                           required, enumPresent, enumValues[], extensibleEnum }

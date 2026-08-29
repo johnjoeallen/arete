@@ -112,6 +112,20 @@ rules:
   STATUS003: rules/STATUS003.md
   STATUS004: rules/STATUS004.md
   STATUS005: rules/STATUS005.md
+  STANDARD011: rules/STANDARD011.md
+  STANDARD012: rules/STANDARD012.md
+  STANDARD013: rules/STANDARD013.md
+  STANDARD014: rules/STANDARD014.md
+  STANDARD015: rules/STANDARD015.md
+  STANDARD016: rules/STANDARD016.md
+  STANDARD017: rules/STANDARD017.md
+  HTTP009: rules/HTTP009.md
+  DOC010: rules/DOC010.md
+  DOC011: rules/DOC011.md
+  DOC012: rules/DOC012.md
+  CASE006: rules/CASE006.md
+  JSON017: rules/JSON017.md
+  SEC009: rules/SEC009.md
 
 policies:
   "Enterprise Grade": policies/EnterpriseGrade.md
@@ -148,3 +162,12 @@ detectors:
   identifier: detectors/identifier/Detector.md
   collection-capability: detectors/collection-capability/Detector.md
   pagination: detectors/pagination/Detector.md
+  parameter: detectors/parameter/Detector.md
+  request-body: detectors/request-body/Detector.md
+  operation-metadata: detectors/operation-metadata/Detector.md
+  api-title: detectors/api-title/Detector.md
+  schema-name: detectors/schema-name/Detector.md
+  path-set: detectors/path-set/Detector.md
+  header-schema: detectors/header-schema/Detector.md
+  enum-values: detectors/enum-values/Detector.md
+  server-url: detectors/server-url/Detector.md

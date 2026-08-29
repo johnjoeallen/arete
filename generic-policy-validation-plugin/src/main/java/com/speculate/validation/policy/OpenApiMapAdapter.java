@@ -13,6 +13,8 @@ import java.util.Map;
 
 /** Converts parser-owned models into the small, stable map contract for detectors. */
 final class OpenApiMapAdapter {
+    private static final java.util.regex.Pattern PATH_TEMPLATE = java.util.regex.Pattern.compile("\\{([^}]+)}");
+
     private OpenApiMapAdapter() { }
 
     static Map<String, Object> toMap(OpenAPI openApi) {
@@ -29,6 +31,10 @@ final class OpenApiMapAdapter {
                     }
                 }
                 path.put("segments", segments);
+                List<String> templateParameters = new ArrayList<>();
+                java.util.regex.Matcher templateMatcher = PATH_TEMPLATE.matcher(entry.getKey());
+                while (templateMatcher.find()) templateParameters.add(templateMatcher.group(1));
+                path.put("templateParameters", templateParameters);
                 List<String> operations = entry.getValue() == null ? List.of() : entry.getValue().readOperationsMap().keySet().stream()
                         .map(method -> method.name()).toList();
                 path.put("operations", operations);
@@ -40,7 +46,11 @@ final class OpenApiMapAdapter {
                         detail.put("method", operationEntry.getKey().name());
                         detail.put("pointer", path.get("pointer") + "/" + operationEntry.getKey().name().toLowerCase());
                         detail.put("summary", operation == null ? null : operation.getSummary());
+                        detail.put("operationId", operation == null ? null : operation.getOperationId());
+                        detail.put("tags", operation == null || operation.getTags() == null ? List.of() : List.copyOf(operation.getTags()));
                         detail.put("requestBodyPresent", operation != null && operation.getRequestBody() != null);
+                        detail.put("requestBodyRequired", operation != null && operation.getRequestBody() != null
+                                && Boolean.TRUE.equals(operation.getRequestBody().getRequired()));
                         detail.put("security", operation == null || operation.getSecurity() == null ? null : securityRequirements(operation.getSecurity()));
                         List<String> mediaTypes = new ArrayList<>();
                         List<String> requestMediaTypes = new ArrayList<>();
@@ -57,6 +67,17 @@ final class OpenApiMapAdapter {
                                 responseMap.put("description", responseProperty(response, "getDescription"));
                                 Object headers = responseProperty(response, "getHeaders");
                                 responseMap.put("headers", headers instanceof Map<?, ?> map ? new ArrayList<>(map.keySet()) : List.of());
+                                List<Map<String, Object>> headerDetails = new ArrayList<>();
+                                if (headers instanceof Map<?, ?> map) {
+                                    for (Map.Entry<?, ?> headerEntry : map.entrySet()) {
+                                        Object schema = responseProperty(headerEntry.getValue(), "getSchema");
+                                        Object content = responseProperty(headerEntry.getValue(), "getContent");
+                                        headerDetails.add(Map.of(
+                                                "name", String.valueOf(headerEntry.getKey()),
+                                                "schemaPresent", schema != null || content != null));
+                                    }
+                                }
+                                responseMap.put("headerDetails", headerDetails);
                                 Object content = responseProperty(response, "getContent");
                                 List<String> schemaTypes = new ArrayList<>();
                                 List<String> responseMediaTypes = new ArrayList<>();
@@ -152,6 +173,8 @@ final class OpenApiMapAdapter {
             detail.put("name", parameter.getName());
             detail.put("in", parameter.getIn());
             detail.put("pointer", pointer + "/" + index);
+            detail.put("required", Boolean.TRUE.equals(parameter.getRequired()));
+            detail.put("schemaPresent", parameter.getSchema() != null || parameter.getContent() != null);
             detail.put("style", parameter.getStyle());
             detail.put("explode", parameter.getExplode());
             detail.put("schemaType", parameter.getSchema() == null ? null : parameter.getSchema().getType());

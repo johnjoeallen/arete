@@ -83,6 +83,20 @@ rules:
     parameters:
       headers: RateLimit-Limit,RateLimit-Remaining
   STANDARD010: 0.5
+  STANDARD011: 0.5
+  STANDARD012: 0.5
+  STANDARD013: 0.5
+  STANDARD014: 0.5
+  STANDARD015: 0.5
+  STANDARD016: 0.5
+  STANDARD017: 0.5
+  HTTP009: 0.5
+  DOC010: 0.5
+  DOC011: 0.5
+  DOC012: 0.5
+  CASE006: 0.5
+  JSON017: 0.5
+  SEC009: 0.5
 ---
 
 # Enterprise Grade Policy

@@ -118,12 +118,12 @@ class GenericPolicyValidationPluginTest {
         ValidationResult result = plugin.validate(input(ACTION_PATH_SPEC));
 
         assertEquals(ValidationResult.Status.SUCCESS, result.getStatus());
-        assertEquals(73, result.getRulesEvaluatedCount());
-        assertEquals(22, result.getViolations().size());
+        assertEquals(87, result.getRulesEvaluatedCount());
+        assertEquals(28, result.getViolations().size());
         assertEquals("REST001", result.getViolations().get(0).getRuleId());
         assertEquals(2, result.getViolations().stream().filter(violation -> violation.getRuleId().equals("REST001")).count());
-        assertEquals(94.5, result.getOverallScore());
-        assertEquals(94.5, result.getOverallScoreWithoutBlockers());
+        assertEquals(93.5, result.getOverallScore());
+        assertEquals(93.5, result.getOverallScoreWithoutBlockers());
         assertEquals(0.5, result.getViolations().get(0).getScoreImprovement());
         assertEquals(0.5, result.getViolations().get(1).getScoreImprovement());
         assertEquals("http://localhost:6809/plugins/generic-policy/rules/REST001",
@@ -140,10 +140,10 @@ class GenericPolicyValidationPluginTest {
         ValidationResult result = plugin.validate(input(COMPLIANT_STARTER_SPEC));
 
         assertEquals(ValidationResult.Status.SUCCESS, result.getStatus());
-        assertEquals(73, result.getRulesEvaluatedCount());
-        assertEquals(12, result.getViolations().size());
+        assertEquals(87, result.getRulesEvaluatedCount());
+        assertEquals(16, result.getViolations().size());
         assertEquals("DOC006", result.getViolations().get(0).getRuleId());
-        assertEquals(96.5, result.getOverallScore());
+        assertEquals(95.5, result.getOverallScore());
     }
 
     @Test
@@ -934,10 +934,17 @@ class GenericPolicyValidationPluginTest {
         resources.put("rules/PAGE005.md", readResource("api-policy/rules/PAGE005.md"));
         resources.put("rules/PAGE006.md", readResource("api-policy/rules/PAGE006.md"));
         resources.put("detectors/pagination/Detector.md", readResource("api-policy/detectors/pagination/Detector.md"));
+        for (String ruleId : new String[] {"STANDARD011", "STANDARD012", "STANDARD013", "STANDARD014", "STANDARD015",
+                "STANDARD016", "STANDARD017", "HTTP009", "DOC010", "DOC011", "DOC012", "CASE006", "JSON017", "SEC009"}) {
+            resources.put("rules/" + ruleId + ".md", readResource("api-policy/rules/" + ruleId + ".md"));
+        }
         for (String detectorId : new String[] {"resource-path", "operation", "text-style", "naming", "schema",
                 "operation-semantics", "response-code", "response-header", "proprietary-header", "query-collection",
                 "security", "manual", "bulk-operation", "versioning", "compatibility", "metadata", "openapi-version",
-                "media-type", "date-time-name", "common-field", "path-count", "hostname", "error-response", "authentication-error", "sensitive-data", "sensitive-search", "identifier", "collection-capability", "pagination"}) {
+                "media-type", "date-time-name", "common-field", "path-count", "hostname", "error-response", "authentication-error", "sensitive-data", "sensitive-search", "identifier", "collection-capability", "pagination",
+                "parameter", "request-body", "operation-metadata", "api-title", "schema-name", "path-set", "header-schema", "enum-values", "server-url"}) {
+            resources.put("detectors/" + detectorId + "/Detector.md",
+                    readResource("api-policy/detectors/" + detectorId + "/Detector.md"));
             resources.put("detectors/" + detectorId + "/Detector.star",
                     readResource("api-policy/detectors/" + detectorId + "/Detector.star"));
         }

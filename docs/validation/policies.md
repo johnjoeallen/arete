@@ -16,7 +16,7 @@ effectiveScore = 0 if any PROHIBITED rule matched, else qualityScore
 
 The default policy: it enables every generally-applicable bundled rule, with a few detector parameters calibrated for a typical enterprise API (allow-listed proprietary headers, expected OAuth2 scopes, standard rate-limit headers).
 
-- **73** rules active
+- **87** rules active
 
 Parameter overrides:
 
@@ -26,7 +26,7 @@ Parameter overrides:
 | `STANDARD008` | `allowed` = `X-Request-Id,X-Correlation-Id,X-Trace-Id` |
 | `STATUS007` | `headers` = `RateLimit-Limit,RateLimit-Remaining` |
 
-??? example "All 73 rules in Enterprise Grade"
+??? example "All 87 rules in Enterprise Grade"
 
     | Rule | Disposition | Title |
     |---|---|---|
@@ -103,6 +103,20 @@ Parameter overrides:
     | `STATUS006` | −0.5 | Error response lacks Problem Details |
     | `STATUS007` | −0.5 | Rate-limit response lacks required headers |
     | `STANDARD010` | −0.5 | OpenAPI version is unsupported or missing |
+    | `STANDARD011` | −0.5 | Operation declares too many parameters |
+    | `STANDARD012` | −0.5 | Path parameter is not marked required |
+    | `STANDARD013` | −0.5 | Path parameter does not match the path template |
+    | `STANDARD014` | −0.5 | Parameter has no schema or content |
+    | `STANDARD015` | −0.5 | Request body is not marked required |
+    | `STANDARD016` | −0.5 | Duplicate path structure |
+    | `STANDARD017` | −0.5 | Response header has no schema |
+    | `HTTP009` | −0.5 | DELETE operation declares a request body |
+    | `DOC010` | −0.5 | operationId is missing or duplicated |
+    | `DOC011` | −0.5 | Operation is not tagged |
+    | `DOC012` | −0.5 | API title does not follow the naming convention |
+    | `CASE006` | −0.5 | Schema name is a placeholder |
+    | `JSON017` | −0.5 | Enum contains duplicate values |
+    | `SEC009` | −0.5 | Server URL exposes an internal host |
 
 ## Zalando
 
