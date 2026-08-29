@@ -294,6 +294,41 @@ class SiftParityTest {
                 Map.of("required-status", 500, "required-header", "WWW-Authenticate"), true);
     }
 
+    private static final String LINT_SPEC = """
+            openapi: 3.0.0
+            info: { title: T, version: 1.0.0 }
+            paths:
+              /x:
+                get:
+                  responses:
+                    200: { description: ok }
+                    '404':
+                      description: nope
+                      content: { application/json: { schema: { $ref: '#/components/schemas/Ghost' } } }
+            """;
+
+    @Test void documentLintParserMessage() {
+        assertParity("document-lint", "api",
+                Map.of("check", "parser-message", "pattern", "(?i)(#/\\S+ is missing|is not of type)"), true, LINT_SPEC);
+    }
+
+    @Test void documentLintNumericStatusKey() {
+        assertParity("document-lint", "api", Map.of("check", "numeric-status-key"), true, LINT_SPEC);
+    }
+
+    @Test void hostnameConvention() {
+        assertParity("hostname", "api", Map.of("convention", "lowercase-hyphenated"), true);
+    }
+
+    @Test void serverUrlInternalHost() {
+        assertParity("server-url", "api", Map.of("check", "internal-host"), false);
+    }
+
+    @Test void serverUrlPattern() {
+        assertParity("server-url", "api",
+                Map.of("check", "url-pattern", "pattern", "https://(api|sandbox)\\.example\\.com/.*"), false);
+    }
+
     // --- harness ---------------------------------------------------------
 
     private void assertParity(String detectorId, String scope, Map<String, Object> parameters) {
@@ -301,8 +336,12 @@ class SiftParityTest {
     }
 
     private void assertParity(String detectorId, String scope, Map<String, Object> parameters, boolean expectFindings) {
-        Map<String, Object> api = OpenApiMapAdapter.toMap(
-                new OpenAPIV3Parser().readContents(CATALOGUE_SPEC, null, new ParseOptions()).getOpenAPI());
+        assertParity(detectorId, scope, parameters, expectFindings, CATALOGUE_SPEC);
+    }
+
+    private void assertParity(String detectorId, String scope, Map<String, Object> parameters, boolean expectFindings, String spec) {
+        var parsed = new OpenAPIV3Parser().readContents(spec, null, new ParseOptions());
+        Map<String, Object> api = OpenApiMapAdapter.toMap(parsed.getOpenAPI(), parsed.getMessages(), spec);
 
         Detector starDetector = new Detector(detectorId, "starlark",
                 read("api-policy/detectors/" + detectorId + "/Detector.star"), List.of(scope), Map.of());

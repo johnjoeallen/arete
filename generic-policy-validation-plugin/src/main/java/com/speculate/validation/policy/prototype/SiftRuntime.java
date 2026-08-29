@@ -121,6 +121,16 @@ public final class SiftRuntime {
             case "tokenize" -> List.of(String.valueOf(args.get(1)).split(java.util.regex.Pattern.quote(String.valueOf(args.get(0)))));
             case "last" -> { List<Object> values = iterableOf(args.get(0)); yield values.isEmpty() ? "" : values.get(values.size() - 1); }
             case "size" -> (long) iterableOf(args.get(0)).size();
+            case "join" -> {
+                StringBuilder joined = new StringBuilder();
+                List<Object> parts = iterableOf(args.get(1));
+                for (int i = 0; i < parts.size(); i++) { if (i > 0) joined.append(String.valueOf(args.get(0))); joined.append(String.valueOf(parts.get(i))); }
+                yield joined.toString();
+            }
+            case "urlHost" -> {
+                try { yield new java.net.URI(String.valueOf(args.get(0))).getHost(); }
+                catch (java.net.URISyntaxException | NullPointerException e) { yield null; }
+            }
             case "parseInt" -> {
                 try { yield Long.parseLong(String.valueOf(args.get(0)).trim()); }
                 catch (NumberFormatException e) { yield args.size() > 1 ? args.get(1) : -1L; }
