@@ -16,7 +16,7 @@
         <link rel="prev" href="../policy-engine/">
       
       
-        <link rel="next" href="../rules/">
+        <link rel="next" href="../sift/">
       
       
         
@@ -588,21 +588,38 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#sift-coverage" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Sift coverage
-      
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sift/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sift reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -824,17 +841,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#sift-coverage" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Sift coverage
-      
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -861,10 +867,12 @@
 
 
 <h1 id="detector-languages">Detector languages<a class="headerlink" href="#detector-languages" title="Permanent link">&para;</a></h1>
-<p>Speculate currently demonstrates the operation-semantics detector in three
-styles: Groovy, Starlark, and the experimental Sift (<code>.sift</code>) syntax.
-All three examples express the same core pipeline: visit paths, flatten their
-operations, retain matching operations, and create occurrences.</p>
+<p>Every bundled detector ships in three languages: <strong>Sift</strong> (<code>Detector.sift</code>, the
+default runtime — see the <a href="../sift/">Sift reference</a>), <strong>Starlark</strong>
+(<code>Detector.star</code>, the sandboxed fallback), and <strong>Groovy</strong> (<code>Detector.groovy</code>,
+the opt-in unsandboxed runtime). The example below expresses the same
+operation-semantics pipeline in all three: visit paths, flatten their
+operations, retain the matching operations, and create occurrences.</p>
 <h2 id="the-same-detector-in-three-languages">The same detector in three languages<a class="headerlink" href="#the-same-detector-in-three-languages" title="Permanent link">&para;</a></h2>
 <h3 id="groovy">Groovy<a class="headerlink" href="#groovy" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="o">{</span><span class="w"> </span><span class="n">Map</span><span class="w"> </span><span class="n">api</span><span class="o">,</span><span class="w"> </span><span class="n">Map</span><span class="w"> </span><span class="n">rule</span><span class="w"> </span><span class="o">-&gt;</span>
@@ -940,8 +948,8 @@ it runs with the authority of the JVM and is therefore an opt-in fallback.</p>
 <a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a>                <span class="p">})</span>
 <a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a>    <span class="k">return</span> <span class="n">out</span>
 </code></pre></div>
-<p>Starlark makes the data model and control flow explicit. It is the default
-runtime and is sandboxed by construction.</p>
+<p>Starlark makes the data model and control flow explicit. It is the sandboxed
+fallback runtime, kept parity-equivalent to Sift.</p>
 <h3 id="sift">Sift<a class="headerlink" href="#sift" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">sift</span><span class="p">(</span><span class="n">api</span><span class="p">,</span><span class="w"> </span><span class="n">rule</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">api</span><span class="p">.</span><span class="na">paths</span>
@@ -974,10 +982,10 @@ runtime and is sandboxed by construction.</p>
 <a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a><span class="w">                </span><span class="n">operationMessage</span><span class="p">(</span><span class="n">rule</span><span class="p">.</span><span class="na">parameters</span><span class="p">))</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">};</span>
 <a id="__codelineno-2-30" name="__codelineno-2-30" href="#__codelineno-2-30"></a><span class="p">}</span>
 </code></pre></div>
-<p>Sift keeps Java-shaped operators and declarations while using
-Groovy-like trailing closures for collection pipelines. <code>expand</code> names the
-operation that turns each path into its operation collection; it is the
-Sift equivalent of Groovy <code>collectMany</code> and Starlark’s nested loop.</p>
+<p>Sift keeps Java-shaped operators while using Groovy-like trailing closures for
+collection pipelines. <code>expand</code> names the operation that turns each path into
+its operation collection; it is the Sift equivalent of Groovy <code>collectMany</code>
+and Starlark's nested loop. The <a href="../sift/">Sift reference</a> is the full guide.</p>
 <p>For regular expressions Sift borrows Groovy's slashy literal and match
 operators. <code>/pattern/</code> is a pattern wherever an operand is expected — after
 <code>==~</code>, <code>=~</code>, <code>(</code>, <code>,</code>, <code>&amp;&amp;</code>, <code>||</code>, <code>return</code>, and so on — with backslashes
@@ -1042,34 +1050,20 @@ remain available and accept either a literal or a string.</p>
 </tbody>
 </table>
 <h2 id="choosing-a-language">Choosing a language<a class="headerlink" href="#choosing-a-language" title="Permanent link">&para;</a></h2>
-<p>Starlark is the default for bundled detectors because it provides a restricted,
-deterministic execution environment. Groovy remains available as an explicit,
-unsandboxed fallback for compatibility. Sift is a prototype focused
-on making detector pipelines feel natural to Java developers while retaining a
-small, controlled operation set.</p>
+<p><strong>Sift is the default</strong> for bundled detectors: it is sandboxed, and its small
+expression grammar keeps detectors terse and reviewable. Starlark is the
+sandboxed fallback, used for any detector that ships only a <code>Detector.star</code>
+(e.g. in a third-party bundle). Groovy remains available as an explicit,
+unsandboxed opt-in for compatibility.</p>
 <p>The language precedence and Groovy opt-in switches are documented in the
-<a href="../policy-engine/#detector-languages">policy engine guide</a>.</p>
+<a href="../policy-engine/#detector-languages">policy engine guide</a>; the full Sift
+grammar and builtin catalogue are in the <a href="../sift/">Sift reference</a>.</p>
 <p>Whichever language a bundle picks, the findings are the same: <code>SiftParityTest</code>
 pins every <code>Detector.sift</code> to its <code>Detector.star</code>, and <code>GroovyStarlarkParityTest</code>
-sweeps every bundle rule against both runtimes so a <code>Detector.groovy</code> can never
-drift from its Starlark twin.</p>
-<h2 id="sift-coverage">Sift coverage<a class="headerlink" href="#sift-coverage" title="Permanent link">&para;</a></h2>
-<p>Sift is expression-only: a single <code>return</code>, closures with one parameter and a
-one-expression body, no local variables or helper functions. Beyond the core
-operators it has <code>&lt; &lt;= &gt; &gt;=</code>, unary <code>-</code>, <code>true</code> / <code>false</code>, <code>/regex/</code> literals
-with <code>==~</code> / <code>=~</code>, list concatenation with <code>+</code>, <code>value[key]</code> indexing, string
-methods (<code>lower</code> <code>trim</code> <code>contains</code> <code>startsWith</code> <code>endsWith</code> <code>length</code>), sequence
-methods (<code>map</code> <code>filter</code> <code>expand</code> <code>any</code> <code>all</code> <code>find</code> <code>count</code> <code>toList</code>), list
-literals (<code>["a", "b"]</code>), map-key iteration (<code>someMap.keys</code> / <code>.values</code>),
-positional iteration (<code>enumerate(list)</code> → <code>[index, value]</code> pairs) and the
-functions <code>occurrence</code> <code>regexFullMatch</code> <code>regexSearch</code> <code>tokenize</code> <code>size</code>
-<code>distinct</code> <code>parseInt</code> <code>join</code> <code>urlHost</code> <code>strip</code> <code>last</code> <code>type</code> <code>truthy</code>
-<code>enumerate</code> <code>pathSegments</code>.</p>
-<p>It still has <strong>no</strong> map literals and no local variables — a value used
-several times is spelled out at each use.</p>
-<p><strong>All 45 bundled detectors ship a <code>Detector.sift</code></strong>, each parity-tested
-against its <code>Detector.star</code> (see <code>SiftParityTest</code>). Detectors that need a
-running accumulator (<code>operation-metadata</code>'s duplicate-operationId check,
+sweeps every bundle rule against both other runtimes so a <code>Detector.groovy</code> can
+never drift from its Starlark twin.</p>
+<p><strong>All 45 bundled detectors ship a <code>Detector.sift</code>.</strong> The two that need a
+running accumulator (<code>operation-metadata</code>'s duplicate-<code>operationId</code> check,
 <code>response-example</code>'s duplicate-payload check) express it by scanning
 <code>enumerate(...)</code> for an earlier matching entry rather than mutating state.</p>
 

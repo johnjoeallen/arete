@@ -524,10 +524,21 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#starlark-default" class="md-nav__link">
+  <a href="#sift-default" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Starlark (default)
+        Sift (default)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#starlark-sandboxed-fallback" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Starlark (sandboxed fallback)
       
     </span>
   </a>
@@ -618,10 +629,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#writing-a-detector-starlark" class="md-nav__link">
+  <a href="#writing-a-detector" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Writing a detector (Starlark)
+        Writing a detector
       
     </span>
   </a>
@@ -762,6 +773,34 @@
     
   
     Detector languages
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sift/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sift reference
   
 
     
@@ -955,10 +994,21 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#starlark-default" class="md-nav__link">
+  <a href="#sift-default" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Starlark (default)
+        Sift (default)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#starlark-sandboxed-fallback" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Starlark (sandboxed fallback)
       
     </span>
   </a>
@@ -1049,10 +1099,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#writing-a-detector-starlark" class="md-nav__link">
+  <a href="#writing-a-detector" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Writing a detector (Starlark)
+        Writing a detector
       
     </span>
   </a>
@@ -1231,10 +1281,10 @@ Speculate UI as selectable rule sets.</p>
    violations.</li>
 </ol>
 <h3 id="detector-languages">Detector languages<a class="headerlink" href="#detector-languages" title="Permanent link">&para;</a></h3>
-<p>The engine ships two detector runtimes. A detector can be authored in either
-language — <code>Detector.star</code> and <code>Detector.groovy</code> sit side by side under the
-detector directory — and a configurable <strong>language precedence</strong> decides which
-source is loaded for each detector.</p>
+<p>The engine ships three detector runtimes. A detector can be authored in any of
+the languages — <code>Detector.sift</code>, <code>Detector.star</code> and <code>Detector.groovy</code> sit side
+by side under the detector directory — and a configurable <strong>language
+precedence</strong> decides which source is loaded for each detector.</p>
 <table>
 <thead>
 <tr>
@@ -1245,9 +1295,14 @@ source is loaded for each detector.</p>
 </thead>
 <tbody>
 <tr>
+<td><code>sift</code></td>
+<td><code>Detector.sift</code></td>
+<td><strong>Default.</strong> Sandboxed; see the <a href="../sift/">Sift reference</a>.</td>
+</tr>
+<tr>
 <td><code>starlark</code></td>
 <td><code>Detector.star</code></td>
-<td><strong>Default.</strong> Always available, sandboxed.</td>
+<td>Sandboxed fallback; always available.</td>
 </tr>
 <tr>
 <td><code>groovy</code></td>
@@ -1256,15 +1311,20 @@ source is loaded for each detector.</p>
 </tr>
 </tbody>
 </table>
+<p>Every bundled detector ships all three sources, kept in lock-step by
+<code>SiftParityTest</code> and <code>GroovyStarlarkParityTest</code>, so the language a bundle
+loads never changes its findings.</p>
 <h4 id="language-precedence">Language precedence<a class="headerlink" href="#language-precedence" title="Permanent link">&para;</a></h4>
 <p>For each detector the loader walks the configured precedence list and uses the
 <strong>first language whose source file is present</strong>. The default precedence is
-<code>starlark</code> only, so Groovy never runs unless you opt in. Enabling Groovy adds
-it to the list:</p>
+<code>sift,starlark</code> — Sift for every detector, with Starlark covering any
+detector (in a third-party bundle, say) that ships only a <code>Detector.star</code>.
+Groovy never runs unless you opt in:</p>
 <ul>
-<li>precedence <code>starlark,groovy</code> (what <code>--enable-groovy-detectors</code> sets) — a
-  detector keeps running on Starlark wherever a <code>Detector.star</code> exists, and
-  only falls back to <code>Detector.groovy</code> when there is no Starlark source;</li>
+<li>precedence <code>starlark</code> — pin the Starlark runtime;</li>
+<li>precedence <code>sift,starlark,groovy</code> (what <code>--enable-groovy-detectors</code> sets) —
+  Sift, then Starlark, then Groovy only where neither of the others has a
+  source;</li>
 <li>precedence <code>groovy,starlark</code> — prefer Groovy where a <code>Detector.groovy</code>
   exists, fall back to Starlark otherwise;</li>
 <li>precedence <code>groovy</code> — Groovy only; a detector with no <code>Detector.groovy</code>
@@ -1281,11 +1341,11 @@ it to the list:</p>
 <tbody>
 <tr>
 <td>Plugin config key <code>detector-languages</code></td>
-<td>comma-separated list, e.g. <code>groovy,starlark</code></td>
+<td>comma-separated list, e.g. <code>starlark</code></td>
 </tr>
 <tr>
 <td>Plugin config key <code>detector-language</code></td>
-<td>a single extra language (added after <code>starlark</code>)</td>
+<td>a single extra language (appended to <code>sift,starlark</code>)</td>
 </tr>
 <tr>
 <td>System property <code>-Dspeculate.policy.detector-languages</code></td>
@@ -1301,7 +1361,7 @@ it to the list:</p>
 </tr>
 <tr>
 <td>Launcher <code>--enable-groovy-detectors</code></td>
-<td>shorthand for <code>starlark,groovy</code></td>
+<td>shorthand for <code>sift,starlark,groovy</code></td>
 </tr>
 </tbody>
 </table>
@@ -1309,16 +1369,26 @@ it to the list:</p>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>./speculate.sh<span class="w"> </span>--enable-groovy-detectors
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>./speculate.sh<span class="w"> </span>--detector-languages<span class="w"> </span>groovy,starlark
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>./speculate.sh<span class="w"> </span>--detector-languages<span class="w"> </span>starlark
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>java<span class="w"> </span>-Dspeculate.policy.detector-languages<span class="o">=</span>groovy,starlark<span class="w"> </span>-jar<span class="w"> </span>speculate.jar
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>java<span class="w"> </span>-Dspeculate.policy.detector-languages<span class="o">=</span>starlark<span class="w"> </span>-jar<span class="w"> </span>speculate.jar
 </code></pre></div>
 </div>
 </div>
 </div>
-<h4 id="starlark-default">Starlark (default)<a class="headerlink" href="#starlark-default" title="Permanent link">&para;</a></h4>
+<h4 id="sift-default">Sift (default)<a class="headerlink" href="#sift-default" title="Permanent link">&para;</a></h4>
+<p>Detectors run as <a href="../sift/">Sift</a> sources — a small expression language shaped
+for detector pipelines (<code>.map</code> / <code>.filter</code> / <code>.expand</code>, slashy regex literals,
+<code>occurrence(...)</code>).</p>
+<ul>
+<li><strong>Safe by construction</strong> — the interpreter exposes only the immutable <code>api</code>
+  and <code>rule</code> values, a fixed builtin set, and RE2/J regex. No filesystem,
+  network, reflection, or unbounded loops.</li>
+<li>See the <a href="../sift/">Sift reference</a> for the full grammar and builtin catalogue.</li>
+</ul>
+<h4 id="starlark-sandboxed-fallback">Starlark (sandboxed fallback)<a class="headerlink" href="#starlark-sandboxed-fallback" title="Permanent link">&para;</a></h4>
 <p>Detectors run as <a href="https://bazel.build/rules/language">Starlark</a> sources.</p>
 <ul>
 <li><strong>Safe by construction</strong> — a Starlark detector cannot touch the filesystem,
@@ -1353,12 +1423,13 @@ it is off by default.</p>
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>├── detectors/
 <a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>│   └── &lt;detector-id&gt;/
 <a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>│       ├── Detector.md          # descriptor (YAML front matter) + prose
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>│       ├── Detector.star        # the detector — Starlark (default runtime)
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>│       └── Detector.groovy      # the same detector — Groovy (opt-in runtime)
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>├── rules/
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>│   └── &lt;RULE-ID&gt;.md             # rule front matter + human documentation
-<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>└── policies/
-<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>    └── &lt;Policy Name&gt;.md         # policy front matter + prose
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>│       ├── Detector.sift        # the detector — Sift (default runtime)
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>│       ├── Detector.star        # the same detector — Starlark (sandboxed fallback)
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>│       └── Detector.groovy      # the same detector — Groovy (opt-in runtime)
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>├── rules/
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>│   └── &lt;RULE-ID&gt;.md             # rule front matter + human documentation
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>└── policies/
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>    └── &lt;Policy Name&gt;.md         # policy front matter + prose
 </code></pre></div>
 <h3 id="policybundleyaml"><code>PolicyBundle.yaml</code><a class="headerlink" href="#policybundleyaml" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nt">formatVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w">                 </span><span class="c1"># must be 1</span>
@@ -1464,7 +1535,11 @@ parser:</p>
 <p><code>operationDetails[].security</code> is <code>null</code> unless the operation overrides the
 global requirement. JSON Pointers are pre-escaped and safe to return verbatim
 as <code>pointer</code>.</p>
-<h3 id="writing-a-detector-starlark">Writing a detector (Starlark)<a class="headerlink" href="#writing-a-detector-starlark" title="Permanent link">&para;</a></h3>
+<h3 id="writing-a-detector">Writing a detector<a class="headerlink" href="#writing-a-detector" title="Permanent link">&para;</a></h3>
+<p>The default runtime is <strong>Sift</strong> (<code>Detector.sift</code>); its grammar and builtins
+have their own chapter — the <a href="../sift/">Sift reference</a>. The rest of this
+section describes the Starlark form, which every bundled detector also ships as
+a sandboxed fallback.</p>
 <p><code>Detector.star</code> must define a top-level function <code>detect(api, rule)</code> that
 returns a list of occurrence dicts:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">detect</span><span class="p">(</span><span class="n">api</span><span class="p">,</span> <span class="n">rule</span><span class="p">):</span>

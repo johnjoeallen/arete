@@ -485,6 +485,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../sift/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Sift reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../rules/" class="md-nav__link">
         
   
@@ -826,8 +854,8 @@ from the <code>speculate-validation-spi</code> module and registers itself via
 <p>If you just want different <strong>rules</strong>, you probably don't need a new plugin
 at all. The bundled <a href="../policy-engine/">Speculate Policy Engine</a> is
 driven entirely by text files — add a rule, detector, or policy by editing
-Markdown/YAML/Starlark. Write a <code>SpecValidationPlugin</code> only when you need a
-different <strong>engine</strong>.</p>
+Markdown, YAML, and a <a href="../sift/">Sift</a> detector. Write a
+<code>SpecValidationPlugin</code> only when you need a different <strong>engine</strong>.</p>
 </div>
 <h2 id="the-spi">The SPI<a class="headerlink" href="#the-spi" title="Permanent link">&para;</a></h2>
 <p>Add the dependency (published to Maven Central) with <code>provided</code> scope — never
