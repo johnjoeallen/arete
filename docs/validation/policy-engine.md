@@ -8,20 +8,6 @@ named concern built on a detector), and *policies* (which rules are active and
 how much each one costs). Anyone can add or change a rule by editing text
 files — no host code changes.
 
-- [How it works](#how-it-works)
-- [The policy bundle](#the-policy-bundle)
-- [Detectors](#detectors)
-  - [The `api` model](#the-api-model)
-  - [Writing a detector (Starlark)](#writing-a-detector-starlark)
-  - [The Groovy runtime (disabled by default)](#the-groovy-runtime-disabled-by-default)
-- [Rules](#rules)
-- [Policies](#policies)
-- [Scoring](#scoring)
-- [Adding to the bundle](#adding-to-the-bundle)
-- [Validation performed at load time](#validation-performed-at-load-time)
-
----
-
 ## How it works
 
 The engine is discovered by the host exactly like any other validation plugin:

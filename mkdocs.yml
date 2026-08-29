@@ -1,0 +1,69 @@
+site_name: Speculate
+site_description: Local-first API explorer for OpenAPI/Swagger specs with pluggable, policy-driven validation.
+site_url: https://johnjoeallen.github.io/speculate/
+repo_url: https://github.com/johnjoeallen/speculate
+repo_name: johnjoeallen/speculate
+edit_uri: edit/main/docs/
+copyright: Apache License 2.0
+
+theme:
+  name: material
+  logo: assets/logo.png
+  favicon: assets/favicon.ico
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+    - content.action.edit
+    - search.suggest
+    - toc.follow
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - tables
+  - toc:
+      permalink: true
+
+extra:
+  version:
+    provider: mike
+    default: latest
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Configuration: configuration.md
+  - Validation:
+      - Overview: validation/index.md
+      - Speculate Policy Engine: validation/policy-engine.md
+      - Zalando Rule Catalogue: validation/zalando-rule-catalogue.md
+      - Writing a Plugin: validation/writing-a-plugin.md
+  - Releasing: releasing.md
