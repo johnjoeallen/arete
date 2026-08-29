@@ -35,6 +35,20 @@
             <artifactId>groovy</artifactId>
             <version>${groovy.version}</version>
         </dependency>
+        <!-- POC (issue #125): safe-by-construction detector language.
+             The eed3si9n build is a community repackage of Bazel's
+             net.starlark.java used only to de-risk the approach; production
+             would vendor a current upstream revision (see the issue). -->
+        <dependency>
+            <groupId>com.eed3si9n.starlark</groupId>
+            <artifactId>starlark</artifactId>
+            <version>4.2.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.re2j</groupId>
+            <artifactId>re2j</artifactId>
+            <version>1.7</version>
+        </dependency>
         <dependency>
             <groupId>io.swagger.parser.v3</groupId>
             <artifactId>swagger-parser</artifactId>
