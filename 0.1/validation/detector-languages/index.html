@@ -1051,20 +1051,24 @@ small, controlled operation set.</p>
 <a href="../policy-engine/#detector-languages">policy engine guide</a>.</p>
 <h2 id="sift-coverage">Sift coverage<a class="headerlink" href="#sift-coverage" title="Permanent link">&para;</a></h2>
 <p>Sift is expression-only: a single <code>return</code>, closures with one parameter and a
-one-expression body, no local variables or helper functions. It has <code>&amp;&amp;</code> <code>||</code>
-<code>!</code> <code>==</code> <code>!=</code> <code>==~</code> <code>=~</code> <code>? :</code>, <code>+</code> (numeric add or string concat), <code>true</code> /
-<code>false</code>, string methods (<code>lower</code> <code>trim</code> <code>contains</code> <code>startsWith</code> <code>endsWith</code>
-<code>length</code>), sequence methods (<code>map</code> <code>filter</code> <code>expand</code> <code>any</code> <code>all</code> <code>find</code>
-<code>count</code> <code>toList</code>) and the functions <code>occurrence</code> <code>regexFullMatch</code>
-<code>regexSearch</code> <code>tokenize</code> <code>last</code>.</p>
-<p>It deliberately has <strong>no</strong> numeric comparison (<code>&lt;</code> <code>&gt;</code> <code>&lt;=</code> <code>&gt;=</code>), no
-list/map literals, no map-key iteration, no cross-iteration state, and no
-<code>str()</code> / <code>parse_int</code> / <code>url_host</code>. Those gaps decide which detectors can be
-ported: as of writing, <code>compatibility</code>, <code>manual</code>, <code>common-field</code>,
-<code>date-time-name</code>, <code>documentation-completeness</code>, <code>header-schema</code>,
-<code>media-type</code>, <code>openapi-version</code>, <code>operation-semantics</code>, <code>request-body</code>,
-<code>schema-name</code> and <code>sensitive-data</code> ship a <code>Detector.sift</code>, each parity-tested against its
-<code>Detector.star</code>. The rest need one of the missing capabilities above.</p>
+one-expression body, no local variables or helper functions. Beyond the core
+operators it has <code>&lt; &lt;= &gt; &gt;=</code>, unary <code>-</code>, <code>true</code> / <code>false</code>, <code>/regex/</code> literals
+with <code>==~</code> / <code>=~</code>, list concatenation with <code>+</code>, <code>value[key]</code> indexing, string
+methods (<code>lower</code> <code>trim</code> <code>contains</code> <code>startsWith</code> <code>endsWith</code> <code>length</code>), sequence
+methods (<code>map</code> <code>filter</code> <code>expand</code> <code>any</code> <code>all</code> <code>find</code> <code>count</code> <code>toList</code>) and the
+functions <code>occurrence</code> <code>regexFullMatch</code> <code>regexSearch</code> <code>tokenize</code> <code>size</code>
+<code>distinct</code> <code>parseInt</code> <code>join</code> <code>urlHost</code> <code>last</code>.</p>
+<p>It still has <strong>no</strong> <code>type(x)</code> introspection, no map-key iteration, no list or
+map literals, and no cross-iteration accumulators.</p>
+<p><strong>29 of the 45 bundled detectors ship a <code>Detector.sift</code></strong>, each parity-tested
+against its <code>Detector.star</code> (see <code>SiftParityTest</code>): <code>authentication-error</code>,
+<code>bulk-operation</code>, <code>collection-capability</code>, <code>common-field</code>, <code>compatibility</code>,
+<code>date-time-name</code>, <code>document-lint</code>, <code>documentation-completeness</code>, <code>enum-values</code>,
+<code>error-response</code>, <code>header-schema</code>, <code>hostname</code>, <code>identifier</code>, <code>manual</code>,
+<code>media-type</code>, <code>openapi-version</code>, <code>operation</code>, <code>operation-semantics</code>,
+<code>pagination</code>, <code>parameter</code>, <code>path-set</code>, <code>request-body</code>, <code>resource-path</code>,
+<code>schema-composition</code>, <code>schema-name</code>, <code>sensitive-data</code>, <code>sensitive-search</code>,
+<code>server-url</code>, <code>status-class</code>.</p>
 
 
 
