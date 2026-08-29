@@ -785,6 +785,28 @@ class GenericPolicyValidationPluginTest {
     }
 
     @Test
+    void starlarkRuntimeRejectsOccurrenceBombs() {
+        Detector detector = new Detector("bomb", "starlark",
+                "def detect(api, rule):\n    return [{\"message\": \"x\"}] * 1001\n",
+                java.util.List.of("operation"), Map.of());
+        Rule rule = new Rule("TEST", "Test", "Test", "bomb", "operation", Map.of(), "");
+
+        assertThrows(DetectorException.class,
+                () -> new StarlarkDetectorRuntime().execute(detector, Map.of(), rule));
+    }
+
+    @Test
+    void starlarkRuntimeRejectsMalformedOccurrenceResults() {
+        Detector detector = new Detector("malformed", "starlark",
+                "def detect(api, rule):\n    return [{\"path\": \"/customers\"}]\n",
+                java.util.List.of("operation"), Map.of());
+        Rule rule = new Rule("TEST", "Test", "Test", "malformed", "operation", Map.of(), "");
+
+        assertThrows(DetectorException.class,
+                () -> new StarlarkDetectorRuntime().execute(detector, Map.of(), rule));
+    }
+
+    @Test
     void operationSemanticsDetectorReportsOnlyDocumentedHeuristicSignals() {
         PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
         String spec = """
