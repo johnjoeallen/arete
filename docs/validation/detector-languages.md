@@ -1,9 +1,11 @@
 # Detector languages
 
-Speculate currently demonstrates the operation-semantics detector in three
-styles: Groovy, Starlark, and the experimental Sift (`.sift`) syntax.
-All three examples express the same core pipeline: visit paths, flatten their
-operations, retain matching operations, and create occurrences.
+Every bundled detector ships in three languages: **Sift** (`Detector.sift`, the
+default runtime — see the [Sift reference](sift.md)), **Starlark**
+(`Detector.star`, the sandboxed fallback), and **Groovy** (`Detector.groovy`,
+the opt-in unsandboxed runtime). The example below expresses the same
+operation-semantics pipeline in all three: visit paths, flatten their
+operations, retain the matching operations, and create occurrences.
 
 ## The same detector in three languages
 
@@ -88,8 +90,8 @@ def detect(api, rule):
     return out
 ```
 
-Starlark makes the data model and control flow explicit. It is the default
-runtime and is sandboxed by construction.
+Starlark makes the data model and control flow explicit. It is the sandboxed
+fallback runtime, kept parity-equivalent to Sift.
 
 ### Sift
 
@@ -126,10 +128,10 @@ sift(api, rule) {
 }
 ```
 
-Sift keeps Java-shaped operators and declarations while using
-Groovy-like trailing closures for collection pipelines. `expand` names the
-operation that turns each path into its operation collection; it is the
-Sift equivalent of Groovy `collectMany` and Starlark’s nested loop.
+Sift keeps Java-shaped operators while using Groovy-like trailing closures for
+collection pipelines. `expand` names the operation that turns each path into
+its operation collection; it is the Sift equivalent of Groovy `collectMany`
+and Starlark's nested loop. The [Sift reference](sift.md) is the full guide.
 
 For regular expressions Sift borrows Groovy's slashy literal and match
 operators. `/pattern/` is a pattern wherever an operand is expected — after
@@ -154,39 +156,22 @@ remain available and accept either a literal or a string.
 
 ## Choosing a language
 
-Starlark is the default for bundled detectors because it provides a restricted,
-deterministic execution environment. Groovy remains available as an explicit,
-unsandboxed fallback for compatibility. Sift is a prototype focused
-on making detector pipelines feel natural to Java developers while retaining a
-small, controlled operation set.
+**Sift is the default** for bundled detectors: it is sandboxed, and its small
+expression grammar keeps detectors terse and reviewable. Starlark is the
+sandboxed fallback, used for any detector that ships only a `Detector.star`
+(e.g. in a third-party bundle). Groovy remains available as an explicit,
+unsandboxed opt-in for compatibility.
 
 The language precedence and Groovy opt-in switches are documented in the
-[policy engine guide](policy-engine.md#detector-languages).
+[policy engine guide](policy-engine.md#detector-languages); the full Sift
+grammar and builtin catalogue are in the [Sift reference](sift.md).
 
 Whichever language a bundle picks, the findings are the same: `SiftParityTest`
 pins every `Detector.sift` to its `Detector.star`, and `GroovyStarlarkParityTest`
-sweeps every bundle rule against both runtimes so a `Detector.groovy` can never
-drift from its Starlark twin.
+sweeps every bundle rule against both other runtimes so a `Detector.groovy` can
+never drift from its Starlark twin.
 
-## Sift coverage
-
-Sift is expression-only: a single `return`, closures with one parameter and a
-one-expression body, no local variables or helper functions. Beyond the core
-operators it has `< <= > >=`, unary `-`, `true` / `false`, `/regex/` literals
-with `==~` / `=~`, list concatenation with `+`, `value[key]` indexing, string
-methods (`lower` `trim` `contains` `startsWith` `endsWith` `length`), sequence
-methods (`map` `filter` `expand` `any` `all` `find` `count` `toList`), list
-literals (`["a", "b"]`), map-key iteration (`someMap.keys` / `.values`),
-positional iteration (`enumerate(list)` → `[index, value]` pairs) and the
-functions `occurrence` `regexFullMatch` `regexSearch` `tokenize` `size`
-`distinct` `parseInt` `join` `urlHost` `strip` `last` `type` `truthy`
-`enumerate` `pathSegments`.
-
-It still has **no** map literals and no local variables — a value used
-several times is spelled out at each use.
-
-**All 45 bundled detectors ship a `Detector.sift`**, each parity-tested
-against its `Detector.star` (see `SiftParityTest`). Detectors that need a
-running accumulator (`operation-metadata`'s duplicate-operationId check,
+**All 45 bundled detectors ship a `Detector.sift`.** The two that need a
+running accumulator (`operation-metadata`'s duplicate-`operationId` check,
 `response-example`'s duplicate-payload check) express it by scanning
 `enumerate(...)` for an earlier matching entry rather than mutating state.

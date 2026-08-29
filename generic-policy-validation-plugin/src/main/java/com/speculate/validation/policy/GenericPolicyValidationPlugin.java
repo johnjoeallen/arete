@@ -28,6 +28,7 @@ public final class GenericPolicyValidationPlugin implements SpecValidationPlugin
     private final PolicyBundleLoader bundleLoader = new PolicyBundleLoader();
     private final GroovyDetectorRuntime groovyRuntime = new GroovyDetectorRuntime();
     private final StarlarkDetectorRuntime starlarkRuntime = new StarlarkDetectorRuntime();
+    private final SiftRuntime siftRuntime = new SiftRuntime();
     private volatile boolean forkDetectors;
     private volatile long forkDetectorTimeoutMillis = 5000;
 
@@ -46,7 +47,7 @@ public final class GenericPolicyValidationPlugin implements SpecValidationPlugin
     }
 
     /** Detector language precedence used when nothing is configured. */
-    static final List<String> DEFAULT_LANGUAGE_PRECEDENCE = List.of("starlark");
+    static final List<String> DEFAULT_LANGUAGE_PRECEDENCE = List.of("sift", "starlark");
 
     @Override
     public synchronized void configure(Map<String, String> config) {
@@ -65,9 +66,9 @@ public final class GenericPolicyValidationPlugin implements SpecValidationPlugin
     /**
      * Resolves the detector language precedence, in order of precedence:
      * the {@code detector-languages} plugin config key (comma-separated), the
-     * {@code detector-language} key (a single language, added after Starlark),
-     * then the matching {@code speculate.policy.*} system properties, then the
-     * Starlark-only default.
+     * {@code detector-language} key (a single language, appended to the
+     * Sift/Starlark default), then the matching {@code speculate.policy.*}
+     * system properties, then the {@code ["sift", "starlark"]} default.
      */
     private static List<String> resolveLanguagePrecedence(Map<String, String> config) {
         String list = configOrProperty(config, "detector-languages", "speculate.policy.detector-languages");
@@ -82,10 +83,12 @@ public final class GenericPolicyValidationPlugin implements SpecValidationPlugin
         String single = configOrProperty(config, "detector-language", "speculate.policy.detector-language");
         if (single != null && !single.isBlank()) {
             String language = single.trim().toLowerCase();
-            if (language.equals("starlark")) return List.of("starlark");
-            // A single non-Starlark language means "also allow this one", with
-            // Starlark still preferred where a Starlark source exists.
-            return List.of("starlark", language);
+            if (DEFAULT_LANGUAGE_PRECEDENCE.contains(language)) return List.of(language);
+            // A single language outside the default means "also allow this one",
+            // with Sift then Starlark still preferred where a source exists.
+            List<String> precedence = new ArrayList<>(DEFAULT_LANGUAGE_PRECEDENCE);
+            precedence.add(language);
+            return List.copyOf(precedence);
         }
         return DEFAULT_LANGUAGE_PRECEDENCE;
     }
@@ -150,9 +153,11 @@ public final class GenericPolicyValidationPlugin implements SpecValidationPlugin
                 Rule effectiveRule = new Rule(rule.id(), rule.title(), rule.category(), rule.detector(), rule.scope(), parameters, rule.documentationMarkdown());
                 occurrences = forkDetectors
                         ? new ForkedDetectorRuntime(forkDetectorTimeoutMillis).execute(detector, api, effectiveRule)
-                        : "groovy".equals(detector.language())
-                        ? groovyRuntime.execute(detector, api, effectiveRule)
-                        : starlarkRuntime.execute(detector, api, effectiveRule);
+                        : switch (detector.language()) {
+                            case "groovy" -> groovyRuntime.execute(detector, api, effectiveRule);
+                            case "sift" -> siftRuntime.execute(detector, api, effectiveRule);
+                            default -> starlarkRuntime.execute(detector, api, effectiveRule);
+                        };
             } catch (DetectorException e) {
                 return ValidationResult.pluginError("Detector '" + rule.detector() + "' failed for " + rule.id() + ": " + e.getMessage());
             }

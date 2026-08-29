@@ -41,26 +41,33 @@ For each `validate(spec)` call:
 
 ### Detector languages
 
-The engine ships two detector runtimes. A detector can be authored in either
-language — `Detector.star` and `Detector.groovy` sit side by side under the
-detector directory — and a configurable **language precedence** decides which
-source is loaded for each detector.
+The engine ships three detector runtimes. A detector can be authored in any of
+the languages — `Detector.sift`, `Detector.star` and `Detector.groovy` sit side
+by side under the detector directory — and a configurable **language
+precedence** decides which source is loaded for each detector.
 
 | Language | Source file | Status |
 |---|---|---|
-| `starlark` | `Detector.star` | **Default.** Always available, sandboxed. |
+| `sift` | `Detector.sift` | **Default.** Sandboxed; see the [Sift reference](sift.md). |
+| `starlark` | `Detector.star` | Sandboxed fallback; always available. |
 | `groovy` | `Detector.groovy` | **Disabled by default** — opt-in, unsandboxed. |
+
+Every bundled detector ships all three sources, kept in lock-step by
+`SiftParityTest` and `GroovyStarlarkParityTest`, so the language a bundle
+loads never changes its findings.
 
 #### Language precedence
 
 For each detector the loader walks the configured precedence list and uses the
 **first language whose source file is present**. The default precedence is
-`starlark` only, so Groovy never runs unless you opt in. Enabling Groovy adds
-it to the list:
+`sift,starlark` — Sift for every detector, with Starlark covering any
+detector (in a third-party bundle, say) that ships only a `Detector.star`.
+Groovy never runs unless you opt in:
 
-- precedence `starlark,groovy` (what `--enable-groovy-detectors` sets) — a
-  detector keeps running on Starlark wherever a `Detector.star` exists, and
-  only falls back to `Detector.groovy` when there is no Starlark source;
+- precedence `starlark` — pin the Starlark runtime;
+- precedence `sift,starlark,groovy` (what `--enable-groovy-detectors` sets) —
+  Sift, then Starlark, then Groovy only where neither of the others has a
+  source;
 - precedence `groovy,starlark` — prefer Groovy where a `Detector.groovy`
   exists, fall back to Starlark otherwise;
 - precedence `groovy` — Groovy only; a detector with no `Detector.groovy`
@@ -70,27 +77,38 @@ Configure it (highest precedence first):
 
 | Mechanism | Value |
 |---|---|
-| Plugin config key `detector-languages` | comma-separated list, e.g. `groovy,starlark` |
-| Plugin config key `detector-language` | a single extra language (added after `starlark`) |
+| Plugin config key `detector-languages` | comma-separated list, e.g. `starlark` |
+| Plugin config key `detector-language` | a single extra language (appended to `sift,starlark`) |
 | System property `-Dspeculate.policy.detector-languages` | comma-separated list |
 | System property `-Dspeculate.policy.detector-language` | single language |
 | Launcher `--detector-languages LIST` | comma-separated list |
-| Launcher `--enable-groovy-detectors` | shorthand for `starlark,groovy` |
+| Launcher `--enable-groovy-detectors` | shorthand for `sift,starlark,groovy` |
 
 === "Launcher"
 
     ```bash
     ./speculate.sh --enable-groovy-detectors
-    ./speculate.sh --detector-languages groovy,starlark
+    ./speculate.sh --detector-languages starlark
     ```
 
 === "System property"
 
     ```bash
-    java -Dspeculate.policy.detector-languages=groovy,starlark -jar speculate.jar
+    java -Dspeculate.policy.detector-languages=starlark -jar speculate.jar
     ```
 
-#### Starlark (default)
+#### Sift (default)
+
+Detectors run as [Sift](sift.md) sources — a small expression language shaped
+for detector pipelines (`.map` / `.filter` / `.expand`, slashy regex literals,
+`occurrence(...)`).
+
+- **Safe by construction** — the interpreter exposes only the immutable `api`
+  and `rule` values, a fixed builtin set, and RE2/J regex. No filesystem,
+  network, reflection, or unbounded loops.
+- See the [Sift reference](sift.md) for the full grammar and builtin catalogue.
+
+#### Starlark (sandboxed fallback)
 
 Detectors run as [Starlark](https://bazel.build/rules/language) sources.
 
@@ -131,7 +149,8 @@ api-policy/
 ├── detectors/
 │   └── <detector-id>/
 │       ├── Detector.md          # descriptor (YAML front matter) + prose
-│       ├── Detector.star        # the detector — Starlark (default runtime)
+│       ├── Detector.sift        # the detector — Sift (default runtime)
+│       ├── Detector.star        # the same detector — Starlark (sandboxed fallback)
 │       └── Detector.groovy      # the same detector — Groovy (opt-in runtime)
 ├── rules/
 │   └── <RULE-ID>.md             # rule front matter + human documentation
@@ -241,7 +260,12 @@ api.schemas[]  { name, pointer, type, array, maxItems, description, examplePrese
 global requirement. JSON Pointers are pre-escaped and safe to return verbatim
 as `pointer`.
 
-### Writing a detector (Starlark)
+### Writing a detector
+
+The default runtime is **Sift** (`Detector.sift`); its grammar and builtins
+have their own chapter — the [Sift reference](sift.md). The rest of this
+section describes the Starlark form, which every bundled detector also ships as
+a sandboxed fallback.
 
 `Detector.star` must define a top-level function `detect(api, rule)` that
 returns a list of occurrence dicts:

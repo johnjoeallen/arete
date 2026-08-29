@@ -202,7 +202,7 @@ class GenericPolicyValidationPluginTest {
 
     @Test
     void operationDetectorReportsOperationsWhoseSummaryIsMissing() {
-        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        PolicyBundle bundle = starlarkBundle();
         Rule rule = bundle.rules().get("DOC001");
         Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
                 .readContents(ACTION_PATH_SPEC, null, new ParseOptions()).getOpenAPI());
@@ -218,7 +218,7 @@ class GenericPolicyValidationPluginTest {
 
     @Test
     void textStyleDetectorUsesTypedRuleParameters() {
-        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        PolicyBundle bundle = starlarkBundle();
         Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
                 .readContents(SUMMARY_STYLE_SPEC, null, new ParseOptions()).getOpenAPI());
 
@@ -235,7 +235,7 @@ class GenericPolicyValidationPluginTest {
 
     @Test
     void namingDetectorInspectsStableParameterAndSchemaMaps() {
-        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        PolicyBundle bundle = starlarkBundle();
         Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
                 .readContents(NAMING_SPEC, null, new ParseOptions()).getOpenAPI());
         StarlarkDetectorRuntime runtime = new StarlarkDetectorRuntime();
@@ -251,7 +251,7 @@ class GenericPolicyValidationPluginTest {
 
     @Test
     void schemaDetectorUsesOnlyStablePrimitivePropertyFacts() {
-        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        PolicyBundle bundle = starlarkBundle();
         Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
                 .readContents(NAMING_SPEC, null, new ParseOptions()).getOpenAPI());
         StarlarkDetectorRuntime runtime = new StarlarkDetectorRuntime();
@@ -263,7 +263,7 @@ class GenericPolicyValidationPluginTest {
 
     @Test
     void existingDetectorsCoverTheNextFiveCataloguedRules() {
-        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        PolicyBundle bundle = starlarkBundle();
         Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
                 .readContents(METHOD_AND_ACTION_SPEC, null, new ParseOptions()).getOpenAPI());
         StarlarkDetectorRuntime runtime = new StarlarkDetectorRuntime();
@@ -277,7 +277,7 @@ class GenericPolicyValidationPluginTest {
 
     @Test
     void proprietaryHeaderDetectorReportsOnlyNonAllowListedCustomHeaders() {
-        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        PolicyBundle bundle = starlarkBundle();
         String spec = """
                 openapi: 3.0.0
                 info: { title: Test API, version: 1.0.0 }
@@ -307,7 +307,7 @@ class GenericPolicyValidationPluginTest {
 
     @Test
     void policiesCanOverrideRuleParametersIndependently() {
-        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        PolicyBundle bundle = starlarkBundle();
 
         assertEquals("X-Request-Id", bundle.policies().get("Zalando").dispositions()
                 .get("STANDARD008").parameters().get("allowed"));
@@ -319,7 +319,7 @@ class GenericPolicyValidationPluginTest {
 
     @Test
     void queryCollectionDetectorHonoursConfiguredSerialization() {
-        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        PolicyBundle bundle = starlarkBundle();
         String spec = """
                 openapi: 3.0.0
                 info: { title: Test API, version: 1.0.0 }
@@ -350,7 +350,7 @@ class GenericPolicyValidationPluginTest {
 
     @Test
     void errorResponseDetectorChecksCoverageAndProtocolDetails() {
-        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        PolicyBundle bundle = starlarkBundle();
         String spec = """
                 openapi: 3.0.0
                 info: { title: Test API, version: 1.0.0 }
@@ -377,7 +377,7 @@ class GenericPolicyValidationPluginTest {
 
     @Test
     void authenticationErrorDetectorUsesEffectiveSecurityRequirements() {
-        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        PolicyBundle bundle = starlarkBundle();
         String spec = """
                 openapi: 3.0.0
                 info: { title: Test API, version: 1.0.0 }
@@ -402,7 +402,7 @@ class GenericPolicyValidationPluginTest {
 
     @Test
     void sensitiveDataDetectorChecksConfigurableNameLocations() {
-        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        PolicyBundle bundle = starlarkBundle();
         String spec = """
                 openapi: 3.0.0
                 info: { title: Test API, version: 1.0.0 }
@@ -435,7 +435,7 @@ class GenericPolicyValidationPluginTest {
 
     @Test
     void sensitiveSearchDetectorDistinguishesSearchInputsFromSensitiveFields() {
-        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        PolicyBundle bundle = starlarkBundle();
         String spec = """
                 openapi: 3.0.0
                 info: { title: Test API, version: 1.0.0 }
@@ -462,7 +462,7 @@ class GenericPolicyValidationPluginTest {
 
     @Test
     void identifierDetectorChecksTypeAndFormatSeparately() {
-        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        PolicyBundle bundle = starlarkBundle();
         String spec = """
                 openapi: 3.0.0
                 info: { title: Test API, version: 1.0.0 }
@@ -486,7 +486,7 @@ class GenericPolicyValidationPluginTest {
 
     @Test
     void collectionCapabilityDetectorChecksPresenceAndRepresentation() {
-        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        PolicyBundle bundle = starlarkBundle();
         String spec = """
                 openapi: 3.0.0
                 info: { title: Test API, version: 1.0.0 }
@@ -514,7 +514,7 @@ class GenericPolicyValidationPluginTest {
 
     @Test
     void paginationDetectorChecksControlsLimitsAndLinks() {
-        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        PolicyBundle bundle = starlarkBundle();
         String spec = """
                 openapi: 3.0.0
                 info: { title: Test API, version: 1.0.0 }
@@ -547,7 +547,7 @@ class GenericPolicyValidationPluginTest {
 
     @Test
     void securityDetectorUsesOperationSecurityAndGlobalFallback() {
-        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        PolicyBundle bundle = starlarkBundle();
         String spec = """
                 openapi: 3.0.0
                 info: { title: Test API, version: 1.0.0 }
@@ -580,7 +580,7 @@ class GenericPolicyValidationPluginTest {
 
     @Test
     void securityDetectorRequiresAllConfiguredScopes() {
-        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        PolicyBundle bundle = starlarkBundle();
         String spec = """
                 openapi: 3.0.0
                 info: { title: Test API, version: 1.0.0 }
@@ -616,7 +616,7 @@ class GenericPolicyValidationPluginTest {
 
     @Test
     void responseHeaderDetectorRequiresEveryConfiguredRateLimitHeader() {
-        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        PolicyBundle bundle = starlarkBundle();
         String spec = """
                 openapi: 3.0.0
                 info: { title: Test API, version: 1.0.0 }
@@ -642,7 +642,7 @@ class GenericPolicyValidationPluginTest {
 
     @Test
     void openApiVersionDetectorChecksPolicySupportedVersionPrefixes() {
-        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        PolicyBundle bundle = starlarkBundle();
         String spec = """
                 openapi: 3.0.3
                 info: { title: Test API, version: 1.0.0 }
@@ -663,7 +663,7 @@ class GenericPolicyValidationPluginTest {
 
     @Test
     void mediaTypeDetectorChecksRequestAndResponseContentFacts() {
-        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        PolicyBundle bundle = starlarkBundle();
         String spec = """
                 openapi: 3.0.0
                 info: { title: Test API, version: 1.0.0 }
@@ -694,7 +694,7 @@ class GenericPolicyValidationPluginTest {
 
     @Test
     void schemaDetectorsCoverEnumFormatsAndDateTimeNamingRules() {
-        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        PolicyBundle bundle = starlarkBundle();
         String spec = """
                 openapi: 3.0.0
                 info: { title: Test API, version: 1.0.0 }
@@ -760,7 +760,7 @@ class GenericPolicyValidationPluginTest {
 
     @Test
     void forkedRuntimeReturnsDetectorOccurrencesThroughJsonLines() {
-        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        PolicyBundle bundle = starlarkBundle();
         String spec = """
                 openapi: 3.0.0
                 info: { title: Test API, version: 1.0.0 }
@@ -808,7 +808,7 @@ class GenericPolicyValidationPluginTest {
 
     @Test
     void operationSemanticsDetectorReportsOnlyDocumentedHeuristicSignals() {
-        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        PolicyBundle bundle = starlarkBundle();
         String spec = """
                 openapi: 3.0.0
                 info: { title: Test API, version: 1.0.0 }
@@ -969,5 +969,12 @@ class GenericPolicyValidationPluginTest {
         } catch (Exception e) {
             throw new AssertionError("Could not read " + resource, e);
         }
+    }
+
+    /** Bundle pinned to the Starlark runtime for tests that drive it directly. */
+    private static PolicyBundle starlarkBundle() {
+        return new PolicyBundleLoader().load(
+                new ClasspathBundleResources(GenericPolicyValidationPluginTest.class.getClassLoader()),
+                new PolicyBundleLoader.LoadOptions(java.util.List.of("starlark")));
     }
 }

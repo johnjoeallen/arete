@@ -97,9 +97,11 @@ final class ForkedDetectorWorker {
             Rule rule = new Rule(string(ruleData, "id"), string(ruleData, "title"), string(ruleData, "category"),
                     string(ruleData, "detector"), string(ruleData, "scope"),
                     mapper.convertValue(ruleData.get("parameters"), new TypeReference<Map<String, Object>>() { }), "");
-            List<Occurrence> occurrences = "groovy".equals(detector.language())
-                    ? new GroovyDetectorRuntime().execute(detector, object(request, "api"), rule)
-                    : new StarlarkDetectorRuntime().execute(detector, object(request, "api"), rule);
+            List<Occurrence> occurrences = switch (detector.language()) {
+                case "groovy" -> new GroovyDetectorRuntime().execute(detector, object(request, "api"), rule);
+                case "sift" -> new SiftRuntime().execute(detector, object(request, "api"), rule);
+                default -> new StarlarkDetectorRuntime().execute(detector, object(request, "api"), rule);
+            };
             System.out.println(mapper.writeValueAsString(Map.of("ok", true, "occurrences", occurrences)));
         } catch (Exception e) {
             System.out.println(mapper.writeValueAsString(Map.of("ok", false, "error", e.toString())));

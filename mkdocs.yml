@@ -68,6 +68,7 @@ nav:
       - Overview: validation/index.md
       - Speculate Policy Engine: validation/policy-engine.md
       - Detector languages: validation/detector-languages.md
+      - Sift reference: validation/sift.md
       - Rule Catalogue: validation/rules.md
       - Policies: validation/policies.md
       - Writing a Plugin: validation/writing-a-plugin.md

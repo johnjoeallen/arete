@@ -61,11 +61,11 @@ echo   --port, -p PORT   Run the server on PORT instead of the configured defaul
 echo   --wipe-db         Delete the local database ^(%DATA_DIR%^) before starting.
 echo   --enable-groovy-detectors
 echo                     Allow the legacy, unsandboxed Groovy runtime as a fallback
-echo                     ^(precedence: starlark,groovy^).
+echo                     ^(precedence: sift,starlark,groovy^).
 echo   --fork-detectors   Run each detector in a disposable JVM with a timeout.
 echo   --detector-languages LIST
 echo                     Comma-separated detector language precedence, e.g.
-echo                     "starlark,groovy" or "groovy,starlark".
+echo                     "sift,starlark" ^(the default^) or "starlark".
 echo   -h, --help        Show this help and exit.
 exit /b 0
 

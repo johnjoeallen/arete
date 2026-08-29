@@ -54,13 +54,15 @@ docs.
 The release bundles the **Speculate Policy Engine**
 (`generic-policy-validation-plugin`) — a policy-driven linter whose rules
 and detectors are plain text files, with detectors running in a
-safe-by-construction Starlark runtime. It ships the Enterprise Grade,
+safe-by-construction runtime (Sift by default, Starlark as a fallback). It
+ships the Enterprise Grade,
 Zalando, and Zalando Extended policies. Drop additional plugin jars into
 `~/.speculate/plugins`.
 
 - [Validation overview](https://johnjoeallen.github.io/speculate/validation/)
 - [Policy engine](https://johnjoeallen.github.io/speculate/validation/policy-engine/)
 - [Detector languages](https://johnjoeallen.github.io/speculate/validation/detector-languages/)
+  and the [Sift reference](https://johnjoeallen.github.io/speculate/validation/sift/)
 - [Rule catalogue](https://johnjoeallen.github.io/speculate/validation/rules/)
   and [policies](https://johnjoeallen.github.io/speculate/validation/policies/)
 - [Writing a plugin](https://johnjoeallen.github.io/speculate/validation/writing-a-plugin/)

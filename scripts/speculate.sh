@@ -18,12 +18,12 @@ Usage: $(basename "$0") [--port PORT] [--wipe-db] [--enable-groovy-detectors] [-
   --wipe-db         Delete the local database ($DATA_DIR) before starting.
   --enable-groovy-detectors
                     Allow the legacy, unsandboxed Groovy detector runtime as a
-                    fallback (precedence: starlark,groovy).
+                    fallback (precedence: sift,starlark,groovy).
   --fork-detectors  Run each detector in a disposable JVM with a timeout.
   --detector-languages LIST
                     Comma-separated detector language precedence, e.g.
-                    "starlark,groovy" or "groovy,starlark". The first language
-                    with a source file present is used for each detector.
+                    "sift,starlark" (the default) or "starlark". The first
+                    language with a source file present is used per detector.
   -h, --help        Show this help and exit.
 EOF
 }

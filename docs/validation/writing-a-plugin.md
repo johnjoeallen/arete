@@ -9,8 +9,8 @@ from the `speculate-validation-spi` module and registers itself via
     If you just want different **rules**, you probably don't need a new plugin
     at all. The bundled [Speculate Policy Engine](policy-engine.md) is
     driven entirely by text files — add a rule, detector, or policy by editing
-    Markdown/YAML/Starlark. Write a `SpecValidationPlugin` only when you need a
-    different **engine**.
+    Markdown, YAML, and a [Sift](sift.md) detector. Write a
+    `SpecValidationPlugin` only when you need a different **engine**.
 
 ## The SPI
 

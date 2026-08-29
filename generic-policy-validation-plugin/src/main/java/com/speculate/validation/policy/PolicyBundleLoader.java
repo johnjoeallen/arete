@@ -19,9 +19,11 @@ final class PolicyBundleLoader {
     private final Yaml yaml;
     private final GroovyDetectorRuntime groovyRuntime = new GroovyDetectorRuntime();
     private final StarlarkDetectorRuntime starlarkRuntime = new StarlarkDetectorRuntime();
+    private final SiftRuntime siftRuntime = new SiftRuntime();
 
     /** The detector source file each supported language is loaded from. */
     private static final Map<String, String> SOURCE_FILE = Map.of(
+            "sift", "Detector.sift",
             "starlark", "Detector.star",
             "groovy", "Detector.groovy");
 
@@ -31,9 +33,11 @@ final class PolicyBundleLoader {
      * shipping only {@code Detector.groovy} runs on Groovy even while a
      * detector that also ships {@code Detector.star} stays on Starlark.
      *
-     * <p>The default is Starlark only — Groovy is opt-in. Callers widen it
-     * (e.g. {@code ["starlark", "groovy"]} to allow Groovy as a fallback, or
-     * {@code ["groovy", "starlark"]} to prefer Groovy) via configuration.
+     * <p>The default is {@code ["sift", "starlark"]}: Sift is the primary
+     * language, with Starlark as the fallback for any detector that ships only
+     * a {@code Detector.star}. Groovy is always opt-in. Callers override this
+     * (e.g. {@code ["starlark"]} to pin Starlark, or {@code ["groovy",
+     * "starlark"]} to prefer Groovy) via configuration.
      */
     record LoadOptions(List<String> languagePrecedence) {
         LoadOptions {
@@ -48,7 +52,7 @@ final class PolicyBundleLoader {
             }
             languagePrecedence = List.copyOf(languagePrecedence);
         }
-        static LoadOptions defaults() { return new LoadOptions(List.of("starlark")); }
+        static LoadOptions defaults() { return new LoadOptions(List.of("sift", "starlark")); }
     }
 
     PolicyBundleLoader() {
@@ -82,8 +86,11 @@ final class PolicyBundleLoader {
                 String source = optionalRead(resources, siblingPath(descriptorPath, SOURCE_FILE.get(language)));
                 if (source == null) continue;
                 detector = new Detector(descriptor.id(), language, source, descriptor.scopes(), descriptor.parameters());
-                if ("groovy".equals(language)) groovyRuntime.validate(detector);
-                else starlarkRuntime.validate(detector);
+                switch (language) {
+                    case "groovy" -> groovyRuntime.validate(detector);
+                    case "sift" -> siftRuntime.validate(detector);
+                    default -> starlarkRuntime.validate(detector);
+                }
                 break;
             }
             if (detector == null) {

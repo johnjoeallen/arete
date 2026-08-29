@@ -17,6 +17,33 @@ public final class SiftRuntime {
         return new Parser(source).parse().apply(Map.of("api", api, "rule", rule));
     }
 
+    /** Parses the detector source, failing the bundle load on a syntax error. */
+    void validate(Detector detector) {
+        if (!"sift".equals(detector.language())) {
+            throw new BundleValidationException("Unsupported detector language '" + detector.language() + "'");
+        }
+        try {
+            new Parser(detector.source()).parse();
+        } catch (RuntimeException e) {
+            throw new BundleValidationException("Detector '" + detector.id() + "' does not compile: " + e.getMessage());
+        }
+    }
+
+    List<Occurrence> execute(Detector detector, Map<String, Object> api, Rule rule) {
+        if (!"sift".equals(detector.language())) {
+            throw new DetectorException("Unsupported detector language '" + detector.language() + "'");
+        }
+        try {
+            List<Occurrence> occurrences = execute(detector.source(), api, rule.asMap());
+            if (occurrences.size() > 1_000) throw new DetectorException("Detector returned more than 1000 occurrences");
+            return occurrences;
+        } catch (DetectorException e) {
+            throw e;
+        } catch (RuntimeException e) {
+            throw new DetectorException(e.toString(), e);
+        }
+    }
+
     private interface Expr { Object eval(Map<String, Object> env); }
     private interface Closure { Object apply(Object value); }
     private record Program(Expr result) { List<Occurrence> apply(Map<String, Object> env) { return castOccurrences(result.eval(env)); } }
