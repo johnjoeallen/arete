@@ -133,6 +133,28 @@ class SiftRuntimeTest {
                 runtime.execute(source, api, Map.of("parameters", Map.of("location", "uri", "match", "present"))));
     }
 
+    @Test
+    void listLiteralsTypeKeysAndTruthyBuiltins() {
+        String source = """
+                sift(api, rule) {
+                    return api.paths
+                        .filter { path -> ["string", "int"].any { t -> t == type(path.path) }
+                            && path.keys.any { k -> k == "pointer" }
+                            && truthy(path.path) }
+                        .map { path -> occurrence(path.pointer, path.path, type(rule.parameters)) };
+                }
+                """;
+        Map<String, Object> api = api("""
+                openapi: 3.0.0
+                info: { title: Test, version: 1.0.0 }
+                paths:
+                  /a: { get: { responses: { '200': { description: OK } } } }
+                """);
+
+        assertEquals(List.of(new Occurrence("/paths/~1a", "/a", "dict")),
+                runtime.execute(source, api, Map.of("parameters", Map.of())));
+    }
+
     private static Map<String, Object> api(String content) {
         return OpenApiMapAdapter.toMap(new OpenAPIV3Parser().readContents(content, null, new ParseOptions()).getOpenAPI());
     }

@@ -34,7 +34,12 @@ public final class SiftRuntime {
 
     private static Object member(Object value, String name) {
         if (value == null) return null;
-        if (value instanceof Map<?, ?> map) return map.get(name);
+        if (value instanceof Map<?, ?> map) {
+            if (map.containsKey(name)) return map.get(name);
+            if (name.equals("keys")) return new ArrayList<Object>(map.keySet());
+            if (name.equals("values")) return new ArrayList<Object>(map.values());
+            return null;
+        }
         if (value instanceof String text) return switch (name) {
             case "length" -> text.length();
             default -> null;
@@ -153,6 +158,18 @@ public final class SiftRuntime {
                 try { yield Long.parseLong(String.valueOf(args.get(0)).trim()); }
                 catch (NumberFormatException e) { yield args.size() > 1 ? args.get(1) : -1L; }
             }
+            case "truthy" -> truthy(args.get(0));
+            case "type" -> {
+                Object value = args.get(0);
+                if (value == null) yield "NoneType";
+                if (value instanceof String) yield "string";
+                if (value instanceof Boolean) yield "bool";
+                if (value instanceof Double || value instanceof Float || value instanceof java.math.BigDecimal) yield "float";
+                if (value instanceof Number) yield "int";
+                if (value instanceof Map<?, ?>) yield "dict";
+                if (value instanceof Iterable<?>) yield "list";
+                yield "object";
+            }
             case "occurrence" -> new Occurrence(string(args, 0), string(args, 1), string(args, 2));
             case "operationMessage" -> operationMessage(args.get(0));
             default -> throw new IllegalArgumentException("unknown function: " + name);
@@ -238,6 +255,12 @@ public final class SiftRuntime {
         }
         private Expr primary() {
             if (accept("(")) { Expr value = expression(); expect(")"); return value; }
+            if (accept("[")) {
+                List<Expr> elements = new ArrayList<>();
+                if (!accept("]")) { do elements.add(expression()); while (accept(",")); expect("]"); }
+                List<Expr> els = elements;
+                return env -> { List<Object> list = new ArrayList<>(); for (Expr e : els) list.add(e.eval(env)); return list; };
+            }
             if (token.kind() == Kind.STRING) { String value = token.text(); advance(); return env -> value; }
             if (token.kind() == Kind.REGEX) { Regex value = new Regex(token.text()); advance(); return env -> value; }
             if (token.kind() == Kind.NUMBER) { long value = Long.parseLong(token.text()); advance(); return env -> value; }

@@ -170,21 +170,26 @@ one-expression body, no local variables or helper functions. Beyond the core
 operators it has `< <= > >=`, unary `-`, `true` / `false`, `/regex/` literals
 with `==~` / `=~`, list concatenation with `+`, `value[key]` indexing, string
 methods (`lower` `trim` `contains` `startsWith` `endsWith` `length`), sequence
-methods (`map` `filter` `expand` `any` `all` `find` `count` `toList`) and the
-functions `occurrence` `regexFullMatch` `regexSearch` `tokenize` `size`
-`distinct` `parseInt` `join` `urlHost` `strip` `last`.
+methods (`map` `filter` `expand` `any` `all` `find` `count` `toList`), list
+literals (`["a", "b"]`), map-key iteration (`someMap.keys` / `.values`) and
+the functions `occurrence` `regexFullMatch` `regexSearch` `tokenize` `size`
+`distinct` `parseInt` `join` `urlHost` `strip` `last` `type` `truthy`.
 
-It still has **no** `type(x)` introspection, no map-key iteration, no list or
-map literals, and no cross-iteration accumulators.
+It still has **no** map literals and no cross-iteration accumulators.
 
-**37 of the 45 bundled detectors ship a `Detector.sift`**, each parity-tested
+**42 of the 45 bundled detectors ship a `Detector.sift`**, each parity-tested
 against its `Detector.star` (see `SiftParityTest`): `api-title`,
 `authentication-error`, `bulk-operation`, `collection-capability`,
 `common-field`, `compatibility`, `date-time-name`, `document-lint`,
-`documentation-completeness`, `enum-values`, `error-response`, `extensions`,
-`header-schema`, `hostname`, `identifier`, `manual`, `media-type`, `naming`,
-`openapi-version`, `operation`, `operation-semantics`, `pagination`,
-`parameter`, `path-set`, `query-collection`, `request-body`, `resource-path`,
-`response-code`, `response-header`, `schema-composition`, `schema-name`,
-`sensitive-data`, `sensitive-search`, `server-url`, `status-class`,
-`text-style`, `versioning`.
+`documentation-completeness`, `enum-values`, `error-response`,
+`example-validity`, `extensions`, `header-schema`, `hostname`, `identifier`,
+`manual`, `media-type`, `metadata`, `naming`, `openapi-version`, `operation`,
+`operation-semantics`, `pagination`, `parameter`, `path-set`,
+`proprietary-header`, `query-collection`, `request-body`, `resource-path`,
+`response-code`, `response-header`, `schema`, `schema-composition`,
+`schema-name`, `security`, `sensitive-data`, `sensitive-search`,
+`server-url`, `status-class`, `text-style`, `versioning`.
+
+The three still on Starlark only are `operation-metadata` and
+`response-example` (need a cross-iteration accumulator) and `path-count`
+(a Sift parser limitation with deeply nested calls inside `&&`).

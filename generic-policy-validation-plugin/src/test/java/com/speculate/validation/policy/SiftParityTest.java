@@ -534,6 +534,118 @@ class SiftParityTest {
         assertParity("text-style", "operation-summary", Map.of("trailing-period", "present"), false, HOUSE_STYLE_SPEC);
     }
 
+    private static final String SCHEMA_SPEC = """
+            openapi: 3.0.0
+            info:
+              title: Widget API
+              description: Widgets.
+              contact: { name: Team, email: team@example.com }
+              version: 1.2
+            components:
+              securitySchemes:
+                bearerAuth: { type: http, scheme: bearer }
+              schemas:
+                Widget:
+                  type: object
+                  required: [id, name]
+                  properties:
+                    id: { type: integer }
+                    name: { type: string }
+                    price: { type: number }
+                    count: { type: integer, format: int32 }
+                    tags: { type: array, items: { type: string } }
+                    status: { type: string, enum: [ACTIVE, inactive, 3] }
+                    kind:
+                      type: string
+                      enum: [A, B]
+                      x-extensible-enum: [A, B]
+                    code: { type: string, pattern: '^[A-Z]{3}$', minLength: 3, maxLength: 3, example: 'ab' }
+                    ratio: { type: number, minimum: 1, maximum: 10, example: 42 }
+                  example:
+                    id: 1
+                WidgetList:
+                  type: object
+                  properties:
+                    items: { type: array, items: { $ref: '#/components/schemas/Widget' } }
+            paths:
+              /widgets:
+                get:
+                  security: []
+                  responses: { '200': { description: ok } }
+                post:
+                  responses:
+                    '201':
+                      description: created
+                      headers:
+                        X-Widget-Token: { description: token }
+            security:
+              - bearerAuth: []
+            """;
+
+    @Test void schemaNumberFormatAbsent() {
+        assertParity("schema", "property", Map.of("type", "number", "format", "absent"), true, SCHEMA_SPEC);
+    }
+
+    @Test void schemaArrayMaxItemsAbsent() {
+        assertParity("schema", "property", Map.of("type", "array", "max-items", "absent"), true, SCHEMA_SPEC);
+    }
+
+    @Test void schemaEnumUpperSnake() {
+        assertParity("schema", "property", Map.of("enum-case", "upper-snake-case"), true, SCHEMA_SPEC);
+    }
+
+    @Test void schemaEnumTypeConsistent() {
+        assertParity("schema", "property", Map.of("enum-type", "consistent"), false, SCHEMA_SPEC);
+    }
+
+    @Test void schemaExtensibleRequired() {
+        assertParity("schema", "property", Map.of("extensible", "required"), true, SCHEMA_SPEC);
+    }
+
+    @Test void schemaStringEnumPresent() {
+        assertParity("schema", "property", Map.of("type", "string", "enum", "present"), true, SCHEMA_SPEC);
+    }
+
+    @Test void schemaFormatAbsent() {
+        assertParity("schema", "property", Map.of("format", "absent"), true, SCHEMA_SPEC);
+    }
+
+    @Test void schemaOptionalNullable() {
+        assertParity("schema", "property", Map.of("required", false, "nullable", true, "semantics", "undefined"), false, SCHEMA_SPEC);
+    }
+
+    @Test void exampleCoversRequired() {
+        assertParity("example-validity", "schema", Map.of("check", "covers-required"), true, SCHEMA_SPEC);
+    }
+
+    @Test void exampleSatisfiesConstraints() {
+        assertParity("example-validity", "property", Map.of("check", "satisfies-constraints"), true, SCHEMA_SPEC);
+    }
+
+    @Test void securitySchemeMissing() {
+        assertParity("security", "operation", Map.of("scheme", "bearerAuth"), true, SCHEMA_SPEC);
+    }
+
+    @Test void securitySchemeWithScopes() {
+        assertParity("security", "operation", Map.of("scheme", "bearerAuth", "scopes", "read"), true, SCHEMA_SPEC);
+    }
+
+    @Test void metadataComplete() {
+        assertParity("metadata", "api", Map.of("required", "complete"), true, SCHEMA_SPEC);
+    }
+
+    @Test void metadataIdentifier() {
+        assertParity("metadata", "api", Map.of("required", "identifier"), true, SCHEMA_SPEC);
+    }
+
+    @Test void metadataAudience() {
+        assertParity("metadata", "api", Map.of("required", "audience"), true, SCHEMA_SPEC);
+    }
+
+    @Test void proprietaryHeaderNotAllowed() {
+        assertParity("proprietary-header", "header", Map.of("allowed", "X-Request-Id,X-Correlation-Id"), true, SCHEMA_SPEC);
+    }
+
     // --- harness ---------------------------------------------------------
 
     private void assertParity(String detectorId, String scope, Map<String, Object> parameters) {
