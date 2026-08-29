@@ -102,34 +102,27 @@ sift(api, rule) {
                 && (
                     (rule.parameters.expected == "safe"
                         && operation.method == "GET"
-                        && regexFullMatch("(?i).*\\b(create|update|delete|remove|activate|deactivate|cancel|change|set)\\b.*",
-                            path.path + " " + operation.summary))
+                        && path.path + " " + operation.summary ==~ ~/(?i).*\b(create|update|delete|remove|activate|deactivate|cancel|change|set)\b.*/)
                     || (rule.parameters.match == "full-resource-replacement"
                         && operation.method == "POST"
-                        && regexFullMatch(".+/\\{[^}]+\\}.*", path.path)
-                        && regexFullMatch("(?i).*\\b(replace|replacement)\\b.*",
-                            path.path + " " + operation.summary))
+                        && path.path ==~ ~/.+\/\{[^}]+\}.*/
+                        && path.path + " " + operation.summary ==~ ~/(?i).*\b(replace|replacement)\b.*/)
                     || (rule.parameters.match == "partial-update"
                         && operation.method == "PUT"
-                        && regexFullMatch("(?i).*\\b(partial|patch|update)\\b.*",
-                            path.path + " " + operation.summary))
+                        && path.path + " " + operation.summary ==~ ~/(?i).*\b(partial|patch|update)\b.*/)
                     || (rule.parameters.match == "inconsistent-method-resource-semantics"
                         && (
                             (operation.method == "GET"
-                                && regexFullMatch("(?i).*\\b(create|update|delete|remove|activate|deactivate|cancel|change|set)\\b.*",
-                                    path.path + " " + operation.summary))
+                                && path.path + " " + operation.summary ==~ ~/(?i).*\b(create|update|delete|remove|activate|deactivate|cancel|change|set)\b.*/)
                             || (operation.method == "POST"
-                                && regexFullMatch(".+/\\{[^}]+\\}.*", path.path)
-                                && regexFullMatch("(?i).*\\b(replace|replacement)\\b.*",
-                                    path.path + " " + operation.summary)))
-                ))
+                                && path.path ==~ ~/.+\/\{[^}]+\}.*/
+                                && path.path + " " + operation.summary ==~ ~/(?i).*\b(replace|replacement)\b.*/)))
+                )
             }
             .map { operation -> occurrence(
                 operation.pointer,
                 operation.method + " " + path.path,
-                operationMessage(rule.parameters)) }
-            }
-            ;
+                operationMessage(rule.parameters)) } };
 }
 ```
 
@@ -137,6 +130,12 @@ Sift keeps Java-shaped operators and declarations while using
 Groovy-like trailing closures for collection pipelines. `expand` names the
 operation that turns each path into its operation collection; it is the
 Sift equivalent of Groovy `collectMany` and Starlark’s nested loop.
+
+For regular expressions Sift borrows Groovy's slashy literal and match
+operators: `~/pattern/` is a pattern (backslashes are literal, only `\/` is
+escaped), `text ==~ ~/…/` is a whole-string match and `text =~ ~/…/` is a
+search. The `regexFullMatch(pattern, text)` / `regexSearch(pattern, text)`
+functions remain available and accept either a `~/…/` literal or a string.
 
 ## Syntax comparison
 
@@ -147,7 +146,7 @@ Sift equivalent of Groovy `collectMany` and Starlark’s nested loop.
 | Flatten nested values | `collectMany { value -> ... }` | nested `for` loop | `.expand { value -> ... }` |
 | Read a field | `value.field` | `value["field"]` | `value.field` |
 | Create a finding | `[pointer: ..., path: ..., message: ...]` | `{"pointer": ..., "path": ..., "message": ...}` | `occurrence(pointer, path, message)` |
-| Regular expressions | Groovy regex literals and `==~` | `re_fullmatch(...)` | `regexFullMatch(...)` |
+| Regular expressions | `~/…/` with `==~` / `=~` | `re_fullmatch(...)` | `~/…/` with `==~` / `=~` (or `regexFullMatch(...)`) |
 | Entry point | closure `{ Map api, Map rule -> ... }` | `detect(api, rule)` | `sift(api, rule) { ... }` |
 
 ## Choosing a language

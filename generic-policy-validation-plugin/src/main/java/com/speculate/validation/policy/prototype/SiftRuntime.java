@@ -78,10 +78,19 @@ public final class SiftRuntime {
 
     private static boolean truthy(Object value) { return value instanceof Boolean b ? b : value != null; }
 
+    /** A {@code ~/pattern/} literal; stringifies to the raw pattern. */
+    private record Regex(String pattern) { public String toString() { return pattern; } }
+
+    private static String patternOf(Object value) { return value instanceof Regex regex ? regex.pattern() : String.valueOf(value); }
+
+    private static boolean regexSearch(Object pattern, Object text) { return Pattern.compile(patternOf(pattern)).matcher(String.valueOf(text)).find(); }
+
+    private static boolean regexFullMatch(Object pattern, Object text) { return Pattern.compile(patternOf(pattern)).matches(String.valueOf(text)); }
+
     private static Object function(String name, List<Object> args) {
         return switch (name) {
-            case "regexSearch" -> Pattern.compile(String.valueOf(args.get(0))).matcher(String.valueOf(args.get(1))).find();
-            case "regexFullMatch" -> Pattern.compile(String.valueOf(args.get(0))).matches(String.valueOf(args.get(1)));
+            case "regexSearch" -> regexSearch(args.get(0), args.get(1));
+            case "regexFullMatch" -> regexFullMatch(args.get(0), args.get(1));
             case "tokenize" -> List.of(String.valueOf(args.get(1)).split(java.util.regex.Pattern.quote(String.valueOf(args.get(0)))));
             case "last" -> { List<Object> values = iterableOf(args.get(0)); yield values.isEmpty() ? "" : values.get(values.size() - 1); }
             case "occurrence" -> new Occurrence(string(args, 0), string(args, 1), string(args, 2));
@@ -101,7 +110,7 @@ public final class SiftRuntime {
 
     private static String string(List<Object> args, int index) { return Objects.toString(args.get(index), null); }
 
-    private enum Kind { ID, STRING, NUMBER, SYMBOL, EOF }
+    private enum Kind { ID, STRING, NUMBER, REGEX, SYMBOL, EOF }
     private record Token(Kind kind, String text) { }
 
     private static final class Lexer {
@@ -114,7 +123,22 @@ public final class SiftRuntime {
             if (Character.isJavaIdentifierStart(ch)) { int start = cursor++; while (cursor < source.length() && Character.isJavaIdentifierPart(source.charAt(cursor))) cursor++; return new Token(Kind.ID, source.substring(start, cursor)); }
             if (ch == '"') { StringBuilder out = new StringBuilder(); cursor++; while (cursor < source.length() && source.charAt(cursor) != '"') { if (source.charAt(cursor) == '\\') cursor++; out.append(source.charAt(cursor++)); } if (cursor == source.length()) throw error("unterminated string"); cursor++; return new Token(Kind.STRING, out.toString()); }
             if (Character.isDigit(ch)) { int start = cursor++; while (cursor < source.length() && Character.isDigit(source.charAt(cursor))) cursor++; return new Token(Kind.NUMBER, source.substring(start, cursor)); }
-            for (String operator : List.of("==", "!=", "&&", "||", "->")) if (source.startsWith(operator, cursor)) { cursor += operator.length(); return new Token(Kind.SYMBOL, operator); }
+            if (ch == '~' && cursor + 1 < source.length() && source.charAt(cursor + 1) == '/') {
+                cursor += 2; StringBuilder out = new StringBuilder();
+                while (cursor < source.length() && source.charAt(cursor) != '/') {
+                    char c = source.charAt(cursor);
+                    if (c == '\\' && cursor + 1 < source.length()) {
+                        char escaped = source.charAt(cursor + 1);
+                        out.append(escaped == '/' ? "/" : "\\" + escaped);
+                        cursor += 2;
+                        continue;
+                    }
+                    out.append(c); cursor++;
+                }
+                if (cursor == source.length()) throw error("unterminated regex");
+                cursor++; return new Token(Kind.REGEX, out.toString());
+            }
+            for (String operator : List.of("==~", "=~", "==", "!=", "&&", "||", "->")) if (source.startsWith(operator, cursor)) { cursor += operator.length(); return new Token(Kind.SYMBOL, operator); }
             cursor++; return new Token(Kind.SYMBOL, String.valueOf(ch));
         }
         private IllegalArgumentException error(String message) { return new IllegalArgumentException(message + " at " + cursor); }
@@ -127,12 +151,13 @@ public final class SiftRuntime {
         private Expr expression() { Expr condition = or(); if (accept("?")) { Expr whenTrue = expression(); expect(":"); Expr whenFalse = expression(); return env -> truthy(condition.eval(env)) ? whenTrue.eval(env) : whenFalse.eval(env); } return condition; }
         private Expr or() { Expr left = and(); while (accept("||")) { Expr right = and(); left = binary(left, right, "||"); } return left; }
         private Expr and() { Expr left = equality(); while (accept("&&")) { Expr right = equality(); left = binary(left, right, "&&"); } return left; }
-        private Expr equality() { Expr left = additive(); while (token.text().equals("==") || token.text().equals("!=")) { String op = token.text(); advance(); Expr right = additive(); left = binary(left, right, op); } return left; }
+        private Expr equality() { Expr left = additive(); while (token.text().equals("==") || token.text().equals("!=") || token.text().equals("==~") || token.text().equals("=~")) { String op = token.text(); advance(); Expr right = additive(); left = binary(left, right, op); } return left; }
         private Expr additive() { Expr left = unary(); while (accept("+")) { Expr right = unary(); Expr prior = left; left = env -> { Object a = prior.eval(env), b = right.eval(env); if (a instanceof Number x && b instanceof Number y) return x.longValue() + y.longValue(); return Objects.toString(a, "null") + Objects.toString(b, "null"); }; } return left; }
         private Expr unary() { if (accept("!")) { Expr value = unary(); return env -> !truthy(value.eval(env)); } return postfix(primary()); }
         private Expr primary() {
             if (accept("(")) { Expr value = expression(); expect(")"); return value; }
             if (token.kind() == Kind.STRING) { String value = token.text(); advance(); return env -> value; }
+            if (token.kind() == Kind.REGEX) { Regex value = new Regex(token.text()); advance(); return env -> value; }
             if (token.kind() == Kind.NUMBER) { long value = Long.parseLong(token.text()); advance(); return env -> value; }
             String name = expectId(); if (accept("(")) { List<Expr> args = arguments(); return env -> function(name, args.stream().map(a -> a.eval(env)).toList()); }
             return env -> env.get(name);
@@ -143,7 +168,7 @@ public final class SiftRuntime {
         }
         private ParsedClosure closure() { expect("{"); String parameter = expectId(); expect("->"); Expr body = expression(); expect("}"); return new ParsedClosure(parameter, body); }
         private List<Expr> arguments() { List<Expr> result = new ArrayList<>(); if (!accept(")")) { do result.add(expression()); while (accept(",")); expect(")"); } return result; }
-        private Expr binary(Expr left, Expr right, String op) { return env -> { Object a = left.eval(env), b = right.eval(env); return switch (op) { case "==" -> Objects.equals(a, b); case "!=" -> !Objects.equals(a, b); case "&&" -> truthy(a) && truthy(b); case "||" -> truthy(a) || truthy(b); default -> throw new IllegalStateException(op); }; }; }
+        private Expr binary(Expr left, Expr right, String op) { return env -> { Object a = left.eval(env), b = right.eval(env); return switch (op) { case "==" -> Objects.equals(a, b); case "!=" -> !Objects.equals(a, b); case "==~" -> regexFullMatch(b, a); case "=~" -> regexSearch(b, a); case "&&" -> truthy(a) && truthy(b); case "||" -> truthy(a) || truthy(b); default -> throw new IllegalStateException(op); }; }; }
         private static Map<String, Object> with(Map<String, Object> env, String key, Object value) { Map<String, Object> result = new LinkedHashMap<>(env); result.put(key, value); return result; }
         private boolean accept(String text) { if (token.text().equals(text)) { advance(); return true; } return false; }
         private void expect(String text) { if (!accept(text)) throw new IllegalArgumentException("expected '" + text + "', got '" + token.text() + "'"); }

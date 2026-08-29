@@ -66,6 +66,28 @@ class SiftRuntimeTest {
     }
 
     @Test
+    void slashyRegexLiteralsAndMatchOperators() {
+        String source = """
+                sift(api, rule) {
+                    return api.paths
+                        .filter { path -> path.path =~ ~/\\/v[0-9]+\\// && !(path.path ==~ ~/(?i).*internal.*/) }
+                        .map { path -> occurrence(path.pointer, path.path, "Versioned public path") };
+                }
+                """;
+        Map<String, Object> api = api("""
+                openapi: 3.0.0
+                info: { title: Test, version: 1.0.0 }
+                paths:
+                  /v1/customers: { get: { responses: { '200': { description: OK } } } }
+                  /v2/internal/audit: { get: { responses: { '200': { description: OK } } } }
+                  /health: { get: { responses: { '200': { description: OK } } } }
+                """);
+
+        assertEquals(List.of(new Occurrence("/paths/~1v1~1customers", "/v1/customers", "Versioned public path")),
+                runtime.execute(source, api, Map.of("parameters", Map.of())));
+    }
+
+    @Test
     void nestedExpandAndMapMatchResourcePaths() {
         String source = """
                 sift(api, rule) {
