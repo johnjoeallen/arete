@@ -646,6 +646,63 @@ class SiftParityTest {
         assertParity("proprietary-header", "header", Map.of("allowed", "X-Request-Id,X-Correlation-Id"), true, SCHEMA_SPEC);
     }
 
+    private static final String OPS_SPEC = """
+            openapi: 3.0.0
+            info: { title: T, version: 1.0.0 }
+            paths:
+              /orders:
+                get:
+                  operationId: listOrders
+                  tags: [orders]
+                  responses: { '200': { description: ok } }
+                post:
+                  operationId: listOrders
+                  tags: [orders]
+                  responses: { '200': { description: ok } }
+              /orders/{id}/items/{itemId}/tags:
+                get:
+                  responses:
+                    '200': { description: ok }
+                    '400':
+                      description: bad
+                      content: { application/json: { example: { error: nope } } }
+                    '422':
+                      description: bad too
+                      content: { application/json: { example: { error: nope } } }
+              /customers:
+                get: { responses: { '200': { description: ok } } }
+              /invoices:
+                get: { responses: { '200': { description: ok } } }
+            """;
+
+    @Test void operationMetadataUniqueOperationId() {
+        assertParity("operation-metadata", "operation", Map.of("check", "unique-operation-id"), true, OPS_SPEC);
+    }
+
+    @Test void operationMetadataTagsPresent() {
+        assertParity("operation-metadata", "operation", Map.of("check", "tags-present"), true, OPS_SPEC);
+    }
+
+    @Test void responseExampleUniqueErrorPayloads() {
+        assertParity("response-example", "operation", Map.of("check", "unique-error-payloads"), true, OPS_SPEC);
+    }
+
+    @Test void pathCountMaximumResources() {
+        assertParity("path-count", "api", Map.of("maximum", 2), true, OPS_SPEC);
+    }
+
+    @Test void pathCountMaximumDepth() {
+        assertParity("path-count", "api", Map.of("maximum", 8, "maximum-depth", 2), true, OPS_SPEC);
+    }
+
+    @Test void pathCountNestedRoot() {
+        assertParity("path-count", "api", Map.of("maximum", 8, "nested-root", true), true, OPS_SPEC);
+    }
+
+    @Test void pathCountWithinLimits() {
+        assertParity("path-count", "api", Map.of("maximum", 8), false, OPS_SPEC);
+    }
+
     // --- harness ---------------------------------------------------------
 
     private void assertParity(String detectorId, String scope, Map<String, Object> parameters) {

@@ -159,6 +159,24 @@ public final class SiftRuntime {
                 catch (NumberFormatException e) { yield args.size() > 1 ? args.get(1) : -1L; }
             }
             case "truthy" -> truthy(args.get(0));
+            case "pathSegments" -> {
+                List<Object> segments = new ArrayList<>();
+                for (String segment : String.valueOf(args.get(0)).split("/")) {
+                    if (!segment.isEmpty() && !segment.startsWith("{")) segments.add(segment);
+                }
+                yield segments;
+            }
+            case "enumerate" -> {
+                List<Object> source = iterableOf(args.get(0));
+                List<Object> pairs = new ArrayList<>();
+                for (int i = 0; i < source.size(); i++) {
+                    List<Object> pair = new ArrayList<>();
+                    pair.add((long) i);
+                    pair.add(source.get(i));
+                    pairs.add(pair);
+                }
+                yield pairs;
+            }
             case "type" -> {
                 Object value = args.get(0);
                 if (value == null) yield "NoneType";

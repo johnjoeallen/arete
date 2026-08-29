@@ -1,0 +1,25 @@
+sift(api, rule) {
+    return rule.parameters["check"] != "unique-error-payloads"
+        ? []
+        : api.paths.expand { path -> path.operationDetails.expand { operation ->
+            enumerate(operation.responses
+                    .filter { resp -> parseInt(resp.status, -1) >= 400 && parseInt(resp.status, -1) < 600 }
+                    .expand { resp -> (resp.exampleStrings == null ? [] : resp.exampleStrings)
+                        .map { example -> ["" + resp.status, example] } })
+                .expand { entry ->
+                    enumerate(operation.responses
+                            .filter { resp -> parseInt(resp.status, -1) >= 400 && parseInt(resp.status, -1) < 600 }
+                            .expand { resp -> (resp.exampleStrings == null ? [] : resp.exampleStrings)
+                                .map { example -> ["" + resp.status, example] } })
+                        .find { prior -> prior[0] < entry[0] && prior[1][1] == entry[1][1] } == null
+                        ? []
+                        : [occurrence(operation.pointer, operation.method + " " + path.path,
+                            "Error responses "
+                              + enumerate(operation.responses
+                                    .filter { resp -> parseInt(resp.status, -1) >= 400 && parseInt(resp.status, -1) < 600 }
+                                    .expand { resp -> (resp.exampleStrings == null ? [] : resp.exampleStrings)
+                                        .map { example -> ["" + resp.status, example] } })
+                                  .find { prior -> prior[0] < entry[0] && prior[1][1] == entry[1][1] } [1][0]
+                              + " and " + entry[1][0]
+                              + " share an identical example payload")] } } };
+}
