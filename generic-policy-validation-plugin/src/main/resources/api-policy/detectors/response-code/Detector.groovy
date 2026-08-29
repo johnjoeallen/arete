@@ -16,6 +16,7 @@
         try { Integer.parseInt(value.toString()) } catch (Exception ignored) { -1 }
     }
     if (p['response-shape'] == 'json-object') return api.paths.collectMany { path -> path.operationDetails.collectMany { op -> op.responses.findAll { statusNumber(it.status) >= 200 && statusNumber(it.status) < 300 && it.schemaTypes && it.schemaTypes.any { t -> t != 'object' } }.collect { [pointer: path.pointer, path: op.method + ' ' + path.path, message: 'Successful response is not a JSON object'] } } }
+    if (p['error-format'] == 'problem-json') return api.paths.collectMany { path -> path.operationDetails.collectMany { op -> op.responses.findAll { statusNumber(it.status) >= 400 && statusNumber(it.status) < 600 && !(op.mediaTypes ?: []).contains('application/problem+json') }.collect { [pointer: path.pointer, path: op.method + ' ' + path.path, message: 'Error response does not declare application/problem+json'] } } }
     def operationMatches = { path, operation ->
         if (p['operation-type'] == 'create' && !(operation.method == 'POST' || operation.method == 'PUT')) return false
         if (p['operation-type'] == 'identifiable-resource-retrieval' && !(operation.method == 'GET' && path.path.contains('{'))) return false

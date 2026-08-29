@@ -27,6 +27,10 @@ parameters:
     type: enum
     required: false
     values: [json-object]
+  error-format:
+    type: enum
+    required: false
+    values: [problem-json]
 ---
 
 # Response-code detector

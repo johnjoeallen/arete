@@ -67,6 +67,7 @@ rules:
   STATUS003: 0.5
   STATUS004: 0.5
   STATUS005: 0.5
+  STATUS006: 0.5
 ---
 
 # Mastercard Core Policy
