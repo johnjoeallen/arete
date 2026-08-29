@@ -1425,10 +1425,13 @@ parser:</p>
 <a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>                          mediaTypes[], schemaInlineObject, exampleStrings[] }
 <a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a>      .headerDetails[]  { name, schemaPresent }
 <a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a>api.schemas[]  { name, pointer, type, array, maxItems, description, examplePresent,
-<a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a>                 extensionKeys[], compositionKind, inlineCompositionMembers, properties[] }
-<a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a>  .properties[]         { name, pointer, type, array, maxItems, format, description,
-<a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a>                          examplePresent, extensionKeys[], nullable, required,
-<a id="__codelineno-5-23" name="__codelineno-5-23" href="#__codelineno-5-23"></a>                          enumPresent, enumValues[], extensibleEnum }
+<a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a>                 example, requiredFields[], extensionKeys[], compositionKind,
+<a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a>                 inlineCompositionMembers, properties[] }
+<a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a>  .properties[]         { name, pointer, type, array, maxItems, format, description,
+<a id="__codelineno-5-23" name="__codelineno-5-23" href="#__codelineno-5-23"></a>                          examplePresent, example, pattern, minLength, maxLength,
+<a id="__codelineno-5-24" name="__codelineno-5-24" href="#__codelineno-5-24"></a>                          minimum, maximum, exclusiveMinimum, exclusiveMaximum,
+<a id="__codelineno-5-25" name="__codelineno-5-25" href="#__codelineno-5-25"></a>                          extensionKeys[], nullable, required, enumPresent,
+<a id="__codelineno-5-26" name="__codelineno-5-26" href="#__codelineno-5-26"></a>                          enumValues[], extensibleEnum }
 </code></pre></div>
 <p><code>operationDetails[].security</code> is <code>null</code> unless the operation overrides the
 global requirement. JSON Pointers are pre-escaped and safe to return verbatim

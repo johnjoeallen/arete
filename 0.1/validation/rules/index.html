@@ -1113,8 +1113,8 @@
 by category. A rule is only evaluated when a <a href="../policies/">policy</a> references
 it. See <a href="../policy-engine/">the policy engine</a> for how rules, detectors, and
 policies fit together.</p>
-<p>There are <strong>135 rules</strong> across <strong>20 categories</strong>, built on
-<strong>43 detectors</strong>.</p>
+<p>There are <strong>138 rules</strong> across <strong>20 categories</strong>, built on
+<strong>45 detectors</strong>.</p>
 <div class="admonition note">
 <p class="admonition-title">Reading the policy columns</p>
 <p>A number is the point deduction applied once if the rule matches;
@@ -1513,6 +1513,14 @@ a blank cell means that policy does not include the rule.</p>
 <td></td>
 <td></td>
 </tr>
+<tr>
+<td><code>DOC016</code></td>
+<td>Schema example omits a required field</td>
+<td><code>example-validity</code></td>
+<td>0.5</td>
+<td></td>
+<td></td>
+</tr>
 </tbody>
 </table>
 <h2 id="error-responses">Error responses<a class="headerlink" href="#error-responses" title="Permanent link">&para;</a></h2>
@@ -1581,6 +1589,14 @@ a blank cell means that policy does not include the rule.</p>
 <td>Method-not-allowed response lacks Allow</td>
 <td><code>error-response</code></td>
 <td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>ERROR011</code></td>
+<td>Error responses share an example payload</td>
+<td><code>response-example</code></td>
+<td>0.5</td>
 <td></td>
 <td></td>
 </tr>
@@ -1896,6 +1912,14 @@ a blank cell means that policy does not include the rule.</p>
 <td><code>JSON019</code></td>
 <td>Number property does not declare a format</td>
 <td><code>schema</code></td>
+<td>0.5</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>JSON020</code></td>
+<td>Property example violates its own constraints</td>
+<td><code>example-validity</code></td>
 <td>0.5</td>
 <td></td>
 <td></td>

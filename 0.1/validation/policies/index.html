@@ -745,7 +745,7 @@ listed here is the default when an unknown rule set is requested.</p>
 <h2 id="enterprise-grade">Enterprise Grade<a class="headerlink" href="#enterprise-grade" title="Permanent link">&para;</a></h2>
 <p>The default policy: it enables every generally-applicable bundled rule, with a few detector parameters calibrated for a typical enterprise API (allow-listed proprietary headers, expected OAuth2 scopes, standard rate-limit headers).</p>
 <ul>
-<li><strong>98</strong> rules active</li>
+<li><strong>101</strong> rules active</li>
 </ul>
 <p>Parameter overrides:</p>
 <table>
@@ -771,7 +771,7 @@ listed here is the default when an unknown rule set is requested.</p>
 </tbody>
 </table>
 <details class="example">
-<summary>All 98 rules in Enterprise Grade</summary>
+<summary>All 101 rules in Enterprise Grade</summary>
 <table>
 <thead>
 <tr>
@@ -1270,6 +1270,21 @@ listed here is the default when an unknown rule set is requested.</p>
 <td><code>DOC015</code></td>
 <td>−0.5</td>
 <td>Operation description is missing</td>
+</tr>
+<tr>
+<td><code>JSON020</code></td>
+<td>−0.5</td>
+<td>Property example violates its own constraints</td>
+</tr>
+<tr>
+<td><code>DOC016</code></td>
+<td>−0.5</td>
+<td>Schema example omits a required field</td>
+</tr>
+<tr>
+<td><code>ERROR011</code></td>
+<td>−0.5</td>
+<td>Error responses share an example payload</td>
 </tr>
 </tbody>
 </table>
