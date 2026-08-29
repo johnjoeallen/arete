@@ -176,6 +176,7 @@ public final class SiftRuntime {
             if (token.kind() == Kind.STRING) { String value = token.text(); advance(); return env -> value; }
             if (token.kind() == Kind.REGEX) { Regex value = new Regex(token.text()); advance(); return env -> value; }
             if (token.kind() == Kind.NUMBER) { long value = Long.parseLong(token.text()); advance(); return env -> value; }
+            if (token.kind() == Kind.ID && (token.text().equals("true") || token.text().equals("false"))) { boolean value = token.text().equals("true"); advance(); return env -> value; }
             String name = expectId(); if (accept("(")) { List<Expr> args = arguments(); return env -> function(name, args.stream().map(a -> a.eval(env)).toList()); }
             return env -> env.get(name);
         }

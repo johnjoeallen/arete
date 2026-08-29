@@ -162,3 +162,22 @@ small, controlled operation set.
 
 The language precedence and Groovy opt-in switches are documented in the
 [policy engine guide](policy-engine.md#detector-languages).
+
+## Sift coverage
+
+Sift is expression-only: a single `return`, closures with one parameter and a
+one-expression body, no local variables or helper functions. It has `&&` `||`
+`!` `==` `!=` `==~` `=~` `? :`, `+` (numeric add or string concat), `true` /
+`false`, string methods (`lower` `trim` `contains` `startsWith` `endsWith`
+`length`), sequence methods (`map` `filter` `expand` `any` `all` `find`
+`count` `toList`) and the functions `occurrence` `regexFullMatch`
+`regexSearch` `tokenize` `last`.
+
+It deliberately has **no** numeric comparison (`<` `>` `<=` `>=`), no
+list/map literals, no map-key iteration, no cross-iteration state, and no
+`str()` / `parse_int` / `url_host`. Those gaps decide which detectors can be
+ported: as of writing, `compatibility`, `manual`, `common-field`,
+`date-time-name`, `documentation-completeness`, `header-schema`,
+`openapi-version`, `operation-semantics`, `request-body`, `schema-name`, and
+`sensitive-data` ship a `Detector.sift`, each parity-tested against its
+`Detector.star`. The rest need one of the missing capabilities above.
