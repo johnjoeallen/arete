@@ -1,5 +1,5 @@
 ---
-id: Mastercard Core
+id: Enterprise Grade
 rules:
   REST001: 0.5
   DOC001: 0.5
@@ -85,9 +85,9 @@ rules:
   STANDARD010: 0.5
 ---
 
-# Mastercard Core Policy
+# Enterprise Grade Policy
 
-This policy enables the Mastercard-requested rules that are currently bundled.
+This policy enables the Enterprise Grade rules that are currently bundled.
 Each matched rule deducts half a point once, regardless of how many occurrences
 it reports. Additional requested rules will be included when their catalogue
 definitions and detectors are bundled.

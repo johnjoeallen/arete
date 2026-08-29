@@ -110,7 +110,7 @@ rules:
   REST002: rules/REST002.md
 policies:
   Strict: policies/Strict.md
-  "Mastercard Core": policies/MastercardCore.md
+  "Enterprise Grade": policies/EnterpriseGrade.md
 detectors:
   naming: detectors/naming/Detector.md
 ```
@@ -318,7 +318,7 @@ Prose describing the policy's intent.
 - The first policy in `PolicyBundle.yaml` is the fallback when a caller
   requests an unknown rule set.
 
-Bundled policies: `Strict`, `Mastercard Core`, `Zalando`, `Zalando Extended`.
+Bundled policies: `Strict`, `Enterprise Grade`, `Zalando`, `Zalando Extended`.
 See [`zalando-rule-catalogue.md`](zalando-rule-catalogue.md) for the
 Zalando/Zally rule mapping.
 

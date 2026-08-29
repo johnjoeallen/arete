@@ -84,7 +84,7 @@ rules:
 
 policies:
   Strict: policies/Strict.md
-  "Mastercard Core": policies/MastercardCore.md
+  "Enterprise Grade": policies/EnterpriseGrade.md
   Zalando: policies/Zalando.md
   "Zalando Extended": policies/ZalandoExtended.md
 

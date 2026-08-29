@@ -52,4 +52,4 @@ rules:
 # Zalando Policy
 
 Contains only implemented rules mapped to the supplied Zalando rule catalogue.
-No generic-only or Mastercard-specific rule is enabled here.
+No generic-only or Enterprise Grade-specific rule is enabled here.

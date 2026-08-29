@@ -146,7 +146,7 @@ Plugins are `.jar` files, discovered from two folders at startup:
   [Zally](https://github.com/zalando/zally) linter, and
   `generic-policy-validation-plugin`, the policy-driven
   [Speculate Policy Engine](docs/policy-engine.md), which ships Strict,
-  Mastercard Core, Zalando, and Zalando Extended policies over a bundle of
+  Enterprise Grade, Zalando, and Zalando Extended policies over a bundle of
   text-defined rules and detectors. Detectors run in a **safe-by-construction
   Starlark runtime** by default (no filesystem, network, or reflection); the
   unsandboxed Groovy runtime is still supported but disabled by default until a
