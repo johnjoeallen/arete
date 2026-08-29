@@ -118,7 +118,7 @@ class GenericPolicyValidationPluginTest {
         ValidationResult result = plugin.validate(input(ACTION_PATH_SPEC));
 
         assertEquals(ValidationResult.Status.SUCCESS, result.getStatus());
-        assertEquals(56, result.getRulesEvaluatedCount());
+        assertEquals(57, result.getRulesEvaluatedCount());
         assertEquals(16, result.getViolations().size());
         assertEquals("REST001", result.getViolations().get(0).getRuleId());
         assertEquals(2, result.getViolations().stream().filter(violation -> violation.getRuleId().equals("REST001")).count());
@@ -129,6 +129,7 @@ class GenericPolicyValidationPluginTest {
         assertEquals("http://localhost:6809/plugins/generic-policy/rules/REST001",
                 result.getViolations().get(0).getDocumentationUrl());
         assertTrue(plugin.getRuleDocumentation("REST001").orElseThrow().markdown().contains("GET /customers"));
+        assertTrue(plugin.getRuleDocumentation("STANDARD005").orElseThrow().markdown().contains("2 nested resource levels"));
     }
 
     @Test
@@ -139,7 +140,7 @@ class GenericPolicyValidationPluginTest {
         ValidationResult result = plugin.validate(input(COMPLIANT_STARTER_SPEC));
 
         assertEquals(ValidationResult.Status.SUCCESS, result.getStatus());
-        assertEquals(56, result.getRulesEvaluatedCount());
+        assertEquals(57, result.getRulesEvaluatedCount());
         assertEquals(8, result.getViolations().size());
         assertEquals("DOC006", result.getViolations().get(0).getRuleId());
         assertEquals(97.5, result.getOverallScore());
@@ -331,6 +332,7 @@ class GenericPolicyValidationPluginTest {
         resources.put("rules/STANDARD002.md", readResource("api-policy/rules/STANDARD002.md"));
         resources.put("rules/STANDARD003.md", readResource("api-policy/rules/STANDARD003.md"));
         resources.put("rules/STANDARD004.md", readResource("api-policy/rules/STANDARD004.md"));
+        resources.put("rules/STANDARD005.md", readResource("api-policy/rules/STANDARD005.md"));
         resources.put("detectors/path-count/Detector.md", readResource("api-policy/detectors/path-count/Detector.md"));
         resources.put("detectors/path-count/Detector.groovy", readResource("api-policy/detectors/path-count/Detector.groovy"));
         resources.put("policies/Zalando.md", readResource("api-policy/policies/Zalando.md"));

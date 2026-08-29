@@ -118,6 +118,15 @@ public final class GenericPolicyValidationPlugin implements SpecValidationPlugin
     @Override
     public Optional<RuleDocumentation> getRuleDocumentation(String ruleId) {
         Rule rule = activeBundle().rules().get(ruleId);
-        return rule == null ? Optional.empty() : Optional.of(new RuleDocumentation(rule.title(), rule.documentationMarkdown()));
+        return rule == null ? Optional.empty() : Optional.of(new RuleDocumentation(rule.title(), interpolateDocumentation(rule.documentationMarkdown(), rule.parameters())));
+    }
+
+    /** Replaces {@code {{parameter-name}}} placeholders with declared rule parameters. */
+    private static String interpolateDocumentation(String markdown, Map<String, Object> parameters) {
+        String rendered = markdown;
+        for (Map.Entry<String, Object> parameter : parameters.entrySet()) {
+            rendered = rendered.replace("{{" + parameter.getKey() + "}}", String.valueOf(parameter.getValue()));
+        }
+        return rendered;
     }
 }
