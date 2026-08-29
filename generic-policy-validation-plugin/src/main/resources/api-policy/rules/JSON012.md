@@ -23,15 +23,12 @@ The rule has `property` scope and uses the `schema` detector:
 parameters: { format: absent }
 ```
 
-In the current detector implementation, this branch excludes non-numeric
-properties and reports numeric properties as matching the configured rule. It
-does not currently test the property’s actual `format` value, so both numeric
-properties with a format and numeric properties without one can be reported.
+The detector selects integer and number properties whose `format` is absent.
 The occurrence points to the property with the generic schema-rule message.
 
 ## Review-candidate example
 
-This numeric property is eligible for the current check:
+This numeric property is eligible for the check:
 
 ```yaml
 components:
@@ -48,7 +45,7 @@ be selected deliberately.
 
 ## Compliant example
 
-Non-numeric properties are excluded by this detector branch:
+Numeric properties with a format, and non-numeric properties, are excluded:
 
 ```yaml
 components:
@@ -56,21 +53,19 @@ components:
     Measurement:
       type: object
       properties:
+        amount:
+          type: number
+          format: double
         label:
           type: string
 ```
 
-Because the current implementation does not inspect the format value, adding
-`format: float` to a numeric property does not guarantee that it avoids a
-finding.
+`format` values are treated as present when they are non-empty; the rule does
+not prescribe which format is appropriate for a particular domain.
 
 ## Parameters, references, and limitations
 
-`format: absent` is the configured parameter, but its present implementation
-semantics are numeric-property selection rather than a true missing-format
-test. The detector does not infer a suitable format, validate numeric ranges,
-inspect runtime serialization, or distinguish integer and number formats
-beyond their primitive types. Referenced properties count only when resolved
-into the host’s normalised schema facts. This documentation records the
-current behavior; tightening the detector to check actual format absence would
-be a separate implementation change.
+`format: absent` is the configured parameter. The detector does not infer a
+suitable format, validate numeric ranges, inspect runtime serialization, or
+distinguish integer and number formats beyond their primitive types. Referenced
+properties count only when resolved into the host’s normalised schema facts.

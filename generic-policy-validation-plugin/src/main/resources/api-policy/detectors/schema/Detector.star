@@ -18,7 +18,9 @@ def _matches(prop, p):
     not_numeric = prop["type"] not in ("integer", "number")
     format_present = p.get("format") == "present"
     format_missing = not prop["format"]
-    if (format_absent and not_numeric) or (format_present and format_missing):
+    if format_absent and (not_numeric or not format_missing):
+        return False
+    if format_present and format_missing:
         return False
 
     if (p.get("enum-type") == "consistent" and prop["enumPresent"]
@@ -27,12 +29,16 @@ def _matches(prop, p):
     if p.get("enum-type") == "consistent":
         return False
 
-    if p.get("extensible") == "required" and prop["enumPresent"] and not prop["extensibleEnum"]:
-        return True
+    if p.get("extensible") == "required":
+        if not prop["enumPresent"]:
+            return False
+        return not prop["extensibleEnum"]
 
-    if p.get("enum-case") == "upper-snake-case" and any(
-            [type(v) == "string" and not re_fullmatch(_UPPER_SNAKE, v) for v in prop["enumValues"]]):
-        return True
+    if p.get("enum-case") == "upper-snake-case":
+        if not prop["enumPresent"]:
+            return False
+        return any([type(v) == "string" and not re_fullmatch(_UPPER_SNAKE, v)
+                    for v in prop["enumValues"]])
 
     if p.get("max-items") == "absent" and prop["maxItems"] != None:
         return False

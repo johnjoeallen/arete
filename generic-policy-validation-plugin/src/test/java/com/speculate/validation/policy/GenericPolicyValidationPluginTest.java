@@ -693,6 +693,72 @@ class GenericPolicyValidationPluginTest {
     }
 
     @Test
+    void schemaDetectorsCoverEnumFormatsAndDateTimeNamingRules() {
+        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        String spec = """
+                openapi: 3.0.0
+                info: { title: Test API, version: 1.0.0 }
+                paths: {}
+                components:
+                  schemas:
+                    Example:
+                      type: object
+                      properties:
+                        amount:
+                          type: number
+                        formattedAmount:
+                          type: number
+                          format: double
+                        mode:
+                          type: string
+                          enum: [pending, READY]
+                          x-extensible-enum: true
+                        count:
+                          type: integer
+                          format: int32
+                          enum: [1, TWO]
+                        state:
+                          type: string
+                          enum: [PENDING, READY]
+                          x-extensible-enum: true
+                        created:
+                          type: string
+                          format: date-time
+                        created_at:
+                          type: string
+                          format: date-time
+                """;
+        Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
+                .readContents(spec, null, new ParseOptions()).getOpenAPI());
+        StarlarkDetectorRuntime runtime = new StarlarkDetectorRuntime();
+
+        java.util.List<Occurrence> missingFormat = runtime.execute(
+                bundle.detectors().get("schema"), api, bundle.rules().get("JSON012"));
+        assertEquals(1, missingFormat.size());
+        assertEquals("amount", missingFormat.get(0).path());
+
+        java.util.List<Occurrence> inconsistentEnum = runtime.execute(
+                bundle.detectors().get("schema"), api, bundle.rules().get("JSON013"));
+        assertEquals(1, inconsistentEnum.size());
+        assertEquals("count", inconsistentEnum.get(0).path());
+
+        java.util.List<Occurrence> nonExtensibleEnum = runtime.execute(
+                bundle.detectors().get("schema"), api, bundle.rules().get("JSON014"));
+        assertEquals(1, nonExtensibleEnum.size());
+        assertEquals("count", nonExtensibleEnum.get(0).path());
+
+        java.util.List<Occurrence> nonUpperSnakeEnum = runtime.execute(
+                bundle.detectors().get("schema"), api, bundle.rules().get("JSON015"));
+        assertEquals(1, nonUpperSnakeEnum.size());
+        assertEquals("mode", nonUpperSnakeEnum.get(0).path());
+
+        java.util.List<Occurrence> incorrectlyNamedDateTime = runtime.execute(
+                bundle.detectors().get("date-time-name"), api, bundle.rules().get("JSON011"));
+        assertEquals(1, incorrectlyNamedDateTime.size());
+        assertEquals("created", incorrectlyNamedDateTime.get(0).path());
+    }
+
+    @Test
     void operationSemanticsDetectorReportsOnlyDocumentedHeuristicSignals() {
         PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
         String spec = """
