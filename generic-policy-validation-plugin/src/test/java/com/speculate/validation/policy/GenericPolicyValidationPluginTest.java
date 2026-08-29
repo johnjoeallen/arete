@@ -401,6 +401,66 @@ class GenericPolicyValidationPluginTest {
     }
 
     @Test
+    void sensitiveDataDetectorChecksConfigurableNameLocations() {
+        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        String spec = """
+                openapi: 3.0.0
+                info: { title: Test API, version: 1.0.0 }
+                paths:
+                  /accounts/{access_token}:
+                    parameters:
+                      - { name: access_token, in: path, required: true, schema: { type: string } }
+                    get:
+                      parameters:
+                        - { name: password, in: query, schema: { type: string } }
+                        - { name: X-Api-Key, in: header, schema: { type: string } }
+                      responses: { '200': { description: OK } }
+                components:
+                  schemas:
+                    Account:
+                      type: object
+                      properties:
+                        password: { type: string }
+                        displayName: { type: string }
+                """;
+        Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
+                .readContents(spec, null, new ParseOptions()).getOpenAPI());
+        StarlarkDetectorRuntime runtime = new StarlarkDetectorRuntime();
+
+        assertEquals(1, runtime.execute(bundle.detectors().get("sensitive-data"), api, bundle.rules().get("SEC001")).size());
+        assertEquals(1, runtime.execute(bundle.detectors().get("sensitive-data"), api, bundle.rules().get("SEC002")).size());
+        assertEquals(1, runtime.execute(bundle.detectors().get("sensitive-data"), api, bundle.rules().get("SEC003")).size());
+        assertEquals(1, runtime.execute(bundle.detectors().get("sensitive-data"), api, bundle.rules().get("SEC008")).size());
+    }
+
+    @Test
+    void sensitiveSearchDetectorDistinguishesSearchInputsFromSensitiveFields() {
+        PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
+        String spec = """
+                openapi: 3.0.0
+                info: { title: Test API, version: 1.0.0 }
+                paths:
+                  /accounts:
+                    get:
+                      parameters:
+                        - { name: search, in: query, schema: { type: string } }
+                        - { name: ssn, in: query, schema: { type: string } }
+                      responses: { '200': { description: OK } }
+                  /public:
+                    get:
+                      parameters:
+                        - { name: q, in: query, schema: { type: string } }
+                      responses: { '200': { description: OK } }
+                """;
+        Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
+                .readContents(spec, null, new ParseOptions()).getOpenAPI());
+        StarlarkDetectorRuntime runtime = new StarlarkDetectorRuntime();
+
+        assertEquals(2, runtime.execute(bundle.detectors().get("sensitive-search"), api, bundle.rules().get("SEC004")).size());
+        assertEquals(1, runtime.execute(bundle.detectors().get("sensitive-search"), api, bundle.rules().get("SEC005")).size());
+    }
+
+    @Test
     void securityDetectorUsesOperationSecurityAndGlobalFallback() {
         PolicyBundle bundle = new PolicyBundleLoader().load(new ClasspathBundleResources(getClass().getClassLoader()));
         String spec = """
@@ -650,10 +710,18 @@ class GenericPolicyValidationPluginTest {
         resources.put("rules/ERROR009.md", readResource("api-policy/rules/ERROR009.md"));
         resources.put("rules/ERROR010.md", readResource("api-policy/rules/ERROR010.md"));
         resources.put("detectors/authentication-error/Detector.md", readResource("api-policy/detectors/authentication-error/Detector.md"));
+        resources.put("rules/SEC001.md", readResource("api-policy/rules/SEC001.md"));
+        resources.put("rules/SEC002.md", readResource("api-policy/rules/SEC002.md"));
+        resources.put("rules/SEC003.md", readResource("api-policy/rules/SEC003.md"));
+        resources.put("rules/SEC008.md", readResource("api-policy/rules/SEC008.md"));
+        resources.put("detectors/sensitive-data/Detector.md", readResource("api-policy/detectors/sensitive-data/Detector.md"));
+        resources.put("rules/SEC004.md", readResource("api-policy/rules/SEC004.md"));
+        resources.put("rules/SEC005.md", readResource("api-policy/rules/SEC005.md"));
+        resources.put("detectors/sensitive-search/Detector.md", readResource("api-policy/detectors/sensitive-search/Detector.md"));
         for (String detectorId : new String[] {"resource-path", "operation", "text-style", "naming", "schema",
                 "operation-semantics", "response-code", "response-header", "proprietary-header", "query-collection",
                 "security", "manual", "bulk-operation", "versioning", "compatibility", "metadata", "openapi-version",
-                "media-type", "date-time-name", "common-field", "path-count", "hostname", "error-response", "authentication-error"}) {
+                "media-type", "date-time-name", "common-field", "path-count", "hostname", "error-response", "authentication-error", "sensitive-data", "sensitive-search"}) {
             resources.put("detectors/" + detectorId + "/Detector.star",
                     readResource("api-policy/detectors/" + detectorId + "/Detector.star"));
         }

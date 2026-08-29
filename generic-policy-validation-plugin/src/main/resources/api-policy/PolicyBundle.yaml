@@ -63,6 +63,12 @@ rules:
   ERROR008: rules/ERROR008.md
   ERROR009: rules/ERROR009.md
   ERROR010: rules/ERROR010.md
+  SEC001: rules/SEC001.md
+  SEC002: rules/SEC002.md
+  SEC003: rules/SEC003.md
+  SEC008: rules/SEC008.md
+  SEC004: rules/SEC004.md
+  SEC005: rules/SEC005.md
   HTTP004: rules/HTTP004.md
   HTTP005: rules/HTTP005.md
   HTTP001: rules/HTTP001.md
@@ -123,3 +129,5 @@ detectors:
   media-type: detectors/media-type/Detector.md
   error-response: detectors/error-response/Detector.md
   authentication-error: detectors/authentication-error/Detector.md
+  sensitive-data: detectors/sensitive-data/Detector.md
+  sensitive-search: detectors/sensitive-search/Detector.md
