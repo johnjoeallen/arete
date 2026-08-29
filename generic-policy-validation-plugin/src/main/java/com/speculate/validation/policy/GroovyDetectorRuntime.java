@@ -36,8 +36,8 @@ final class GroovyDetectorRuntime {
             List<Occurrence> occurrences = new ArrayList<>(collection.size());
             for (Object raw : collection) {
                 if (!(raw instanceof Map<?, ?> map)) throw new DetectorException("Detector returned a non-map occurrence");
-                Object message = map.get("message");
-                if (!(message instanceof String text) || text.isBlank()) throw new DetectorException("Detector occurrence requires a non-blank message");
+                String text = optionalString(map.get("message"));
+                if (text == null || text.isBlank()) throw new DetectorException("Detector occurrence requires a non-blank message");
                 occurrences.add(new Occurrence(optionalString(map.get("pointer")), optionalString(map.get("path")), text));
             }
             return occurrences;
@@ -50,7 +50,8 @@ final class GroovyDetectorRuntime {
 
     private static String optionalString(Object value) {
         if (value == null) return null;
-        if (!(value instanceof String text)) throw new DetectorException("Detector occurrence fields must be strings");
-        return text;
+        // Groovy string interpolation yields GString (a CharSequence, not String).
+        if (value instanceof CharSequence text) return text.toString();
+        throw new DetectorException("Detector occurrence fields must be strings");
     }
 }

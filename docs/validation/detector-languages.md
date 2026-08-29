@@ -163,6 +163,11 @@ small, controlled operation set.
 The language precedence and Groovy opt-in switches are documented in the
 [policy engine guide](policy-engine.md#detector-languages).
 
+Whichever language a bundle picks, the findings are the same: `SiftParityTest`
+pins every `Detector.sift` to its `Detector.star`, and `GroovyStarlarkParityTest`
+sweeps every bundle rule against both runtimes so a `Detector.groovy` can never
+drift from its Starlark twin.
+
 ## Sift coverage
 
 Sift is expression-only: a single `return`, closures with one parameter and a

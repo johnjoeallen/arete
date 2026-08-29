@@ -32,13 +32,32 @@
  */
 { Map api, Map rule ->
     def parameters = rule.parameters ?: [:]
+    def enumInconsistent = { v, t ->
+        t == 'string' ? !(v instanceof CharSequence)
+            : t == 'integer' ? !(v instanceof Integer || v instanceof Long)
+            : t == 'number' ? !(v instanceof Number)
+            : false
+    }
     def matches = { property ->
         if (parameters.type && property.type != parameters.type) return false
-        if (parameters.format == 'absent' && !(property.type in ['integer', 'number']) || parameters.format == 'present' && !(property.format)) return false
-        if (parameters['enum-type'] == 'consistent' && property.enumPresent && property.enumValues.any { v -> property.type == 'string' ? !(v instanceof String) : property.type == 'integer' ? !(v instanceof Integer) : property.type == 'number' ? !(v instanceof Number) : false }) return true
-        if (parameters['enum-type'] == 'consistent') return false
-        if (parameters.extensible == 'required' && property.enumPresent && !property.extensibleEnum) return true
-        if (parameters['enum-case'] == 'upper-snake-case' && property.enumValues.any { it instanceof String && !(it ==~ /[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*/) }) return true
+
+        boolean formatAbsent = parameters.format == 'absent'
+        boolean notNumeric = !(property.type in ['integer', 'number'])
+        boolean formatMissing = !property.format
+        if (formatAbsent && (notNumeric || !formatMissing)) return false
+        if (parameters.format == 'present' && formatMissing) return false
+
+        if (parameters['enum-type'] == 'consistent') {
+            return property.enumPresent && property.enumValues.any { v -> enumInconsistent(v, property.type) }
+        }
+        if (parameters.extensible == 'required') {
+            return property.enumPresent && !property.extensibleEnum
+        }
+        if (parameters['enum-case'] == 'upper-snake-case') {
+            return property.enumPresent && property.enumValues.any { v ->
+                v instanceof CharSequence && !(v ==~ /[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*/)
+            }
+        }
         if (parameters['max-items'] == 'absent' && property.maxItems != null) return false
         if (parameters['max-items'] == 'present' && property.maxItems == null) return false
         if (parameters.enum == 'present' && !property.enumPresent) return false
