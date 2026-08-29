@@ -126,6 +126,13 @@ rules:
   CASE006: rules/CASE006.md
   JSON017: rules/JSON017.md
   SEC009: rules/SEC009.md
+  STANDARD018: rules/STANDARD018.md
+  STANDARD019: rules/STANDARD019.md
+  STANDARD020: rules/STANDARD020.md
+  STANDARD021: rules/STANDARD021.md
+  STANDARD022: rules/STANDARD022.md
+  DOC013: rules/DOC013.md
+  DOC014: rules/DOC014.md
 
 policies:
   "Enterprise Grade": policies/EnterpriseGrade.md
@@ -171,3 +178,7 @@ detectors:
   header-schema: detectors/header-schema/Detector.md
   enum-values: detectors/enum-values/Detector.md
   server-url: detectors/server-url/Detector.md
+  extensions: detectors/extensions/Detector.md
+  documentation-completeness: detectors/documentation-completeness/Detector.md
+  schema-composition: detectors/schema-composition/Detector.md
+  document-lint: detectors/document-lint/Detector.md

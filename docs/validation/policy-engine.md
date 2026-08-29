@@ -210,22 +210,28 @@ parser:
 
 ```
 api.info      { title, description, version, contactName, contactEmail,
-                openapiVersion, apiId, audience }
+                openapiVersion, apiId, audience, extensionKeys[] }
 api.servers   [ "https://api.example.com/v1", ... ]
 api.security  [ { <schemeName>: [scopes...] }, ... ]  or null   # global requirement
+api.lint      { parserMessages[], numericStatusKeys[] }         # parser + raw-document diagnostics
 api.paths[]   { path, pointer, segments[], templateParameters[], operations[], operationDetails[] }
   .segments[]           { name, pointer }                 # literal segments only, no {params}
   .templateParameters[] "customerId"                      # the {names} in the path string
-  .operationDetails[]   { method, pointer, summary, operationId, tags[], security,
-                          requestBodyPresent, requestBodyRequired,
-                          mediaTypes[], requestMediaTypes[], parameters[], responses[] }
-    .parameters[]       { name, in, pointer, required, schemaPresent, style, explode,
+  .operationDetails[]   { method, pointer, summary, description, operationId, tags[],
+                          extensionKeys[], security, requestBodyPresent, requestBodyRequired,
+                          requestBodyInlineObject, mediaTypes[], requestMediaTypes[],
+                          parameters[], responses[] }
+    .parameters[]       { name, in, pointer, required, schemaPresent, description,
+                          examplePresent, extensionKeys[], style, explode,
                           schemaType, schemaMaximum }
-    .responses[]        { status, description, headers[], headerDetails[], schemaTypes[], mediaTypes[] }
+    .responses[]        { status, description, headers[], headerDetails[], schemaTypes[],
+                          mediaTypes[], schemaInlineObject, exampleStrings[] }
       .headerDetails[]  { name, schemaPresent }
-api.schemas[]  { name, pointer, type, array, maxItems, properties[] }
-  .properties[]         { name, pointer, type, array, maxItems, format, nullable,
-                          required, enumPresent, enumValues[], extensibleEnum }
+api.schemas[]  { name, pointer, type, array, maxItems, description, examplePresent,
+                 extensionKeys[], compositionKind, inlineCompositionMembers, properties[] }
+  .properties[]         { name, pointer, type, array, maxItems, format, description,
+                          examplePresent, extensionKeys[], nullable, required,
+                          enumPresent, enumValues[], extensibleEnum }
 ```
 
 `operationDetails[].security` is `null` unless the operation overrides the

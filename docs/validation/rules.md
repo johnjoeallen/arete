@@ -7,8 +7,8 @@ by category. A rule is only evaluated when a [policy](policies.md) references
 it. See [the policy engine](policy-engine.md) for how rules, detectors, and
 policies fit together.
 
-There are **123 rules** across **20 categories**, built on
-**38 detectors**.
+There are **130 rules** across **20 categories**, built on
+**42 detectors**.
 
 !!! note "Reading the policy columns"
     A number is the point deduction applied once if the rule matches;
@@ -79,6 +79,8 @@ There are **123 rules** across **20 categories**, built on
 | `DOC010` | operationId is missing or duplicated | `operation-metadata` | 0.5 |  |  |
 | `DOC011` | Operation is not tagged | `operation-metadata` | 0.5 |  |  |
 | `DOC012` | API title does not follow the naming convention | `api-title` | 0.5 |  |  |
+| `DOC013` | Schema property lacks a description or example | `documentation-completeness` | 0.5 |  |  |
+| `DOC014` | Parameter lacks a description or example | `documentation-completeness` | 0.5 |  |  |
 
 ## Error responses
 
@@ -214,6 +216,11 @@ There are **123 rules** across **20 categories**, built on
 | `STANDARD015` | Request body is not marked required | `request-body` | 0.5 |  |  |
 | `STANDARD016` | Duplicate path structure | `path-set` | 0.5 |  |  |
 | `STANDARD017` | Response header has no schema | `header-schema` | 0.5 |  |  |
+| `STANDARD018` | Non-standard specification extension | `extensions` | 0.5 |  |  |
+| `STANDARD019` | Inline composition member | `schema-composition` | 0.5 |  |  |
+| `STANDARD020` | Request or response body uses an inline object schema | `schema-composition` | 0.5 |  |  |
+| `STANDARD021` | Unresolved reference | `document-lint` | 0.5 |  |  |
+| `STANDARD022` | HTTP status keys are bare numbers | `document-lint` | 0.5 |  |  |
 
 ## Status codes
 

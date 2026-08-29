@@ -130,7 +130,7 @@ public final class GenericPolicyValidationPlugin implements SpecValidationPlugin
         }
 
         Policy policy = currentBundle.policyOrDefault(input.getRuleSet());
-        Map<String, Object> api = OpenApiMapAdapter.toMap(parsed.getOpenAPI());
+        Map<String, Object> api = OpenApiMapAdapter.toMap(parsed.getOpenAPI(), parsed.getMessages(), input.getContent());
         List<Violation> violations = new ArrayList<>();
         double deductions = 0;
         boolean prohibitedMatched = false;

@@ -97,6 +97,13 @@ rules:
   CASE006: 0.5
   JSON017: 0.5
   SEC009: 0.5
+  STANDARD018: 0.5
+  STANDARD019: 0.5
+  STANDARD020: 0.5
+  STANDARD021: 0.5
+  STANDARD022: 0.5
+  DOC013: 0.5
+  DOC014: 0.5
 ---
 
 # Enterprise Grade Policy

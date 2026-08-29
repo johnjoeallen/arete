@@ -15,7 +15,25 @@ import java.util.Map;
 final class OpenApiMapAdapter {
     private static final java.util.regex.Pattern PATH_TEMPLATE = java.util.regex.Pattern.compile("\\{([^}]+)}");
 
+    private static final java.util.regex.Pattern UNQUOTED_STATUS_KEY =
+            java.util.regex.Pattern.compile("(?m)^\\s+([1-5][0-9]{2})\\s*:");
+
     private OpenApiMapAdapter() { }
+
+    /** Adds a {@code lint} block sourced from parser diagnostics and the raw document. */
+    static Map<String, Object> toMap(OpenAPI openApi, List<String> parserMessages, String rawContent) {
+        Map<String, Object> result = toMap(openApi);
+        Map<String, Object> lint = new LinkedHashMap<>();
+        lint.put("parserMessages", parserMessages == null ? List.of() : List.copyOf(parserMessages));
+        List<String> numericStatusKeys = new ArrayList<>();
+        if (rawContent != null) {
+            java.util.regex.Matcher matcher = UNQUOTED_STATUS_KEY.matcher(rawContent);
+            while (matcher.find()) numericStatusKeys.add(matcher.group(1));
+        }
+        lint.put("numericStatusKeys", numericStatusKeys);
+        result.put("lint", lint);
+        return result;
+    }
 
     static Map<String, Object> toMap(OpenAPI openApi) {
         List<Map<String, Object>> paths = new ArrayList<>();
@@ -46,11 +64,15 @@ final class OpenApiMapAdapter {
                         detail.put("method", operationEntry.getKey().name());
                         detail.put("pointer", path.get("pointer") + "/" + operationEntry.getKey().name().toLowerCase());
                         detail.put("summary", operation == null ? null : operation.getSummary());
+                        detail.put("description", operation == null ? null : operation.getDescription());
                         detail.put("operationId", operation == null ? null : operation.getOperationId());
                         detail.put("tags", operation == null || operation.getTags() == null ? List.of() : List.copyOf(operation.getTags()));
+                        detail.put("extensionKeys", operation == null ? List.of() : extensionKeys(operation.getExtensions()));
                         detail.put("requestBodyPresent", operation != null && operation.getRequestBody() != null);
                         detail.put("requestBodyRequired", operation != null && operation.getRequestBody() != null
                                 && Boolean.TRUE.equals(operation.getRequestBody().getRequired()));
+                        detail.put("requestBodyInlineObject", operation != null && operation.getRequestBody() != null
+                                && hasInlineObjectSchema(operation.getRequestBody().getContent()));
                         detail.put("security", operation == null || operation.getSecurity() == null ? null : securityRequirements(operation.getSecurity()));
                         List<String> mediaTypes = new ArrayList<>();
                         List<String> requestMediaTypes = new ArrayList<>();
@@ -88,6 +110,22 @@ final class OpenApiMapAdapter {
                                 }
                                 responseMap.put("schemaTypes", schemaTypes);
                                 responseMap.put("mediaTypes", responseMediaTypes);
+                                responseMap.put("schemaInlineObject", hasInlineObjectSchema(content));
+                                List<String> exampleStrings = new ArrayList<>();
+                                if (content instanceof Map<?, ?> map) {
+                                    for (Object media : map.values()) {
+                                        Object example = responseProperty(media, "getExample");
+                                        if (example != null) exampleStrings.add(String.valueOf(example));
+                                        Object examples = responseProperty(media, "getExamples");
+                                        if (examples instanceof Map<?, ?> exMap) {
+                                            for (Object ex : exMap.values()) {
+                                                Object value = responseProperty(ex, "getValue");
+                                                if (value != null) exampleStrings.add(String.valueOf(value));
+                                            }
+                                        }
+                                    }
+                                }
+                                responseMap.put("exampleStrings", exampleStrings);
                                 responses.add(responseMap);
                             }
                         }
@@ -115,6 +153,11 @@ final class OpenApiMapAdapter {
                 schemaMap.put("type", schema == null ? null : schema.getType());
                 schemaMap.put("array", schema != null && "array".equals(schema.getType()));
                 schemaMap.put("maxItems", schema == null ? null : schema.getMaxItems());
+                schemaMap.put("description", schema == null ? null : schema.getDescription());
+                schemaMap.put("examplePresent", schema != null && schema.getExample() != null);
+                schemaMap.put("extensionKeys", schema == null ? List.of() : extensionKeys(schema.getExtensions()));
+                schemaMap.put("compositionKind", compositionKind(schema));
+                schemaMap.put("inlineCompositionMembers", schema == null ? 0 : inlineCompositionMembers(schema));
                 List<Map<String, Object>> properties = new ArrayList<>();
                 if (schema != null && schema.getProperties() != null) {
                     for (Object propertyEntryObject : schema.getProperties().entrySet()) {
@@ -127,6 +170,9 @@ final class OpenApiMapAdapter {
                         propertyMap.put("array", property != null && "array".equals(property.getType()));
                         propertyMap.put("maxItems", property.getMaxItems());
                         propertyMap.put("format", property.getFormat());
+                        propertyMap.put("description", property.getDescription());
+                        propertyMap.put("examplePresent", property.getExample() != null);
+                        propertyMap.put("extensionKeys", extensionKeys(property.getExtensions()));
                         propertyMap.put("nullable", Boolean.TRUE.equals(property.getNullable()));
                         propertyMap.put("required", schema.getRequired() != null && schema.getRequired().contains(propertyName));
                         propertyMap.put("enumPresent", property.getEnum() != null && !property.getEnum().isEmpty());
@@ -150,6 +196,9 @@ final class OpenApiMapAdapter {
             }
         }
         info.put("openapiVersion", openApi.getOpenapi());
+        List<String> infoExtensionKeys = new ArrayList<>(extensionKeys(openApi.getExtensions()));
+        if (openApi.getInfo() != null) infoExtensionKeys.addAll(extensionKeys(openApi.getInfo().getExtensions()));
+        info.put("extensionKeys", infoExtensionKeys);
         if (openApi.getExtensions() != null) {
             info.put("apiId", openApi.getExtensions().get("x-api-id"));
             info.put("audience", openApi.getExtensions().get("x-audience"));
@@ -175,12 +224,60 @@ final class OpenApiMapAdapter {
             detail.put("pointer", pointer + "/" + index);
             detail.put("required", Boolean.TRUE.equals(parameter.getRequired()));
             detail.put("schemaPresent", parameter.getSchema() != null || parameter.getContent() != null);
+            detail.put("description", parameter.getDescription());
+            detail.put("examplePresent", parameter.getExample() != null
+                    || (parameter.getExamples() != null && !parameter.getExamples().isEmpty())
+                    || (parameter.getSchema() != null && parameter.getSchema().getExample() != null));
+            detail.put("extensionKeys", extensionKeys(parameter.getExtensions()));
             detail.put("style", parameter.getStyle());
             detail.put("explode", parameter.getExplode());
             detail.put("schemaType", parameter.getSchema() == null ? null : parameter.getSchema().getType());
             detail.put("schemaMaximum", parameter.getSchema() == null ? null : parameter.getSchema().getMaximum());
             destination.add(detail);
         }
+    }
+
+    /** Names of {@code x-} extension keys on a parser object, or an empty list. */
+    private static List<String> extensionKeys(Map<String, Object> extensions) {
+        if (extensions == null) return List.of();
+        List<String> keys = new ArrayList<>();
+        for (String key : extensions.keySet()) if (key != null && key.startsWith("x-")) keys.add(key);
+        return keys;
+    }
+
+    /** "allOf" / "anyOf" / "oneOf" if the schema composes, else null. */
+    private static String compositionKind(Schema<?> schema) {
+        if (schema == null) return null;
+        if (schema.getAllOf() != null && !schema.getAllOf().isEmpty()) return "allOf";
+        if (schema.getAnyOf() != null && !schema.getAnyOf().isEmpty()) return "anyOf";
+        if (schema.getOneOf() != null && !schema.getOneOf().isEmpty()) return "oneOf";
+        return null;
+    }
+
+    /** Count of composition members declared inline rather than through {@code $ref}. */
+    @SuppressWarnings("unchecked")
+    private static int inlineCompositionMembers(Schema<?> schema) {
+        List<Schema> members = new ArrayList<>();
+        if (schema.getAllOf() != null) members.addAll(schema.getAllOf());
+        if (schema.getAnyOf() != null) members.addAll(schema.getAnyOf());
+        if (schema.getOneOf() != null) members.addAll(schema.getOneOf());
+        int inline = 0;
+        for (Schema<?> member : members) if (member != null && member.get$ref() == null) inline++;
+        return inline;
+    }
+
+    /** True when a content map declares an inline object schema (properties, no {@code $ref}). */
+    private static boolean hasInlineObjectSchema(Object content) {
+        if (!(content instanceof Map<?, ?> map)) return false;
+        for (Object media : map.values()) {
+            Object schema = responseProperty(media, "getSchema");
+            if (schema == null) continue;
+            Object ref = responseProperty(schema, "get$ref");
+            Object properties = responseProperty(schema, "getProperties");
+            Object type = responseProperty(schema, "getType");
+            if (ref == null && (properties != null || "object".equals(type))) return true;
+        }
+        return false;
     }
 
     private static List<Map<String, Object>> securityRequirements(List<io.swagger.v3.oas.models.security.SecurityRequirement> requirements) {
