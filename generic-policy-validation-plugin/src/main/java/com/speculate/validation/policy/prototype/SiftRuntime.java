@@ -121,6 +121,15 @@ public final class SiftRuntime {
             case "tokenize" -> List.of(String.valueOf(args.get(1)).split(java.util.regex.Pattern.quote(String.valueOf(args.get(0)))));
             case "last" -> { List<Object> values = iterableOf(args.get(0)); yield values.isEmpty() ? "" : values.get(values.size() - 1); }
             case "size" -> (long) iterableOf(args.get(0)).size();
+            case "distinct" -> {
+                List<Object> unique = new ArrayList<>();
+                List<String> keys = new ArrayList<>();
+                for (Object value : iterableOf(args.get(0))) {
+                    String key = String.valueOf(value);
+                    if (value != null && !keys.contains(key)) { keys.add(key); unique.add(value); }
+                }
+                yield unique;
+            }
             case "join" -> {
                 StringBuilder joined = new StringBuilder();
                 List<Object> parts = iterableOf(args.get(1));

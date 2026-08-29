@@ -324,6 +324,35 @@ class SiftParityTest {
         assertParity("server-url", "api", Map.of("check", "internal-host"), false);
     }
 
+    @Test void enumValuesNoDuplicates() {
+        assertParity("enum-values", "property", Map.of("check", "no-duplicates"), true, """
+                openapi: 3.0.0
+                info: { title: T, version: 1.0.0 }
+                paths: {}
+                components:
+                  schemas:
+                    S:
+                      type: object
+                      properties:
+                        status: { type: string, enum: [A, B, A] }
+                        clean: { type: string, enum: [X, Y] }
+                """);
+    }
+
+    @Test void pathSetUnique() {
+        assertParity("path-set", "api", Map.of("check", "unique"), true, """
+                openapi: 3.0.0
+                info: { title: T, version: 1.0.0 }
+                paths:
+                  /pets/{id}: { get: { responses: { '200': { description: ok } } } }
+                  /pets/{petId}: { get: { responses: { '200': { description: ok } } } }
+                  /owners: { get: { responses: { '200': { description: ok } } } }
+                """);
+    }
+
+
+
+
     @Test void serverUrlPattern() {
         assertParity("server-url", "api",
                 Map.of("check", "url-pattern", "pattern", "https://(api|sandbox)\\.example\\.com/.*"), false);
