@@ -15,6 +15,7 @@
     def statusNumber = { value ->
         try { Integer.parseInt(value.toString()) } catch (Exception ignored) { -1 }
     }
+    if (p['response-shape'] == 'json-object') return api.paths.collectMany { path -> path.operationDetails.collectMany { op -> op.responses.findAll { statusNumber(it.status) >= 200 && statusNumber(it.status) < 300 && it.schemaTypes && it.schemaTypes.any { t -> t != 'object' } }.collect { [pointer: path.pointer, path: op.method + ' ' + path.path, message: 'Successful response is not a JSON object'] } } }
     def operationMatches = { path, operation ->
         if (p['operation-type'] == 'create' && !(operation.method == 'POST' || operation.method == 'PUT')) return false
         if (p['operation-type'] == 'identifiable-resource-retrieval' && !(operation.method == 'GET' && path.path.contains('{'))) return false

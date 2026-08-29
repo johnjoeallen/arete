@@ -55,7 +55,12 @@ final class OpenApiMapAdapter {
                                 Object headers = responseProperty(response, "getHeaders");
                                 responseMap.put("headers", headers instanceof Map<?, ?> map ? new ArrayList<>(map.keySet()) : List.of());
                                 Object content = responseProperty(response, "getContent");
-                                if (content instanceof Map<?, ?> map) mediaTypes.addAll(map.keySet().stream().map(Object::toString).toList());
+                                List<String> schemaTypes = new ArrayList<>();
+                                if (content instanceof Map<?, ?> map) {
+                                    mediaTypes.addAll(map.keySet().stream().map(Object::toString).toList());
+                                    map.values().forEach(media -> { Object schema = responseProperty(media, "getSchema"); Object type = responseProperty(schema, "getType"); if (type != null) schemaTypes.add(type.toString()); });
+                                }
+                                responseMap.put("schemaTypes", schemaTypes);
                                 responses.add(responseMap);
                             }
                         }

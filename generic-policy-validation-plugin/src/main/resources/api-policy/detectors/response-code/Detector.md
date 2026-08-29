@@ -23,6 +23,10 @@ parameters:
     type: enum
     required: false
     values: [semantic-conflict]
+  response-shape:
+    type: enum
+    required: false
+    values: [json-object]
 ---
 
 # Response-code detector
