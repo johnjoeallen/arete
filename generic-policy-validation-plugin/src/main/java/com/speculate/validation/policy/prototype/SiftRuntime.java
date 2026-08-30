@@ -290,8 +290,8 @@ public final class SiftRuntime {
         private Expr expression() { Expr condition = or(); if (accept("?")) { Expr whenTrue = expression(); expect(":"); Expr whenFalse = expression(); return env -> truthy(condition.eval(env)) ? whenTrue.eval(env) : whenFalse.eval(env); } return condition; }
         private Expr or() { Expr left = and(); while (accept("||")) { Expr right = and(); Expr l = left, r = right; left = env -> truthy(l.eval(env)) || truthy(r.eval(env)); } return left; }
         private Expr and() { Expr left = equality(); while (accept("&&")) { Expr right = equality(); Expr l = left, r = right; left = env -> truthy(l.eval(env)) && truthy(r.eval(env)); } return left; }
-        private Expr equality() { Expr left = relational(); while (token.text().equals("==") || token.text().equals("!=") || token.text().equals("==~") || token.text().equals("=~")) { String op = token.text(); advance(); Expr right = relational(); left = binary(left, right, op); } return left; }
-        private Expr relational() { Expr left = additive(); while (token.text().equals("<") || token.text().equals("<=") || token.text().equals(">") || token.text().equals(">=")) { String op = token.text(); advance(); Expr right = additive(); left = binary(left, right, op); } return left; }
+        private Expr equality() { Expr left = relational(); while (at("==") || at("!=") || at("==~") || at("=~")) { String op = token.text(); advance(); Expr right = relational(); left = binary(left, right, op); } return left; }
+        private Expr relational() { Expr left = additive(); while (at("<") || at("<=") || at(">") || at(">=")) { String op = token.text(); advance(); Expr right = additive(); left = binary(left, right, op); } return left; }
         private Expr additive() { Expr left = unary(); while (accept("+")) { Expr right = unary(); Expr prior = left; left = env -> { Object a = prior.eval(env), b = right.eval(env); if (a instanceof Number x && b instanceof Number y) return x.longValue() + y.longValue(); if (a instanceof Iterable<?> && b instanceof Iterable<?>) { List<Object> merged = new ArrayList<>(iterableOf(a)); merged.addAll(iterableOf(b)); return merged; } return Objects.toString(a, "null") + Objects.toString(b, "null"); }; } return left; }
         private Expr unary() {
             if (accept("!")) { Expr value = unary(); return env -> !truthy(value.eval(env)); }
@@ -314,11 +314,11 @@ public final class SiftRuntime {
             return env -> env.get(name);
         }
         private Expr postfix(Expr value) {
-            while (token.text().equals(".") || token.text().equals("[")) {
+            while (at(".") || at("[")) {
                 if (accept(".")) {
                     String name = expectId();
                     if (accept("(")) { List<Expr> args = arguments(); Expr receiver = value; value = env -> call(receiver.eval(env), name, args.stream().map(a -> a.eval(env)).toList()); }
-                    else if (token.text().equals("{")) { ParsedClosure closure = closure(); Expr receiver = value; value = env -> call(receiver.eval(env), name, List.of((Closure) argument -> closure.body().eval(with(env, closure.parameter(), argument)))); }
+                    else if (at("{")) { ParsedClosure closure = closure(); Expr receiver = value; value = env -> call(receiver.eval(env), name, List.of((Closure) argument -> closure.body().eval(with(env, closure.parameter(), argument)))); }
                     else { Expr receiver = value; value = env -> member(receiver.eval(env), name); }
                 } else {
                     expect("["); Expr key = expression(); expect("]"); Expr receiver = value;
@@ -331,7 +331,9 @@ public final class SiftRuntime {
         private List<Expr> arguments() { List<Expr> result = new ArrayList<>(); if (!accept(")")) { do result.add(expression()); while (accept(",")); expect(")"); } return result; }
         private Expr binary(Expr left, Expr right, String op) { return env -> { Object a = left.eval(env), b = right.eval(env); return switch (op) { case "==" -> equalValue(a, b); case "!=" -> !equalValue(a, b); case "==~" -> regexFullMatch(b, a); case "=~" -> regexSearch(b, a); case "<" -> compare(a, b) < 0; case "<=" -> compare(a, b) <= 0; case ">" -> compare(a, b) > 0; case ">=" -> compare(a, b) >= 0; case "&&" -> truthy(a) && truthy(b); case "||" -> truthy(a) || truthy(b); default -> throw new IllegalStateException(op); }; }; }
         private static Map<String, Object> with(Map<String, Object> env, String key, Object value) { Map<String, Object> result = new LinkedHashMap<>(env); result.put(key, value); return result; }
-        private boolean accept(String text) { if (token.text().equals(text)) { advance(); return true; } return false; }
+        /** True when the current token is the keyword/operator {@code text} — never a string or regex literal that happens to read the same. */
+        private boolean at(String text) { return token.kind() != Kind.STRING && token.kind() != Kind.REGEX && token.text().equals(text); }
+        private boolean accept(String text) { if (at(text)) { advance(); return true; } return false; }
         private void expect(String text) { if (!accept(text)) throw new IllegalArgumentException("expected '" + text + "', got '" + token.text() + "'"); }
         private String expectId() { expectKind(Kind.ID); String result = token.text(); advance(); return result; }
         private void expectKind(Kind kind) { if (token.kind() != kind) throw new IllegalArgumentException("expected " + kind + ", got " + token.text()); }

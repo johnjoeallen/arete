@@ -75,8 +75,13 @@ Highest precedence first:
 
 Notes:
 
+- `+` is the **only** arithmetic operator — there is no `-`, `*`, `/` or `%`
+  binary operator (`-a` is unary negation only). Detectors compare and count;
+  they do not do arithmetic.
 - `+` on two numbers is **integer** addition. To build a message string from a
   number write `"" + n`, which takes the string-concatenation branch.
+- A string or regex literal is never mistaken for an operator: `"-"`, `"."`
+  and `"=="` are ordinary strings.
 - `==` / `!=` are value equality. `parseInt(resp.status, -1) == 404` works even
   though the parsed value is a `long` and the literal an `int`.
 - `&&` and `||` short-circuit, so `x != null && x.lower() == "y"` is safe.
@@ -176,6 +181,133 @@ regexFullMatch("(?i).*\\berror\\b.*", text)   // string pattern: normal Java esc
 
 `a ==~ r` is a whole-string match, `a =~ r` is a search. The engine is RE2/J:
 linear-time, no backreferences, no catastrophic backtracking.
+
+## Worked examples
+
+### Expressions
+
+Each row is a complete expression and the value it produces.
+
+| Expression | Result |
+|---|---|
+| `2 + 3` | `5` |
+| `"" + 2 + 3` | `"23"` — left to right: `("" + 2)` is `"2"`, then `+ 3` |
+| `["x", "y"] + ["z"]` | `["x", "y", "z"]` |
+| `[10, 20, 30][-1]` | `30` — negative index counts from the end |
+| `[10, 20, 30][5]` | `null` — out of range |
+| `type(3)` &nbsp; `type("s")` &nbsp; `type([1])` | `"int"` &nbsp; `"string"` &nbsp; `"list"` |
+| `truthy("")` &nbsp; `truthy([])` &nbsp; `truthy(0)` | `true` &nbsp; `true` &nbsp; `true` |
+| `tokenize(",", "a,,b")` | `["a", "", "b"]` — empty token kept |
+| `size(tokenize(",", "a,,b"))` | `3` |
+| `join("|", tokenize(",", "a,,b"))` | `"a\|\|b"` |
+| `distinct(["b", "a", "b", null, "a"])` | `["b", "a"]` — `null` dropped, first-seen order |
+| `pathSegments("/v1/orders/{id}/items")` | `["v1", "orders", "items"]` — empty and `{…}` segments dropped |
+| `parseInt("  42 ")` &nbsp; `parseInt("x", 0)` | `42` &nbsp; `0` |
+| `strip("--hi--", "-")` &nbsp; `strip("  hi  ")` | `"hi"` &nbsp; `"hi"` |
+| `last(["a", "b"])` &nbsp; `last([])` | `"b"` &nbsp; `""` |
+| `"Order-1" ==~ /[A-Za-z]+-[0-9]+/` | `true` |
+| `enumerate(["a", "b"]).map { p -> p[0] + "=" + p[1] }` | `["0=a", "1=b"]` |
+
+### Detectors
+
+Each example is a full `Detector.sift` run against the spec beside it; the
+output is the list of occurrences (`pointer` &nbsp;\|&nbsp; `path` &nbsp;\|&nbsp; `message`).
+
+**Operations with no `summary`.**
+
+```java
+sift(api, rule) {
+    return api.paths.expand { path -> path.operationDetails
+        .filter { op -> op.summary == null || op.summary.trim() == "" }
+        .map { op -> occurrence(op.pointer, op.method + " " + path.path,
+            "Operation has no summary") } };
+}
+```
+
+```yaml
+paths:
+  /orders:
+    get:  { summary: List orders, responses: { '200': { description: ok } } }
+    post: { responses: { '201': { description: created } } }
+```
+
+```
+/paths/~1orders/post  |  POST /orders  |  Operation has no summary
+```
+
+**Property names must be camelCase.**
+
+```java
+sift(api, rule) {
+    return api.schemas.expand { schema -> schema.properties
+        .filter { prop -> !(prop.name ==~ /[a-z][a-zA-Z0-9]*/) }
+        .map { prop -> occurrence(prop.pointer, schema.name + "." + prop.name,
+            "Property '" + prop.name + "' is not camelCase") } };
+}
+```
+
+```yaml
+components:
+  schemas:
+    Order:
+      type: object
+      properties:
+        orderId:    { type: string }
+        created_at: { type: string }
+        Total:      { type: number }
+```
+
+```
+/components/schemas/Order/properties/created_at  |  Order.created_at  |  Property 'created_at' is not camelCase
+/components/schemas/Order/properties/Total       |  Order.Total       |  Property 'Total' is not camelCase
+```
+
+**One occurrence for the whole API** — the title must end with a configured
+suffix. `rule.parameters` is `{ "suffix": "API" }`.
+
+```java
+sift(api, rule) {
+    return api.info.title.endsWith(rule.parameters["suffix"])
+        ? []
+        : [occurrence("/info/title", api.info.title,
+            "Title should end with '" + rule.parameters["suffix"] + "'")];
+}
+```
+
+```yaml
+info: { title: Payments, version: 1.0.0 }
+```
+
+```
+/info/title  |  Payments  |  Title should end with 'API'
+```
+
+**Duplicate `operationId`** — the "seen already?" scan, with no accumulator.
+`e` is `[index, [pointer, location, operationId]]`.
+
+```java
+sift(api, rule) {
+    return enumerate(api.paths.expand { path -> path.operationDetails.map { op ->
+            [op.pointer, op.method + " " + path.path, op.operationId] } })
+        .filter { e -> e[1][2] != null
+            && enumerate(api.paths.expand { path -> path.operationDetails.map { op ->
+                    [op.pointer, op.method + " " + path.path, op.operationId] } })
+                .any { earlier -> earlier[0] < e[0] && earlier[1][2] == e[1][2] } }
+        .map { e -> occurrence(e[1][0], e[1][1],
+            "operationId '" + e[1][2] + "' is already used") };
+}
+```
+
+```yaml
+paths:
+  /orders/{id}:
+    get: { operationId: getOrder, responses: { '200': { description: ok } } }
+    put: { operationId: getOrder, responses: { '200': { description: ok } } }
+```
+
+```
+/paths/~1orders~1{id}/put  |  PUT /orders/{id}  |  operationId 'getOrder' is already used
+```
 
 ## Idioms
 

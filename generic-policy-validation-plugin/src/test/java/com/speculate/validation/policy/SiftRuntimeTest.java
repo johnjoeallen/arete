@@ -155,6 +155,30 @@ class SiftRuntimeTest {
                 runtime.execute(source, api, Map.of("parameters", Map.of())));
     }
 
+    @Test
+    void stringLiteralsThatLookLikeOperatorsAreNotOperators() {
+        // "-", "+", ".", "==" etc. as string content must stay string literals.
+        String source = """
+                sift(api, rule) {
+                    return api.paths
+                        .filter { path -> path.path.contains("-")
+                            && strip(path.path, "/") != ""
+                            && join("-", ["a", "b"]) == "a-b" }
+                        .map { path -> occurrence(path.pointer, path.path, "kept " + "-" + " ok") };
+                }
+                """;
+        Map<String, Object> api = api("""
+                openapi: 3.0.0
+                info: { title: Test, version: 1.0.0 }
+                paths:
+                  /order-items: { get: { responses: { '200': { description: OK } } } }
+                  /orders: { get: { responses: { '200': { description: OK } } } }
+                """);
+
+        assertEquals(List.of(new Occurrence("/paths/~1order-items", "/order-items", "kept - ok")),
+                runtime.execute(source, api, Map.of("parameters", Map.of())));
+    }
+
     private static Map<String, Object> api(String content) {
         return OpenApiMapAdapter.toMap(new OpenAPIV3Parser().readContents(content, null, new ParseOptions()).getOpenAPI());
     }
