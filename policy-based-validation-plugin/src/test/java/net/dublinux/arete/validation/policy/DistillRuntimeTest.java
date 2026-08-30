@@ -10,9 +10,57 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class DistillMatcherEvaluatorTest {
     private final DistillMatcherEvaluator runtime = new DistillMatcherEvaluator();
+
+    @Test
+    void validationRejectsUnknownFunctionsBeforeExecution() {
+        Matcher matcher = new Matcher("test", "distill",
+                "distill(api, rule) { return blah(); }", List.of("api"), Map.of());
+
+        assertThrows(BundleValidationException.class, () -> runtime.validate(matcher));
+    }
+
+    @Test
+    void validationRejectsUnknownPropertiesBeforeExecution() {
+        Matcher matcher = new Matcher("test", "distill",
+                "distill(api, rule) { return api.notAProperty; }", List.of("api"), Map.of());
+
+        assertThrows(BundleValidationException.class, () -> runtime.validate(matcher));
+    }
+
+    @Test
+    void occurrenceIsTheSupportedFindingBuiltin() {
+        assertEquals(List.of(new Diagnostic("/", "API", "Found")), runtime.execute(
+                "distill(api, rule) { return [occurrence(\"/\", \"API\", \"Found\")]; }",
+                Map.of(), Map.of("parameters", Map.of())));
+    }
+
+    @Test
+    void safeNavigationHandlesMissingProperties() {
+        assertEquals(List.of(), runtime.execute(
+                "distill(api, rule) { return api.paths.expand { path -> path.operationDetails.filter { operation -> operation.summary?.trim() == \"x\" }.map { operation -> occurrence(operation.pointer, path.path, \"x\") } }; }",
+                Map.of("paths", List.of(Map.of("operationDetails", List.of(Map.of())))),
+                Map.of("parameters", Map.of())));
+    }
+
+    @Test
+    void safeNavigationCanMatchMissingProperties() {
+        assertEquals(1, runtime.execute(
+                "distill(api, rule) { return api.paths.expand { path -> path.operationDetails.filter { operation -> !operation.summary?.trim() }.map { operation -> occurrence(operation.pointer, path.path, \"missing\") } }; }",
+                Map.of("paths", List.of(Map.of("path", "/books", "operationDetails", List.of(Map.of())))),
+                Map.of("parameters", Map.of())).size());
+    }
+
+    @Test
+    void isBlankMatchesNullEmptyAndWhitespaceOnlyStrings() {
+        assertEquals(3, runtime.execute(
+                "distill(api, rule) { return api.values.filter { value -> value is blank }.map { value -> occurrence(\"/\", \"value\", \"blank\") }; }",
+                Map.of("values", java.util.Arrays.asList(null, "", "  ", "text")),
+                Map.of("parameters", Map.of())).size());
+    }
 
     @Test
     void nestedExpandFilterAndMapMatchOperationSemantics() {

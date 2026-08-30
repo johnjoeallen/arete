@@ -11,8 +11,7 @@ distill(api, rule) {
             .group { entry -> "" + entry[2] }
             .values
             .expand { group ->
-                (group[0][2] == null
-                        || (type(group[0][2]) == "string" && group[0][2].trim() == ""))
+                (group[0][2] is blank)
                     ? group.map { entry -> occurrence(entry[0], entry[1],
                         "Operation has no operationId") }
                     : (size(group) > 1

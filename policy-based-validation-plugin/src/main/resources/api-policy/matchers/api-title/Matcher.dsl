@@ -1,5 +1,5 @@
 distill(api, rule) {
-    return (api.info.title == null || api.info.title.trim() == "")
+    return (api.info.title is blank)
         ? api.servers.filter { u -> false }
         : (rule.parameters["suffix"] != null && !api.info.title.trim().endsWith(rule.parameters["suffix"])
             ? tokenize(",", "x").map { u -> occurrence("/info/title", api.info.title,

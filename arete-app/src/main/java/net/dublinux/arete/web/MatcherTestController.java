@@ -21,13 +21,11 @@ import java.util.Map;
 public class MatcherTestController {
     private final PluginRegistry pluginRegistry;
     private final SpecStorageService specStorageService;
-    private final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public MatcherTestController(PluginRegistry pluginRegistry, SpecStorageService specStorageService,
-            ObjectMapper objectMapper) {
+    public MatcherTestController(PluginRegistry pluginRegistry, SpecStorageService specStorageService) {
         this.pluginRegistry = pluginRegistry;
         this.specStorageService = specStorageService;
-        this.objectMapper = objectMapper;
     }
 
     @GetMapping("/matcher-test")
@@ -91,7 +89,21 @@ public class MatcherTestController {
         model.addAttribute("matcherId", "my-matcher");
         model.addAttribute("scope", "operation");
         model.addAttribute("parameters", "{}");
-        model.addAttribute("matcherSource", "distill(api, rule) {\n    return api.paths.expand { path ->\n        path.operationDetails.map { operation ->\n            occurrence(operation.pointer, path.path, \"Example occurrence\")\n        }\n    };\n}");
-        model.addAttribute("spec", "openapi: 3.0.0\ninfo:\n  title: Example API\n  version: 1.0.0\npaths: {}\n");
+        model.addAttribute("matcherSource", """
+                distill(api, rule) {
+                    return api.paths
+                        .expand { path ->
+                            path.operationDetails
+                            .filter { operation -> operation.summary is blank }
+                            .map { operation ->
+                                occurrence(
+                                    operation.pointer,
+                                    operation.method + " " + path.path,
+                                    "Operation summary is missing")
+                            }
+                        };
+                }
+                """);
+        model.addAttribute("spec", "openapi: 3.0.0\ninfo:\n  title: Library API\n  version: 1.2.0\n  description: A small API for browsing and managing books.\nservers:\n  - url: https://api.example.com/v1\npaths:\n  /books:\n    get:\n      summary: List books\n      parameters:\n        - name: limit\n          in: query\n          description: Maximum number of books to return.\n          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }\n      responses:\n        '200':\n          description: A page of books.\n          content:\n            application/json:\n              schema: { type: array, items: { $ref: '#/components/schemas/Book' } }\n    post:\n      requestBody:\n        required: true\n        content:\n          application/json:\n            schema: { $ref: '#/components/schemas/NewBook' }\n      responses:\n        '201':\n          description: Book created.\n          content:\n            application/json:\n              schema: { $ref: '#/components/schemas/Book' }\n  /books/{bookId}:\n    get:\n      summary: Get a book\n      parameters:\n        - name: bookId\n          in: path\n          required: true\n          schema: { type: string }\n      responses:\n        '200':\n          description: A book.\n          content:\n            application/json:\n              schema: { $ref: '#/components/schemas/Book' }\n        '404': { description: Book not found. }\n    delete:\n      parameters:\n        - name: bookId\n          in: path\n          required: true\n          schema: { type: string }\n      responses:\n        '204': { description: Book deleted. }\ncomponents:\n  schemas:\n    Book:\n      type: object\n      required: [id, title, author]\n      properties:\n        id: { type: string, example: bk_123 }\n        title: { type: string, example: The Odyssey }\n        author: { type: string, example: Homer }\n        publishedYear: { type: integer, example: -700 }\n    NewBook:\n      type: object\n      required: [title, author]\n      properties:\n        title: { type: string }\n        author: { type: string }\n");
     }
 }

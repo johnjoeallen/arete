@@ -9,6 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 
 /** Interpreter for Distill, the Java-shaped fluent rule language (Matcher.dsl). */
@@ -132,6 +133,8 @@ public final class DistillMatcherEvaluator {
     }
 
     private static boolean truthy(Object value) { return value instanceof Boolean b ? b : value != null; }
+
+    private static boolean isBlank(Object value) { return value == null || value instanceof String text && text.trim().isEmpty(); }
 
     /** Ordering for {@code < <= > >=}: numeric by value, otherwise lexicographic. */
     private static int compare(Object a, Object b) {
@@ -293,13 +296,28 @@ public final class DistillMatcherEvaluator {
     }
 
     private static final class Parser {
-        private final Lexer lexer; private Token token;
-        Parser(String source) { lexer = new Lexer(source); token = lexer.next(); }
+        private final Lexer lexer; private Token token; private Token lookahead;
+        Parser(String source) { lexer = new Lexer(source); token = lexer.next(); lookahead = lexer.next(); }
         Program parse() { expect("distill"); expect("("); String api = expectId(); expect(","); String rule = expectId(); expect(")"); expect("{"); expect("return"); Expr expression = expression(); expect(";"); expect("}"); expectKind(Kind.EOF); return new Program(expression); }
         private Expr expression() { Expr condition = or(); if (accept("?")) { Expr whenTrue = expression(); expect(":"); Expr whenFalse = expression(); return env -> truthy(condition.eval(env)) ? whenTrue.eval(env) : whenFalse.eval(env); } return condition; }
         private Expr or() { Expr left = and(); while (accept("||")) { Expr right = and(); Expr l = left, r = right; left = env -> truthy(l.eval(env)) || truthy(r.eval(env)); } return left; }
         private Expr and() { Expr left = equality(); while (accept("&&")) { Expr right = equality(); Expr l = left, r = right; left = env -> truthy(l.eval(env)) && truthy(r.eval(env)); } return left; }
-        private Expr equality() { Expr left = relational(); while (at("==") || at("!=") || at("==~") || at("=~")) { String op = token.text(); advance(); Expr right = relational(); left = binary(left, right, op); } return left; }
+        private Expr equality() {
+            Expr left = relational();
+            while (at("==") || at("!=") || at("==~") || at("=~") || at("is")) {
+                if (accept("is")) {
+                    expect("blank");
+                    Expr value = left;
+                    left = env -> isBlank(value.eval(env));
+                } else {
+                    String op = token.text();
+                    advance();
+                    Expr right = relational();
+                    left = binary(left, right, op);
+                }
+            }
+            return left;
+        }
         private Expr relational() { Expr left = additive(); while (at("<") || at("<=") || at(">") || at(">=")) { String op = token.text(); advance(); Expr right = additive(); left = binary(left, right, op); } return left; }
         private Expr additive() { Expr left = unary(); while (accept("+")) { Expr right = unary(); Expr prior = left; left = env -> { Object a = prior.eval(env), b = right.eval(env); if (a instanceof Number x && b instanceof Number y) return x.longValue() + y.longValue(); if (a instanceof Iterable<?> && b instanceof Iterable<?>) { List<Object> merged = new ArrayList<>(iterableOf(a)); merged.addAll(iterableOf(b)); return merged; } return Objects.toString(a, "null") + Objects.toString(b, "null"); }; } return left; }
         private Expr unary() {
@@ -319,16 +337,42 @@ public final class DistillMatcherEvaluator {
             if (token.kind() == Kind.REGEX) { Regex value = new Regex(token.text()); advance(); return env -> value; }
             if (token.kind() == Kind.NUMBER) { long value = Long.parseLong(token.text()); advance(); return env -> value; }
             if (token.kind() == Kind.ID && (token.text().equals("true") || token.text().equals("false"))) { boolean value = token.text().equals("true"); advance(); return env -> value; }
-            String name = expectId(); if (accept("(")) { List<Expr> args = arguments(); return env -> function(name, args.stream().map(a -> a.eval(env)).toList()); }
+            String name = expectId(); if (accept("(")) {
+                if (!KNOWN_FUNCTIONS.contains(name)) throw new IllegalArgumentException("unknown function: " + name);
+                List<Expr> args = arguments();
+                return env -> function(name, args.stream().map(a -> a.eval(env)).toList());
+            }
             return env -> env.get(name);
         }
         private Expr postfix(Expr value) {
-            while (at(".") || at("[")) {
+            while (at(".") || (at("?") && ".".equals(lookahead.text())) || at("[")) {
                 if (accept(".")) {
                     String name = expectId();
+                    if (!KNOWN_MEMBERS.contains(name)) throw new IllegalArgumentException("unknown property or operation: " + name);
                     if (accept("(")) { List<Expr> args = arguments(); Expr receiver = value; value = env -> call(receiver.eval(env), name, args.stream().map(a -> a.eval(env)).toList()); }
                     else if (at("{")) { ParsedClosure closure = closure(); Expr receiver = value; value = env -> call(receiver.eval(env), name, List.of((Closure) argument -> closure.body().eval(with(env, closure.parameter(), argument)))); }
                     else { Expr receiver = value; value = env -> member(receiver.eval(env), name); }
+                } else if (accept("?")) {
+                    expect(".");
+                    String name = expectId();
+                    if (!KNOWN_MEMBERS.contains(name)) throw new IllegalArgumentException("unknown property or operation: " + name);
+                    Expr receiver = value;
+                    if (accept("(")) {
+                        List<Expr> args = arguments();
+                        value = env -> {
+                            Object target = receiver.eval(env);
+                            return target == null ? null : call(target, name, args.stream().map(a -> a.eval(env)).toList());
+                        };
+                    } else if (at("{")) {
+                        ParsedClosure closure = closure();
+                        value = env -> {
+                            Object target = receiver.eval(env);
+                            return target == null ? null : call(target, name,
+                                    List.of((Closure) argument -> closure.body().eval(with(env, closure.parameter(), argument))));
+                        };
+                    } else {
+                        value = env -> member(receiver.eval(env), name);
+                    }
                 } else {
                     expect("["); Expr key = expression(); expect("]"); Expr receiver = value;
                     value = env -> index(receiver.eval(env), key.eval(env));
@@ -346,6 +390,26 @@ public final class DistillMatcherEvaluator {
         private void expect(String text) { if (!accept(text)) throw new IllegalArgumentException("expected '" + text + "', got '" + token.text() + "'"); }
         private String expectId() { expectKind(Kind.ID); String result = token.text(); advance(); return result; }
         private void expectKind(Kind kind) { if (token.kind() != kind) throw new IllegalArgumentException("expected " + kind + ", got " + token.text()); }
-        private void advance() { token = lexer.next(); }
+        private void advance() { token = lookahead; lookahead = lexer.next(); }
     }
+
+    private static final Set<String> KNOWN_FUNCTIONS = Set.of(
+            "regexSearch", "regexFullMatch", "tokenize", "last", "size", "distinct", "join", "strip",
+            "urlHost", "parseInt", "truthy", "pathSegments", "enumerate", "type", "occurrence",
+            "operationMessage");
+
+    private static final Set<String> KNOWN_MEMBERS = Set.of(
+            "all", "allowed", "any", "array", "audience", "case", "check", "compositionKind", "contains",
+            "count", "description", "distinct", "endsWith", "enumPresent", "enumValues", "example",
+            "examplePresent", "exampleStrings", "exclusiveMaximum", "exclusiveMinimum", "expand", "expected",
+            "explode", "extensibleEnum", "extensionKeys", "filter", "find", "forbidden", "format", "group",
+            "headerDetails", "headers", "in", "info", "inlineCompositionMembers", "keys", "length", "lint",
+            "location", "lower", "map", "match", "maxItems", "maxLength", "maximum", "mediaTypes", "method",
+            "methods", "minLength", "minimum", "name", "nullable", "numericStatusKeys", "openapiVersion",
+            "operationDetails", "operationId", "operations", "parameters", "parserMessages", "path", "paths",
+            "pattern", "pointer", "properties", "requestBodyInlineObject", "requestBodyPresent",
+            "requestBodyRequired", "requestMediaTypes", "require", "required", "requiredFields", "responses",
+            "schemaInlineObject", "schemaMaximum", "schemaPresent", "schemaType", "schemaTypes", "schemas",
+            "scope", "security", "segments", "servers", "startsWith", "status", "style", "suffix", "summary",
+            "tags", "templateParameters", "title", "toList", "trim", "type", "values");
 }

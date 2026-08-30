@@ -3,13 +3,13 @@ distill(api, rule) {
         .filter { operation ->
             (rule.parameters["method"] == null || operation.method == rule.parameters["method"])
             && (rule.parameters["summary"] != "present"
-                || (operation.summary == null ? "" : operation.summary.trim()) != "")
+                || !(operation.summary is blank))
             && (rule.parameters["summary"] != "absent"
-                || (operation.summary == null ? "" : operation.summary.trim()) == "")
+                || operation.summary is blank)
             && (rule.parameters["description"] != "present"
-                || (operation.description == null ? "" : operation.description.trim()) != "")
+                || !(operation.description is blank))
             && (rule.parameters["description"] != "absent"
-                || (operation.description == null ? "" : operation.description.trim()) == "")
+                || operation.description is blank)
             && (rule.parameters["request-body"] != "present" || operation.requestBodyPresent)
             && (rule.parameters["request-body"] != "absent" || !operation.requestBodyPresent) }
         .map { operation -> occurrence(operation.pointer,
