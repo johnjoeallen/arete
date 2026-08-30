@@ -54,10 +54,9 @@ endpoint with severity badges, JSON Pointer locations, and links to rule
 docs.
 
 The release bundles the **Areté Policy Engine**
-(`policy-based-validation-plugin`) — a policy-driven linter whose rules
-and rules are plain text files, with rules running in a
-safe-by-construction Distill runtime. It
-ships the Enterprise Grade,
+(`policy-based-validation-plugin`) — a policy-driven linter whose matchers,
+rules, and policies are plain text files, with matchers written in Distill,
+a safe-by-construction expression language. It ships the Enterprise Grade,
 Zalando, and Zalando Extended policies. Drop additional plugin jars into
 `~/.arete/plugins`.
 
