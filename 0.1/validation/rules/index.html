@@ -1195,8 +1195,8 @@
 by category. A rule is only evaluated when a <a href="../policies/">policy</a> references
 it. See <a href="../policy-engine/">the policy engine</a> for how matchers, rules, and
 policies fit together.</p>
-<p>There are <strong>139 rules</strong> across <strong>20 categories</strong>, built on
-<strong>45 matchers</strong>.</p>
+<p>There are <strong>146 rules</strong> across <strong>20 categories</strong>, built on
+<strong>48 matchers</strong>.</p>
 <div class="admonition note">
 <p class="admonition-title">Reading the policy columns</p>
 <p>A number is the point deduction applied once if the rule matches;
@@ -1561,7 +1561,7 @@ a blank cell means that policy does not include the rule.</p>
 <td><code>operation-metadata</code></td>
 <td>0.5</td>
 <td></td>
-<td></td>
+<td>0.5</td>
 </tr>
 <tr>
 <td><code>DOC012</code></td>
@@ -1602,6 +1602,22 @@ a blank cell means that policy does not include the rule.</p>
 <td>0.5</td>
 <td></td>
 <td></td>
+</tr>
+<tr>
+<td><code>DOC017</code></td>
+<td>Tag has no description</td>
+<td><code>tag</code></td>
+<td></td>
+<td></td>
+<td>0.5</td>
+</tr>
+<tr>
+<td><code>DOC018</code></td>
+<td>Operation uses an undeclared tag</td>
+<td><code>tag</code></td>
+<td></td>
+<td></td>
+<td>0.5</td>
 </tr>
 </tbody>
 </table>
@@ -2006,6 +2022,22 @@ a blank cell means that policy does not include the rule.</p>
 <td></td>
 <td></td>
 </tr>
+<tr>
+<td><code>JSON021</code></td>
+<td>Numeric property has no minimum and maximum</td>
+<td><code>schema</code></td>
+<td></td>
+<td></td>
+<td>0.5</td>
+</tr>
+<tr>
+<td><code>JSON022</code></td>
+<td>String property has no maximum length</td>
+<td><code>schema</code></td>
+<td></td>
+<td></td>
+<td>0.5</td>
+</tr>
 </tbody>
 </table>
 <h2 id="naming">Naming<a class="headerlink" href="#naming" title="Permanent link">&para;</a></h2>
@@ -2076,6 +2108,14 @@ a blank cell means that policy does not include the rule.</p>
 <td></td>
 <td></td>
 <td></td>
+</tr>
+<tr>
+<td><code>CASE008</code></td>
+<td>Tag name does not follow the naming convention</td>
+<td><code>tag</code></td>
+<td></td>
+<td></td>
+<td>0.5</td>
 </tr>
 </tbody>
 </table>
@@ -2202,6 +2242,14 @@ a blank cell means that policy does not include the rule.</p>
 <td>0.5</td>
 <td></td>
 <td></td>
+</tr>
+<tr>
+<td><code>REST007</code></td>
+<td>All paths share a common prefix</td>
+<td><code>path-prefix</code></td>
+<td></td>
+<td></td>
+<td>0.5</td>
 </tr>
 </tbody>
 </table>
@@ -2414,7 +2462,7 @@ a blank cell means that policy does not include the rule.</p>
 <td><code>parameter</code></td>
 <td>0.5</td>
 <td></td>
-<td></td>
+<td>0.5</td>
 </tr>
 <tr>
 <td><code>STANDARD013</code></td>
@@ -2422,7 +2470,7 @@ a blank cell means that policy does not include the rule.</p>
 <td><code>parameter</code></td>
 <td>0.5</td>
 <td></td>
-<td></td>
+<td>0.5</td>
 </tr>
 <tr>
 <td><code>STANDARD014</code></td>
@@ -2430,7 +2478,7 @@ a blank cell means that policy does not include the rule.</p>
 <td><code>parameter</code></td>
 <td>0.5</td>
 <td></td>
-<td></td>
+<td>0.5</td>
 </tr>
 <tr>
 <td><code>STANDARD015</code></td>
@@ -2502,7 +2550,15 @@ a blank cell means that policy does not include the rule.</p>
 <td><code>server-url</code></td>
 <td></td>
 <td></td>
+<td>0.5</td>
+</tr>
+<tr>
+<td><code>STANDARD024</code></td>
+<td>Component schema is never referenced</td>
+<td><code>component-usage</code></td>
 <td></td>
+<td></td>
+<td>0.5</td>
 </tr>
 </tbody>
 </table>

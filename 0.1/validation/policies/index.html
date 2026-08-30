@@ -1610,9 +1610,9 @@ listed here is the default when an unknown rule set is requested.</p>
 </table>
 </details>
 <h2 id="zalando-extended">Zalando Extended<a class="headerlink" href="#zalando-extended" title="Permanent link">&para;</a></h2>
-<p>Contains only implemented Zalando-catalogue rules. It will gain the ten Zally-extension-only rules when those matcher definitions and rules exist.</p>
+<p>Everything in the <code>Zalando</code> policy, plus the checks that were previously only in Zalando's supplementary linter rule pack, reworked as Areté rules.</p>
 <ul>
-<li><strong>40</strong> rules active</li>
+<li><strong>52</strong> rules active</li>
 </ul>
 <p>Parameter overrides:</p>
 <table>
@@ -1634,7 +1634,7 @@ listed here is the default when an unknown rule set is requested.</p>
 </tbody>
 </table>
 <details class="example">
-<summary>All 40 rules in Zalando Extended</summary>
+<summary>All 52 rules in Zalando Extended</summary>
 <table>
 <thead>
 <tr>
@@ -1843,6 +1843,66 @@ listed here is the default when an unknown rule set is requested.</p>
 <td><code>STANDARD010</code></td>
 <td>−0.5</td>
 <td>OpenAPI version is unsupported or missing</td>
+</tr>
+<tr>
+<td><code>STANDARD012</code></td>
+<td>−0.5</td>
+<td>Path parameter is not marked required</td>
+</tr>
+<tr>
+<td><code>STANDARD013</code></td>
+<td>−0.5</td>
+<td>Path parameter does not match the path template</td>
+</tr>
+<tr>
+<td><code>STANDARD014</code></td>
+<td>−0.5</td>
+<td>Parameter has no schema or content</td>
+</tr>
+<tr>
+<td><code>STANDARD023</code></td>
+<td>−0.5</td>
+<td>Server URL is not on the approved pattern</td>
+</tr>
+<tr>
+<td><code>STANDARD024</code></td>
+<td>−0.5</td>
+<td>Component schema is never referenced</td>
+</tr>
+<tr>
+<td><code>CASE008</code></td>
+<td>−0.5</td>
+<td>Tag name does not follow the naming convention</td>
+</tr>
+<tr>
+<td><code>DOC011</code></td>
+<td>−0.5</td>
+<td>Operation is not tagged</td>
+</tr>
+<tr>
+<td><code>DOC017</code></td>
+<td>−0.5</td>
+<td>Tag has no description</td>
+</tr>
+<tr>
+<td><code>DOC018</code></td>
+<td>−0.5</td>
+<td>Operation uses an undeclared tag</td>
+</tr>
+<tr>
+<td><code>JSON021</code></td>
+<td>−0.5</td>
+<td>Numeric property has no minimum and maximum</td>
+</tr>
+<tr>
+<td><code>JSON022</code></td>
+<td>−0.5</td>
+<td>String property has no maximum length</td>
+</tr>
+<tr>
+<td><code>REST007</code></td>
+<td>−0.5</td>
+<td>All paths share a common prefix</td>
 </tr>
 </tbody>
 </table>
