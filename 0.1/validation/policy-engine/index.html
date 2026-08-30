@@ -1208,7 +1208,7 @@
 <p>The <strong>Areté Policy Engine</strong> (<code>policy-based-validation-plugin</code>, plugin id
 <code>generic-policy</code>) is the built-in, policy-driven validation plugin. Instead of
 hard-coding checks in Java, it ships a <strong>policy bundle</strong>: a tree of Markdown +
-YAML files defining <strong>matchers</strong> (Distill programs that inspect the normalized
+YAML files defining <strong>matchers</strong> (Distill programs that inspect the normalised
 API model and return occurrences), <strong>rules</strong> (named checks that select a
 matcher, scope, and parameters), and <strong>policies</strong> (which rules are active and
 what disposition each match has, such as a point deduction or <code>PROHIBITED</code>).
@@ -1222,15 +1222,15 @@ Areté UI as selectable rule sets.</p>
 <p>When validation runs, the plugin resolves the requested policy. If the name is
 unknown, the <strong>first policy declared</strong> in the bundle manifest is used as the
 default. Each rule listed in that policy is then evaluated <strong>in declaration
-order</strong>: its matcher runs against the normalized API model and the rule's
+order</strong>: its matcher runs against the normalised API model and the rule's
 <code>{id, scope, parameters}</code>, returning zero or more occurrences. If a rule
 returns occurrences, the policy's <strong>disposition</strong> (a point deduction or
 <code>PROHIBITED</code>) is applied once, and one finding is emitted for each occurrence.</p>
 <h3 id="matcher-language">Matcher language<a class="headerlink" href="#matcher-language" title="Permanent link">&para;</a></h3>
-<p>Matchers are written in <a href="../distill/">Distill</a> (<code>Matcher.dsl</code>), which is
-currently the only supported matcher language. Distill is a small expression language
-shaped for rule pipelines (<code>.map</code> / <code>.filter</code> / <code>.expand</code>, slashy regex
-literals, <code>occurrence(...)</code>).</p>
+<p>Matchers are written in <a href="../distill/">Distill</a> (<code>Matcher.dsl</code>), currently the
+only supported matcher language. It is a small expression language shaped for
+rule pipelines (<code>.map</code> / <code>.filter</code> / <code>.expand</code>, slashy regex literals,
+<code>occurrence(...)</code>).</p>
 <ul>
 <li><strong>Safe by construction</strong> — the interpreter exposes only the immutable <code>api</code>
   and <code>rule</code> values, a fixed builtin set, and RE2/J regex. No filesystem,
@@ -1277,13 +1277,13 @@ documentation.</p>
 <h2 id="matchers">Matchers<a class="headerlink" href="#matchers" title="Permanent link">&para;</a></h2>
 <p>A matcher is a reusable, parameterised Distill program. It reports <strong>what it
 observed</strong> by returning occurrences and takes no position on severity or score
-— that is the rule and policy's job.</p>
+— that is the job of the rule and policy.</p>
 <h3 id="descriptor-matchermd-front-matter">Descriptor (<code>Matcher.md</code> front matter)<a class="headerlink" href="#descriptor-matchermd-front-matter" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nn">---</span>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">naming</span><span class="w">                       </span><span class="c1"># must match the manifest key</span>
-<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="nt">language</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">distill</span><span class="w">                 </span><span class="c1"># the rule language</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Matcher.dsl</span><span class="w">               </span><span class="c1"># the rule source</span>
-<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="nt">scopes</span><span class="p">:</span><span class="w">                          </span><span class="c1"># the scope values rules may request</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="nt">language</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">distill</span><span class="w">                </span><span class="c1"># the matcher language</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Matcher.dsl</span><span class="w">              </span><span class="c1"># the matcher source</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="nt">scopes</span><span class="p">:</span><span class="w">                          </span><span class="c1"># the scope values a matcher may request</span>
 <a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">property</span>
 <a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path-segment</span>
 <a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">query-parameter</span>
@@ -1303,7 +1303,7 @@ scripts can trust their inputs):</p>
 <thead>
 <tr>
 <th>type</th>
-<th>valid rule value</th>
+<th>valid value</th>
 </tr>
 </thead>
 <tbody>
@@ -1421,9 +1421,6 @@ schemas, properties, parameters, responses, and headers expose the additional
 fields described by their corresponding objects. <code>operationDetails[].security</code>
 is <code>null</code> unless the operation overrides the global requirement. JSON Pointers
 are pre-escaped and safe to return verbatim as <code>pointer</code>.</p>
-<p><code>operationDetails[].security</code> is <code>null</code> unless the operation overrides the
-global requirement. JSON Pointers are pre-escaped and safe to return verbatim
-as <code>pointer</code>.</p>
 <h3 id="writing-a-matcher">Writing a matcher<a class="headerlink" href="#writing-a-matcher" title="Permanent link">&para;</a></h3>
 <p>Matchers are written in <strong>Distill</strong> (<code>Matcher.dsl</code>); its grammar and builtins
 have their own chapter — the <a href="../distill/">Distill reference</a>.</p>
@@ -1432,7 +1429,7 @@ have their own chapter — the <a href="../distill/">Distill reference</a>.</p>
 <li><code>message</code> is required and must be non-blank; <code>pointer</code> and <code>path</code> are
   optional strings.</li>
 <li>Return an empty list when nothing matches — <strong>never</strong> return a score or severity.</li>
-<li>More than 1000 occurrences is a rule error.</li>
+<li>More than 1000 occurrences is a matcher error.</li>
 <li>Any error (raised, step-cap exceeded, wrong return shape) becomes a plugin
   error for that rule's run — it does not abort the other rules.</li>
 <li>The script is compiled when the bundle loads; a compile failure fails the
@@ -1440,41 +1437,13 @@ have their own chapter — the <a href="../distill/">Distill reference</a>.</p>
 </ul>
 <p><strong>Safe by construction.</strong> <code>api</code> and <code>rule</code> are deep-immutable. The language
 has no <code>import</code>, no I/O, no reflection, no recursion, and execution is bounded
-by a hard interpreter-step cap. The only capabilities beyond core
-list/dict/string/<code>for</code>/comprehension work are these builtins:</p>
-<table>
-<thead>
-<tr>
-<th>Builtin</th>
-<th>Purpose</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>re_fullmatch(pattern, text)</code></td>
-<td>whole-string match (RE2 syntax, linear time)</td>
-</tr>
-<tr>
-<td><code>re_search(pattern, text)</code></td>
-<td>match anywhere in <code>text</code></td>
-</tr>
-<tr>
-<td><code>tokenize(text, delims)</code></td>
-<td>split on any char in <code>delims</code>, dropping empty tokens</td>
-</tr>
-<tr>
-<td><code>parse_int(text, fallback)</code></td>
-<td>base-10 int, or <code>fallback</code> if not one</td>
-</tr>
-<tr>
-<td><code>url_host(url)</code></td>
-<td>host component of a URL, or <code>None</code></td>
-</tr>
-</tbody>
-</table>
-<p>If a rule needs something outside this list, that is a deliberate,
-reviewed addition to the runtime — not a workaround in the script.</p>
-<p>The <code>manual</code> rule is the deliberate no-op (<code>distill(api, rule) { return []; }</code>).
+by a hard interpreter-step cap. Matchers work with the core
+list/string/closure operations plus a small, fixed set of builtins
+(<code>regexFullMatch</code>, <code>tokenize</code>, <code>pathSegments</code>, <code>parseInt</code>, …), catalogued in
+the <a href="../distill/#builtin-functions">Distill reference</a>. Anything outside that
+set is a deliberate, reviewed addition to the runtime, not a workaround in the
+script.</p>
+<p>The <code>manual</code> matcher is the deliberate no-op (<code>distill(api, rule) { return []; }</code>).
 It keeps a rule in the catalogue as a checklist item that cannot be inferred
 from an OpenAPI document.</p>
 <hr />
@@ -1484,8 +1453,8 @@ human explanation used for its findings.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>---
 <a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>id: CASE001                       # must match the manifest key
 <a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>category: Naming                  # free-text grouping shown in the UI
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>matcher: naming                  # rule id
-<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>scope: property                   # must be one of that rule's <span class="sb">`scopes`</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>matcher: naming                  # matcher id
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>scope: property                   # must be one of that matcher's <span class="sb">`scopes`</span>
 <a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="gu">parameters: { convention: camelCase, match: non-conforming }</span>
 <a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="gu">---</span>
 <a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>
@@ -1501,10 +1470,10 @@ human explanation used for its findings.</p>
   <code>Should not exceed {{maximum-depth}} nested levels.</code></li>
 <li><code>parameters</code> may be omitted if the rule needs none.</li>
 <li>Parameter names, value types, required-parameter presence, and the
-  scope-vs-rule match are all checked at load time — <strong>unless</strong> the
-  rule named by the rule is not yet in the bundle, in which case the rule
+  scope-vs-matcher match are all checked at load time — <strong>unless</strong> the
+  matcher named by the rule is not yet in the bundle, in which case the rule
   is still loaded but left unvalidated (this lets the catalogue document rules
-  ahead of their rule).</li>
+  ahead of their matcher).</li>
 </ul>
 <p>The rule is invisible until a policy references it.</p>
 <hr />
@@ -1567,7 +1536,7 @@ rule, 2.0 each, security rules <code>PROHIBITED</code>), make good starting poin
 <h2 id="adding-to-the-bundle">Adding to the bundle<a class="headerlink" href="#adding-to-the-bundle" title="Permanent link">&para;</a></h2>
 <h3 id="a-new-rule-using-an-existing-matcher">A new rule (using an existing matcher)<a class="headerlink" href="#a-new-rule-using-an-existing-matcher" title="Permanent link">&para;</a></h3>
 <ol>
-<li>Create <code>rules/&lt;ID&gt;.md</code> with front matter (<code>id</code>, <code>category</code>, <code>rule</code>,
+<li>Create <code>rules/&lt;ID&gt;.md</code> with front matter (<code>id</code>, <code>category</code>, <code>matcher</code>,
    <code>scope</code>, <code>parameters</code>) and a <code># &lt;ID&gt; — &lt;title&gt;</code> body.</li>
 <li>Add <code>&lt;ID&gt;: rules/&lt;ID&gt;.md</code> to <code>PolicyBundle.yaml</code> under <code>rules:</code>.</li>
 <li>Reference <code>&lt;ID&gt;</code> from one or more policies with a deduction or <code>PROHIBITED</code>.</li>
@@ -1617,7 +1586,7 @@ rule-compile error.</p>
   scalar parameter that declares <code>values</code>, an unsupported parameter type.</li>
 <li>A rule: a <code>scope</code> not in the matcher's <code>scopes</code>, an unknown parameter, a
   wrong-typed parameter value, a missing required parameter, a body with no
-  <code>#</code> heading. (Skipped only when the rule isn't bundled yet.)</li>
+  <code>#</code> heading. (Skipped only when the matcher isn't bundled yet.)</li>
 <li>A policy: a disposition that is neither <code>0</code>–<code>100</code> nor <code>PROHIBITED</code>, or a
   reference to an unknown rule id.</li>
 </ul>

@@ -689,10 +689,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#rules" class="md-nav__link">
+  <a href="#matchers" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Rules
+        Matchers
       
     </span>
   </a>
@@ -1052,10 +1052,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#rules" class="md-nav__link">
+  <a href="#matchers" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Rules
+        Matchers
       
     </span>
   </a>
@@ -1124,9 +1124,9 @@ no user-defined functions — and safe by construction: the interpreter exposes
 only the immutable <code>api</code> and <code>rule</code> values, a fixed set of builtins, and
 <a href="https://github.com/google/re2j">RE2/J</a> regular expressions. There is no I/O,
 reflection, recursion, or unbounded iteration.</p>
-<p>The build may include a corresponding <code>Matcher.groovy</code> source for parity
-testing, but it is not deployed as a supported runtime language. A deployed
-Areté always evaluates matchers with Distill.</p>
+<p>The build also runs a matching <code>Matcher.groovy</code> for some matchers as a parity
+check; Groovy is not part of the deployed runtime. A deployed Areté always
+evaluates matchers with Distill.</p>
 <h2 id="the-entry-point">The entry point<a class="headerlink" href="#the-entry-point" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">distill</span><span class="p">(</span><span class="n">api</span><span class="p">,</span><span class="w"> </span><span class="n">rule</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="o">&lt;</span><span class="n">expression</span><span class="o">&gt;</span><span class="p">;</span>
@@ -1136,12 +1136,12 @@ Areté always evaluates matchers with Distill.</p>
 names (<code>api</code> and <code>rule</code> by convention), then <code>return</code> <strong>one</strong> expression
 terminated by <code>;</code>. The expression must evaluate to a list of occurrences
 (often built with <code>.map { … -&gt; occurrence(...) }</code>); returning more than 1000
-occurrences is a rule error.</p>
+occurrences is a matcher error.</p>
 <ul>
 <li><code>api</code> is the deep-immutable API model. Its shape (<code>api.paths</code>,
   <code>path.operationDetails</code>, <code>api.schemas</code>,
   <code>schema.properties</code>, <code>api.info</code>, <code>api.security</code>, …) is documented under
-  <a href="../policy-engine/#writing-a-rule">Writing a rule</a>.</li>
+  <a href="../policy-engine/#the-api-model">The <code>api</code> model</a>.</li>
 <li><code>rule</code> is <code>{ id, scope, parameters }</code>. Rule configuration is
   <code>rule.parameters</code> — e.g. <code>rule.parameters["max-items"]</code> or, for a key that
   is a plain identifier, <code>rule.parameters.suffix</code>.</li>
@@ -1237,7 +1237,7 @@ relying on emptiness, and use <code>truthy(x)</code> when you need the boolean i
 <p>Notes:</p>
 <ul>
 <li><code>+</code> is the <strong>only</strong> arithmetic operator — there is no <code>-</code>, <code>*</code>, <code>/</code> or <code>%</code>
-  binary operator (<code>-a</code> is unary negation only). Rules compare and count;
+  binary operator (<code>-a</code> is unary negation only). Matchers compare and count;
   they do not do arithmetic.</li>
 <li><code>+</code> on two numbers is <strong>integer</strong> addition. To build a message string from a
   number write <code>"" + n</code>, which takes the string-concatenation branch.</li>
@@ -1527,7 +1527,7 @@ linear-time, no backreferences, no catastrophic backtracking.</p>
 </tr>
 </tbody>
 </table>
-<h3 id="rules">Rules<a class="headerlink" href="#rules" title="Permanent link">&para;</a></h3>
+<h3 id="matchers">Matchers<a class="headerlink" href="#matchers" title="Permanent link">&para;</a></h3>
 <p>Each example is a full <code>Matcher.dsl</code> run against the spec beside it; the
 output is the list of occurrences (<code>pointer</code> &nbsp;|&nbsp; <code>path</code> &nbsp;|&nbsp; <code>message</code>).</p>
 <p><strong>Operations with no <code>summary</code>.</strong></p>
@@ -1579,7 +1579,7 @@ suffix. <code>rule.parameters</code> is <code>{ "suffix": "API" }</code>.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>/info/title  |  Payments  |  Title should end with 'API'
 </code></pre></div>
 <p><strong>Duplicate <code>operationId</code></strong> — group by id, then report every operation after
-the first in a group. This is the <code>operation-metadata</code> rule's real
+the first in a group. This is the <code>operation-metadata</code> matcher's real
 <code>unique-operation-id</code> shape (blank-id handling elided). <code>group</code> is a list of
 <code>[pointer, location, operationId]</code> entries; <code>enumerate</code> supplies the index so
 the first entry can be skipped.</p>

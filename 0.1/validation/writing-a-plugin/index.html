@@ -950,7 +950,7 @@ of times, <strong>potentially concurrently</strong>. Don't mutate instance field
 <p><strong>Classloading contract.</strong> Every type in a method signature must be a JDK type
 or declared in the SPI module. The SPI is the shared parent classloader for
 every plugin's isolated <code>URLClassLoader</code>, so those are the only types safe to
-pass across the boundary. Never add a method mentioning e.g. a swagger-parser
+pass across the boundary. Never add a method mentioning, say, a swagger-parser
 or Kotlin type.</p>
 <h2 id="a-minimal-plugin">A minimal plugin<a class="headerlink" href="#a-minimal-plugin" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">package</span><span class="w"> </span><span class="nn">com.example.myvalidator</span><span class="p">;</span>
