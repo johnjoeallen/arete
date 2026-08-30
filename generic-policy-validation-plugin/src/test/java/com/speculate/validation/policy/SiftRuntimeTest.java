@@ -179,6 +179,34 @@ class SiftRuntimeTest {
                 runtime.execute(source, api, Map.of("parameters", Map.of())));
     }
 
+    @Test
+    void groupByBucketsItemsByKeyInFirstSeenOrder() {
+        // Flag every path whose first segment is shared by another path.
+        String source = """
+                sift(api, rule) {
+                    return api.paths
+                        .groupBy { path -> pathSegments(path.path)[0] }
+                        .values
+                        .filter { g -> size(g) > 1 }
+                        .expand { g -> g.map { path -> occurrence(path.pointer, path.path,
+                            "shares a root with " + size(g) + " paths") } };
+                }
+                """;
+        Map<String, Object> api = api("""
+                openapi: 3.0.0
+                info: { title: Test, version: 1.0.0 }
+                paths:
+                  /orders: { get: { responses: { '200': { description: OK } } } }
+                  /orders/{id}: { get: { responses: { '200': { description: OK } } } }
+                  /customers: { get: { responses: { '200': { description: OK } } } }
+                """);
+
+        assertEquals(List.of(
+                        new Occurrence("/paths/~1orders", "/orders", "shares a root with 2 paths"),
+                        new Occurrence("/paths/~1orders~1{id}", "/orders/{id}", "shares a root with 2 paths")),
+                runtime.execute(source, api, Map.of("parameters", Map.of())));
+    }
+
     private static Map<String, Object> api(String content) {
         return OpenApiMapAdapter.toMap(new OpenAPIV3Parser().readContents(content, null, new ParseOptions()).getOpenAPI());
     }

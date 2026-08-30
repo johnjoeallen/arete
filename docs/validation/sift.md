@@ -103,7 +103,9 @@ Notes:
   identifiers).
 - **list** `[int]` → that element; negative indexes count from the end;
   out-of-range yields `null`.
-- **string** `[name]` → same as `value.name`.
+- **string** `[key]` → same as `value.name`, so only `s["length"]` is
+  meaningful; strings are **not** indexable by character position (`s[0]` is
+  `null`). Use `s.startsWith(...)` / regex instead.
 
 ## Methods
 
@@ -133,6 +135,7 @@ appear in trailing position.
 | `xs.all { x -> ... }` | `true` if the closure is truthy for every item |
 | `xs.find { x -> ... }` | first matching item, or `null` |
 | `xs.count { x -> ... }` | number of matching items |
+| `xs.groupBy { x -> key }` | a map of key → list of items with that key, in first-seen key order (keys compared by string value); iterate it with `.values` |
 | `xs.toList()` | shallow copy |
 
 `expand` is the Sift form of a nested loop:
@@ -207,6 +210,7 @@ Each row is a complete expression and the value it produces.
 | `last(["a", "b"])` &nbsp; `last([])` | `"b"` &nbsp; `""` |
 | `"Order-1" ==~ /[A-Za-z]+-[0-9]+/` | `true` |
 | `enumerate(["a", "b"]).map { p -> p[0] + "=" + p[1] }` | `["0=a", "1=b"]` |
+| `["ax", "ay", "bz"].groupBy { s -> s.startsWith("a") }.values` | `[["ax", "ay"], ["bz"]]` |
 
 ### Detectors
 
@@ -282,19 +286,24 @@ info: { title: Payments, version: 1.0.0 }
 /info/title  |  Payments  |  Title should end with 'API'
 ```
 
-**Duplicate `operationId`** — the "seen already?" scan, with no accumulator.
-`e` is `[index, [pointer, location, operationId]]`.
+**Duplicate `operationId`** — group by id, then report every operation after
+the first in a group. This is the `operation-metadata` detector's real
+`unique-operation-id` shape (blank-id handling elided). `group` is a list of
+`[pointer, location, operationId]` entries; `enumerate` supplies the index so
+the first entry can be skipped.
 
 ```java
 sift(api, rule) {
-    return enumerate(api.paths.expand { path -> path.operationDetails.map { op ->
-            [op.pointer, op.method + " " + path.path, op.operationId] } })
-        .filter { e -> e[1][2] != null
-            && enumerate(api.paths.expand { path -> path.operationDetails.map { op ->
-                    [op.pointer, op.method + " " + path.path, op.operationId] } })
-                .any { earlier -> earlier[0] < e[0] && earlier[1][2] == e[1][2] } }
-        .map { e -> occurrence(e[1][0], e[1][1],
-            "operationId '" + e[1][2] + "' is already used") };
+    return api.paths
+        .expand { path -> path.operationDetails.map { op ->
+            [op.pointer, op.method + " " + path.path, op.operationId] } }
+        .groupBy { entry -> "" + entry[2] }
+        .values
+        .filter { group -> size(group) > 1 }
+        .expand { group -> enumerate(group)
+            .filter { indexed -> indexed[0] > 0 }
+            .map { indexed -> occurrence(indexed[1][0], indexed[1][1],
+                "operationId '" + group[0][2] + "' is also used by " + group[0][1]) } };
 }
 ```
 
@@ -306,7 +315,7 @@ paths:
 ```
 
 ```
-/paths/~1orders~1{id}/put  |  PUT /orders/{id}  |  operationId 'getOrder' is already used
+/paths/~1orders~1{id}/put  |  PUT /orders/{id}  |  operationId 'getOrder' is also used by GET /orders/{id}
 ```
 
 ## Idioms
@@ -336,15 +345,11 @@ sift(api, rule) {
 }
 ```
 
-**"Seen already?" without an accumulator.** Scan `enumerate(...)` for an
-earlier entry that matches — this replaces a mutable `seen` set:
-
-```java
-enumerate(entries).expand { pair ->
-    enumerate(entries).find { earlier -> earlier[0] < pair[0] && earlier[1].key == pair[1].key } == null
-        ? []
-        : [occurrence(pair[1].pointer, pair[1].loc, "Duplicate of an earlier entry")] }
-```
+**"Seen already?" — group, don't accumulate.** `groupBy` replaces a mutable
+`seen` map: group the entries by their key, keep the groups with more than one
+member, and report all but the first (see the duplicate-`operationId` example
+above). `enumerate` then supplies the positional "all but the first" filter,
+`indexed[0] > 0`. This is O(n) and needs no repetition.
 
 **List building.** Concatenate independent checks with `+`:
 
@@ -355,7 +360,7 @@ info.extensionKeys.filter { k -> ... }.map { k -> occurrence(...) }
 
 ## Coverage
 
-All 45 bundled detectors ship a `Detector.sift`. The two that need a running
-accumulator — `operation-metadata` (duplicate `operationId`) and
-`response-example` (duplicate error payloads) — use the `enumerate(...)` scan
-shown above. `path-count` uses `pathSegments(...)` to stay within the grammar.
+All 45 bundled detectors ship a `Detector.sift`. The two "uniqueness" rules —
+`operation-metadata` (duplicate `operationId`) and `response-example`
+(duplicate error payloads) — use `groupBy` as shown above. `path-count` uses
+`pathSegments(...)` to stay within the grammar.

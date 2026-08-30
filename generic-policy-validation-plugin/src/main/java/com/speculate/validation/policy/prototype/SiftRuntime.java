@@ -109,6 +109,15 @@ public final class SiftRuntime {
                 case "all" -> values.stream().allMatch(value -> truthy(closure.apply(value)));
                 case "find" -> values.stream().filter(value -> truthy(closure.apply(value))).findFirst().orElse(null);
                 case "count" -> values.stream().filter(value -> truthy(closure.apply(value))).count();
+                case "groupBy" -> {
+                    // key -> items with that key, in first-seen key order. Keys are
+                    // compared by string value, matching distinct().
+                    Map<String, List<Object>> groups = new LinkedHashMap<>();
+                    for (Object value : values) {
+                        groups.computeIfAbsent(String.valueOf(closure.apply(value)), k -> new ArrayList<>()).add(value);
+                    }
+                    yield groups;
+                }
                 case "toList" -> List.copyOf(values);
                 default -> throw new IllegalArgumentException("unknown sequence operation: " + name);
             };

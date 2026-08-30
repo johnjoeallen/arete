@@ -171,7 +171,8 @@ pins every `Detector.sift` to its `Detector.star`, and `GroovyStarlarkParityTest
 sweeps every bundle rule against both other runtimes so a `Detector.groovy` can
 never drift from its Starlark twin.
 
-**All 45 bundled detectors ship a `Detector.sift`.** The two that need a
-running accumulator (`operation-metadata`'s duplicate-`operationId` check,
-`response-example`'s duplicate-payload check) express it by scanning
-`enumerate(...)` for an earlier matching entry rather than mutating state.
+**All 45 bundled detectors ship a `Detector.sift`.** The two "uniqueness"
+checks (`operation-metadata`'s duplicate-`operationId`, `response-example`'s
+duplicate-payload) use `.groupBy { … }` — group the entries by key, keep the
+groups with more than one member, report all but the first — rather than
+mutating a `seen` map.

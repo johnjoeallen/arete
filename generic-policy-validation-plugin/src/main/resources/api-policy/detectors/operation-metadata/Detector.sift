@@ -1,28 +1,25 @@
 sift(api, rule) {
-    return rule.parameters["check"] == "unique-operation-id"
-        ? enumerate(api.paths.expand { path -> path.operationDetails.map { operation ->
-                [operation.pointer, operation.method + " " + path.path, operation.operationId] } })
-            .expand { entry ->
-                (entry[1][2] == null
-                        || (type(entry[1][2]) == "string" && entry[1][2].trim() == ""))
-                    ? [occurrence(entry[1][0], entry[1][1], "Operation has no operationId")]
-                    : (enumerate(api.paths.expand { path -> path.operationDetails.map { operation ->
-                            [operation.pointer, operation.method + " " + path.path, operation.operationId] } })
-                          .find { prior -> prior[0] < entry[0]
-                              && prior[1][2] != null
-                              && ("" + prior[1][2]) == ("" + entry[1][2]) } == null
-                        ? []
-                        : [occurrence(entry[1][0], entry[1][1],
-                            "operationId '" + entry[1][2] + "' is also used by "
-                              + enumerate(api.paths.expand { path -> path.operationDetails.map { operation ->
-                                    [operation.pointer, operation.method + " " + path.path, operation.operationId] } })
-                                  .find { prior -> prior[0] < entry[0]
-                                      && prior[1][2] != null
-                                      && ("" + prior[1][2]) == ("" + entry[1][2]) } [1][1])]) }
-        : rule.parameters["check"] == "tags-present"
+    return rule.parameters["check"] == "tags-present"
         ? api.paths.expand { path -> path.operationDetails
-            .filter { operation -> size(operation.tags) == 0 }
-            .map { operation -> occurrence(operation.pointer, operation.method + " " + path.path,
+            .filter { op -> size(op.tags) == 0 }
+            .map { op -> occurrence(op.pointer, op.method + " " + path.path,
                 "Operation is not assigned any tag") } }
+        : rule.parameters["check"] == "unique-operation-id"
+        ? api.paths
+            .expand { path -> path.operationDetails.map { op ->
+                [op.pointer, op.method + " " + path.path, op.operationId] } }
+            .groupBy { entry -> "" + entry[2] }
+            .values
+            .expand { group ->
+                (group[0][2] == null
+                        || (type(group[0][2]) == "string" && group[0][2].trim() == ""))
+                    ? group.map { entry -> occurrence(entry[0], entry[1],
+                        "Operation has no operationId") }
+                    : (size(group) > 1
+                        ? enumerate(group)
+                            .filter { indexed -> indexed[0] > 0 }
+                            .map { indexed -> occurrence(indexed[1][0], indexed[1][1],
+                                "operationId '" + group[0][2] + "' is also used by " + group[0][1]) }
+                        : []) }
         : [];
 }
