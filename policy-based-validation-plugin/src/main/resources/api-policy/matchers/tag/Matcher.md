@@ -7,7 +7,7 @@ parameters:
   check:
     type: enum
     required: true
-    values: [name-convention, documented, declared]
+    values: [name-convention, documented, declared, unique]
   convention:
     type: enum
     required: false
@@ -24,3 +24,6 @@ referenced by operations.
 - `documented` — reports a top-level `tags` entry with no `description`.
 - `declared` — reports a tag name used by an operation that is not defined in
   the top-level `tags` list.
+- `unique` — reports a top-level `tags` entry whose `name` is the same as an
+  earlier entry's. The first entry is left alone; each later duplicate is
+  reported.

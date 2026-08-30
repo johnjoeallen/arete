@@ -149,6 +149,15 @@ rules:
   DOC017: rules/DOC017.md
   DOC018: rules/DOC018.md
   STANDARD024: rules/STANDARD024.md
+  JSON023: rules/JSON023.md
+  SECURITY003: rules/SECURITY003.md
+  SECURITY004: rules/SECURITY004.md
+  STANDARD025: rules/STANDARD025.md
+  STANDARD026: rules/STANDARD026.md
+  STANDARD027: rules/STANDARD027.md
+  STANDARD028: rules/STANDARD028.md
+  DOC019: rules/DOC019.md
+  DOC020: rules/DOC020.md
 
 policies:
   "Enterprise Grade": policies/EnterpriseGrade.md
@@ -204,3 +213,7 @@ matchers:
   path-prefix: matchers/path-prefix/Matcher.md
   tag: matchers/tag/Matcher.md
   component-usage: matchers/component-usage/Matcher.md
+  array-items: matchers/array-items/Matcher.md
+  security-scheme: matchers/security-scheme/Matcher.md
+  path-syntax: matchers/path-syntax/Matcher.md
+  markdown-safety: matchers/markdown-safety/Matcher.md

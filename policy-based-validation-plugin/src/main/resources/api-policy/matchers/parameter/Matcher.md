@@ -7,7 +7,7 @@ parameters:
   check:
     type: enum
     required: true
-    values: [max-count, path-required, template-match, schema-present]
+    values: [max-count, path-required, template-match, schema-present, unique]
   maximum:
     type: integer
     required: false
@@ -25,3 +25,7 @@ Inspects the operation and path parameters declared in the contract.
   in the path template, and a `{placeholder}` with no matching path parameter.
 - `schema-present` — reports a parameter that declares neither `schema` nor
   `content`.
+- `unique` — reports a parameter whose `name` + `in` pair is declared more
+  than once on the same operation (counting path-level and operation-level
+  parameters together). The first declaration is left alone; each later
+  duplicate is reported.

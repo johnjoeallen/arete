@@ -4,6 +4,15 @@ distill(api, rule) {
             .filter { t -> t.description is blank }
             .map { t -> occurrence(t.pointer, t.name,
                 "Tag '" + t.name + "' has no description") }
+    : rule.parameters["check"] == "unique"
+        ? api.tags
+            .group { t -> t.name }
+            .values
+            .filter { dupes -> size(dupes) > 1 }
+            .expand { dupes -> enumerate(dupes)
+                .filter { indexed -> indexed[0] > 0 }
+                .map { indexed -> occurrence(indexed[1].pointer, indexed[1].name,
+                    "Tag '" + dupes[0].name + "' is declared more than once") } }
     : rule.parameters["check"] == "declared"
         ? distinct(api.paths.expand { p -> p.operationDetails.expand { op -> op.tags } })
             .filter { name -> !api.tags.any { t -> t.name == name } }

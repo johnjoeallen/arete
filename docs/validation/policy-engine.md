@@ -137,6 +137,9 @@ objects. A matcher sees data like this:
     "version": "1.0.0",
     "contactName": null,
     "contactEmail": null,
+    "contactUrl": null,
+    "licenseName": "Apache-2.0",
+    "licenseUrl": "https://www.apache.org/licenses/LICENSE-2.0",
     "openapiVersion": "3.0.0",
     "apiId": null,
     "audience": null,
@@ -144,7 +147,9 @@ objects. A matcher sees data like this:
   },
   "servers": ["https://api.example.com/v1"],
   "tags": [{"name": "Books", "description": "Book catalogue operations", "pointer": "/tags/0"}],
+  "components": {"securitySchemes": ["bearerAuth"]},
   "security": null,
+  "descriptions": [{"pointer": "/info", "text": "Books and authors"}],
   "lint": {"parserMessages": [], "numericStatusKeys": [], "refs": ["#/components/schemas/Book"]},
   "paths": [
     {
@@ -206,6 +211,7 @@ objects. A matcher sees data like this:
       "pointer": "/components/schemas/Book",
       "type": "object",
       "array": false,
+      "itemsPresent": false,
       "maxItems": null,
       "description": "A book",
       "examplePresent": false,
@@ -224,9 +230,12 @@ The example shows the main nesting used by matchers; collections such as
 schemas, properties, parameters, responses, and headers expose the additional
 fields described by their corresponding objects. `operationDetails[].security`
 is `null` unless the operation overrides the global requirement. `api.tags` is
-the top-level `tags` list; `api.lint.refs` is every `$ref` target found in the
-raw document. JSON Pointers are pre-escaped and safe to return verbatim as
-`pointer`.
+the top-level `tags` list, `api.components.securitySchemes` the declared
+security-scheme names, and `api.descriptions` a flat `{pointer, text}` list of
+every `description` / `summary` in the document; `api.lint.refs` is every
+`$ref` target found in the raw document. Array-typed schemas and properties
+carry an `itemsPresent` flag. JSON Pointers are pre-escaped and safe to return
+verbatim as `pointer`.
 
 ### Writing a matcher
 

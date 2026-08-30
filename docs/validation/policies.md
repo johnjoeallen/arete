@@ -16,7 +16,7 @@ effectiveScore = 0 if any PROHIBITED rule matched, else qualityScore
 
 The default policy: it enables every generally-applicable bundled rule, with a few rule parameters calibrated for a typical enterprise API (allow-listed proprietary headers, expected OAuth2 scopes, standard rate-limit headers).
 
-- **101** rules active
+- **109** rules active
 
 Parameter overrides:
 
@@ -26,7 +26,7 @@ Parameter overrides:
 | `STANDARD008` | `allowed` = `X-Request-Id,X-Correlation-Id,X-Trace-Id` |
 | `STATUS007` | `headers` = `RateLimit-Limit,RateLimit-Remaining` |
 
-??? example "All 101 rules in Enterprise Grade"
+??? example "All 109 rules in Enterprise Grade"
 
     | Rule | Disposition | Title |
     |---|---|---|
@@ -131,6 +131,14 @@ Parameter overrides:
     | `JSON020` | −0.5 | Property example violates its own constraints |
     | `DOC016` | −0.5 | Schema example omits a required field |
     | `ERROR011` | −0.5 | Error responses share an example payload |
+    | `JSON023` | −0.5 | Array schema declares no items |
+    | `SECURITY003` | −0.5 | Security requirement names an undefined scheme |
+    | `SECURITY004` | −0.5 | Description contains active markup |
+    | `STANDARD025` | −0.5 | Path key contains a query string |
+    | `STANDARD026` | −0.5 | Parameter is declared more than once |
+    | `STANDARD027` | −0.5 | Server URL has a trailing slash |
+    | `DOC019` | −0.5 | Tag is declared more than once |
+    | `DOC020` | −0.5 | API does not declare a license |
 
 ## Zalando
 
@@ -194,7 +202,7 @@ Parameter overrides:
 
 Everything in the `Zalando` policy, plus the checks that were previously only in Zalando's supplementary linter rule pack, reworked as Areté rules.
 
-- **52** rules active
+- **61** rules active
 
 Parameter overrides:
 
@@ -203,7 +211,7 @@ Parameter overrides:
 | `SECURITY002` | `scopes` = `read` |
 | `STANDARD008` | `allowed` = `X-Request-Id,X-Correlation-Id` |
 
-??? example "All 52 rules in Zalando Extended"
+??? example "All 61 rules in Zalando Extended"
 
     | Rule | Disposition | Title |
     |---|---|---|
@@ -258,4 +266,13 @@ Parameter overrides:
     | `DOC018` | −0.5 | Operation uses an undeclared tag |
     | `JSON021` | −0.5 | Numeric property has no minimum and maximum |
     | `JSON022` | −0.5 | String property has no maximum length |
+    | `JSON023` | −0.5 | Array schema declares no items |
     | `REST007` | −0.5 | All paths share a common prefix |
+    | `SECURITY003` | −0.5 | Security requirement names an undefined scheme |
+    | `SECURITY004` | −0.5 | Description contains active markup |
+    | `STANDARD025` | −0.5 | Path key contains a query string |
+    | `STANDARD026` | −0.5 | Parameter is declared more than once |
+    | `STANDARD027` | −0.5 | Server URL has a trailing slash |
+    | `STANDARD028` | −0.5 | Server URL uses a placeholder host |
+    | `DOC019` | −0.5 | Tag is declared more than once |
+    | `DOC020` | −0.5 | API does not declare a license |

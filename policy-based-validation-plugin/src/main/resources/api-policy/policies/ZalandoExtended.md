@@ -58,7 +58,16 @@ rules:
   DOC018: 0.5
   JSON021: 0.5
   JSON022: 0.5
+  JSON023: 0.5
   REST007: 0.5
+  SECURITY003: 0.5
+  SECURITY004: 0.5
+  STANDARD025: 0.5
+  STANDARD026: 0.5
+  STANDARD027: 0.5
+  STANDARD028: 0.5
+  DOC019: 0.5
+  DOC020: 0.5
 ---
 
 # Zalando Extended Policy
@@ -80,3 +89,13 @@ The additions are:
   (`DOC017`, `DOC018`);
 - structural advice — a shared path prefix belongs in the server URL
   (`REST007`).
+
+It also carries the stricter validity and safety checks derived from
+Spectral's OpenAPI ruleset: array schemas must declare `items` (`JSON023`),
+`security` requirements must name a defined scheme (`SECURITY003`),
+descriptions must not contain active markup (`SECURITY004`), path keys must
+not contain a query string
+(`STANDARD025`), parameters must not be duplicated (`STANDARD026`), server
+URLs must not end in `/` (`STANDARD027`) or use an `example.com` placeholder
+(`STANDARD028`), tags must not be declared twice (`DOC019`), and the API must
+declare a license (`DOC020`).

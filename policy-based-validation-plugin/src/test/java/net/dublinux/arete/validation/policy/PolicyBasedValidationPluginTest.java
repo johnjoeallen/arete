@@ -118,12 +118,12 @@ class PolicyBasedValidationPluginTest {
         ValidationResult result = plugin.validate(input(ACTION_PATH_SPEC));
 
         assertEquals(ValidationResult.Status.SUCCESS, result.getStatus());
-        assertEquals(101, result.getRulesEvaluatedCount());
-        assertEquals(31, result.getDiagnostics().size());
+        assertEquals(109, result.getRulesEvaluatedCount());
+        assertEquals(32, result.getDiagnostics().size());
         assertEquals("REST001", result.getDiagnostics().get(0).getRuleId());
         assertEquals(2, result.getDiagnostics().stream().filter(diagnostic -> diagnostic.getRuleId().equals("REST001")).count());
-        assertEquals(93.0, result.getOverallScore());
-        assertEquals(93.0, result.getOverallScoreWithoutBlockers());
+        assertEquals(92.5, result.getOverallScore());
+        assertEquals(92.5, result.getOverallScoreWithoutBlockers());
         assertEquals(0.5, result.getDiagnostics().get(0).getScoreImprovement());
         assertEquals(0.5, result.getDiagnostics().get(1).getScoreImprovement());
         assertEquals("http://localhost:6809/plugins/generic-policy/rules/REST001",
@@ -140,10 +140,10 @@ class PolicyBasedValidationPluginTest {
         ValidationResult result = plugin.validate(input(COMPLIANT_STARTER_SPEC));
 
         assertEquals(ValidationResult.Status.SUCCESS, result.getStatus());
-        assertEquals(101, result.getRulesEvaluatedCount());
-        assertEquals(18, result.getDiagnostics().size());
+        assertEquals(109, result.getRulesEvaluatedCount());
+        assertEquals(19, result.getDiagnostics().size());
         assertEquals("DOC006", result.getDiagnostics().get(0).getRuleId());
-        assertEquals(95.0, result.getOverallScore());
+        assertEquals(94.5, result.getOverallScore());
     }
 
     @Test
@@ -292,6 +292,56 @@ class PolicyBasedValidationPluginTest {
         assertEquals(1, runtime.execute(bundle.matchers().get("tag"), api, bundle.rules().get("DOC017")).size());
         assertEquals(1, runtime.execute(bundle.matchers().get("tag"), api, bundle.rules().get("DOC018")).size());
         assertEquals(1, runtime.execute(bundle.matchers().get("component-usage"), api, bundle.rules().get("STANDARD024")).size());
+    }
+
+    @Test
+    void spectralDerivedRulesFlagValidityAndSafetyIssues() {
+        String spec = """
+                openapi: 3.0.0
+                info:
+                  title: Test API
+                  version: 1.0.0
+                  description: "Notes <script>alert(1)</script>"
+                servers:
+                  - url: https://api.example.com/v1/
+                tags:
+                  - { name: orders, description: Order operations }
+                  - { name: orders, description: Duplicate }
+                paths:
+                  /orders/{orderId}:
+                    parameters:
+                      - { name: orderId, in: path, required: true, schema: { type: string } }
+                    get:
+                      parameters:
+                        - { name: orderId, in: path, required: true, schema: { type: string } }
+                      security:
+                        - undefinedScheme: []
+                      responses:
+                        '200':
+                          description: OK
+                          content:
+                            application/json:
+                              schema: { $ref: '#/components/schemas/Order' }
+                components:
+                  schemas:
+                    Order:
+                      type: object
+                      properties:
+                        tags: { type: array }
+                """;
+        PolicyBundle bundle = distillBundle();
+        Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
+                .readContents(spec, null, new ParseOptions()).getOpenAPI(), java.util.List.of(), spec);
+        DistillMatcherEvaluator runtime = new DistillMatcherEvaluator();
+
+        assertEquals(1, runtime.execute(bundle.matchers().get("array-items"), api, bundle.rules().get("JSON023")).size(), "JSON023");
+        assertEquals(1, runtime.execute(bundle.matchers().get("security-scheme"), api, bundle.rules().get("SECURITY003")).size(), "SECURITY003");
+        assertEquals(1, runtime.execute(bundle.matchers().get("markdown-safety"), api, bundle.rules().get("SECURITY004")).size(), "SECURITY004");
+        assertEquals(1, runtime.execute(bundle.matchers().get("parameter"), api, bundle.rules().get("STANDARD026")).size(), "STANDARD026");
+        assertEquals(1, runtime.execute(bundle.matchers().get("server-url"), api, bundle.rules().get("STANDARD027")).size(), "STANDARD027");
+        assertEquals(1, runtime.execute(bundle.matchers().get("server-url"), api, bundle.rules().get("STANDARD028")).size(), "STANDARD028");
+        assertEquals(1, runtime.execute(bundle.matchers().get("tag"), api, bundle.rules().get("DOC019")).size(), "DOC019");
+        assertEquals(1, runtime.execute(bundle.matchers().get("metadata"), api, bundle.rules().get("DOC020")).size(), "DOC020");
     }
 
     @Test
@@ -913,11 +963,14 @@ class PolicyBasedValidationPluginTest {
         resources.put("matchers/path-count/Matcher.md", readResource("api-policy/matchers/path-count/Matcher.md"));
         resources.put("policies/Zalando.md", readResource("api-policy/policies/Zalando.md"));
         resources.put("policies/ZalandoExtended.md", readResource("api-policy/policies/ZalandoExtended.md"));
-        for (String matcher : new String[] {"path-prefix", "tag", "component-usage"}) {
+        for (String matcher : new String[] {"path-prefix", "tag", "component-usage",
+                "array-items", "security-scheme", "path-syntax", "markdown-safety"}) {
             resources.put("matchers/" + matcher + "/Matcher.md", readResource("api-policy/matchers/" + matcher + "/Matcher.md"));
             resources.put("matchers/" + matcher + "/Matcher.dsl", readResource("api-policy/matchers/" + matcher + "/Matcher.dsl"));
         }
-        for (String rule : new String[] {"JSON021", "JSON022", "REST007", "CASE008", "DOC017", "DOC018", "STANDARD024"}) {
+        for (String rule : new String[] {"JSON021", "JSON022", "JSON023", "JSON024", "REST007", "CASE008",
+                "DOC017", "DOC018", "DOC019", "DOC020", "STANDARD024", "STANDARD025", "STANDARD026",
+                "STANDARD027", "STANDARD028", "SECURITY003", "SECURITY004"}) {
             resources.put("rules/" + rule + ".md", readResource("api-policy/rules/" + rule + ".md"));
         }
         resources.put("matchers/hostname/Matcher.md", readResource("api-policy/matchers/hostname/Matcher.md"));

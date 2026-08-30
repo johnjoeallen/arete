@@ -19,6 +19,17 @@ distill(api, rule) {
                 .map { param -> occurrence(param.pointer,
                     operation.method + " " + path.path + " " + param.name,
                     "Parameter '" + param.name + "' defines neither a schema nor content") }
+        : rule.parameters.check == "unique"
+            ? operation.parameters
+                .group { param -> param.in + " " + param.name }
+                .values
+                .filter { dupes -> size(dupes) > 1 }
+                .expand { dupes -> enumerate(dupes)
+                    .filter { indexed -> indexed[0] > 0 }
+                    .map { indexed -> occurrence(indexed[1].pointer,
+                        operation.method + " " + path.path + " " + indexed[1].name,
+                        "Parameter '" + dupes[0].name + "' in " + dupes[0].in
+                            + " is declared more than once") } }
         : rule.parameters.check == "template-match"
             ? operation.parameters
                 .filter { param -> param.in == "path"
