@@ -1,47 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-         <loc>https://johnjoeallen.github.io/speculate/0.1/</loc>
+         <loc>https://johnjoeallen.github.io/arete/0.1/</loc>
          <lastmod>2026-08-30</lastmod>
     </url>
     <url>
-         <loc>https://johnjoeallen.github.io/speculate/0.1/configuration/</loc>
+         <loc>https://johnjoeallen.github.io/arete/0.1/configuration/</loc>
          <lastmod>2026-08-30</lastmod>
     </url>
     <url>
-         <loc>https://johnjoeallen.github.io/speculate/0.1/getting-started/</loc>
+         <loc>https://johnjoeallen.github.io/arete/0.1/getting-started/</loc>
          <lastmod>2026-08-30</lastmod>
     </url>
     <url>
-         <loc>https://johnjoeallen.github.io/speculate/0.1/releasing/</loc>
+         <loc>https://johnjoeallen.github.io/arete/0.1/releasing/</loc>
          <lastmod>2026-08-30</lastmod>
     </url>
     <url>
-         <loc>https://johnjoeallen.github.io/speculate/0.1/validation/</loc>
+         <loc>https://johnjoeallen.github.io/arete/0.1/validation/</loc>
          <lastmod>2026-08-30</lastmod>
     </url>
     <url>
-         <loc>https://johnjoeallen.github.io/speculate/0.1/validation/detector-languages/</loc>
+         <loc>https://johnjoeallen.github.io/arete/0.1/validation/distill/</loc>
          <lastmod>2026-08-30</lastmod>
     </url>
     <url>
-         <loc>https://johnjoeallen.github.io/speculate/0.1/validation/policies/</loc>
+         <loc>https://johnjoeallen.github.io/arete/0.1/validation/policies/</loc>
          <lastmod>2026-08-30</lastmod>
     </url>
     <url>
-         <loc>https://johnjoeallen.github.io/speculate/0.1/validation/policy-engine/</loc>
+         <loc>https://johnjoeallen.github.io/arete/0.1/validation/policy-engine/</loc>
          <lastmod>2026-08-30</lastmod>
     </url>
     <url>
-         <loc>https://johnjoeallen.github.io/speculate/0.1/validation/rules/</loc>
+         <loc>https://johnjoeallen.github.io/arete/0.1/validation/rule-languages/</loc>
          <lastmod>2026-08-30</lastmod>
     </url>
     <url>
-         <loc>https://johnjoeallen.github.io/speculate/0.1/validation/sift/</loc>
+         <loc>https://johnjoeallen.github.io/arete/0.1/validation/rules/</loc>
          <lastmod>2026-08-30</lastmod>
     </url>
     <url>
-         <loc>https://johnjoeallen.github.io/speculate/0.1/validation/writing-a-plugin/</loc>
+         <loc>https://johnjoeallen.github.io/arete/0.1/validation/writing-a-plugin/</loc>
          <lastmod>2026-08-30</lastmod>
     </url>
 </urlset>

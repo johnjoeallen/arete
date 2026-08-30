@@ -1,4 +1,4 @@
-/* Speculate logo to the left of every page's top-level heading. */
+/* Areté logo to the left of every page's top-level heading. */
 .md-typeset h1::before {
   content: "";
   display: inline-block;
