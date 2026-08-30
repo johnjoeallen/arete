@@ -1,0 +1,1243 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Local-first API explorer for OpenAPI/Swagger specs with pluggable, policy-driven validation.">
+      
+      
+      
+        <link rel="canonical" href="https://johnjoeallen.github.io/arete/0.1/validation/rule-documentation-review/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Rule documentation review - Areté</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#rule-documentation-review" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Areté" class="md-header__button md-logo" aria-label="Areté" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Areté
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Rule documentation review
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/johnjoeallen/arete" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    johnjoeallen/arete
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Areté" class="md-nav__button md-logo" aria-label="Areté" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    Areté
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/johnjoeallen/arete" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    johnjoeallen/arete
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../history/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    History
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Validation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../policy-engine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Areté Policy Engine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../distill/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Distill reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rule Catalogue
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../policies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Policies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../writing-a-plugin/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Writing a Plugin
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../releasing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Releasing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../publishing-spi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Publishing the SPI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#scope" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Scope
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rating-scale" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Rating scale
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#initial-review-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Initial review summary
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#remediation-status" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Remediation status
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#current-rescan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Current rescan
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#per-rule-ratings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per-rule ratings
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Per-rule ratings">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-complete" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A — complete
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b-mostly-complete" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        B — mostly complete
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#c-partial-or-intentionally-limited" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        C — partial or intentionally limited
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#d-rated-rules-addressed-in-the-first-remediation-pass" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        D-rated rules addressed in the first remediation pass
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sample-correctness-findings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sample correctness findings
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#specification-correctness-observations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Specification correctness observations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#remaining-improvement-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Remaining improvement order
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#review-limitation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Review limitation
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/johnjoeallen/arete/edit/main/docs/validation/rule-documentation-review.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="rule-documentation-review">Rule documentation review<a class="headerlink" href="#rule-documentation-review" title="Permanent link">&para;</a></h1>
+<h2 id="scope">Scope<a class="headerlink" href="#scope" title="Permanent link">&para;</a></h2>
+<p>This review covers all 146 rule documents under
+<code>policy-based-validation-plugin/src/main/resources/api-policy/rules/</code>.</p>
+<p>The review assesses documentation, not the desirability of the rule itself. A
+rule can be well documented while still being a heuristic, a future capability,
+or a policy decision that an organisation may choose not to enable.</p>
+<p>The review checked the rule metadata against its matcher, the explanation of
+the rule, the detection/scope description, the explanation of parameters and
+limitations, and the presence and apparent intent of violation and compliant
+examples. Examples were checked as OpenAPI fragments and against the matcher
+semantics where that could be established statically. They are not all complete
+standalone OpenAPI documents, so a fragment must be placed at the documented
+location before it can be parsed as a complete specification.</p>
+<h2 id="rating-scale">Rating scale<a class="headerlink" href="#rating-scale" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Rating</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>A</strong></td>
+<td>Complete explanation, detection and scope, useful violation example, useful compliant example, and limitations/parameters. The examples appear consistent with the rule.</td>
+</tr>
+<tr>
+<td><strong>B</strong></td>
+<td>Substantively useful and mostly correct, but missing one documentation element, usually an explicit intent section, a separately labelled compliant example, or fuller parameter guidance.</td>
+</tr>
+<tr>
+<td><strong>C</strong></td>
+<td>Partial documentation. Either the rule is intentionally comparison-mode/no-op and needs special treatment, or it has only one side of the example story or limited detection guidance.</td>
+</tr>
+<tr>
+<td><strong>D</strong></td>
+<td>Inadequate for users. Usually only a title, short explanation, and an unlabelled/compliant fragment; the reader cannot reliably tell what violation to create or what a correct specification looks like.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="initial-review-summary">Initial review summary<a class="headerlink" href="#initial-review-summary" title="Permanent link">&para;</a></h2>
+<p>The following was the state before the remediation pass described below.</p>
+<table>
+<thead>
+<tr>
+<th>Rating</th>
+<th>Rules</th>
+<th style="text-align: right;">Count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>Complete</td>
+<td style="text-align: right;">56</td>
+</tr>
+<tr>
+<td>B</td>
+<td>Mostly complete</td>
+<td style="text-align: right;">44</td>
+</tr>
+<tr>
+<td>C</td>
+<td>Partial or intentionally limited</td>
+<td style="text-align: right;">11</td>
+</tr>
+<tr>
+<td>D</td>
+<td>Needs documentation work</td>
+<td style="text-align: right;">35</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td></td>
+<td style="text-align: right;"><strong>146</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The most important initial issue was the 35 D-rated documents. They were not
+necessarily wrong implementations, but they did not give a developer enough
+information to construct a failing specification, understand the matching
+boundary, and then repair it confidently.</p>
+<h2 id="remediation-status">Remediation status<a class="headerlink" href="#remediation-status" title="Permanent link">&para;</a></h2>
+<p>The first remediation pass has now completed for all 35 initially D-rated
+documents. Each has explicit detection/scope, a review-candidate example, a
+compliant example, and configuration/limitation guidance. The misleading
+examples identified below were also corrected.</p>
+<p>A follow-up structural scan reports:</p>
+<ul>
+<li>146 of 146 rule documents contain fenced examples;</li>
+<li>146 of 146 contain detection/scope guidance;</li>
+<li>146 of 146 contain both review-candidate and compliant-example guidance;</li>
+<li>0 documents remain D-rated under the original structural rubric.</li>
+</ul>
+<p>The remaining B and C ratings are quality improvements rather than missing
+minimum documentation.</p>
+<h2 id="current-rescan">Current rescan<a class="headerlink" href="#current-rescan" title="Permanent link">&para;</a></h2>
+<p>The current rule bundle contains 155 documents. A fresh scan of all 155
+documents after the B-rating remediation now reports:</p>
+<table>
+<thead>
+<tr>
+<th>Rating</th>
+<th style="text-align: right;">Count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td style="text-align: right;">155</td>
+</tr>
+<tr>
+<td>B</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td>C</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td>D</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td style="text-align: right;"><strong>155</strong></td>
+</tr>
+</tbody>
+</table>
+<p>All 155 documents now contain the core documentation sections and at least one
+fenced example. Additional rules found in the rescan include
+<code>DOC019</code>, <code>DOC020</code>, <code>JSON023</code>, <code>JSON024</code>, <code>SECURITY003</code>, <code>SECURITY004</code>, and
+<code>STANDARD025</code>–<code>STANDARD028</code>; all are currently rated A.</p>
+<p>The six compatibility rules (<code>COMPAT001</code>–<code>COMPAT006</code>) now include explicit
+baseline/proposed comparison shapes while still stating that the current
+implementation does not execute those comparisons. This keeps the examples
+useful without presenting future capability as current runtime behaviour.</p>
+<h2 id="per-rule-ratings">Per-rule ratings<a class="headerlink" href="#per-rule-ratings" title="Permanent link">&para;</a></h2>
+<h3 id="a-complete">A — complete<a class="headerlink" href="#a-complete" title="Permanent link">&para;</a></h3>
+<p>These documents explain the concern, describe how it is detected, show the
+review-candidate and compliant cases, and document limitations or parameters.</p>
+<p><code>BULK003</code>, <code>CASE001</code>, <code>CASE002</code>, <code>CASE003</code>, <code>CASE004</code>, <code>CASE005</code>, <code>DOC003</code>,
+<code>DOC009</code>, <code>DOC017</code>, <code>DOC018</code>, <code>HTTP001</code>, <code>HTTP002</code>, <code>HTTP003</code>, <code>HTTP004</code>,
+<code>HTTP005</code>, <code>HTTP006</code>, <code>JSON003</code>, <code>JSON004</code>, <code>JSON006</code>, <code>JSON007</code>, <code>JSON009</code>,
+<code>JSON010</code>, <code>JSON011</code>, <code>JSON012</code>, <code>JSON013</code>, <code>JSON014</code>, <code>JSON015</code>, <code>JSON021</code>,
+<code>JSON022</code>, <code>REST001</code>, <code>REST002</code>, <code>REST003</code>, <code>REST004</code>, <code>REST005</code>, <code>REST006</code>,
+<code>REST007</code>, <code>STANDARD001</code>, <code>STANDARD002</code>, <code>STANDARD003</code>, <code>STANDARD004</code>,
+<code>STANDARD005</code>, <code>STANDARD006</code>, <code>STANDARD007</code>, <code>STATUS001</code>, <code>STATUS002</code>,
+<code>STATUS003</code>, <code>STATUS004</code>, <code>STATUS005</code>, <code>STATUS006</code>, <code>UPDATE001</code>, <code>UPDATE002</code>,
+<code>UPDATE003</code>, <code>VERSION001</code>, <code>VERSION002</code>, <code>VERSION003</code>, <code>VERSION004</code>.</p>
+<p>These are the current documentation exemplars. New rules should follow their
+structure, especially the separation between detection, violation example,
+compliant example, and limitations.</p>
+<h3 id="b-mostly-complete">B — mostly complete<a class="headerlink" href="#b-mostly-complete" title="Permanent link">&para;</a></h3>
+<p>These documents are usable, but each needs a focused improvement before it is a
+model rule document. The common omissions are an explicit intent explanation,
+an explicit compliant example, or a fuller explanation of the rule boundary.</p>
+<p><code>BULK001</code>, <code>BULK002</code>, <code>CASE006</code>, <code>CASE007</code>, <code>DOC001</code>, <code>DOC002</code>, <code>DOC004</code>,
+<code>DOC005</code>, <code>DOC006</code>, <code>DOC010</code>, <code>DOC011</code>, <code>DOC012</code>, <code>DOC013</code>, <code>DOC014</code>, <code>DOC015</code>,
+<code>DOC016</code>, <code>ERROR011</code>, <code>HTTP009</code>, <code>JSON016</code>, <code>JSON017</code>, <code>JSON018</code>, <code>JSON019</code>,
+<code>JSON020</code>, <code>SEC009</code>, <code>SECURITY001</code>, <code>SECURITY002</code>, <code>STANDARD008</code>, <code>STANDARD009</code>,
+<code>STANDARD010</code>, <code>STANDARD011</code>, <code>STANDARD012</code>, <code>STANDARD013</code>, <code>STANDARD014</code>,
+<code>STANDARD015</code>, <code>STANDARD016</code>, <code>STANDARD017</code>, <code>STANDARD018</code>, <code>STANDARD019</code>,
+<code>STANDARD020</code>, <code>STANDARD021</code>, <code>STANDARD022</code>, <code>STANDARD023</code>, <code>STATUS007</code>,
+<code>STATUS008</code>.</p>
+<p>Recommended treatment:</p>
+<ul>
+<li>Add a short <code>## Intent</code> section where the document starts directly with
+  detection.</li>
+<li>Label every code sample as either a review candidate/violation or compliant.</li>
+<li>For compact rules, add one sentence describing what the matcher ignores.</li>
+<li>For rules with parameters, state the exact accepted values and comparison
+  boundary, not only the configured value used by the bundled rule.</li>
+</ul>
+<h3 id="c-partial-or-intentionally-limited">C — partial or intentionally limited<a class="headerlink" href="#c-partial-or-intentionally-limited" title="Permanent link">&para;</a></h3>
+<p><code>COMPAT001</code>–<code>COMPAT006</code> are correctly documented as future comparison-mode
+capabilities that cannot produce a finding from one current document. They do
+not need a false “compliant current specification” example. They do need a
+concrete old/new pair once baseline comparison is implemented.</p>
+<p><code>HTTP008</code> is correctly documented as a current no-op. It should remain explicit
+about that status and should not be presented as an active compliance check.</p>
+<p>The remaining C-rated documents need ordinary completion:</p>
+<ul>
+<li><code>CASE008</code> has a violation example but no separately labelled compliant example.</li>
+<li><code>DOC007</code> and <code>DOC008</code> have examples but use an <code>Examples</code> heading rather than
+  clearly separating the review candidate and compliant specification.</li>
+<li><code>STANDARD024</code> has a good violation example but no compliant example.</li>
+</ul>
+<h2 id="d-rated-rules-addressed-in-the-first-remediation-pass">D-rated rules addressed in the first remediation pass<a class="headerlink" href="#d-rated-rules-addressed-in-the-first-remediation-pass" title="Permanent link">&para;</a></h2>
+<p>The following documents need substantial documentation improvement:</p>
+<p><code>CONTENT001</code>, <code>CONTENT002</code>, <code>CONTENT003</code>, <code>CONTENT004</code>, <code>ERROR001</code>, <code>ERROR002</code>,
+<code>ERROR003</code>, <code>ERROR004</code>, <code>ERROR005</code>, <code>ERROR006</code>, <code>ERROR007</code>, <code>ERROR008</code>,
+<code>ERROR009</code>, <code>ERROR010</code>, <code>FIELD001</code>, <code>FILTER001</code>, <code>FILTER002</code>, <code>PAGE001</code>,
+<code>PAGE002</code>, <code>PAGE003</code>, <code>PAGE004</code>, <code>PAGE005</code>, <code>PAGE006</code>, <code>SEC001</code>, <code>SEC002</code>,
+<code>SEC003</code>, <code>SEC004</code>, <code>SEC005</code>, <code>SEC006</code>, <code>SEC007</code>, <code>SEC008</code>, <code>SORT001</code>,
+<code>SORT002</code>, <code>SORT003</code>, <code>SORT004</code>.</p>
+<p>These documents initially contained only front matter, a title, and a short
+description. Some included a single code fragment, but it was not labelled and
+often showed the correct condition rather than the violation. The first pass
+added the following to each one:</p>
+<ol>
+<li>Intent — why the API practice matters.</li>
+<li>Detection and scope — exactly which object is inspected and which objects are
+   ignored.</li>
+<li>Review-candidate example — a minimal fragment that definitely produces a
+   finding.</li>
+<li>Compliant example — the smallest repair that does not produce a finding.</li>
+<li>Parameters, references, and limitations — including case sensitivity,
+   inheritance, <code>$ref</code> handling, and known false positives where relevant.</li>
+</ol>
+<h2 id="sample-correctness-findings">Sample correctness findings<a class="headerlink" href="#sample-correctness-findings" title="Permanent link">&para;</a></h2>
+<p>The following samples are not suitable as violation examples. They show the
+condition the rule asks for, so they should either be labelled <strong>Compliant
+example</strong> or replaced with a deliberately failing fragment.</p>
+<table>
+<thead>
+<tr>
+<th>Rules</th>
+<th>Current sample problem</th>
+<th>Required correction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ERROR001</code>–<code>ERROR003</code></td>
+<td>The snippets show a success, client-error, or server-error response, which is the condition required by the rule.</td>
+<td>Add an operation with the relevant response class absent, then retain the current snippet as the compliant example.</td>
+</tr>
+<tr>
+<td><code>ERROR004</code></td>
+<td>The sample includes <code>description: Invalid request</code>, so it does not demonstrate a missing description.</td>
+<td>Use a <code>400</code> or <code>500</code> response without <code>description</code>; keep the current sample as compliant.</td>
+</tr>
+<tr>
+<td><code>ERROR005</code></td>
+<td>The sample declares <code>application/problem+json</code>, so it satisfies the rule.</td>
+<td>Show an error response with another media type or no content, then retain the current sample as compliant.</td>
+</tr>
+<tr>
+<td><code>ERROR006</code></td>
+<td>The sample includes <code>WWW-Authenticate</code>, so it satisfies the rule.</td>
+<td>Show a <code>401</code> response without that header.</td>
+</tr>
+<tr>
+<td><code>ERROR007</code></td>
+<td>The sample includes <code>Allow</code>, so it satisfies the rule.</td>
+<td>Show a <code>405</code> response without <code>Allow</code>.</td>
+</tr>
+<tr>
+<td><code>ERROR008</code>–<code>ERROR009</code></td>
+<td>The samples show the required <code>401</code>/<code>403</code> response, so they are compliant.</td>
+<td>Show a secured operation missing the required response and retain the current response snippets as compliant.</td>
+</tr>
+<tr>
+<td><code>ERROR010</code></td>
+<td>The sample has no <code>WWW-Authenticate</code> header, so it is compliant with the prohibition.</td>
+<td>Show a <code>403</code> response that incorrectly includes <code>WWW-Authenticate</code>, then retain the current sample as compliant.</td>
+</tr>
+<tr>
+<td><code>FIELD001</code>, <code>FILTER001</code>, <code>PAGE001</code>, <code>PAGE004</code>, <code>PAGE005</code>, <code>SORT001</code></td>
+<td>Each sample supplies the capability the rule says is missing or invalid.</td>
+<td>Add an operation/parameter/response without the capability as the violation example; label the current fragment compliant.</td>
+</tr>
+<tr>
+<td><code>SEC006</code></td>
+<td><code>customer_id</code> is declared as <code>type: string</code>, so it passes the “must be a string” check.</td>
+<td>Use <code>type: integer</code> for the violation example.</td>
+</tr>
+<tr>
+<td><code>SEC007</code></td>
+<td><code>customer_id</code> declares <code>format: uuid</code>, so it passes the required-format check.</td>
+<td>Omit the format or use a different format for the violation example.</td>
+</tr>
+<tr>
+<td><code>SEC001</code>–<code>SEC005</code>, <code>SEC008</code></td>
+<td>These fragments appear to demonstrate the sensitive-name/search/header condition, but are not labelled.</td>
+<td>Keep them as violation examples and add explicit compliant examples showing a non-sensitive name or reviewed alternative.</td>
+</tr>
+</tbody>
+</table>
+<p><code>FILTER002</code>, <code>PAGE002</code>, <code>PAGE003</code>, <code>PAGE006</code>, <code>SORT002</code>, <code>SORT003</code>, and
+<code>SORT004</code> have no sample at all. Each needs both a wrong representation and a
+correct representation. <code>CONTENT001</code>–<code>CONTENT004</code> likewise need examples for
+missing, wildcard, and disallowed media types.</p>
+<h2 id="specification-correctness-observations">Specification correctness observations<a class="headerlink" href="#specification-correctness-observations" title="Permanent link">&para;</a></h2>
+<p>The samples are mostly intentionally small OpenAPI fragments. That is a good
+format for rule documentation, but every document should say where the fragment
+belongs when it is not obvious. For example:</p>
+<ul>
+<li><code>properties:</code> belongs under a schema object;</li>
+<li><code>parameters:</code> belongs under an operation or path item;</li>
+<li><code>headers:</code> belongs under a response object;</li>
+<li><code>content:</code> belongs under a request body or response;</li>
+<li><code>paths:</code> belongs at the OpenAPI document root.</li>
+</ul>
+<p>The review found no general need to turn every example into a large standalone
+specification. A minimal fragment is clearer, provided it is labelled and its
+insertion point is clear.</p>
+<p>The main correctness risk is semantic rather than YAML syntax: a sample can be
+valid OpenAPI and still be the wrong example for the rule. The rules listed in
+the sample-correction table should be fixed before the catalogue is treated as
+authoritative compliance guidance.</p>
+<h2 id="remaining-improvement-order">Remaining improvement order<a class="headerlink" href="#remaining-improvement-order" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Add executable documentation tests that load each example at its declared
+   insertion point and assert that the violation example matches while the
+   compliant example does not.</li>
+<li>Add explicit compliant examples to <code>CASE008</code> and <code>STANDARD024</code>, and rename
+   ambiguous example headings in <code>DOC007</code> and <code>DOC008</code>.</li>
+<li>Add the missing intent sections to the B-rated rules where the rule is
+   intended for human policy authors rather than only the generated catalogue.</li>
+</ol>
+<h2 id="review-limitation">Review limitation<a class="headerlink" href="#review-limitation" title="Permanent link">&para;</a></h2>
+<p>This was a repository-wide documentation and matcher-semantics review. It did
+not change the rule files or claim that every fragment has been executed as a
+complete OpenAPI document. The next useful step is an example-test harness that
+turns the two examples for each rule into fixtures and evaluates them through
+the same Distill runtime used by the policy engine.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Apache License 2.0
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.top", "content.code.copy", "content.action.edit", "search.suggest", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

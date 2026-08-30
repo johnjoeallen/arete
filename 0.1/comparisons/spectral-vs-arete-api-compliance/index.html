@@ -1,0 +1,1543 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Local-first API explorer for OpenAPI/Swagger specs with pluggable, policy-driven validation.">
+      
+      
+      
+        <link rel="canonical" href="https://johnjoeallen.github.io/arete/0.1/comparisons/spectral-vs-arete-api-compliance/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Spectral and Areté for API compliance - Areté</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#spectral-and-arete-for-api-compliance" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Areté" class="md-header__button md-logo" aria-label="Areté" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Areté
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Spectral and Areté for API compliance
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/johnjoeallen/arete" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    johnjoeallen/arete
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Areté" class="md-nav__button md-logo" aria-label="Areté" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    Areté
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/johnjoeallen/arete" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    johnjoeallen/arete
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../history/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    History
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Validation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../validation/policy-engine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Areté Policy Engine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../validation/distill/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Distill reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../validation/rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rule Catalogue
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../validation/policies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Policies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../validation/writing-a-plugin/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Writing a Plugin
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../releasing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Releasing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../publishing-spi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Publishing the SPI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#executive-conclusion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Executive conclusion
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-api-compliance-includes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What API compliance includes
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#high-level-comparison" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        High-level comparison
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-specification-conformance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Specification conformance
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Specification conformance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#spectral" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Spectral
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arete" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Areté
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-api-design-standards" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. API design standards
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-policy-and-applicability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Policy and applicability
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Policy and applicability">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#spectral_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Spectral
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arete_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Areté
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-scoring-and-compliance-gates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Scoring and compliance gates
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Scoring and compliance gates">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#spectral_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Spectral
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arete_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Areté
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-breaking-change-compliance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Breaking-change compliance
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Breaking-change compliance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#spectral_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Spectral
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arete-under-the-assumed-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Areté under the assumed model
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-enforcement-across-the-delivery-lifecycle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Enforcement across the delivery lifecycle
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-evidence-audit-and-accountability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Evidence, audit, and accountability
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-rule-authoring-safety-and-trust" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Rule-authoring safety and trust
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-false-positives-and-explainability" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. False positives and explainability
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-operational-trade-offs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Operational trade-offs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recommended-positioning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recommended positioning
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Recommended positioning">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#spectral-is-the-better-fit-for" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Spectral is the better fit for
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#arete-is-the-better-fit-for" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Areté is the better fit for
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#strategic-recommendation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Strategic recommendation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sources
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/johnjoeallen/arete/edit/main/docs/comparisons/spectral-vs-arete-api-compliance.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="spectral-and-arete-for-api-compliance">Spectral and Areté for API compliance<a class="headerlink" href="#spectral-and-arete-for-api-compliance" title="Permanent link">&para;</a></h1>
+<p>This document compares Spectral and Areté from an <strong>API compliance</strong> perspective,
+not as a general product comparison.</p>
+<p>For this comparison, Areté is assumed to be available as:</p>
+<ul>
+<li>a central service for portfolio-wide governance;</li>
+<li>Git integration for pull-request and breaking-change checks;</li>
+<li>a command-line interface;</li>
+<li>Maven and Gradle plugins.</li>
+</ul>
+<p>These deployment modes are architectural assumptions for this document. They are
+not all implemented in the current repository. The current validation design is
+described in <a href="/home/jallen/git/arete/docs/validation/index.md">Validation</a> and
+the <a href="/home/jallen/git/arete/docs/validation/policy-engine.md">Policy Engine</a>.</p>
+<h2 id="executive-conclusion">Executive conclusion<a class="headerlink" href="#executive-conclusion" title="Permanent link">&para;</a></h2>
+<p>Spectral is primarily a document linter that can enforce API style and quality
+rules close to the source file. Areté is better modelled as a compliance system:
+it evaluates named rules under named policies, produces findings, and calculates
+a score from policy dispositions.</p>
+<p>Spectral is the stronger default for developer-local linting and broad JSON/YAML
+ecosystem coverage. Areté is the stronger model for organisation-wide API
+compliance when compliance means more than “the document has lint findings” —
+for example, policy profiles, score thresholds, prohibited conditions, central
+reporting, exceptions, ownership, and change history.</p>
+<p>The assumed Areté deployment modes would close much of Spectral's workflow
+advantage:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>IDE / local CLI / Maven / Gradle
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>                 \\
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>                  Git and CI  ---&gt;  central Areté compliance service
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>                                      |
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>                                      +-- policy profile
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>                                      +-- score and gates
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>                                      +-- findings and ownership
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>                                      +-- historical evidence
+</code></pre></div>
+<h2 id="what-api-compliance-includes">What API compliance includes<a class="headerlink" href="#what-api-compliance-includes" title="Permanent link">&para;</a></h2>
+<p>This comparison uses six dimensions:</p>
+<ol>
+<li><strong>Specification conformance</strong> — whether the document uses OpenAPI correctly.</li>
+<li><strong>API design standards</strong> — naming, paths, methods, responses, pagination,
+   errors, security, versioning, and documentation.</li>
+<li><strong>Organisational policy</strong> — which rules apply to which API, team, lifecycle,
+   or risk tier.</li>
+<li><strong>Change compatibility</strong> — whether a proposed change breaks clients.</li>
+<li><strong>Enforcement</strong> — whether a violation blocks a commit, build, merge, release,
+   or publication.</li>
+<li><strong>Evidence and governance</strong> — whether compliance can be measured, explained,
+   audited, and tracked over time.</li>
+</ol>
+<p>A linter is excellent at the first two dimensions. A compliance system must also
+handle the remaining four.</p>
+<h2 id="high-level-comparison">High-level comparison<a class="headerlink" href="#high-level-comparison" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Compliance concern</th>
+<th>Spectral</th>
+<th>Areté under the assumed deployment model</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OpenAPI linting</td>
+<td>Strong built-in OpenAPI rulesets</td>
+<td>Strong for rules represented in the policy bundle</td>
+</tr>
+<tr>
+<td>Other formats</td>
+<td>OpenAPI, AsyncAPI, Arazzo, and JSON Schema formats</td>
+<td>Extensible through plugins; bundled policy engine targets Swagger/OpenAPI 2 and OpenAPI 3</td>
+</tr>
+<tr>
+<td>Custom rules</td>
+<td>YAML/JSON rulesets plus JavaScript/TypeScript functions</td>
+<td>Markdown/YAML rules plus reusable Distill matchers; Java plugins for a different engine</td>
+</tr>
+<tr>
+<td>Target selection</td>
+<td>JSONPath <code>given</code> expressions</td>
+<td>Matcher-defined traversal over a normalised API model</td>
+</tr>
+<tr>
+<td>Rule reuse</td>
+<td>Rules reuse functions and inherited rulesets</td>
+<td>Matchers are reused by rules; rules are reused by policies</td>
+</tr>
+<tr>
+<td>Policy profiles</td>
+<td>Inheritance, formats, aliases, and overrides</td>
+<td>Named policies with active rules, dispositions, and parameter overrides</td>
+</tr>
+<tr>
+<td>Severity</td>
+<td>Rule-level error, warn, info, hint</td>
+<td>Fixed four-level model with plugin-defined labels</td>
+</tr>
+<tr>
+<td>Compliance score</td>
+<td>No native weighted score model</td>
+<td>Native deductions, prohibited rules, and 0–100 score</td>
+</tr>
+<tr>
+<td>Breaking changes</td>
+<td>Not a primary document-linting concern; normally requires another tool or custom integration</td>
+<td>Assumed Git-aware compatibility analysis and pull-request gating</td>
+</tr>
+<tr>
+<td>Local use</td>
+<td>Mature CLI and JavaScript API</td>
+<td>Assumed CLI, Maven, and Gradle integrations</td>
+</tr>
+<tr>
+<td>Central governance</td>
+<td>Usually assembled through CI or a platform</td>
+<td>Assumed first-class central service and portfolio view</td>
+</tr>
+<tr>
+<td>Source locations</td>
+<td>Strong line/range output</td>
+<td>JSON Pointer and finding locations; assumed adapters can translate these to build annotations</td>
+</tr>
+<tr>
+<td>Runtime isolation</td>
+<td>Custom functions are not sandboxed</td>
+<td>Distill is restricted, step-capped, and isolated from parser implementation details</td>
+</tr>
+<tr>
+<td>Auditability</td>
+<td>Depends on surrounding CI or platform</td>
+<td>Policy, score, finding, and historical evidence can be first-class records</td>
+</tr>
+</tbody>
+</table>
+<p>Spectral's official documentation describes rules as targets selected with
+JSONPath and evaluated by functions, with support for formats, inheritance,
+aliases, and overrides. Its CLI documents JSON, JUnit, SARIF, GitHub Actions,
+GitLab, and other output formats. See the <a href="https://github.com/stoplightio/spectral/blob/develop/docs/guides/4-custom-rulesets.md">Spectral ruleset reference</a>
+and <a href="https://github.com/stoplightio/spectral/blob/develop/docs/guides/2-cli.md">CLI reference</a>.</p>
+<h2 id="1-specification-conformance">1. Specification conformance<a class="headerlink" href="#1-specification-conformance" title="Permanent link">&para;</a></h2>
+<h3 id="spectral">Spectral<a class="headerlink" href="#spectral" title="Permanent link">&para;</a></h3>
+<p>Spectral has a strong built-in OpenAPI baseline. Its official ruleset supports
+OpenAPI 2 and 3 and includes structural and semantic quality concerns such as
+responses, references, security definitions, operation metadata, and common
+documentation requirements.</p>
+<p>Its format detection also allows one ruleset to contain rules for OpenAPI,
+AsyncAPI, Arazzo, or JSON Schema and activate the appropriate rules for each
+document.</p>
+<h3 id="arete">Areté<a class="headerlink" href="#arete" title="Permanent link">&para;</a></h3>
+<p>Areté separates parsing from matcher execution. The bundled policy engine parses
+the specification and exposes a stable JSON-shaped model through
+<code>OpenApiMapAdapter</code>. Matchers do not depend on Swagger parser classes.</p>
+<p>This gives Areté a narrower but more controlled contract. It makes policy rules
+less vulnerable to parser-library changes and makes plugin isolation practical.
+The trade-off is that a fact must first be exposed by the adapter before a
+matcher can use it.</p>
+<p>From a compliance perspective:</p>
+<ul>
+<li>Spectral provides broader out-of-the-box structural access.</li>
+<li>Areté provides a more governable and stable rule-authoring surface.</li>
+<li>Neither proves runtime API behaviour or business correctness by itself.</li>
+</ul>
+<h2 id="2-api-design-standards">2. API design standards<a class="headerlink" href="#2-api-design-standards" title="Permanent link">&para;</a></h2>
+<p>Both systems can express rules for naming, paths, operation IDs, tags,
+summaries, descriptions, request and response bodies, media types, status codes,
+errors, pagination, security, and versioning.</p>
+<p>Spectral generally expresses a simple rule as a target plus a function:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nt">operation-summary</span><span class="p">:</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Operation summaries must be present.</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span><span class="nt">severity</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">warn</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">  </span><span class="nt">given</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">$.paths[*][get,post,put,patch,delete]</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">  </span><span class="nt">then</span><span class="p">:</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span><span class="nt">field</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">summary</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">    </span><span class="nt">function</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">truthy</span>
+</code></pre></div>
+<p>Areté expresses the same concern through a matcher, a rule descriptor, and a
+policy entry. This is more ceremony for a one-off check, but it permits one
+matcher to support multiple named rules and lets policies change activation,
+parameters, and cost.</p>
+<p>For compliance programmes, that means a reusable matcher can observe an API
+fact while separate rules define whether the fact is mandatory, advisory, or
+prohibited for a particular policy.</p>
+<p>Spectral can approximate this with multiple rulesets, inheritance, and
+overrides, but Areté makes the policy layer explicit.</p>
+<h2 id="3-policy-and-applicability">3. Policy and applicability<a class="headerlink" href="#3-policy-and-applicability" title="Permanent link">&para;</a></h2>
+<p>Compliance is rarely one universal checklist. Requirements commonly differ for
+public and internal APIs, experimental and production APIs, low-risk and
+regulated APIs, or legacy and newly published APIs.</p>
+<h3 id="spectral_1">Spectral<a class="headerlink" href="#spectral_1" title="Permanent link">&para;</a></h3>
+<p>Spectral provides useful composition tools:</p>
+<ul>
+<li><code>extends</code> for inheriting rulesets;</li>
+<li>format-specific activation;</li>
+<li>aliases for reusable JSONPath expressions;</li>
+<li>overrides for files, formats, document sections, and rules;</li>
+<li>severity changes and rule disabling.</li>
+</ul>
+<p>This works well when applicability is primarily a property of a repository,
+file, document format, or path. <a href="https://github.com/stoplightio/spectral/blob/develop/docs/guides/4d-overrides.md">Spectral overrides</a></p>
+<h3 id="arete_1">Areté<a class="headerlink" href="#arete_1" title="Permanent link">&para;</a></h3>
+<p>Areté policies are named compliance profiles. A policy lists active rules and
+their dispositions. It can also override rule parameters, so one matcher/rule
+definition can be calibrated for different governance profiles.</p>
+<p>That is a better conceptual fit when the question is:</p>
+<blockquote>
+<p>Which compliance standard is this API being assessed against?</p>
+</blockquote>
+<p>rather than:</p>
+<blockquote>
+<p>Which lint rules should run in this directory?</p>
+</blockquote>
+<p>The assumed central service could select a policy using API metadata, repository
+ownership, lifecycle stage, or service classification. That selection mechanism
+would need to be explicitly designed; it is not implied by the current policy
+bundle.</p>
+<h2 id="4-scoring-and-compliance-gates">4. Scoring and compliance gates<a class="headerlink" href="#4-scoring-and-compliance-gates" title="Permanent link">&para;</a></h2>
+<h3 id="spectral_2">Spectral<a class="headerlink" href="#spectral_2" title="Permanent link">&para;</a></h3>
+<p>Spectral reports findings with severity. Its CLI can fail a command according to
+a configured minimum severity, and its formatters make results easy to feed into
+CI.</p>
+<p>This is effective for gates such as “fail if any error exists”. It is less
+natural for weighted requirements such as:</p>
+<ul>
+<li>the API must score at least 85;</li>
+<li>critical rules have different weights;</li>
+<li>one prohibited condition forces a zero score;</li>
+<li>the team must recover the missing points before release.</li>
+</ul>
+<p>Those policies can be built around Spectral, but they are normally external to
+the linter.</p>
+<h3 id="arete_2">Areté<a class="headerlink" href="#arete_2" title="Permanent link">&para;</a></h3>
+<p>Areté treats scoring as part of validation. A policy can assign deductions to
+rules and mark a rule as <code>PROHIBITED</code>. Results can include both the overall score
+and the points associated with individual findings.</p>
+<p>This makes Areté more suitable for scorecards, release-readiness thresholds,
+portfolio reporting, prioritised remediation, and governance dashboards.</p>
+<p>Severity answers “how serious is this finding?” A score answers “how compliant is
+this API under this policy?” Spectral primarily provides the former; Areté is
+designed to provide both.</p>
+<h2 id="5-breaking-change-compliance">5. Breaking-change compliance<a class="headerlink" href="#5-breaking-change-compliance" title="Permanent link">&para;</a></h2>
+<p>Breaking-change detection is separate from static linting. Examples include:</p>
+<ul>
+<li>removing an endpoint or response status;</li>
+<li>removing a parameter;</li>
+<li>making an optional parameter required;</li>
+<li>narrowing an enum;</li>
+<li>making a response property required;</li>
+<li>changing a schema type incompatibly;</li>
+<li>changing security requirements in a client-breaking way.</li>
+</ul>
+<h3 id="spectral_3">Spectral<a class="headerlink" href="#spectral_3" title="Permanent link">&para;</a></h3>
+<p>Spectral evaluates a document. It does not primarily model the relationship
+between a proposed document and its previous released contract. A team can add
+custom functions or combine Spectral with a dedicated OpenAPI diff tool, but the
+baseline workflow is still document linting.</p>
+<p>A Spectral pipeline commonly looks like:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>new spec ----------------------&gt; Spectral lint
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>old spec + new spec -----------&gt; separate breaking-change tool
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>                                      |
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>                                      +--&gt; CI aggregation
+</code></pre></div>
+<h3 id="arete-under-the-assumed-model">Areté under the assumed model<a class="headerlink" href="#arete-under-the-assumed-model" title="Permanent link">&para;</a></h3>
+<p>A central Areté service with Git integration could make compatibility a native
+part of API compliance:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>pull request
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>  ↓
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>identify previous released or default-branch spec
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>  ↓
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>compare old and new API models
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>  ↓
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>classify changes by compatibility policy
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>  ↓
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>publish findings, score impact, and merge status
+</code></pre></div>
+<p>The same policy system could then express that breaking changes are prohibited
+for stable APIs, allowed with migration notes for experimental APIs, or subject
+to stricter rules for regulated APIs.</p>
+<p>This is a significant potential Areté advantage, but it depends on a high-quality
+diff engine and explainable compatibility semantics. A poor diff implementation
+would create false confidence regardless of which product owns it.</p>
+<h2 id="6-enforcement-across-the-delivery-lifecycle">6. Enforcement across the delivery lifecycle<a class="headerlink" href="#6-enforcement-across-the-delivery-lifecycle" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Lifecycle point</th>
+<th>Spectral</th>
+<th>Areté under the assumed model</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Editor</td>
+<td>Strong through VS Code, JetBrains, and Stoplight integrations</td>
+<td>Possible through CLI or future editor adapters</td>
+</tr>
+<tr>
+<td>Local command</td>
+<td>Strong <code>spectral lint</code> workflow</td>
+<td>Assumed Areté CLI</td>
+</tr>
+<tr>
+<td>Commit hook</td>
+<td>Straightforward</td>
+<td>Assumed CLI integration</td>
+</tr>
+<tr>
+<td>Maven build</td>
+<td>Usually shell/plugin integration around Spectral</td>
+<td>Assumed native Maven plugin with score thresholds</td>
+</tr>
+<tr>
+<td>Gradle build</td>
+<td>Usually shell/plugin integration around Spectral</td>
+<td>Assumed native Gradle plugin</td>
+</tr>
+<tr>
+<td>Pull request</td>
+<td>CI status, annotations, SARIF/GitHub output</td>
+<td>Assumed status plus findings, score, policy, and breaking-change report</td>
+</tr>
+<tr>
+<td>Merge gate</td>
+<td>Severity threshold or custom aggregation</td>
+<td>Policy score, prohibited rules, and compatibility status</td>
+</tr>
+<tr>
+<td>Release</td>
+<td>Requires surrounding release process</td>
+<td>Assumed central release assessment and evidence record</td>
+</tr>
+<tr>
+<td>Portfolio</td>
+<td>Usually an external reporting layer</td>
+<td>Assumed central service with compliance history</td>
+</tr>
+</tbody>
+</table>
+<p>The assumed Areté integrations would not necessarily make local linting better
+than Spectral. Their value would be consistency: the same policy identity, score
+semantics, and compatibility result could be used in local builds, pull requests,
+releases, and the central service.</p>
+<h2 id="7-evidence-audit-and-accountability">7. Evidence, audit, and accountability<a class="headerlink" href="#7-evidence-audit-and-accountability" title="Permanent link">&para;</a></h2>
+<p>Static lint output is not the same as compliance evidence. A compliance record
+normally needs to identify:</p>
+<ul>
+<li>the API version and source commit;</li>
+<li>the policy and policy version;</li>
+<li>the active rules;</li>
+<li>the API owner;</li>
+<li>findings at assessment time;</li>
+<li>approved exceptions and their expiry;</li>
+<li>the release or merge decision;</li>
+<li>score changes over time;</li>
+<li>whether findings were fixed, waived, or superseded.</li>
+</ul>
+<p>Spectral can participate in this model, but these records normally come from CI,
+an API catalogue, or a governance platform around it.</p>
+<p>A central Areté service could make these records native. The service would still
+need explicit designs for authentication, authorisation, tenancy, policy
+versioning, waiver expiry, retention, branch identity, release identity, and
+rescore behaviour when policies change.</p>
+<h2 id="8-rule-authoring-safety-and-trust">8. Rule-authoring safety and trust<a class="headerlink" href="#8-rule-authoring-safety-and-trust" title="Permanent link">&para;</a></h2>
+<p>Spectral custom functions are JavaScript or TypeScript. This gives rule authors
+maximum flexibility, but the official documentation notes that custom function
+code is not sandboxed. <a href="https://github.com/stoplightio/spectral/blob/develop/docs/guides/5-custom-functions.md">Spectral custom functions</a></p>
+<p>Areté's runtime matcher language, Distill, is intentionally constrained. It
+operates over a stable model, exposes a fixed builtin set, and uses execution
+limits. This is better suited to centrally distributed policy logic.</p>
+<p>The trade-off is authoring power:</p>
+<ul>
+<li>Spectral can solve unusual problems with ordinary JavaScript.</li>
+<li>Areté requires a Distill feature, an adapter-model change, or a Java plugin
+  for unusual problems.</li>
+</ul>
+<h2 id="9-false-positives-and-explainability">9. False positives and explainability<a class="headerlink" href="#9-false-positives-and-explainability" title="Permanent link">&para;</a></h2>
+<p>Both tools use heuristics for many API design concerns. Neither can infer all
+business intent from an API description.</p>
+<p>Spectral's advantage is local precision: a rule can target a JSONPath and return
+a line/range near the problematic value.</p>
+<p>Areté's advantage is policy explanation: a finding can be explained as the
+result of a named rule under a named policy, with a score impact and documentation.</p>
+<p>An effective compliance finding should answer:</p>
+<ol>
+<li>What is wrong?</li>
+<li>Where is it wrong?</li>
+<li>Why does the selected policy care?</li>
+<li>What is the effect on compliance or release readiness?</li>
+</ol>
+<p>Spectral is already strong on the first two. Areté is designed to add the last
+two.</p>
+<h2 id="10-operational-trade-offs">10. Operational trade-offs<a class="headerlink" href="#10-operational-trade-offs" title="Permanent link">&para;</a></h2>
+<p>Spectral is simple to adopt: install it with npm, commit a ruleset, run it
+locally or in CI, and consume standard formatter output. This favours
+decentralised ownership, but can produce rule, version, and severity drift
+between repositories.</p>
+<p>The assumed Areté central service favours managed governance: policy versions,
+portfolio assessments, visible exceptions, score history, and Git-linked
+breaking-change decisions can be centrally managed. It also introduces service
+availability, authentication, tenancy, policy rollout, and offline-build
+questions.</p>
+<p>The CLI, Maven plugin, and Gradle plugin should therefore support a deliberate
+offline or cached-policy mode. A central-service outage should not prevent an
+unrelated local build from running a known policy version.</p>
+<h2 id="recommended-positioning">Recommended positioning<a class="headerlink" href="#recommended-positioning" title="Permanent link">&para;</a></h2>
+<p>Areté should position itself as complementary to Spectral rather than as a
+drop-in replacement for every Spectral use case.</p>
+<h3 id="spectral-is-the-better-fit-for">Spectral is the better fit for<a class="headerlink" href="#spectral-is-the-better-fit-for" title="Permanent link">&para;</a></h3>
+<ul>
+<li>broad JSON/YAML linting;</li>
+<li>fast repository-local adoption;</li>
+<li>JavaScript/TypeScript-owned rules;</li>
+<li>editor-first feedback;</li>
+<li>standard CI annotations;</li>
+<li>teams already invested in Spectral rulesets;</li>
+<li>formats outside the bundled Areté OpenAPI model.</li>
+</ul>
+<h3 id="arete-is-the-better-fit-for">Areté is the better fit for<a class="headerlink" href="#arete-is-the-better-fit-for" title="Permanent link">&para;</a></h3>
+<ul>
+<li>centrally governed API compliance;</li>
+<li>selectable organisation-wide policies;</li>
+<li>weighted scorecards;</li>
+<li>prohibited compliance conditions;</li>
+<li>release and merge decisions;</li>
+<li>Git-aware breaking-change assessment;</li>
+<li>auditable policy and exception history;</li>
+<li>one assessment model across desktop, CLI, build plugins, Git, and a central service;</li>
+<li>controlled execution of distributed policy logic.</li>
+</ul>
+<h2 id="strategic-recommendation">Strategic recommendation<a class="headerlink" href="#strategic-recommendation" title="Permanent link">&para;</a></h2>
+<p>If Areté gains the assumed deployment modes, its differentiating proposition
+should be:</p>
+<blockquote>
+<p>Areté turns API lint findings into governed compliance assessments across the
+API lifecycle.</p>
+</blockquote>
+<p>That proposition depends on five capabilities being consistent everywhere:</p>
+<ol>
+<li><strong>One policy identity</strong> — local and central validation identify the same policy
+   and version.</li>
+<li><strong>One rule semantics</strong> — CLI, Maven, Gradle, Git, and service results agree on
+   what a rule means.</li>
+<li><strong>One compatibility model</strong> — breaking-change classifications are explainable
+   and policy-controlled.</li>
+<li><strong>One evidence model</strong> — findings, scores, waivers, commits, and releases are
+   linkable.</li>
+<li><strong>One failure contract</strong> — integrations distinguish invalid input, policy
+   violations, prohibited findings, service errors, and tool failures.</li>
+</ol>
+<p>Spectral remains the benchmark for ease of adoption and ecosystem reach. Areté
+can compete effectively by owning the layer above linting: policy selection,
+scoring, lifecycle enforcement, breaking-change governance, and evidence.</p>
+<h2 id="sources">Sources<a class="headerlink" href="#sources" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="https://github.com/stoplightio/spectral">Spectral repository and supported workflows</a></li>
+<li><a href="https://github.com/stoplightio/spectral/blob/develop/docs/guides/4-custom-rulesets.md">Spectral rulesets and formats</a></li>
+<li><a href="https://github.com/stoplightio/spectral/blob/develop/docs/reference/functions.md">Spectral built-in functions</a></li>
+<li><a href="https://github.com/stoplightio/spectral/blob/develop/docs/guides/5-custom-functions.md">Spectral custom functions</a></li>
+<li><a href="https://github.com/stoplightio/spectral/blob/develop/docs/guides/2-cli.md">Spectral CLI and output formats</a></li>
+<li><a href="https://github.com/stoplightio/spectral/blob/develop/docs/guides/4d-overrides.md">Spectral overrides</a></li>
+<li><a href="/home/jallen/git/arete/docs/validation/index.md">Areté validation overview</a></li>
+<li><a href="/home/jallen/git/arete/docs/validation/policy-engine.md">Areté Policy Engine</a></li>
+<li><a href="/home/jallen/git/arete/docs/validation/distill.md">Areté Distill reference</a></li>
+<li><a href="/home/jallen/git/arete/docs/validation/writing-a-plugin.md">Writing an Areté plugin</a></li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Apache License 2.0
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.top", "content.code.copy", "content.action.edit", "search.suggest", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
