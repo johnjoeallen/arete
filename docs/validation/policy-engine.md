@@ -3,7 +3,7 @@
 The **Areté Policy Engine** (`policy-based-validation-plugin`, plugin id
 `generic-policy`) is the built-in, policy-driven validation plugin. Instead of
 hard-coding checks in Java, it ships a **policy bundle**: a tree of Markdown +
-YAML files defining **matchers** (Distill programs that inspect the normalized
+YAML files defining **matchers** (Distill programs that inspect the normalised
 API model and return occurrences), **rules** (named checks that select a
 matcher, scope, and parameters), and **policies** (which rules are active and
 what disposition each match has, such as a point deduction or `PROHIBITED`).
@@ -20,17 +20,17 @@ Areté UI as selectable rule sets.
 When validation runs, the plugin resolves the requested policy. If the name is
 unknown, the **first policy declared** in the bundle manifest is used as the
 default. Each rule listed in that policy is then evaluated **in declaration
-order**: its matcher runs against the normalized API model and the rule's
+order**: its matcher runs against the normalised API model and the rule's
 `{id, scope, parameters}`, returning zero or more occurrences. If a rule
 returns occurrences, the policy's **disposition** (a point deduction or
 `PROHIBITED`) is applied once, and one finding is emitted for each occurrence.
 
 ### Matcher language
 
-Matchers are written in [Distill](distill.md) (`Matcher.dsl`), which is
-currently the only supported matcher language. Distill is a small expression language
-shaped for rule pipelines (`.map` / `.filter` / `.expand`, slashy regex
-literals, `occurrence(...)`).
+Matchers are written in [Distill](distill.md) (`Matcher.dsl`), currently the
+only supported matcher language. It is a small expression language shaped for
+rule pipelines (`.map` / `.filter` / `.expand`, slashy regex literals,
+`occurrence(...)`).
 
 - **Safe by construction** — the interpreter exposes only the immutable `api`
   and `rule` values, a fixed builtin set, and RE2/J regex. No filesystem,
@@ -90,16 +90,16 @@ documentation.
 
 A matcher is a reusable, parameterised Distill program. It reports **what it
 observed** by returning occurrences and takes no position on severity or score
-— that is the rule and policy's job.
+— that is the job of the rule and policy.
 
 ### Descriptor (`Matcher.md` front matter)
 
 ```yaml
 ---
 id: naming                       # must match the manifest key
-    language: distill                 # the rule language
-    source: Matcher.dsl               # the rule source
-scopes:                          # the scope values rules may request
+language: distill                # the matcher language
+source: Matcher.dsl              # the matcher source
+scopes:                          # the scope values a matcher may request
   - property
   - path-segment
   - query-parameter
@@ -117,7 +117,7 @@ parameters:
 Parameter types and their accepted values (checked before the script runs, so
 scripts can trust their inputs):
 
-| type      | valid rule value                                  |
+| type      | valid value                                       |
 |-----------|---------------------------------------------------|
 | `enum`    | a string that is one of `values`                  |
 | `string`  | a non-blank string                                |
@@ -225,10 +225,6 @@ fields described by their corresponding objects. `operationDetails[].security`
 is `null` unless the operation overrides the global requirement. JSON Pointers
 are pre-escaped and safe to return verbatim as `pointer`.
 
-`operationDetails[].security` is `null` unless the operation overrides the
-global requirement. JSON Pointers are pre-escaped and safe to return verbatim
-as `pointer`.
-
 ### Writing a matcher
 
 Matchers are written in **Distill** (`Matcher.dsl`); its grammar and builtins
@@ -239,7 +235,7 @@ Matchers:
 - `message` is required and must be non-blank; `pointer` and `path` are
   optional strings.
 - Return an empty list when nothing matches — **never** return a score or severity.
-- More than 1000 occurrences is a rule error.
+- More than 1000 occurrences is a matcher error.
 - Any error (raised, step-cap exceeded, wrong return shape) becomes a plugin
   error for that rule's run — it does not abort the other rules.
 - The script is compiled when the bundle loads; a compile failure fails the
@@ -247,21 +243,14 @@ Matchers:
 
 **Safe by construction.** `api` and `rule` are deep-immutable. The language
 has no `import`, no I/O, no reflection, no recursion, and execution is bounded
-by a hard interpreter-step cap. The only capabilities beyond core
-list/dict/string/`for`/comprehension work are these builtins:
+by a hard interpreter-step cap. Matchers work with the core
+list/string/closure operations plus a small, fixed set of builtins
+(`regexFullMatch`, `tokenize`, `pathSegments`, `parseInt`, …), catalogued in
+the [Distill reference](distill.md#builtin-functions). Anything outside that
+set is a deliberate, reviewed addition to the runtime, not a workaround in the
+script.
 
-| Builtin | Purpose |
-|---|---|
-| `re_fullmatch(pattern, text)` | whole-string match (RE2 syntax, linear time) |
-| `re_search(pattern, text)` | match anywhere in `text` |
-| `tokenize(text, delims)` | split on any char in `delims`, dropping empty tokens |
-| `parse_int(text, fallback)` | base-10 int, or `fallback` if not one |
-| `url_host(url)` | host component of a URL, or `None` |
-
-If a rule needs something outside this list, that is a deliberate,
-reviewed addition to the runtime — not a workaround in the script.
-
-The `manual` rule is the deliberate no-op (`distill(api, rule) { return []; }`).
+The `manual` matcher is the deliberate no-op (`distill(api, rule) { return []; }`).
 It keeps a rule in the catalogue as a checklist item that cannot be inferred
 from an OpenAPI document.
 
@@ -276,8 +265,8 @@ human explanation used for its findings.
 ---
 id: CASE001                       # must match the manifest key
 category: Naming                  # free-text grouping shown in the UI
-matcher: naming                  # rule id
-scope: property                   # must be one of that rule's `scopes`
+matcher: naming                  # matcher id
+scope: property                   # must be one of that matcher's `scopes`
 parameters: { convention: camelCase, match: non-conforming }
 ---
 
@@ -293,10 +282,10 @@ JSON property names should use camelCase where required by policy.
   `Should not exceed {{maximum-depth}} nested levels.`
 - `parameters` may be omitted if the rule needs none.
 - Parameter names, value types, required-parameter presence, and the
-  scope-vs-rule match are all checked at load time — **unless** the
-  rule named by the rule is not yet in the bundle, in which case the rule
+  scope-vs-matcher match are all checked at load time — **unless** the
+  matcher named by the rule is not yet in the bundle, in which case the rule
   is still loaded but left unvalidated (this lets the catalogue document rules
-  ahead of their rule).
+  ahead of their matcher).
 
 The rule is invisible until a policy references it.
 
@@ -374,7 +363,7 @@ The result reports `overallScore` (`effectiveScore`) and
 
 ### A new rule (using an existing matcher)
 
-1. Create `rules/<ID>.md` with front matter (`id`, `category`, `rule`,
+1. Create `rules/<ID>.md` with front matter (`id`, `category`, `matcher`,
    `scope`, `parameters`) and a `# <ID> — <title>` body.
 2. Add `<ID>: rules/<ID>.md` to `PolicyBundle.yaml` under `rules:`.
 3. Reference `<ID>` from one or more policies with a deduction or `PROHIBITED`.
@@ -434,6 +423,6 @@ The bundle fails fast (`BundleValidationException`) on:
   scalar parameter that declares `values`, an unsupported parameter type.
 - A rule: a `scope` not in the matcher's `scopes`, an unknown parameter, a
   wrong-typed parameter value, a missing required parameter, a body with no
-  `#` heading. (Skipped only when the rule isn't bundled yet.)
+  `#` heading. (Skipped only when the matcher isn't bundled yet.)
 - A policy: a disposition that is neither `0`–`100` nor `PROHIBITED`, or a
   reference to an unknown rule id.

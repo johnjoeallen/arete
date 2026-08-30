@@ -55,7 +55,7 @@ of times, **potentially concurrently**. Don't mutate instance fields inside
 **Classloading contract.** Every type in a method signature must be a JDK type
 or declared in the SPI module. The SPI is the shared parent classloader for
 every plugin's isolated `URLClassLoader`, so those are the only types safe to
-pass across the boundary. Never add a method mentioning e.g. a swagger-parser
+pass across the boundary. Never add a method mentioning, say, a swagger-parser
 or Kotlin type.
 
 ## A minimal plugin

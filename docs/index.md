@@ -32,12 +32,12 @@ duplicates), and renders it as browsable docs:
   the spec (`application/json`, `application/xml`, …), plus an **Object** tab
   showing the schema as a collapsible property tree.
 - Worked examples for each media type: the spec's own `example`/`examples` when
-  present, otherwise one synthesized from the schema (respecting `enum`, common
+  present, otherwise one synthesised from the schema (respecting `enum`, common
   string `format`s like `date-time`/`email`/`uuid`, nested objects and arrays)
   and rendered in the right shape for that content type — pretty-printed JSON,
   XML, or `x-www-form-urlencoded`.
 - `description` fields throughout the spec (info, tags, operations, parameters)
-  render as Markdown, including any raw HTML they contain, sanitized for safe
+  render as Markdown, including any raw HTML they contain, sanitised for safe
   display.
 
 ### Load from disk and stay in sync
