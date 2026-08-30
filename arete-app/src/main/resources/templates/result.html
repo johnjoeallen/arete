@@ -73,19 +73,19 @@
                                     </tr>
                                 </tbody>
                             </table>
-                            <button type="submit">Analyse</button>
+                            <button type="submit">Score</button>
                         </form>
                     </div>
 
                     <div class="score-lower-panel">
-                        <div th:if="${!hasBeenAnalysed}" class="score-empty-state" role="img" aria-label="No analysis results">
+                        <div th:if="${!hasBeenScored}" class="score-empty-state" role="img" aria-label="No analysis results">
                             <span class="score-empty-icon">&#128683;</span>
-                            <p>Run Analyse to see validation results.</p>
+                            <p>Score this to see validation results.</p>
                         </div>
 
-                        <div th:if="${hasBeenAnalysed}">
+                        <div th:if="${hasBeenScored}">
                             <div class="validation-results">
-                                <p th:if="${resultFromCache}" class="validation-summary-line validation-cached-note">Showing results from the last Analyse run.</p>
+                                <p th:if="${resultFromCache}" class="validation-summary-line validation-cached-note">Showing results from the last Score run.</p>
                                 <p th:if="${validation.rulesEvaluatedCount() >= 0}" class="validation-summary-line"
                                    th:text="${validation.rulesEvaluatedCount()} + ' rule(s) checked across ' + ${validation.pluginSummaries().size()} + ' validator(s).'"></p>
                                 <p th:if="${!T(java.lang.Double).isNaN(validation.overallScore())}" class="validation-summary-line validation-score-line">

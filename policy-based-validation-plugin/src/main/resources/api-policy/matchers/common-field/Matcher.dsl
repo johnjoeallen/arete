@@ -5,6 +5,6 @@ distill(api, rule) {
                 (prop.name == "id" && prop.type != "string")
                 || ((prop.name == "created" || prop.name == "modified")
                     && !(prop.type == "string" && prop.format == "date-time")) }
-            .map { prop -> diagnostic(prop.pointer, prop.name,
+            .map { prop -> occurrence(prop.pointer, prop.name,
                 "Common field has an inconsistent type or format") } };
 }

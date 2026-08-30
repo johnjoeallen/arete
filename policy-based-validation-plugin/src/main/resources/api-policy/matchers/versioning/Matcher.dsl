@@ -7,7 +7,7 @@ distill(api, rule) {
                     && param.name ==~ /(?i)(api[-_])?version|x-api-version/ }
                 || operation.mediaTypes.any { mt -> mt ==~ /(?i).*\+?v[0-9]+.*|.*version[0-9]+.*/ } } }
             ? api.paths.filter { p -> false }
-            : tokenize(",", "x").map { u -> diagnostic("/paths", "API",
+            : tokenize(",", "x").map { u -> occurrence("/paths", "API",
                 "Interface has no explicit versioning") })
         : api.paths
             .filter { path ->
@@ -20,6 +20,6 @@ distill(api, rule) {
                     ? path.operationDetails.any { operation -> operation.mediaTypes.any { mt ->
                         mt ==~ /(?i).*\+?v[0-9]+.*|.*version[0-9]+.*/ } }
                 : false }
-            .map { path -> diagnostic(path.pointer, path.path,
+            .map { path -> occurrence(path.pointer, path.path,
                 "Interface version is exposed through " + rule.parameters["location"]) };
 }

@@ -26,7 +26,7 @@ distill(api, rule) {
             || (rule.parameters["semantic"] == "singular" && candidate.name.lower().endsWith("s") && candidate.name.length > 1)
             || (rule.parameters["semantic"] == "plural" && !(candidate.name.lower().endsWith("s") && candidate.name.length > 1))
             || (rule.parameters["schema-type"] == "array" && candidate.type != "array")) }
-        .map { candidate -> diagnostic(candidate.pointer, candidate.name,
+        .map { candidate -> occurrence(candidate.pointer, candidate.name,
             rule.parameters["suffix"] != null ? "Name has prohibited suffix " + rule.parameters["suffix"]
                 : rule.parameters["semantic"] == "collection" ? "Collection name is singular"
                 : rule.parameters["semantic"] == "singular" ? "Array property has a singular name"

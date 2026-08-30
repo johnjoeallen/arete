@@ -67,7 +67,6 @@ nav:
   - Validation:
       - Overview: validation/index.md
       - Areté Policy Engine: validation/policy-engine.md
-      - Rule languages: validation/rule-languages.md
       - Distill reference: validation/distill.md
       - Rule Catalogue: validation/rules.md
       - Policies: validation/policies.md

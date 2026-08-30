@@ -3,7 +3,7 @@ distill(api, rule) {
         .filter { response -> rule.parameters.forbidden == "server-error"
             && parseInt(response.status, -1) >= 500
             && parseInt(response.status, -1) < 600 }
-        .map { response -> diagnostic(operation.pointer,
+        .map { response -> occurrence(operation.pointer,
             operation.method + " " + path.path + " " + response.status,
             "Documents a server-error (" + response.status + ") response; these should be omitted from the contract") } } };
 }

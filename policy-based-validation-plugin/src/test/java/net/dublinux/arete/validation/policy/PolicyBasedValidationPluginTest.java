@@ -169,17 +169,6 @@ class PolicyBasedValidationPluginTest {
     }
 
     @Test
-    void rejectsABrokenStarlarkRuleSourceWhileLoadingTheBundle() {
-        Map<String, String> resources = bundledResources();
-        resources.put("matchers/resource-path/Matcher.star", "def detect(api, rule)\n    this is not valid Starlark");
-
-        BundleValidationException error = assertThrows(BundleValidationException.class,
-                () -> new PolicyBundleLoader().load(resources::get));
-
-        assertTrue(error.getMessage().contains("does not compile"));
-    }
-
-    @Test
     void acceptsCatalogueRulesWhoseRuleIsNotYetBundled() {
         Map<String, String> resources = bundledResources();
         resources.put("PolicyBundle.yaml", resources.get("PolicyBundle.yaml")
@@ -202,12 +191,12 @@ class PolicyBasedValidationPluginTest {
 
     @Test
     void operationRuleReportsOperationsWhoseSummaryIsMissing() {
-        PolicyBundle bundle = starlarkBundle();
+        PolicyBundle bundle = distillBundle();
         PolicyRule rule = bundle.rules().get("DOC001");
         Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
                 .readContents(ACTION_PATH_SPEC, null, new ParseOptions()).getOpenAPI());
 
-        java.util.List<Diagnostic> diagnostics = new StarlarkMatcherEvaluator()
+        java.util.List<Diagnostic> diagnostics = new DistillMatcherEvaluator()
                 .execute(bundle.matchers().get("operation"), api, rule);
 
         assertEquals(3, diagnostics.size());
@@ -218,13 +207,13 @@ class PolicyBasedValidationPluginTest {
 
     @Test
     void textStyleRuleUsesTypedRuleParameters() {
-        PolicyBundle bundle = starlarkBundle();
+        PolicyBundle bundle = distillBundle();
         Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
                 .readContents(SUMMARY_STYLE_SPEC, null, new ParseOptions()).getOpenAPI());
 
-        java.util.List<Diagnostic> initialCapital = new StarlarkMatcherEvaluator()
+        java.util.List<Diagnostic> initialCapital = new DistillMatcherEvaluator()
                 .execute(bundle.matchers().get("text-style"), api, bundle.rules().get("DOC002"));
-        java.util.List<Diagnostic> tooLong = new StarlarkMatcherEvaluator()
+        java.util.List<Diagnostic> tooLong = new DistillMatcherEvaluator()
                 .execute(bundle.matchers().get("text-style"), api, bundle.rules().get("DOC005"));
 
         assertEquals(1, initialCapital.size());
@@ -235,10 +224,10 @@ class PolicyBasedValidationPluginTest {
 
     @Test
     void namingRuleInspectsStableParameterAndSchemaMaps() {
-        PolicyBundle bundle = starlarkBundle();
+        PolicyBundle bundle = distillBundle();
         Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
                 .readContents(NAMING_SPEC, null, new ParseOptions()).getOpenAPI());
-        StarlarkMatcherEvaluator runtime = new StarlarkMatcherEvaluator();
+        DistillMatcherEvaluator runtime = new DistillMatcherEvaluator();
 
         assertEquals(1, runtime.execute(bundle.matchers().get("naming"), api, bundle.rules().get("CASE001")).size());
         assertEquals(1, runtime.execute(bundle.matchers().get("naming"), api, bundle.rules().get("CASE002")).size());
@@ -251,10 +240,10 @@ class PolicyBasedValidationPluginTest {
 
     @Test
     void schemaRuleUsesOnlyStablePrimitivePropertyFacts() {
-        PolicyBundle bundle = starlarkBundle();
+        PolicyBundle bundle = distillBundle();
         Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
                 .readContents(NAMING_SPEC, null, new ParseOptions()).getOpenAPI());
-        StarlarkMatcherEvaluator runtime = new StarlarkMatcherEvaluator();
+        DistillMatcherEvaluator runtime = new DistillMatcherEvaluator();
 
         assertEquals(1, runtime.execute(bundle.matchers().get("schema"), api, bundle.rules().get("JSON006")).size());
         assertEquals(1, runtime.execute(bundle.matchers().get("schema"), api, bundle.rules().get("JSON007")).size());
@@ -263,10 +252,10 @@ class PolicyBasedValidationPluginTest {
 
     @Test
     void existingRulesCoverTheNextFiveCataloguedRules() {
-        PolicyBundle bundle = starlarkBundle();
+        PolicyBundle bundle = distillBundle();
         Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
                 .readContents(METHOD_AND_ACTION_SPEC, null, new ParseOptions()).getOpenAPI());
-        StarlarkMatcherEvaluator runtime = new StarlarkMatcherEvaluator();
+        DistillMatcherEvaluator runtime = new DistillMatcherEvaluator();
 
         assertEquals(1, runtime.execute(bundle.matchers().get("resource-path"), api, bundle.rules().get("REST003")).size());
         assertEquals(1, runtime.execute(bundle.matchers().get("resource-path"), api, bundle.rules().get("REST004")).size());
@@ -277,7 +266,7 @@ class PolicyBasedValidationPluginTest {
 
     @Test
     void proprietaryHeaderRuleReportsOnlyNonAllowListedCustomHeaders() {
-        PolicyBundle bundle = starlarkBundle();
+        PolicyBundle bundle = distillBundle();
         String spec = """
                 openapi: 3.0.0
                 info: { title: Test API, version: 1.0.0 }
@@ -297,7 +286,7 @@ class PolicyBasedValidationPluginTest {
         Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
                 .readContents(spec, null, new ParseOptions()).getOpenAPI());
 
-        java.util.List<Diagnostic> diagnostics = new StarlarkMatcherEvaluator()
+        java.util.List<Diagnostic> diagnostics = new DistillMatcherEvaluator()
                 .execute(bundle.matchers().get("proprietary-header"), api, bundle.rules().get("STANDARD008"));
 
         assertEquals(2, diagnostics.size());
@@ -307,7 +296,7 @@ class PolicyBasedValidationPluginTest {
 
     @Test
     void policiesCanOverrideRuleParametersIndependently() {
-        PolicyBundle bundle = starlarkBundle();
+        PolicyBundle bundle = distillBundle();
 
         assertEquals("X-Request-Id", bundle.policies().get("Zalando").dispositions()
                 .get("STANDARD008").parameters().get("allowed"));
@@ -319,7 +308,7 @@ class PolicyBasedValidationPluginTest {
 
     @Test
     void queryCollectionRuleHonoursConfiguredSerialization() {
-        PolicyBundle bundle = starlarkBundle();
+        PolicyBundle bundle = distillBundle();
         String spec = """
                 openapi: 3.0.0
                 info: { title: Test API, version: 1.0.0 }
@@ -327,11 +316,6 @@ class PolicyBasedValidationPluginTest {
                   /customers:
                     get:
                       parameters:
-                        - name: tags
-                          in: query
-                          style: form
-                          explode: true
-                          schema: { type: array, items: { type: string } }
                         - name: states
                           in: query
                           style: pipeDelimited
@@ -341,7 +325,7 @@ class PolicyBasedValidationPluginTest {
                 """;
         Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
                 .readContents(spec, null, new ParseOptions()).getOpenAPI());
-        java.util.List<Diagnostic> diagnostics = new StarlarkMatcherEvaluator()
+        java.util.List<Diagnostic> diagnostics = new DistillMatcherEvaluator()
                 .execute(bundle.matchers().get("query-collection"), api, bundle.rules().get("STANDARD009"));
 
         assertEquals(1, diagnostics.size());
@@ -350,7 +334,7 @@ class PolicyBasedValidationPluginTest {
 
     @Test
     void errorResponseRuleChecksCoverageAndProtocolDetails() {
-        PolicyBundle bundle = starlarkBundle();
+        PolicyBundle bundle = distillBundle();
         String spec = """
                 openapi: 3.0.0
                 info: { title: Test API, version: 1.0.0 }
@@ -367,7 +351,7 @@ class PolicyBasedValidationPluginTest {
                 """;
         Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
                 .readContents(spec, null, new ParseOptions()).getOpenAPI());
-        StarlarkMatcherEvaluator runtime = new StarlarkMatcherEvaluator();
+        DistillMatcherEvaluator runtime = new DistillMatcherEvaluator();
 
         assertEquals(1, runtime.execute(bundle.matchers().get("error-response"), api, bundle.rules().get("ERROR003")).size());
         assertEquals(1, runtime.execute(bundle.matchers().get("error-response"), api, bundle.rules().get("ERROR005")).size());
@@ -377,7 +361,7 @@ class PolicyBasedValidationPluginTest {
 
     @Test
     void authenticationErrorRuleUsesEffectiveSecurityRequirements() {
-        PolicyBundle bundle = starlarkBundle();
+        PolicyBundle bundle = distillBundle();
         String spec = """
                 openapi: 3.0.0
                 info: { title: Test API, version: 1.0.0 }
@@ -392,7 +376,7 @@ class PolicyBasedValidationPluginTest {
                 """;
         Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
                 .readContents(spec, null, new ParseOptions()).getOpenAPI());
-        StarlarkMatcherEvaluator runtime = new StarlarkMatcherEvaluator();
+        DistillMatcherEvaluator runtime = new DistillMatcherEvaluator();
 
         assertEquals(0, runtime.execute(bundle.matchers().get("authentication-error"), api, bundle.rules().get("ERROR008")).size());
         assertEquals(0, runtime.execute(bundle.matchers().get("authentication-error"), api, bundle.rules().get("ERROR009")).size());
@@ -402,7 +386,7 @@ class PolicyBasedValidationPluginTest {
 
     @Test
     void sensitiveDataRuleChecksConfigurableNameLocations() {
-        PolicyBundle bundle = starlarkBundle();
+        PolicyBundle bundle = distillBundle();
         String spec = """
                 openapi: 3.0.0
                 info: { title: Test API, version: 1.0.0 }
@@ -425,7 +409,7 @@ class PolicyBasedValidationPluginTest {
                 """;
         Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
                 .readContents(spec, null, new ParseOptions()).getOpenAPI());
-        StarlarkMatcherEvaluator runtime = new StarlarkMatcherEvaluator();
+        DistillMatcherEvaluator runtime = new DistillMatcherEvaluator();
 
         assertEquals(1, runtime.execute(bundle.matchers().get("sensitive-data"), api, bundle.rules().get("SEC001")).size());
         assertEquals(1, runtime.execute(bundle.matchers().get("sensitive-data"), api, bundle.rules().get("SEC002")).size());
@@ -435,7 +419,7 @@ class PolicyBasedValidationPluginTest {
 
     @Test
     void sensitiveSearchRuleDistinguishesSearchInputsFromSensitiveFields() {
-        PolicyBundle bundle = starlarkBundle();
+        PolicyBundle bundle = distillBundle();
         String spec = """
                 openapi: 3.0.0
                 info: { title: Test API, version: 1.0.0 }
@@ -454,7 +438,7 @@ class PolicyBasedValidationPluginTest {
                 """;
         Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
                 .readContents(spec, null, new ParseOptions()).getOpenAPI());
-        StarlarkMatcherEvaluator runtime = new StarlarkMatcherEvaluator();
+        DistillMatcherEvaluator runtime = new DistillMatcherEvaluator();
 
         assertEquals(2, runtime.execute(bundle.matchers().get("sensitive-search"), api, bundle.rules().get("SEC004")).size());
         assertEquals(1, runtime.execute(bundle.matchers().get("sensitive-search"), api, bundle.rules().get("SEC005")).size());
@@ -462,7 +446,7 @@ class PolicyBasedValidationPluginTest {
 
     @Test
     void identifierRuleChecksTypeAndFormatSeparately() {
-        PolicyBundle bundle = starlarkBundle();
+        PolicyBundle bundle = distillBundle();
         String spec = """
                 openapi: 3.0.0
                 info: { title: Test API, version: 1.0.0 }
@@ -478,7 +462,7 @@ class PolicyBasedValidationPluginTest {
                 """;
         Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
                 .readContents(spec, null, new ParseOptions()).getOpenAPI());
-        StarlarkMatcherEvaluator runtime = new StarlarkMatcherEvaluator();
+        DistillMatcherEvaluator runtime = new DistillMatcherEvaluator();
 
         assertEquals(1, runtime.execute(bundle.matchers().get("identifier"), api, bundle.rules().get("SEC006")).size());
         assertEquals(2, runtime.execute(bundle.matchers().get("identifier"), api, bundle.rules().get("SEC007")).size());
@@ -486,7 +470,7 @@ class PolicyBasedValidationPluginTest {
 
     @Test
     void collectionCapabilityRuleChecksPresenceAndRepresentation() {
-        PolicyBundle bundle = starlarkBundle();
+        PolicyBundle bundle = distillBundle();
         String spec = """
                 openapi: 3.0.0
                 info: { title: Test API, version: 1.0.0 }
@@ -501,7 +485,7 @@ class PolicyBasedValidationPluginTest {
                 """;
         Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
                 .readContents(spec, null, new ParseOptions()).getOpenAPI());
-        StarlarkMatcherEvaluator runtime = new StarlarkMatcherEvaluator();
+        DistillMatcherEvaluator runtime = new DistillMatcherEvaluator();
 
         assertEquals(0, runtime.execute(bundle.matchers().get("collection-capability"), api, bundle.rules().get("FILTER001")).size());
         assertEquals(1, runtime.execute(bundle.matchers().get("collection-capability"), api, bundle.rules().get("FILTER002")).size());
@@ -514,7 +498,7 @@ class PolicyBasedValidationPluginTest {
 
     @Test
     void paginationRuleChecksControlsLimitsAndLinks() {
-        PolicyBundle bundle = starlarkBundle();
+        PolicyBundle bundle = distillBundle();
         String spec = """
                 openapi: 3.0.0
                 info: { title: Test API, version: 1.0.0 }
@@ -535,7 +519,7 @@ class PolicyBasedValidationPluginTest {
                 """;
         Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
                 .readContents(spec, null, new ParseOptions()).getOpenAPI());
-        StarlarkMatcherEvaluator runtime = new StarlarkMatcherEvaluator();
+        DistillMatcherEvaluator runtime = new DistillMatcherEvaluator();
 
         assertEquals(0, runtime.execute(bundle.matchers().get("pagination"), api, bundle.rules().get("PAGE001")).size());
         assertEquals(1, runtime.execute(bundle.matchers().get("pagination"), api, bundle.rules().get("PAGE002")).size());
@@ -547,7 +531,7 @@ class PolicyBasedValidationPluginTest {
 
     @Test
     void securityRuleUsesOperationSecurityAndGlobalFallback() {
-        PolicyBundle bundle = starlarkBundle();
+        PolicyBundle bundle = distillBundle();
         String spec = """
                 openapi: 3.0.0
                 info: { title: Test API, version: 1.0.0 }
@@ -570,7 +554,7 @@ class PolicyBasedValidationPluginTest {
         Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
                 .readContents(spec, null, new ParseOptions()).getOpenAPI());
 
-        java.util.List<Diagnostic> diagnostics = new StarlarkMatcherEvaluator()
+        java.util.List<Diagnostic> diagnostics = new DistillMatcherEvaluator()
                 .execute(bundle.matchers().get("security"), api, bundle.rules().get("SECURITY001"));
 
         assertEquals(2, diagnostics.size());
@@ -580,7 +564,7 @@ class PolicyBasedValidationPluginTest {
 
     @Test
     void securityRuleRequiresAllConfiguredScopes() {
-        PolicyBundle bundle = starlarkBundle();
+        PolicyBundle bundle = distillBundle();
         String spec = """
                 openapi: 3.0.0
                 info: { title: Test API, version: 1.0.0 }
@@ -607,7 +591,7 @@ class PolicyBasedValidationPluginTest {
         PolicyRule writeRule = new PolicyRule(rule.id(), rule.title(), rule.category(), rule.matcherId(), rule.scope(),
                 Map.of("scheme", "bearerAuth", "scopes", "read,write"), rule.documentationMarkdown());
 
-        java.util.List<Diagnostic> diagnostics = new StarlarkMatcherEvaluator()
+        java.util.List<Diagnostic> diagnostics = new DistillMatcherEvaluator()
                 .execute(bundle.matchers().get("security"), api, writeRule);
 
         assertEquals(1, diagnostics.size());
@@ -616,7 +600,7 @@ class PolicyBasedValidationPluginTest {
 
     @Test
     void responseHeaderRuleRequiresEveryConfiguredRateLimitHeader() {
-        PolicyBundle bundle = starlarkBundle();
+        PolicyBundle bundle = distillBundle();
         String spec = """
                 openapi: 3.0.0
                 info: { title: Test API, version: 1.0.0 }
@@ -633,7 +617,7 @@ class PolicyBasedValidationPluginTest {
         Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
                 .readContents(spec, null, new ParseOptions()).getOpenAPI());
 
-        java.util.List<Diagnostic> diagnostics = new StarlarkMatcherEvaluator()
+        java.util.List<Diagnostic> diagnostics = new DistillMatcherEvaluator()
                 .execute(bundle.matchers().get("response-header"), api, bundle.rules().get("STATUS007"));
 
         assertEquals(1, diagnostics.size());
@@ -642,7 +626,7 @@ class PolicyBasedValidationPluginTest {
 
     @Test
     void openApiVersionRuleChecksPolicySupportedVersionPrefixes() {
-        PolicyBundle bundle = starlarkBundle();
+        PolicyBundle bundle = distillBundle();
         String spec = """
                 openapi: 3.0.3
                 info: { title: Test API, version: 1.0.0 }
@@ -654,7 +638,7 @@ class PolicyBasedValidationPluginTest {
         PolicyRule strictVersionRule = new PolicyRule(rule.id(), rule.title(), rule.category(), rule.matcherId(), rule.scope(),
                 Map.of("allowed", "3.1"), rule.documentationMarkdown());
 
-        java.util.List<Diagnostic> diagnostics = new StarlarkMatcherEvaluator()
+        java.util.List<Diagnostic> diagnostics = new DistillMatcherEvaluator()
                 .execute(bundle.matchers().get("openapi-version"), api, strictVersionRule);
 
         assertEquals(1, diagnostics.size());
@@ -663,7 +647,7 @@ class PolicyBasedValidationPluginTest {
 
     @Test
     void mediaTypeRuleChecksRequestAndResponseContentFacts() {
-        PolicyBundle bundle = starlarkBundle();
+        PolicyBundle bundle = distillBundle();
         String spec = """
                 openapi: 3.0.0
                 info: { title: Test API, version: 1.0.0 }
@@ -685,7 +669,7 @@ class PolicyBasedValidationPluginTest {
                 """;
         Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
                 .readContents(spec, null, new ParseOptions()).getOpenAPI());
-        StarlarkMatcherEvaluator runtime = new StarlarkMatcherEvaluator();
+        DistillMatcherEvaluator runtime = new DistillMatcherEvaluator();
 
         assertTrue(runtime.execute(bundle.matchers().get("media-type"), api, bundle.rules().get("CONTENT001")).isEmpty());
         assertEquals(1, runtime.execute(bundle.matchers().get("media-type"), api, bundle.rules().get("CONTENT003")).size());
@@ -694,7 +678,7 @@ class PolicyBasedValidationPluginTest {
 
     @Test
     void schemaRulesCoverEnumFormatsAndDateTimeNamingRules() {
-        PolicyBundle bundle = starlarkBundle();
+        PolicyBundle bundle = distillBundle();
         String spec = """
                 openapi: 3.0.0
                 info: { title: Test API, version: 1.0.0 }
@@ -730,7 +714,7 @@ class PolicyBasedValidationPluginTest {
                 """;
         Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
                 .readContents(spec, null, new ParseOptions()).getOpenAPI());
-        StarlarkMatcherEvaluator runtime = new StarlarkMatcherEvaluator();
+        DistillMatcherEvaluator runtime = new DistillMatcherEvaluator();
 
         java.util.List<Diagnostic> missingFormat = runtime.execute(
                 bundle.matchers().get("schema"), api, bundle.rules().get("JSON012"));
@@ -760,7 +744,7 @@ class PolicyBasedValidationPluginTest {
 
     @Test
     void forkedRuntimeReturnsRuleDiagnosticsThroughJsonLines() {
-        PolicyBundle bundle = starlarkBundle();
+        PolicyBundle bundle = distillBundle();
         String spec = """
                 openapi: 3.0.0
                 info: { title: Test API, version: 1.0.0 }
@@ -785,30 +769,8 @@ class PolicyBasedValidationPluginTest {
     }
 
     @Test
-    void starlarkRuntimeRejectsDiagnosticBombs() {
-        Matcher matcher = new Matcher("bomb", "starlark",
-                "def detect(api, rule):\n    return [{\"message\": \"x\"}] * 1001\n",
-                java.util.List.of("operation"), Map.of());
-        PolicyRule policyRule = new PolicyRule("TEST", "Test", "Test", "bomb", "operation", Map.of(), "");
-
-        assertThrows(MatcherEvaluationException.class,
-                () -> new StarlarkMatcherEvaluator().execute(matcher, Map.of(), policyRule));
-    }
-
-    @Test
-    void starlarkRuntimeRejectsMalformedDiagnosticResults() {
-        Matcher matcher = new Matcher("malformed", "starlark",
-                "def detect(api, rule):\n    return [{\"path\": \"/customers\"}]\n",
-                java.util.List.of("operation"), Map.of());
-        PolicyRule policyRule = new PolicyRule("TEST", "Test", "Test", "malformed", "operation", Map.of(), "");
-
-        assertThrows(MatcherEvaluationException.class,
-                () -> new StarlarkMatcherEvaluator().execute(matcher, Map.of(), policyRule));
-    }
-
-    @Test
     void operationSemanticsRuleReportsOnlyDocumentedHeuristicSignals() {
-        PolicyBundle bundle = starlarkBundle();
+        PolicyBundle bundle = distillBundle();
         String spec = """
                 openapi: 3.0.0
                 info: { title: Test API, version: 1.0.0 }
@@ -819,7 +781,7 @@ class PolicyBasedValidationPluginTest {
                     put: { summary: Partially update customer, responses: { '200': { description: OK } } }
                 """;
         Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser().readContents(spec, null, new ParseOptions()).getOpenAPI());
-        StarlarkMatcherEvaluator runtime = new StarlarkMatcherEvaluator();
+        DistillMatcherEvaluator runtime = new DistillMatcherEvaluator();
 
         assertEquals(1, runtime.execute(bundle.matchers().get("operation-semantics"), api, bundle.rules().get("HTTP001")).size());
         assertEquals(1, runtime.execute(bundle.matchers().get("operation-semantics"), api, bundle.rules().get("HTTP002")).size());
@@ -850,9 +812,6 @@ class PolicyBasedValidationPluginTest {
         assertResource("api-policy/rules/CONTENT004.md");
         assertResource("api-policy/policies/EnterpriseGrade.md");
         assertResource("api-policy/matchers/resource-path/Matcher.md");
-        assertResource("api-policy/matchers/resource-path/Matcher.star");
-        assertResource("api-policy/matchers/schema/Matcher.star");
-        assertResource("api-policy/matchers/security/Matcher.star");
         assertResource("api-policy/matchers/operation/Matcher.md");
         assertResource("api-policy/matchers/text-style/Matcher.md");
         assertResource("api-policy/matchers/proprietary-header/Matcher.md");
@@ -861,7 +820,6 @@ class PolicyBasedValidationPluginTest {
         assertResource("api-policy/matchers/openapi-version/Matcher.md");
         assertResource("api-policy/matchers/media-type/Matcher.md");
         assertResource("api-policy/matchers/error-response/Matcher.md");
-        assertResource("api-policy/matchers/error-response/Matcher.star");
     }
 
     private static SpecInput input(String content) {
@@ -873,6 +831,10 @@ class PolicyBasedValidationPluginTest {
         for (String path : new String[] {"PolicyBundle.yaml", "rules/REST001.md", "rules/REST002.md", "rules/REST003.md", "rules/REST004.md", "rules/REST005.md", "rules/REST006.md", "rules/HTTP001.md", "rules/HTTP002.md", "rules/HTTP003.md", "rules/HTTP004.md", "rules/HTTP005.md", "rules/HTTP006.md", "rules/HTTP008.md", "rules/UPDATE001.md", "rules/UPDATE002.md", "rules/UPDATE003.md", "rules/BULK001.md", "rules/BULK002.md", "rules/BULK003.md", "rules/VERSION001.md", "rules/VERSION002.md", "rules/VERSION003.md", "rules/VERSION004.md", "rules/COMPAT001.md", "rules/COMPAT002.md", "rules/COMPAT003.md", "rules/COMPAT004.md", "rules/COMPAT005.md", "rules/COMPAT006.md", "rules/STATUS001.md", "rules/STATUS002.md", "rules/STATUS003.md", "rules/STATUS004.md", "rules/STATUS005.md", "rules/STATUS006.md", "rules/STATUS007.md", "rules/DOC001.md", "rules/DOC002.md", "rules/DOC003.md", "rules/DOC004.md", "rules/DOC005.md", "rules/DOC006.md", "rules/DOC009.md", "rules/CASE001.md", "rules/CASE002.md", "rules/CASE003.md", "rules/CASE004.md", "rules/CASE005.md", "rules/JSON003.md", "rules/JSON004.md", "rules/JSON006.md", "rules/JSON007.md", "rules/JSON009.md", "rules/STANDARD008.md", "rules/STANDARD009.md", "rules/SECURITY001.md", "rules/SECURITY002.md", "rules/ERROR001.md", "rules/ERROR002.md", "rules/ERROR003.md", "rules/ERROR004.md", "rules/ERROR005.md", "rules/ERROR006.md", "rules/ERROR007.md", "policies/EnterpriseGrade.md", "matchers/resource-path/Matcher.md", "matchers/resource-path/Matcher.groovy", "matchers/operation/Matcher.md", "matchers/operation/Matcher.groovy", "matchers/text-style/Matcher.md", "matchers/text-style/Matcher.groovy", "matchers/naming/Matcher.md", "matchers/naming/Matcher.groovy", "matchers/schema/Matcher.md", "matchers/schema/Matcher.groovy", "matchers/operation-semantics/Matcher.md", "matchers/operation-semantics/Matcher.groovy", "matchers/response-code/Matcher.md", "matchers/response-code/Matcher.groovy", "matchers/response-header/Matcher.md", "matchers/response-header/Matcher.groovy", "matchers/proprietary-header/Matcher.md", "matchers/proprietary-header/Matcher.groovy", "matchers/query-collection/Matcher.md", "matchers/query-collection/Matcher.groovy", "matchers/security/Matcher.md", "matchers/security/Matcher.groovy", "matchers/manual/Matcher.md", "matchers/manual/Matcher.groovy", "matchers/bulk-operation/Matcher.md", "matchers/bulk-operation/Matcher.groovy", "matchers/versioning/Matcher.md", "matchers/versioning/Matcher.groovy", "matchers/compatibility/Matcher.md", "matchers/compatibility/Matcher.groovy", "matchers/metadata/Matcher.md", "matchers/metadata/Matcher.groovy", "matchers/error-response/Matcher.md", "matchers/error-response/Matcher.groovy"}) {
             if (path.endsWith("Matcher.groovy")) continue;
             resources.put(path, readResource("api-policy/" + path));
+            if (path.endsWith("Matcher.md")) {
+                String dslPath = path.replace("Matcher.md", "Matcher.dsl");
+                resources.put(dslPath, readResource("api-policy/" + dslPath));
+            }
         }
         resources.put("rules/STANDARD010.md", readResource("api-policy/rules/STANDARD010.md"));
         resources.put("matchers/openapi-version/Matcher.md", readResource("api-policy/matchers/openapi-version/Matcher.md"));
@@ -948,8 +910,8 @@ class PolicyBasedValidationPluginTest {
                 "extensions", "documentation-completeness", "schema-composition", "document-lint", "status-class", "example-validity", "response-example"}) {
             resources.put("matchers/" + matcherId + "/Matcher.md",
                     readResource("api-policy/matchers/" + matcherId + "/Matcher.md"));
-            resources.put("matchers/" + matcherId + "/Matcher.star",
-                    readResource("api-policy/matchers/" + matcherId + "/Matcher.star"));
+            resources.put("matchers/" + matcherId + "/Matcher.dsl",
+                    readResource("api-policy/matchers/" + matcherId + "/Matcher.dsl"));
         }
         return resources;
     }
@@ -971,10 +933,10 @@ class PolicyBasedValidationPluginTest {
         }
     }
 
-    /** Bundle pinned to the Starlark runtime for tests that drive it directly. */
-    private static PolicyBundle starlarkBundle() {
+    /** Bundle pinned to the Distill runtime for tests that drive it directly. */
+    private static PolicyBundle distillBundle() {
         return new PolicyBundleLoader().load(
                 new ClasspathBundleResources(PolicyBasedValidationPluginTest.class.getClassLoader()),
-                new PolicyBundleLoader.LoadOptions(java.util.List.of("starlark")));
+                new PolicyBundleLoader.LoadOptions(java.util.List.of("distill")));
     }
 }

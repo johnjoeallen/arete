@@ -23,7 +23,7 @@ distill(api, rule) {
             : (rule.parameters.keys.any { k -> k == "nullable" } && prop.nullable != rule.parameters["nullable"]) ? false
             : (rule.parameters.keys.any { k -> k == "required" } && prop.required != rule.parameters["required"]) ? false
             : true }
-        .map { prop -> diagnostic(prop.pointer, prop.name,
+        .map { prop -> occurrence(prop.pointer, prop.name,
             rule.parameters["enum"] == "present" ? "Property uses an enum"
             : rule.parameters["enum"] == "absent" ? "Property does not use an enum"
             : (rule.parameters.keys.any { k -> k == "nullable" } && rule.parameters["required"] == false)

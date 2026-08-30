@@ -1,9 +1,9 @@
 # Distill reference
 
 Distill is the default language for policy-bundle rules (`Matcher.dsl`). A
-Distill script *distills* the API model down to the diagnostics that violate a rule:
+Distill script *distills* the API model down to the occurrences that violate a rule:
 it is a single expression that walks `api`, keeps what matches, and returns a
-list of `diagnostic(...)` values.
+list of `occurrence(...)` values.
 
 It is deliberately small — one expression, no statements, no local variables,
 no user-defined functions — and safe by construction: the interpreter exposes
@@ -11,9 +11,8 @@ only the immutable `api` and `rule` values, a fixed set of builtins, and
 [RE2/J](https://github.com/google/re2j) regular expressions. There is no I/O,
 reflection, recursion, or unbounded iteration.
 
-Every bundled rule also ships `Matcher.star` and `Matcher.groovy`.
-`DistillParityTest` and `GroovyStarlarkParityTest` assert all three produce
-identical diagnostics, so choosing a runtime never changes a policy's findings.
+Groovy remains available as a fallback matcher runtime and is used for
+validation against the Distill implementation.
 
 ## The entry point
 
@@ -25,12 +24,12 @@ distill(api, rule) {
 
 That is the whole grammar at the top level: the keyword `distill`, two parameter
 names (`api` and `rule` by convention), then `return` **one** expression
-terminated by `;`. The expression must evaluate to a list of diagnostics
-(often built with `.map { … -> diagnostic(...) }`); returning more than 1000
-diagnostics is a rule error.
+terminated by `;`. The expression must evaluate to a list of occurrences
+(often built with `.map { … -> occurrence(...) }`); returning more than 1000
+occurrences is a rule error.
 
-- `api` is the deep-immutable API model — the same value the Starlark runtime
-  receives. Its shape (`api.paths`, `path.operationDetails`, `api.schemas`,
+- `api` is the deep-immutable API model. Its shape (`api.paths`,
+  `path.operationDetails`, `api.schemas`,
   `schema.properties`, `api.info`, `api.security`, …) is documented under
   [Writing a rule](policy-engine.md#writing-a-rule).
 - `rule` is `{ id, scope, parameters }`. Rule configuration is
@@ -142,14 +141,14 @@ appear in trailing position.
 
 ```java
 api.paths.expand { path -> path.operationDetails.map { operation ->
-    diagnostic(operation.pointer, operation.method + " " + path.path, "…") } }
+    occurrence(operation.pointer, operation.method + " " + path.path, "…") } }
 ```
 
 ## Builtin functions
 
 | Function | Result |
 |---|---|
-| `diagnostic(pointer, path, message)` | an diagnostic; `pointer` and `path` may be `null`, `message` must be non-blank. Non-string arguments are stringified. |
+| `occurrence(pointer, path, message)` | an occurrence; `pointer` and `path` may be `null`, `message` must be non-blank. Non-string arguments are stringified. |
 | `regexFullMatch(pattern, text)` | whole-string match; `pattern` is a regex literal or a string |
 | `regexSearch(pattern, text)` | match anywhere in `text` |
 | `tokenize(delim, text)` | split `text` on the **literal string** `delim`; empty tokens are kept (pair with `.filter { t -> t != "" }`) |
@@ -215,7 +214,7 @@ Each row is a complete expression and the value it produces.
 ### Rules
 
 Each example is a full `Matcher.dsl` run against the spec beside it; the
-output is the list of diagnostics (`pointer` &nbsp;\|&nbsp; `path` &nbsp;\|&nbsp; `message`).
+output is the list of occurrences (`pointer` &nbsp;\|&nbsp; `path` &nbsp;\|&nbsp; `message`).
 
 **Operations with no `summary`.**
 
@@ -223,7 +222,7 @@ output is the list of diagnostics (`pointer` &nbsp;\|&nbsp; `path` &nbsp;\|&nbsp
 distill(api, rule) {
     return api.paths.expand { path -> path.operationDetails
         .filter { op -> op.summary == null || op.summary.trim() == "" }
-        .map { op -> diagnostic(op.pointer, op.method + " " + path.path,
+        .map { op -> occurrence(op.pointer, op.method + " " + path.path,
             "Operation has no summary") } };
 }
 ```
@@ -245,7 +244,7 @@ paths:
 distill(api, rule) {
     return api.schemas.expand { schema -> schema.properties
         .filter { prop -> !(prop.name ==~ /[a-z][a-zA-Z0-9]*/) }
-        .map { prop -> diagnostic(prop.pointer, schema.name + "." + prop.name,
+        .map { prop -> occurrence(prop.pointer, schema.name + "." + prop.name,
             "Property '" + prop.name + "' is not camelCase") } };
 }
 ```
@@ -266,14 +265,14 @@ components:
 /components/schemas/Order/properties/Total       |  Order.Total       |  Property 'Total' is not camelCase
 ```
 
-**One diagnostic for the whole API** — the title must end with a configured
+**One occurrence for the whole API** — the title must end with a configured
 suffix. `rule.parameters` is `{ "suffix": "API" }`.
 
 ```java
 distill(api, rule) {
     return api.info.title.endsWith(rule.parameters["suffix"])
         ? []
-        : [diagnostic("/info/title", api.info.title,
+        : [occurrence("/info/title", api.info.title,
             "Title should end with '" + rule.parameters["suffix"] + "'")];
 }
 ```
@@ -302,7 +301,7 @@ distill(api, rule) {
         .filter { group -> size(group) > 1 }
         .expand { group -> enumerate(group)
             .filter { indexed -> indexed[0] > 0 }
-            .map { indexed -> diagnostic(indexed[1][0], indexed[1][1],
+            .map { indexed -> occurrence(indexed[1][0], indexed[1][1],
                 "operationId '" + group[0][2] + "' is also used by " + group[0][1]) } };
 }
 ```
@@ -325,22 +324,22 @@ Because Distill has no local variables, a few patterns recur.
 **Repeat, don't bind.** A value used several times is written out each time.
 Keep sub-expressions small and let `filter` / `map` carry the structure.
 
-**Optional single diagnostic.** Use a list literal for the "emit one" and "emit
+**Optional single occurrence.** Use a list literal for the "emit one" and "emit
 nothing" branches, then let the surrounding `expand` flatten it:
 
 ```java
 api.paths.expand { path ->
     size(pathSegments(path.path)) > rule.parameters["maximum-depth"]
-        ? [diagnostic(path.pointer, path.path, "Path nests too deeply")]
+        ? [occurrence(path.pointer, path.path, "Path nests too deeply")]
         : [] }
 ```
 
-**Whole-API single diagnostic.** Same idea at the top level:
+**Whole-API single occurrence.** Same idea at the top level:
 
 ```java
 distill(api, rule) {
     return size(distinct(api.paths.map { p -> pathSegments(p.path)[0] })) > rule.parameters["maximum"]
-        ? [diagnostic("/paths", "API", "Too many top-level resources")]
+        ? [occurrence("/paths", "API", "Too many top-level resources")]
         : [];
 }
 ```
@@ -354,7 +353,7 @@ above). `enumerate` then supplies the positional "all but the first" filter,
 **List building.** Concatenate independent checks with `+`:
 
 ```java
-info.extensionKeys.filter { k -> ... }.map { k -> diagnostic(...) }
+info.extensionKeys.filter { k -> ... }.map { k -> occurrence(...) }
   + api.paths.expand { path -> ... }
 ```
 

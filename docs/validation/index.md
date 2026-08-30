@@ -15,7 +15,7 @@ organization-specific plugin such as a breaking-changes checker.
 
 A **Validation** picker on the spec's page lists every globally enabled plugin
 as its own row — a checkbox plus that plugin's own rule-set dropdown — so more
-than one plugin can run at once. Click **Analyse** to run every checked plugin;
+than one plugin can run at once. Click **Score** to run every checked plugin;
 nothing runs until you do.
 
 Which plugins are checked is remembered **per spec** in the database, so

@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Persists and reloads the most recent Analyse run's result per spec — see
+ * Persists and reloads the most recent Score run's result per spec — see
  * {@link SpecValidationResultEntity}.
  */
 @Service

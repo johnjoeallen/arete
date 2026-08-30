@@ -13,7 +13,7 @@ distill(api, rule) {
                     && op.summary.trim().length <= rule.parameters["maximum-length"])
                 || (rule.parameters["match"] == "non-action-oriented"
                     && op.summary.trim() ==~ /(Get|List|Create|Update|Delete|Replace|Search|Find|Cancel|Activate|Deactivate)( .*)?/)) }
-        .map { op -> diagnostic(op.pointer, op.method + " " + path.path,
+        .map { op -> occurrence(op.pointer, op.method + " " + path.path,
             rule.parameters["initial-capital"] != null ? "Operation summary does not begin with a capital letter"
                 : rule.parameters["convention"] == "sentence-case" ? "Operation summary is not sentence case"
                 : rule.parameters["trailing-period"] == "present" ? "Operation summary ends with a period"

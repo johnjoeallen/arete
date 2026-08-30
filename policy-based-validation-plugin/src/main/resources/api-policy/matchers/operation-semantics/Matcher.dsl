@@ -23,7 +23,7 @@ distill(api, rule) {
                                 && path.path + " " + operation.summary ==~ /(?i).*\b(replace|replacement)\b.*/)))
                 )
             }
-            .map { operation -> diagnostic(
+            .map { operation -> occurrence(
                 operation.pointer,
                 operation.method + " " + path.path,
                 operationMessage(rule.parameters)) } };

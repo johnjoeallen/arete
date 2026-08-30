@@ -10,7 +10,7 @@ distill(api, rule) {
                     ? tokenize(",", rule.parameters["headers"]).map { t -> t.trim() }.filter { t -> t != "" }
                     : tokenize(",", "" + rule.parameters["header"]))
                     .any { e -> resp.headers.any { h -> h.lower() == e.lower() } }) }
-        .map { resp -> diagnostic(operation.pointer, operation.method + " " + path.path,
+        .map { resp -> occurrence(operation.pointer, operation.method + " " + path.path,
             "Response " + resp.status + " "
             + (rule.parameters["required"] ? "lacks one or more required" : "contains an unexpected")
             + " headers: "

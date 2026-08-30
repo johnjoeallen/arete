@@ -22,7 +22,7 @@ class DistillMatcherEvaluatorTest {
                         .expand { path -> path.operationDetails
                             .filter { operation -> operation.method == rule.parameters.method
                                 && regexSearch("(?i).*(create|update|delete|remove).*", path.path + " " + operation.summary) }
-                            .map { operation -> diagnostic(operation.pointer, operation.method + " " + path.path, "GET operation appears to mutate state") } };
+                            .map { operation -> occurrence(operation.pointer, operation.method + " " + path.path, "GET operation appears to mutate state") } };
                 }
                 """;
         Map<String, Object> api = api("""
@@ -72,7 +72,7 @@ class DistillMatcherEvaluatorTest {
                 distill(api, rule) {
                     return api.paths
                         .filter { path -> path.path =~ /\\/v[0-9]+\\// && !(path.path ==~ ~/(?i).*internal.*/) }
-                        .map { path -> diagnostic(path.pointer, path.path, "Versioned public path") };
+                        .map { path -> occurrence(path.pointer, path.path, "Versioned public path") };
                 }
                 """;
         Map<String, Object> api = api("""
@@ -95,7 +95,7 @@ class DistillMatcherEvaluatorTest {
                     return api.paths
                         .filter { path -> regexFullMatch("(?i).*/actions(?:/[^/]+)?", path.path) }
                         .expand { path -> path.operations
-                            .map { method -> diagnostic(path.pointer + "/" + method.lower(), method + " " + path.path, "Custom action resource is used") } };
+                            .map { method -> occurrence(path.pointer + "/" + method.lower(), method + " " + path.path, "Custom action resource is used") } };
                 }
                 """;
         Map<String, Object> api = api("""
@@ -117,7 +117,7 @@ class DistillMatcherEvaluatorTest {
                 distill(api, rule) {
                     return api.paths
                         .filter { path -> regexFullMatch(".*/(v[0-9]+|version[0-9]+)(/.*)?", path.path) }
-                        .map { path -> diagnostic(path.pointer, path.path, "Interface version is exposed through uri") };
+                        .map { path -> occurrence(path.pointer, path.path, "Interface version is exposed through uri") };
                 }
                 """;
         Map<String, Object> api = api("""
@@ -141,7 +141,7 @@ class DistillMatcherEvaluatorTest {
                         .filter { path -> ["string", "int"].any { t -> t == type(path.path) }
                             && path.keys.any { k -> k == "pointer" }
                             && truthy(path.path) }
-                        .map { path -> diagnostic(path.pointer, path.path, type(rule.parameters)) };
+                        .map { path -> occurrence(path.pointer, path.path, type(rule.parameters)) };
                 }
                 """;
         Map<String, Object> api = api("""
@@ -164,7 +164,7 @@ class DistillMatcherEvaluatorTest {
                         .filter { path -> path.path.contains("-")
                             && strip(path.path, "/") != ""
                             && join("-", ["a", "b"]) == "a-b" }
-                        .map { path -> diagnostic(path.pointer, path.path, "kept " + "-" + " ok") };
+                        .map { path -> occurrence(path.pointer, path.path, "kept " + "-" + " ok") };
                 }
                 """;
         Map<String, Object> api = api("""
@@ -188,7 +188,7 @@ class DistillMatcherEvaluatorTest {
                         .group { path -> pathSegments(path.path)[0] }
                         .values
                         .filter { g -> size(g) > 1 }
-                        .expand { g -> g.map { path -> diagnostic(path.pointer, path.path,
+                        .expand { g -> g.map { path -> occurrence(path.pointer, path.path,
                             "shares a root with " + size(g) + " paths") } };
                 }
                 """;

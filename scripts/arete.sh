@@ -6,23 +6,19 @@ JAR="$DIR/arete.jar"
 DATA_DIR="$HOME/.arete/data"
 PORT=""
 WIPE=0
-GROOVY=0
 FORK=0
 RULE_LANGUAGES=""
 
 usage() {
   cat <<EOF
-Usage: $(basename "$0") [--port PORT] [--wipe-db] [--enable-groovy-rules] [--fork-rules] [--rule-languages LIST] [-h|--help]
+Usage: $(basename "$0") [--port PORT] [--wipe-db] [--fork-rules] [--rule-languages LIST] [-h|--help]
 
   --port, -p PORT   Run the server on PORT instead of the configured default.
   --wipe-db         Delete the local database ($DATA_DIR) before starting.
-  --enable-groovy-rules
-                    Allow the legacy, unsandboxed Groovy rule runtime as a
-                    fallback (precedence: distill,starlark,groovy).
   --fork-rules  Run each rule in a disposable JVM with a timeout.
   --rule-languages LIST
                     Comma-separated rule language precedence, e.g.
-                    "distill,starlark" (the default) or "starlark". The first
+                    "distill,groovy" (the default) or "groovy,distill". The first
                     language with a source file present is used per rule.
   -h, --help        Show this help and exit.
 EOF
@@ -33,7 +29,6 @@ while [ $# -gt 0 ]; do
     --port=*) PORT="${1#*=}"; shift ;;
     --port|-p) PORT="$2"; shift 2 ;;
     --wipe-db|--reset-db) WIPE=1; shift ;;
-    --enable-groovy-rules) GROOVY=1; shift ;;
     --fork-rules) FORK=1; shift ;;
     --rule-languages=*) RULE_LANGUAGES="${1#*=}"; shift ;;
     --rule-languages) RULE_LANGUAGES="$2"; shift 2 ;;
@@ -75,8 +70,6 @@ fi
 ARGS=()
 if [ -n "$RULE_LANGUAGES" ]; then
   ARGS+=("-Darete.policy.rule-languages=$RULE_LANGUAGES")
-elif [ "$GROOVY" -eq 1 ]; then
-  ARGS+=("-Darete.policy.rule-language=groovy")
 fi
 if [ "$FORK" -eq 1 ]; then
   ARGS+=("-Darete.policy.fork-rules=true")

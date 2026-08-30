@@ -5,7 +5,6 @@ set "JAR=%~dp0arete.jar"
 set "DATA_DIR=%USERPROFILE%\.arete\data"
 set "PORT="
 set "WIPE=0"
-set "GROOVY=0"
 set "FORK=0"
 set "RULE_LANGUAGES="
 
@@ -33,11 +32,6 @@ if /i "%~1"=="--reset-db" (
     shift
     goto :parse
 )
-if /i "%~1"=="--enable-groovy-rules" (
-    set "GROOVY=1"
-    shift
-    goto :parse
-)
 if /i "%~1"=="--fork-rules" (
     set "FORK=1"
     shift
@@ -55,17 +49,14 @@ echo Unknown option: %~1
 goto :usage
 
 :usage
-echo Usage: %~nx0 [--port PORT] [--wipe-db] [--enable-groovy-rules] [--fork-rules] [--rule-languages LIST] [-h^|--help]
+echo Usage: %~nx0 [--port PORT] [--wipe-db] [--fork-rules] [--rule-languages LIST] [-h^|--help]
 echo.
 echo   --port, -p PORT   Run the server on PORT instead of the configured default.
 echo   --wipe-db         Delete the local database ^(%DATA_DIR%^) before starting.
-echo   --enable-groovy-rules
-echo                     Allow the legacy, unsandboxed Groovy runtime as a fallback
-echo                     ^(precedence: distill,starlark,groovy^).
 echo   --fork-rules   Run each rule in a disposable JVM with a timeout.
 echo   --rule-languages LIST
 echo                     Comma-separated rule language precedence, e.g.
-echo                     "distill,starlark" ^(the default^) or "starlark".
+echo                     "distill,groovy" ^(the default^) or "groovy,distill".
 echo   -h, --help        Show this help and exit.
 exit /b 0
 
@@ -108,8 +99,6 @@ if "%WIPE%"=="1" (
 set "JAVA_OPTS="
 if not "%RULE_LANGUAGES%"=="" (
     set "JAVA_OPTS=-Darete.policy.rule-languages=%RULE_LANGUAGES%"
-) else if "%GROOVY%"=="1" (
-  set "JAVA_OPTS=-Darete.policy.rule-language=groovy"
 )
 if "%FORK%"=="1" set "JAVA_OPTS=%JAVA_OPTS% -Darete.policy.fork-rules=true"
 set "ARGS="

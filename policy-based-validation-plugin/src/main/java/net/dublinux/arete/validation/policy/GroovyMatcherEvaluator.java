@@ -10,10 +10,8 @@ import java.util.Map;
 
 /**
  * Runs bundle Groovy directly in the plugin JVM via a bare {@code GroovyShell}
- * — no sandbox. It is an opt-in fallback ({@code rule-language=groovy}),
- * disabled by default until the rule sandbox is available. Not deprecated:
- * kept parity-equivalent to the Starlark runtime and re-enabled once it can be
- * run safely. See {@code docs/policy-engine-sandbox-plan.md}.
+ * — no sandbox. It is available as a fallback because it executes
+ * bundle-supplied code.
  */
 final class GroovyMatcherEvaluator {
     void validate(Matcher rule) {

@@ -12,7 +12,7 @@ distill(api, rule) {
                 || (operation.description == null ? "" : operation.description.trim()) == "")
             && (rule.parameters["request-body"] != "present" || operation.requestBodyPresent)
             && (rule.parameters["request-body"] != "absent" || !operation.requestBodyPresent) }
-        .map { operation -> diagnostic(operation.pointer,
+        .map { operation -> occurrence(operation.pointer,
             operation.method + " " + path.path,
             rule.parameters["summary"] == "absent" ? "Operation summary is missing"
                 : rule.parameters["description"] == "absent" ? "Operation description is missing"

@@ -5,7 +5,7 @@ distill(api, rule) {
                 || (param.explode == null
                         ? (param.style == null ? "form" : param.style) == "form"
                         : param.explode) != rule.parameters["explode"]) }
-        .map { param -> diagnostic(param.pointer, operation.method + " " + path.path,
+        .map { param -> occurrence(param.pointer, operation.method + " " + path.path,
             "Collection query parameter " + param.name
                 + " does not use " + rule.parameters["style"]
                 + " serialization with explode="

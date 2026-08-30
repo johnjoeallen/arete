@@ -2,13 +2,13 @@ distill(api, rule) {
     return (api.info.title == null || api.info.title.trim() == "")
         ? api.servers.filter { u -> false }
         : (rule.parameters["suffix"] != null && !api.info.title.trim().endsWith(rule.parameters["suffix"])
-            ? tokenize(",", "x").map { u -> diagnostic("/info/title", api.info.title,
+            ? tokenize(",", "x").map { u -> occurrence("/info/title", api.info.title,
                 "API title does not end with '" + rule.parameters["suffix"] + "'") }
             : tokenize(",", "x").filter { u -> false })
         + tokenize(",", "" + rule.parameters["forbidden"])
             .filter { token -> token.trim() != ""
                 && token.trim().lower() == strip(last(tokenize(" ", api.info.title)), "()[]:,.").lower() }
-            .map { token -> diagnostic("/info/title", api.info.title,
+            .map { token -> occurrence("/info/title", api.info.title,
                 "API title ends with the discouraged marker '" + token.trim() + "'") }
         + (rule.parameters["case"] == "title-case"
             ? tokenize(" ", api.info.title)
@@ -17,7 +17,7 @@ distill(api, rule) {
                     && !(strip(word, "()[]:,.").lower() ==~ /(a|an|and|as|at|but|by|for|in|of|on|or|the|to|via|with)/)
                     && strip(word, "()[]:,.").length > 3
                     && !(strip(word, "()[]:,.") ==~ /[A-Z0-9].*/) }
-                .map { word -> diagnostic("/info/title", api.info.title,
+                .map { word -> occurrence("/info/title", api.info.title,
                     "API title word '" + word + "' is not in Title Case") }
             : api.servers.filter { u -> false });
 }

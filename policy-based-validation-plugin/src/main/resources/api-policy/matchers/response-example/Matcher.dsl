@@ -10,7 +10,7 @@ distill(api, rule) {
                 .values
                 .expand { group -> enumerate(group)
                     .filter { indexed -> indexed[0] > 0 }
-                    .map { indexed -> diagnostic(operation.pointer, operation.method + " " + path.path,
+                    .map { indexed -> occurrence(operation.pointer, operation.method + " " + path.path,
                         "Error responses " + group[0][0] + " and " + indexed[1][0]
                           + " share an identical example payload") } } } };
 }

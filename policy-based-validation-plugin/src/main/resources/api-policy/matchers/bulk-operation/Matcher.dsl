@@ -9,7 +9,7 @@ distill(api, rule) {
                 && operation.method == rule.parameters["method"]
                 && ((path.path == null ? "" : path.path) + " " + (operation.summary == null ? "" : operation.summary)).lower()
                     =~ /(?i)(search|filter|criteria|query)/) }
-        .map { operation -> diagnostic(operation.pointer,
+        .map { operation -> occurrence(operation.pointer,
             operation.method + " " + path.path,
             rule.parameters["operation-type"] == "create"
                 ? "Bulk creation is not POSTed to a collection"

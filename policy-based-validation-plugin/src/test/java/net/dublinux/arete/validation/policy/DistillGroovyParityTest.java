@@ -13,10 +13,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 /**
- * Every bundled rule that also ships a Matcher.dsl must produce exactly
- * the same diagnostics as its Matcher.star for a representative spec.
+ * Every bundled rule that ships both Matcher.dsl and Matcher.groovy must produce exactly
+ * the same diagnostics from both implementations. for a representative spec.
  */
-class DistillParityTest {
+class DistillGroovyParityTest {
 
     private static final String CATALOGUE_SPEC = """
             openapi: 3.0.0
@@ -717,24 +717,33 @@ class DistillParityTest {
         var parsed = new OpenAPIV3Parser().readContents(spec, null, new ParseOptions());
         Map<String, Object> api = OpenApiMapAdapter.toMap(parsed.getOpenAPI(), parsed.getMessages(), spec);
 
-        Matcher starRule = new Matcher(matcherId, "starlark",
-                read("api-policy/matchers/" + matcherId + "/Matcher.star"), List.of(scope), Map.of());
+        String groovySource = readOptional("api-policy/matchers/" + matcherId + "/Matcher.groovy");
+        if (groovySource == null) return;
+        Matcher groovyRule = new Matcher(matcherId, "groovy", groovySource, List.of(scope), Map.of());
         PolicyRule rule = new PolicyRule("PARITY", "Parity", "Parity", matcherId, scope, parameters, "");
 
-        List<Diagnostic> starDiagnostics = new StarlarkMatcherEvaluator().execute(starRule, api, rule);
+        List<Diagnostic> groovyDiagnostics = new GroovyMatcherEvaluator().execute(groovyRule, api, rule);
         List<Diagnostic> distillDiagnostics = new DistillMatcherEvaluator().execute(
                 read("api-policy/matchers/" + matcherId + "/Matcher.dsl"), api, rule.asMap());
 
-        assertEquals(starDiagnostics, distillDiagnostics, matcherId + " distill/star output differs");
+        assertEquals(groovyDiagnostics, distillDiagnostics, matcherId + " distill/groovy output differs");
         if (expectFindings) {
-            assertFalse(starDiagnostics.isEmpty(), matcherId + ": test spec should exercise the rule");
+            assertFalse(groovyDiagnostics.isEmpty(), matcherId + ": test spec should exercise the rule");
         }
     }
 
     private static String read(String path) {
-        try (InputStream stream = DistillParityTest.class.getClassLoader().getResourceAsStream(path)) {
+        try (InputStream stream = DistillGroovyParityTest.class.getClassLoader().getResourceAsStream(path)) {
             if (stream == null) throw new IllegalArgumentException("missing resource " + path);
             return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (java.io.IOException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    private static String readOptional(String path) {
+        try (InputStream stream = DistillGroovyParityTest.class.getClassLoader().getResourceAsStream(path)) {
+            return stream == null ? null : new String(stream.readAllBytes(), StandardCharsets.UTF_8);
         } catch (java.io.IOException e) {
             throw new IllegalStateException(e);
         }

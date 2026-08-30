@@ -9,7 +9,7 @@ import jakarta.persistence.Table;
 import java.time.Instant;
 
 /**
- * The most recent Analyse run's result for a spec, so reopening it shows
+ * The most recent Score run's result for a spec, so reopening it shows
  * those findings again instead of an empty picker — validation is still
  * on-demand (nothing runs automatically), but the last thing it computed
  * doesn't vanish the moment the page is left. One row per spec; a new run
@@ -20,7 +20,7 @@ import java.time.Instant;
  * which is null for a pasted spec — this needs to work for every spec,
  * not just file-sourced ones) — the host compares it against the spec's
  * current content to decide whether this cached result is still current,
- * i.e. whether the Analyse button should start enabled.
+ * i.e. whether the Score button should start enabled.
  */
 @Entity
 @Table(name = "spec_validation_results")

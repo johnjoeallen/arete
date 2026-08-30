@@ -26,7 +26,6 @@ public final class PolicyBasedValidationPlugin implements SpecValidationPlugin, 
     private volatile PolicyBundle bundle;
     private final PolicyBundleLoader bundleLoader = new PolicyBundleLoader();
     private final GroovyMatcherEvaluator groovyRuntime = new GroovyMatcherEvaluator();
-    private final StarlarkMatcherEvaluator starlarkRuntime = new StarlarkMatcherEvaluator();
     private final DistillMatcherEvaluator distillRuntime = new DistillMatcherEvaluator();
     private volatile boolean forkRules;
     private volatile long forkRuleTimeoutMillis = 5000;
@@ -46,16 +45,11 @@ public final class PolicyBasedValidationPlugin implements SpecValidationPlugin, 
     }
 
     /** Matcher language precedence used when nothing is configured. */
-    static final List<String> DEFAULT_LANGUAGE_PRECEDENCE = List.of("distill", "starlark");
+    static final List<String> DEFAULT_LANGUAGE_PRECEDENCE = List.of("distill", "groovy");
 
     @Override
     public synchronized void configure(Map<String, String> config) {
         List<String> precedence = resolveLanguagePrecedence(config);
-        if (precedence.contains("groovy")) {
-            LOG.log(System.Logger.Level.WARNING,
-                    "Areté policy engine: the Groovy rule runtime is enabled (rule-languages={0}). "
-                            + "This runtime is UNSANDBOXED; only enable it for bundles you fully trust.", precedence);
-        }
         bundle = bundleLoader.load(new ClasspathBundleResources(getClass().getClassLoader()),
                 new PolicyBundleLoader.LoadOptions(precedence));
         forkRules = booleanConfig(config, "fork-rules", "arete.policy.fork-rules", false);
@@ -66,8 +60,8 @@ public final class PolicyBasedValidationPlugin implements SpecValidationPlugin, 
      * Resolves the rule language precedence, in order of precedence:
      * the {@code rule-languages} plugin config key (comma-separated), the
      * {@code rule-language} key (a single language, appended to the
-     * Distill/Starlark default), then the matching {@code arete.policy.*}
-     * system properties, then the {@code ["distill", "starlark"]} default.
+     * Distill/Groovy default), then the matching {@code arete.policy.*} system
+     * properties, then the default.
      */
     private static List<String> resolveLanguagePrecedence(Map<String, String> config) {
         String list = configOrProperty(config, "rule-languages", "arete.policy.rule-languages");
@@ -84,7 +78,7 @@ public final class PolicyBasedValidationPlugin implements SpecValidationPlugin, 
             String language = single.trim().toLowerCase();
             if (DEFAULT_LANGUAGE_PRECEDENCE.contains(language)) return List.of(language);
             // A single language outside the default means "also allow this one",
-            // with Distill then Starlark still preferred where a source exists.
+            // with the default runtimes still preferred where a source exists.
             List<String> precedence = new ArrayList<>(DEFAULT_LANGUAGE_PRECEDENCE);
             precedence.add(language);
             return List.copyOf(precedence);
@@ -155,7 +149,7 @@ public final class PolicyBasedValidationPlugin implements SpecValidationPlugin, 
                         : switch (matcher.language()) {
                             case "groovy" -> groovyRuntime.execute(matcher, api, effectiveRule);
                             case "distill" -> distillRuntime.execute(matcher, api, effectiveRule);
-                            default -> starlarkRuntime.execute(matcher, api, effectiveRule);
+                            default -> throw new MatcherEvaluationException("Unsupported matcher language: " + matcher.language());
                         };
             } catch (MatcherEvaluationException e) {
                 return ValidationResult.pluginError("Matcher '" + rule.matcherId() + "' failed for " + rule.id() + ": " + e.getMessage());

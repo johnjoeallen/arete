@@ -18,26 +18,21 @@ import java.util.Set;
 final class PolicyBundleLoader {
     private final Yaml yaml;
     private final GroovyMatcherEvaluator groovyRuntime = new GroovyMatcherEvaluator();
-    private final StarlarkMatcherEvaluator starlarkRuntime = new StarlarkMatcherEvaluator();
     private final DistillMatcherEvaluator distillRuntime = new DistillMatcherEvaluator();
 
     /** The rule source file each supported language is loaded from. */
     private static final Map<String, String> SOURCE_FILE = Map.of(
             "distill", "Matcher.dsl",
-            "starlark", "Matcher.star",
             "groovy", "Matcher.groovy");
 
     /**
      * Ordered list of rule languages to try for each rule. The first
      * language in the list that has a source file present wins, so a rule
      * shipping only {@code Matcher.groovy} runs on Groovy even while a
-     * rule that also ships {@code Matcher.star} stays on Starlark.
+     * rule that also ships {@code Matcher.groovy} stays on Groovy.
      *
-     * <p>The default is {@code ["distill", "starlark"]}: Distill is the primary
-     * language, with Starlark as the fallback for any rule that ships only
-     * a {@code Matcher.star}. Groovy is always opt-in. Callers override this
-     * (e.g. {@code ["starlark"]} to pin Starlark, or {@code ["groovy",
-     * "starlark"]} to prefer Groovy) via configuration.
+     * <p>The default is {@code ["distill", "groovy"]}; Distill wins when
+     * both sources are present. Callers may override this via configuration.
      */
     record LoadOptions(List<String> languagePrecedence) {
         LoadOptions {
@@ -52,7 +47,7 @@ final class PolicyBundleLoader {
             }
             languagePrecedence = List.copyOf(languagePrecedence);
         }
-        static LoadOptions defaults() { return new LoadOptions(List.of("distill", "starlark")); }
+        static LoadOptions defaults() { return new LoadOptions(List.of("distill", "groovy")); }
     }
 
     PolicyBundleLoader() {
@@ -89,7 +84,7 @@ final class PolicyBundleLoader {
                 switch (language) {
                     case "groovy" -> groovyRuntime.validate(matcher);
                     case "distill" -> distillRuntime.validate(matcher);
-                    default -> starlarkRuntime.validate(matcher);
+                    default -> throw new BundleValidationException("unknown matcher language '" + language + "'");
                 }
                 break;
             }

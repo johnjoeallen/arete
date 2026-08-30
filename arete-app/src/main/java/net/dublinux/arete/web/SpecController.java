@@ -149,9 +149,9 @@ public class SpecController {
     /**
      * Renders a spec's docs. Validation is on-demand, not automatic — see
      * {@link PluginValidationService} — so {@code ran} is absent on a plain
-     * open (nothing runs; instead the last Analyse run's result, if any, is
+     * open (nothing runs; instead the last Score run's result, if any, is
      * reloaded from {@link SpecValidationResultService} so it doesn't just
-     * vanish when the page is left) and present when the Analyse form
+     * vanish when the page is left) and present when the Score form
      * resubmits here. {@code plugin} is the checked plugin ids from that
      * form — a plugin present in {@code allParams} (i.e. rendered as a
      * picker row) but absent from {@code plugin} was unchecked, per HTML's
@@ -203,7 +203,7 @@ public class SpecController {
             }
             if (requests.isEmpty()) {
                 specValidationResultService.deleteForSpec(id);
-                model.addAttribute("hasBeenAnalysed", false);
+                model.addAttribute("hasBeenScored", false);
             } else {
                 AggregatedValidationResult validation = pluginValidationService.validateMany(entity.getRawContent(), requests);
                 List<String> activePluginIds = requests.stream().map(PluginRunRequest::pluginId).toList();
@@ -221,13 +221,13 @@ public class SpecController {
     }
 
     /**
-     * Loads whatever the last Analyse run for this spec found, if any — used
+     * Loads whatever the last Score run for this spec found, if any — used
      * whenever a spec is shown without a fresh run having just happened
      * (a plain reopen, or right after saving a pasted/loaded spec whose
      * title reused an existing row's id).
      */
     private void populateCachedValidation(Model model, Long specId) {
-        model.addAttribute("hasBeenAnalysed", false);
+        model.addAttribute("hasBeenScored", false);
         specValidationResultService.findForSpec(specId).ifPresent(cached -> {
             populateValidationModel(model, cached.result(), cached.activePluginIds());
             model.addAttribute("resultFromCache", true);
@@ -235,7 +235,7 @@ public class SpecController {
     }
 
     private void populateValidationModel(Model model, AggregatedValidationResult validation, List<String> activePluginIds) {
-        model.addAttribute("hasBeenAnalysed", true);
+        model.addAttribute("hasBeenScored", true);
         model.addAttribute("validation", validation);
         model.addAttribute("endpointFindings", EndpointFindings.byEndpoint(validation.diagnostics()));
         model.addAttribute("schemaFindings", ComponentFindings.byComponent("schemas", validation.diagnostics()));
@@ -297,7 +297,7 @@ public class SpecController {
      */
     private SpecEntity parseAndSave(String content, String filePath, Model model) {
         model.addAttribute("activateScore", false);
-        model.addAttribute("hasBeenAnalysed", false);
+        model.addAttribute("hasBeenScored", false);
         try {
             ParsedSpec parsed = specParserService.parse(content);
             model.addAttribute("openApi", parsed.openApi());
@@ -396,7 +396,7 @@ public class SpecController {
      * @param ruleSetSelections {@code ruleSet_<pluginId>} request params to
      *                        read the selected index from, keyed exactly as
      *                        the picker form submits them (a just-submitted
-     *                        Analyse); a plugin with no entry here falls
+     *                        Score); a plugin with no entry here falls
      *                        back to its persisted per-spec choice, then to
      *                        index 0 if that's absent too (or either value
      *                        is out-of-range/non-numeric)

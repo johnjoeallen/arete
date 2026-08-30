@@ -5,13 +5,13 @@ distill(api, rule) {
                 && (param.name.lower().startsWith("x-") || param.name.lower().startsWith("x_"))
                 && !tokenize(",", (rule.parameters["allowed"] == null ? "" : rule.parameters["allowed"]))
                         .any { a -> a.trim().lower() == param.name.lower() } }
-            .map { param -> diagnostic(param.pointer, operation.method + " " + path.path,
+            .map { param -> occurrence(param.pointer, operation.method + " " + path.path,
                 "Proprietary request header is not allow-listed: " + param.name) }
         + operation.responses.expand { resp -> resp.headers
             .filter { header -> (header.lower().startsWith("x-") || header.lower().startsWith("x_"))
                 && !tokenize(",", (rule.parameters["allowed"] == null ? "" : rule.parameters["allowed"]))
                         .any { a -> a.trim().lower() == header.lower() } }
-            .map { header -> diagnostic(operation.pointer, operation.method + " " + path.path,
+            .map { header -> occurrence(operation.pointer, operation.method + " " + path.path,
                 "Proprietary response header is not allow-listed: " + header) } }
     } };
 }

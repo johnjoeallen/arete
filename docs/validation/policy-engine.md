@@ -41,35 +41,26 @@ For each `validate(spec)` call:
 
 ### Rule languages
 
-The engine ships three rule runtimes. A rule can be authored in any of
-the languages — `Matcher.dsl`, `Matcher.star` and `Matcher.groovy` sit side
-by side under the rule directory — and a configurable **language
+The engine ships Distill and Groovy rule runtimes. A configurable **language
 precedence** decides which source is loaded for each rule.
 
 | Language | Source file | Status |
 |---|---|---|
 | `distill` | `Matcher.dsl` | **Default.** Sandboxed; see the [Distill reference](distill.md). |
-| `starlark` | `Matcher.star` | Sandboxed fallback; always available. |
-| `groovy` | `Matcher.groovy` | **Disabled by default** — opt-in, unsandboxed. |
+| `groovy` | `Matcher.groovy` | Available for validation and execution. |
 
-Every bundled rule ships all three sources, kept in lock-step by
-`DistillParityTest` and `GroovyStarlarkParityTest`, so the language a bundle
-loads never changes its findings.
+Where both implementations are provided, the Distill and Groovy sources are
+kept in lock-step by the validation tests.
 
 #### Language precedence
 
 For each rule the loader walks the configured precedence list and uses the
 **first language whose source file is present**. The default precedence is
-`distill,starlark` — Distill for every rule, with Starlark covering any
-rule (in a third-party bundle, say) that ships only a `Matcher.star`.
-Groovy never runs unless you opt in:
+`distill,groovy` — Distill first, with Groovy available where no Distill source
+exists:
 
-- precedence `starlark` — pin the Starlark runtime;
-- precedence `distill,starlark,groovy` (what `--enable-groovy-rules` sets) —
-  Distill, then Starlark, then Groovy only where neither of the others has a
-  source;
-- precedence `groovy,starlark` — prefer Groovy where a `Matcher.groovy`
-  exists, fall back to Starlark otherwise;
+- precedence `distill,groovy` — prefer Distill, then Groovy;
+- precedence `groovy,distill` — prefer Groovy, then Distill;
 - precedence `groovy` — Groovy only; a rule with no `Matcher.groovy`
   fails the bundle.
 
@@ -77,65 +68,45 @@ Configure it (highest precedence first):
 
 | Mechanism | Value |
 |---|---|
-| Plugin config key `rule-languages` | comma-separated list, e.g. `starlark` |
-| Plugin config key `rule-language` | a single extra language (appended to `distill,starlark`) |
+| Plugin config key `rule-languages` | comma-separated list, e.g. `distill,groovy` |
+| Plugin config key `rule-language` | a single extra language (appended to `distill,groovy`) |
 | System property `-Darete.policy.rule-languages` | comma-separated list |
 | System property `-Darete.policy.rule-language` | single language |
 | Launcher `--rule-languages LIST` | comma-separated list |
-| Launcher `--enable-groovy-rules` | shorthand for `distill,starlark,groovy` |
 
 === "Launcher"
 
     ```bash
-    ./arete.sh --enable-groovy-rules
-    ./arete.sh --rule-languages starlark
+    ./arete.sh --rule-languages distill,groovy
     ```
 
 === "System property"
 
     ```bash
-    java -Darete.policy.rule-languages=starlark -jar arete.jar
+    java -Darete.policy.rule-languages=distill,groovy -jar arete.jar
     ```
 
 #### Distill (default)
 
 Rules run as [Distill](distill.md) sources — a small expression language shaped
 for rule pipelines (`.map` / `.filter` / `.expand`, slashy regex literals,
-`diagnostic(...)`).
+`occurrence(...)`).
 
 - **Safe by construction** — the interpreter exposes only the immutable `api`
   and `rule` values, a fixed builtin set, and RE2/J regex. No filesystem,
   network, reflection, or unbounded loops.
 - See the [Distill reference](distill.md) for the full grammar and builtin catalogue.
 
-#### Starlark (sandboxed fallback)
+#### Groovy
 
-Rules run as [Starlark](https://bazel.build/rules/language) sources.
-
-- **Safe by construction** — a Starlark rule cannot touch the filesystem,
-  network, environment, threads, reflection, or any class outside the
-  whitelisted value model. It reads the immutable `api` and `rule` values and
-  returns a list of diagnostic dicts. Nothing to sandbox.
-- Regex is [RE2/J](https://github.com/google/re2j) — linear-time, no
-  catastrophic backtracking.
-- The Starlark rules were verified against the Groovy implementations
-  across a corpus sweep.
-
-#### Groovy (disabled by default)
-
-`GroovyRuleRuntime` runs a `Matcher.groovy` source directly in the plugin
-JVM via a bare `GroovyShell` — **with no sandbox**. It is a deliberate, opt-in
-fallback and is **disabled by default** until the rule sandbox described in
-the
-[sandbox plan](https://github.com/johnjoeallen/arete/blob/main/design-notes/policy-engine-sandbox-plan.md)
-lands. It is *not* deprecated — the intent is to re-enable it as a first-class
-option once bundle-supplied Groovy can be run safely.
+`GroovyMatcherEvaluator` runs a `Matcher.groovy` source directly in the plugin
+JVM via a bare `GroovyShell` — **with no sandbox**. It is enabled after
+Distill when no Distill source is present.
 
 !!! danger "Groovy rules are unsandboxed"
     A `Matcher.groovy` runs with the full authority of the plugin JVM —
-    filesystem, network, process execution, reflection. Only add `groovy` to
-    the precedence for a policy bundle you fully trust and control. That is why
-    it is off by default.
+    filesystem, network, process execution, reflection. Use it only with a
+    policy bundle you fully trust and control.
 
 ---
 
@@ -149,9 +120,8 @@ api-policy/
 ├── rules/
 │   └── <rule-id>/
 │       ├── Matcher.md          # descriptor (YAML front matter) + prose
-│       ├── Matcher.dsl        # the rule — Distill (default runtime)
-│       ├── Matcher.star        # the same rule — Starlark (sandboxed fallback)
-│       └── Matcher.groovy      # the same rule — Groovy (opt-in runtime)
+│       ├── Matcher.dsl         # the rule — Distill (default runtime)
+│       └── Matcher.groovy      # the same rule — Groovy
 ├── rules/
 │   └── <RULE-ID>.md             # rule front matter + human documentation
 └── policies/
@@ -195,8 +165,8 @@ job.
 ```yaml
 ---
 id: naming                       # must match the manifest key
-language: starlark                # the rule language
-source: Matcher.star             # the rule source
+    language: distill                 # the rule language
+    source: Matcher.dsl               # the rule source
 scopes:                          # the scope values rules may request
   - property
   - path-segment
@@ -263,34 +233,14 @@ as `pointer`.
 ### Writing a rule
 
 The default runtime is **Distill** (`Matcher.dsl`); its grammar and builtins
-have their own chapter — the [Distill reference](distill.md). The rest of this
-section describes the Starlark form, which every bundled rule also ships as
-a sandboxed fallback.
-
-`Matcher.star` must define a top-level function `detect(api, rule)` that
-returns a list of diagnostic dicts:
-
-```python
-def detect(api, rule):
-    suffix = rule["parameters"]["suffix"]        # rule = {"id", "scope", "parameters"}
-    out = []
-    for schema in api["schemas"]:
-        for prop in schema["properties"]:
-            if prop["name"].endswith(suffix):
-                out.append({
-                    "pointer": prop["pointer"],          # optional, string
-                    "path": prop["name"],                # optional, string (shown as location)
-                    "message": "Property has the prohibited suffix " + suffix,  # required, non-blank
-                })
-    return out
-```
+have their own chapter — the [Distill reference](distill.md).
 
 Rules:
 
 - `message` is required and must be non-blank; `pointer` and `path` are
   optional strings.
-- Return `[]` when nothing matches — **never** return a score or a severity.
-- More than 1000 diagnostics is a rule error.
+- Return an empty list when nothing matches — **never** return a score or severity.
+- More than 1000 occurrences is a rule error.
 - Any error (raised, step-cap exceeded, wrong return shape) becomes a plugin
   error for that rule's run — it does not abort the other rules.
 - The script is compiled when the bundle loads; a compile failure fails the
@@ -312,7 +262,7 @@ list/dict/string/`for`/comprehension work are these builtins:
 If a rule needs something outside this list, that is a deliberate,
 reviewed addition to the runtime — not a workaround in the script.
 
-The `manual` rule is the deliberate no-op (`def detect(api, rule): return []`).
+The `manual` rule is the deliberate no-op (`distill(api, rule) { return []; }`).
 It keeps a rule in the catalogue as a checklist item that cannot be inferred
 from an OpenAPI document.
 
@@ -413,7 +363,7 @@ The result reports `overallScore` (`effectiveScore`) and
 ### A new rule
 
 1. Create `matchers/<id>/Matcher.md` (descriptor) and
-   `rules/<id>/Matcher.star` (the `detect(api, rule)` function).
+   `matchers/<id>/Matcher.dsl` (the Distill expression).
 2. Add `<id>: matchers/<id>/Matcher.md` to `PolicyBundle.yaml` under
    `rules:`.
 3. Add rules that use it.
@@ -460,7 +410,7 @@ The bundle fails fast (`BundleValidationException`) on:
 - `formatVersion` ≠ 1; empty `rules`/`policies`/`rules`; unknown top-level
   or front-matter fields; unsafe resource paths.
 - A manifest key that doesn't match the `id` inside the referenced file.
-- A rule: an uncompilable `Matcher.star`, a missing source, an `enum`
+- A rule: an uncompilable matcher source, a missing source, an `enum`
   parameter with no `values`, a
   scalar parameter that declares `values`, an unsupported parameter type.
 - A rule: a `scope` not in the rule's `scopes`, an unknown parameter, a

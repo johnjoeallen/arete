@@ -13,7 +13,7 @@ distill(api, rule) {
                            && tokenize(",", (rule.parameters["scopes"] == null ? "" : rule.parameters["scopes"]))
                                 .map { s -> s.trim() }.filter { s -> s != "" }
                                 .all { need -> requirement[rule.parameters["scheme"]].any { g -> ("" + g) == need } })) }) }
-        .map { operation -> diagnostic(operation.pointer, operation.method + " " + path.path,
+        .map { operation -> occurrence(operation.pointer, operation.method + " " + path.path,
             size(tokenize(",", (rule.parameters["scopes"] == null ? "" : rule.parameters["scopes"]))
                     .map { s -> s.trim() }.filter { s -> s != "" }) == 0
                 ? "Operation does not require security scheme " + rule.parameters["scheme"]

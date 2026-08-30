@@ -3,6 +3,6 @@ distill(api, rule) {
         .filter { prop -> prop.enumPresent
             && rule.parameters["check"] == "no-duplicates"
             && size(prop.enumValues) != size(distinct(prop.enumValues)) }
-        .map { prop -> diagnostic(prop.pointer, prop.name,
+        .map { prop -> occurrence(prop.pointer, prop.name,
             "Enum for '" + prop.name + "' contains duplicate values") } };
 }

@@ -9,7 +9,7 @@ distill(api, rule) {
                         : rule.parameters.match == "not-allowed"
                             ? operation.requestMediaTypes.any { t -> !(tokenize(",", rule.parameters.allowed).any { a -> a.trim().lower() == t.lower() }) }
                             : false }
-            .map { operation -> diagnostic(operation.pointer,
+            .map { operation -> occurrence(operation.pointer,
                 operation.method + " " + path.path,
                 "Request body media type " + rule.parameters.match) } }
         : api.paths.expand { path -> path.operationDetails.expand { operation -> operation.responses
@@ -21,7 +21,7 @@ distill(api, rule) {
                         : rule.parameters.match == "not-allowed"
                             ? response.mediaTypes.any { t -> !(tokenize(",", rule.parameters.allowed).any { a -> a.trim().lower() == t.lower() }) }
                             : false }
-            .map { response -> diagnostic(operation.pointer,
+            .map { response -> occurrence(operation.pointer,
                 operation.method + " " + path.path,
                 "Response " + response.status + " media type " + rule.parameters.match) } } };
 }

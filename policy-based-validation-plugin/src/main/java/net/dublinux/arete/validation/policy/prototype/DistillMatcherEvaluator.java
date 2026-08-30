@@ -53,7 +53,7 @@ public final class DistillMatcherEvaluator {
         if (!(value instanceof Iterable<?> values)) throw new IllegalArgumentException("rule must return a collection");
         List<Diagnostic> result = new ArrayList<>();
         for (Object item : values) {
-            if (!(item instanceof Diagnostic diagnostic)) throw new IllegalArgumentException("rule returned a non-diagnostic");
+            if (!(item instanceof Diagnostic diagnostic)) throw new IllegalArgumentException("rule returned a non-occurrence");
             result.add(diagnostic);
         }
         return result;
@@ -224,7 +224,7 @@ public final class DistillMatcherEvaluator {
                 if (value instanceof Iterable<?>) yield "list";
                 yield "object";
             }
-            case "diagnostic" -> new Diagnostic(string(args, 0), string(args, 1), string(args, 2));
+            case "occurrence" -> new Diagnostic(string(args, 0), string(args, 1), string(args, 2));
             case "operationMessage" -> operationMessage(args.get(0));
             default -> throw new IllegalArgumentException("unknown function: " + name);
         };

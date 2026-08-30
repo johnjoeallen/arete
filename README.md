@@ -49,22 +49,21 @@ the full list.
 ## Validation
 
 Validation is on-demand: open a spec, pick a plugin and rule set in the
-**Validation** panel, and click **Analyse**. Findings are merged per
+**Validation** panel, and click **Score**. Findings are merged per
 endpoint with severity badges, JSON Pointer locations, and links to rule
 docs.
 
 The release bundles the **Areté Policy Engine**
 (`policy-based-validation-plugin`) — a policy-driven linter whose rules
 and rules are plain text files, with rules running in a
-safe-by-construction runtime (Distill by default, Starlark as a fallback). It
+safe-by-construction Distill runtime. It
 ships the Enterprise Grade,
 Zalando, and Zalando Extended policies. Drop additional plugin jars into
 `~/.arete/plugins`.
 
 - [Validation overview](https://johnjoeallen.github.io/arete/validation/)
 - [Policy engine](https://johnjoeallen.github.io/arete/validation/policy-engine/)
-- [Rule languages](https://johnjoeallen.github.io/arete/validation/rule-languages/)
-  and the [Distill reference](https://johnjoeallen.github.io/arete/validation/distill/)
+- [Distill reference](https://johnjoeallen.github.io/arete/validation/distill/)
 - [Rule catalogue](https://johnjoeallen.github.io/arete/validation/rules/)
   and [policies](https://johnjoeallen.github.io/arete/validation/policies/)
 - [Writing a plugin](https://johnjoeallen.github.io/arete/validation/writing-a-plugin/)

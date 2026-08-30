@@ -5,7 +5,7 @@ distill(api, rule) {
                 (rule.parameters.require != "example"
                     && (prop.description == null ? true : prop.description.trim() == ""))
                 || (rule.parameters.require != "description" && !prop.examplePresent) }
-            .map { prop -> diagnostic(prop.pointer, schema.name + "." + prop.name,
+            .map { prop -> occurrence(prop.pointer, schema.name + "." + prop.name,
                 (rule.parameters.require != "example"
                         && (prop.description == null ? true : prop.description.trim() == "")
                         && rule.parameters.require != "description" && !prop.examplePresent)
@@ -19,7 +19,7 @@ distill(api, rule) {
                 (rule.parameters.require != "example"
                     && (param.description == null ? true : param.description.trim() == ""))
                 || (rule.parameters.require != "description" && !param.examplePresent) }
-            .map { param -> diagnostic(param.pointer,
+            .map { param -> occurrence(param.pointer,
                 operation.method + " " + path.path + " " + param.name,
                 (rule.parameters.require != "example"
                         && (param.description == null ? true : param.description.trim() == "")

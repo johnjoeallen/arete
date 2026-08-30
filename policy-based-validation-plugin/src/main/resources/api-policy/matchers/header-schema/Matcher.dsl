@@ -4,7 +4,7 @@ distill(api, rule) {
             .expand { operation -> operation.responses
                 .expand { response -> response.headerDetails
                     .filter { header -> !header.schemaPresent }
-                    .map { header -> diagnostic(operation.pointer,
+                    .map { header -> occurrence(operation.pointer,
                         operation.method + " " + path.path + " " + response.status,
                         "Response header '" + header.name + "' defines neither a schema nor content") } } } };
 }

@@ -100,7 +100,7 @@ final class ForkedRuleWorker {
             List<Diagnostic> diagnostics = switch (matcher.language()) {
                 case "groovy" -> new GroovyMatcherEvaluator().execute(matcher, object(request, "api"), policyRule);
                 case "distill" -> new DistillMatcherEvaluator().execute(matcher, object(request, "api"), policyRule);
-                default -> new StarlarkMatcherEvaluator().execute(matcher, object(request, "api"), policyRule);
+                default -> throw new MatcherEvaluationException("Unsupported matcher language: " + matcher.language());
             };
             System.out.println(mapper.writeValueAsString(Map.of("ok", true, "diagnostics", diagnostics)));
         } catch (Exception e) {

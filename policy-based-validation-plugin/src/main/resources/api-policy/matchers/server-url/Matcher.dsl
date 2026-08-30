@@ -6,12 +6,12 @@ distill(api, rule) {
                     || urlHost(url).lower() ==~ /(127\..*|10\..*|192\.168\..*|172\.(1[6-9]|2[0-9]|3[01])\..*)/
                     || urlHost(url).lower() ==~ /.*(\.internal|\.local|\.corp|\.intranet|\.lan|\.home|\.test)/
                     || (!urlHost(url).contains(".") && urlHost(url) != "")) }
-            .map { url -> diagnostic("/servers", url,
+            .map { url -> occurrence("/servers", url,
                 "Server URL points at an internal or non-routable host: " + urlHost(url)) }
         : (rule.parameters["check"] == "url-pattern" && rule.parameters["pattern"] != null)
             ? api.servers
                 .filter { url -> !(url ==~ rule.parameters["pattern"]) }
-                .map { url -> diagnostic("/servers", url,
+                .map { url -> occurrence("/servers", url,
                     "Server URL does not match the approved pattern " + rule.parameters["pattern"]) }
             : api.servers.filter { url -> false };
 }

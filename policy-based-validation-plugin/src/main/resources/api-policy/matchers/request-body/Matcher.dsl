@@ -8,7 +8,7 @@ distill(api, rule) {
                 || (rule.parameters.check == "required-flag-missing"
                     && operation.requestBodyPresent
                     && !operation.requestBodyRequired) }
-            .map { operation -> diagnostic(operation.pointer,
+            .map { operation -> occurrence(operation.pointer,
                 operation.method + " " + path.path,
                 rule.parameters.check == "forbidden-on-methods"
                     ? operation.method + " operation declares a request body"

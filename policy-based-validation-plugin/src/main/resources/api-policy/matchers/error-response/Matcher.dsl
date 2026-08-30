@@ -9,7 +9,7 @@ distill(api, rule) {
                         && parseInt(r.status, -1) >= 400 && parseInt(r.status, -1) < 500)
                     || (rule.parameters["required-class"] == "server-error"
                         && parseInt(r.status, -1) >= 500 && parseInt(r.status, -1) < 600) } }
-            .map { operation -> diagnostic(operation.pointer, operation.method + " " + path.path,
+            .map { operation -> occurrence(operation.pointer, operation.method + " " + path.path,
                 "Operation does not document a " + rule.parameters["required-class"] + " response") } }
         : api.paths.expand { path -> path.operationDetails.expand { operation -> operation.responses
             .filter { resp -> (rule.parameters["status"] == null
@@ -26,13 +26,13 @@ distill(api, rule) {
                 (rule.parameters["require-description"] != null
                         && parseInt(resp.status, -1) >= 400 && parseInt(resp.status, -1) < 600
                         && !resp.description)
-                    ? diagnostic(operation.pointer, operation.method + " " + path.path,
+                    ? occurrence(operation.pointer, operation.method + " " + path.path,
                         "Error response is missing a description")
                     : (rule.parameters["problem-json"] != null
                             && parseInt(resp.status, -1) >= 400 && parseInt(resp.status, -1) < 600
                             && !resp.mediaTypes.any { m -> m == "application/problem+json" })
-                        ? diagnostic(operation.pointer, operation.method + " " + path.path,
+                        ? occurrence(operation.pointer, operation.method + " " + path.path,
                             "Error response does not declare application/problem+json")
-                        : diagnostic(operation.pointer, operation.method + " " + path.path,
+                        : occurrence(operation.pointer, operation.method + " " + path.path,
                             "Response " + resp.status + " is missing " + rule.parameters["required-header"] + "") } } };
 }

@@ -2,13 +2,13 @@ distill(api, rule) {
     return rule.parameters["match"] == "trailing-slash"
         ? api.paths
             .filter { path -> path.path.length > 1 && path.path.endsWith("/") }
-            .map { path -> diagnostic(path.pointer, path.path,
+            .map { path -> occurrence(path.pointer, path.path,
                 "Resource path has an unnecessary trailing slash") }
         : rule.parameters["match"] == "embedded-identifier"
         ? api.paths
             .filter { path -> tokenize("/", path.path).any { s ->
                 !s.startsWith("{") && s ==~ /.*(?:Id|ID|[0-9]{2,}).*/ } }
-            .map { path -> diagnostic(path.pointer, path.path,
+            .map { path -> occurrence(path.pointer, path.path,
                 "Resource identifier is embedded in a path segment") }
         : api.paths
             .filter { path ->
@@ -26,7 +26,7 @@ distill(api, rule) {
                        || last(tokenize("/", path.path)).lower() ==~ /(get|list|create|update|delete|remove|add|set).*/)
                 : false }
             .expand { path -> path.operations
-                .map { method -> diagnostic(path.pointer + "/" + method.lower(),
+                .map { method -> occurrence(path.pointer + "/" + method.lower(),
                     method + " " + path.path,
                     rule.parameters["match"] == "query-predicate" ? "Resource path contains a query predicate"
                         : rule.parameters["match"] == "rpc-style" ? "API uses RPC-style resource design"

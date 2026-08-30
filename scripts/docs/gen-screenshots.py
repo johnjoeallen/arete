@@ -76,7 +76,7 @@ def main():
         shot(pg, "screenshot.png")
 
         click_tab(pg, "Score")
-        pg.get_by_role("button", name="Analyse", exact=True).click()
+        pg.locator("#validation-picker-form").get_by_role("button", name="Score", exact=True).click()
         pg.wait_for_load_state("networkidle")
         pg.wait_for_timeout(800)
         click_tab(pg, "Score")
