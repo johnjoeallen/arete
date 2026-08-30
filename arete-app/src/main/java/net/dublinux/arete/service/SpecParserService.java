@@ -4,17 +4,27 @@ import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.parser.util.DeserializationUtils;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.unit.DataSize;
 
 @Service
 public class SpecParserService {
 
-    static {
-        // swagger-parser's SnakeYAML-backed loader caps documents at 3MB by
-        // default (a YAML-bomb guard). Real-world specs (e.g. GitHub's REST
-        // API) routinely exceed that, so raise it to match our form-post
-        // size limit (see server.tomcat.max-http-form-post-size).
-        DeserializationUtils.getOptions().setMaxYamlCodePoints(50 * 1024 * 1024);
+    @Value("${arete.openapi.max-document-size:50MB}")
+    private DataSize maxDocumentSize;
+
+    @PostConstruct
+    void configureYamlDocumentLimit() {
+        // swagger-parser's SnakeYAML-backed loader caps documents at 3 MiB by
+        // default (a YAML-bomb guard). Keep this aligned with the configured
+        // application limit so trusted, large specifications can be loaded.
+        long bytes = maxDocumentSize.toBytes();
+        if (bytes > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException("arete.openapi.max-document-size must not exceed 2 GiB");
+        }
+        DeserializationUtils.getOptions().setMaxYamlCodePoints((int) bytes);
     }
 
     public ParsedSpec parse(String rawSpec) {
