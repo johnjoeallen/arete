@@ -11,8 +11,11 @@ only the immutable `api` and `rule` values, a fixed set of builtins, and
 [RE2/J](https://github.com/google/re2j) regular expressions. There is no I/O,
 reflection, recursion, or unbounded iteration.
 
-Groovy matchers are only used as a matcher runtime for validation against the
-Distill implementation.
+Groovy matchers are **not used at runtime**. Every bundled matcher ships a
+`Matcher.dsl`, so a deployed Areté always evaluates with Distill. A
+`Matcher.groovy` exists only for Areté's own build, where the test suite runs it
+alongside the corresponding `Matcher.dsl` to confirm the two implementations
+agree.
 
 ## The entry point
 
