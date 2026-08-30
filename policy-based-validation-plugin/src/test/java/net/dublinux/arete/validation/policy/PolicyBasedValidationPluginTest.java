@@ -251,6 +251,50 @@ class PolicyBasedValidationPluginTest {
     }
 
     @Test
+    void newRulesCoverTagSchemaAndStructureChecks() {
+        String spec = """
+                openapi: 3.0.0
+                info: { title: Test API, version: 1.0.0 }
+                tags:
+                  - name: orders
+                paths:
+                  /v1/orders:
+                    get:
+                      tags: [Order Management]
+                      responses:
+                        '200':
+                          description: OK
+                          content:
+                            application/json:
+                              schema: { $ref: '#/components/schemas/Used' }
+                  /v1/customers:
+                    get:
+                      responses: { '200': { description: OK } }
+                components:
+                  schemas:
+                    Used:
+                      type: object
+                      properties:
+                        amount: { type: number }
+                        note: { type: string }
+                    Unused:
+                      type: object
+                """;
+        PolicyBundle bundle = distillBundle();
+        Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
+                .readContents(spec, null, new ParseOptions()).getOpenAPI(), java.util.List.of(), spec);
+        DistillMatcherEvaluator runtime = new DistillMatcherEvaluator();
+
+        assertEquals(1, runtime.execute(bundle.matchers().get("path-prefix"), api, bundle.rules().get("REST007")).size());
+        assertEquals(1, runtime.execute(bundle.matchers().get("schema"), api, bundle.rules().get("JSON021")).size());
+        assertEquals(1, runtime.execute(bundle.matchers().get("schema"), api, bundle.rules().get("JSON022")).size());
+        assertEquals(1, runtime.execute(bundle.matchers().get("tag"), api, bundle.rules().get("CASE008")).size());
+        assertEquals(1, runtime.execute(bundle.matchers().get("tag"), api, bundle.rules().get("DOC017")).size());
+        assertEquals(1, runtime.execute(bundle.matchers().get("tag"), api, bundle.rules().get("DOC018")).size());
+        assertEquals(1, runtime.execute(bundle.matchers().get("component-usage"), api, bundle.rules().get("STANDARD024")).size());
+    }
+
+    @Test
     void existingRulesCoverTheNextFiveCataloguedRules() {
         PolicyBundle bundle = distillBundle();
         Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
@@ -869,6 +913,13 @@ class PolicyBasedValidationPluginTest {
         resources.put("matchers/path-count/Matcher.md", readResource("api-policy/matchers/path-count/Matcher.md"));
         resources.put("policies/Zalando.md", readResource("api-policy/policies/Zalando.md"));
         resources.put("policies/ZalandoExtended.md", readResource("api-policy/policies/ZalandoExtended.md"));
+        for (String matcher : new String[] {"path-prefix", "tag", "component-usage"}) {
+            resources.put("matchers/" + matcher + "/Matcher.md", readResource("api-policy/matchers/" + matcher + "/Matcher.md"));
+            resources.put("matchers/" + matcher + "/Matcher.dsl", readResource("api-policy/matchers/" + matcher + "/Matcher.dsl"));
+        }
+        for (String rule : new String[] {"JSON021", "JSON022", "REST007", "CASE008", "DOC017", "DOC018", "STANDARD024"}) {
+            resources.put("rules/" + rule + ".md", readResource("api-policy/rules/" + rule + ".md"));
+        }
         resources.put("matchers/hostname/Matcher.md", readResource("api-policy/matchers/hostname/Matcher.md"));
         resources.put("rules/ERROR008.md", readResource("api-policy/rules/ERROR008.md"));
         resources.put("rules/ERROR009.md", readResource("api-policy/rules/ERROR009.md"));

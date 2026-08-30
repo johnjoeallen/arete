@@ -47,9 +47,36 @@ rules:
       scopes: read
   STATUS007: 0.5
   STANDARD010: 0.5
+  STANDARD012: 0.5
+  STANDARD013: 0.5
+  STANDARD014: 0.5
+  STANDARD023: 0.5
+  STANDARD024: 0.5
+  CASE008: 0.5
+  DOC011: 0.5
+  DOC017: 0.5
+  DOC018: 0.5
+  JSON021: 0.5
+  JSON022: 0.5
+  REST007: 0.5
 ---
 
 # Zalando Extended Policy
 
-Contains only implemented Zalando-catalogue rules. It will gain the ten
-Zally-extension-only rules when those matcher definitions and rules exist.
+Everything in the `Zalando` policy, plus the checks that were previously only
+in Zalando's supplementary linter rule pack, reworked as Areté rules.
+
+The additions are:
+
+- request-hygiene and contract-completeness checks — path parameters must be
+  `required` and typed (`STANDARD012`–`STANDARD014`), the server URL must be a
+  well-formed absolute URL (`STANDARD023`), and unreferenced component schemas
+  are flagged (`STANDARD024`);
+- schema-bound checks — numeric properties need a `minimum` and `maximum`
+  (`JSON021`) and string properties need a `maxLength` (`JSON022`), alongside
+  the existing enum-casing check (`JSON015`);
+- tag hygiene — every operation is tagged (`DOC011`), tag names follow a
+  convention (`CASE008`), and top-level tags are declared and described
+  (`DOC017`, `DOC018`);
+- structural advice — a shared path prefix belongs in the server URL
+  (`REST007`).

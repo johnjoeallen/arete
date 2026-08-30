@@ -143,8 +143,9 @@ objects. A matcher sees data like this:
     "extensionKeys": []
   },
   "servers": ["https://api.example.com/v1"],
+  "tags": [{"name": "Books", "description": "Book catalogue operations", "pointer": "/tags/0"}],
   "security": null,
-  "lint": {"parserMessages": [], "numericStatusKeys": []},
+  "lint": {"parserMessages": [], "numericStatusKeys": [], "refs": ["#/components/schemas/Book"]},
   "paths": [
     {
       "path": "/books/{bookId}",
@@ -222,8 +223,10 @@ objects. A matcher sees data like this:
 The example shows the main nesting used by matchers; collections such as
 schemas, properties, parameters, responses, and headers expose the additional
 fields described by their corresponding objects. `operationDetails[].security`
-is `null` unless the operation overrides the global requirement. JSON Pointers
-are pre-escaped and safe to return verbatim as `pointer`.
+is `null` unless the operation overrides the global requirement. `api.tags` is
+the top-level `tags` list; `api.lint.refs` is every `$ref` target found in the
+raw document. JSON Pointers are pre-escaped and safe to return verbatim as
+`pointer`.
 
 ### Writing a matcher
 

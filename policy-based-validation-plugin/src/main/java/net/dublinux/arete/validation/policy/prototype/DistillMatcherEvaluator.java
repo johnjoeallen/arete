@@ -407,7 +407,7 @@ public final class DistillMatcherEvaluator {
             "location", "lower", "map", "match", "maxItems", "maxLength", "maximum", "mediaTypes", "method",
             "methods", "minLength", "minimum", "name", "nullable", "numericStatusKeys", "openapiVersion",
             "operationDetails", "operationId", "operations", "parameters", "parserMessages", "path", "paths",
-            "pattern", "pointer", "properties", "requestBodyInlineObject", "requestBodyPresent",
+            "pattern", "pointer", "properties", "refs", "requestBodyInlineObject", "requestBodyPresent",
             "requestBodyRequired", "requestMediaTypes", "require", "required", "requiredFields", "responses",
             "schemaInlineObject", "schemaMaximum", "schemaPresent", "schemaType", "schemaTypes", "schemas",
             "scope", "security", "segments", "servers", "startsWith", "status", "style", "suffix", "summary",

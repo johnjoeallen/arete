@@ -7,8 +7,8 @@ by category. A rule is only evaluated when a [policy](policies.md) references
 it. See [the policy engine](policy-engine.md) for how matchers, rules, and
 policies fit together.
 
-There are **139 rules** across **20 categories**, built on
-**45 matchers**.
+There are **146 rules** across **20 categories**, built on
+**48 matchers**.
 
 !!! note "Reading the policy columns"
     A number is the point deduction applied once if the rule matches;
@@ -77,12 +77,14 @@ There are **139 rules** across **20 categories**, built on
 | `DOC008` | API audience is missing | `metadata` | 0.5 | 0.5 | 0.5 |
 | `DOC009` | Operation summary is not action-oriented | `text-style` | 0.5 |  |  |
 | `DOC010` | operationId is missing or duplicated | `operation-metadata` | 0.5 |  |  |
-| `DOC011` | Operation is not tagged | `operation-metadata` | 0.5 |  |  |
+| `DOC011` | Operation is not tagged | `operation-metadata` | 0.5 |  | 0.5 |
 | `DOC012` | API title does not follow the naming convention | `api-title` | 0.5 |  |  |
 | `DOC013` | Schema property lacks a description or example | `documentation-completeness` | 0.5 |  |  |
 | `DOC014` | Parameter lacks a description or example | `documentation-completeness` | 0.5 |  |  |
 | `DOC015` | Operation description is missing | `operation` | 0.5 |  |  |
 | `DOC016` | Schema example omits a required field | `example-validity` | 0.5 |  |  |
+| `DOC017` | Tag has no description | `tag` |  |  | 0.5 |
+| `DOC018` | Operation uses an undeclared tag | `tag` |  |  | 0.5 |
 
 ## Error responses
 
@@ -149,6 +151,8 @@ There are **139 rules** across **20 categories**, built on
 | `JSON018` | Integer property does not declare a format | `schema` | 0.5 |  |  |
 | `JSON019` | Number property does not declare a format | `schema` | 0.5 |  |  |
 | `JSON020` | Property example violates its own constraints | `example-validity` | 0.5 |  |  |
+| `JSON021` | Numeric property has no minimum and maximum | `schema` |  |  | 0.5 |
+| `JSON022` | String property has no maximum length | `schema` |  |  | 0.5 |
 
 ## Naming
 
@@ -161,6 +165,7 @@ There are **139 rules** across **20 categories**, built on
 | `CASE005` | Path segment is not kebab-case | `naming` | 0.5 | 0.5 | 0.5 |
 | `CASE006` | Schema name is a placeholder | `schema-name` | 0.5 |  |  |
 | `CASE007` | Request/response object is not PascalCase | `schema-name` |  |  |  |
+| `CASE008` | Tag name does not follow the naming convention | `tag` |  |  | 0.5 |
 
 ## Pagination
 
@@ -183,6 +188,7 @@ There are **139 rules** across **20 categories**, built on
 | `REST004` | Custom action resource is used | `resource-path` | 0.5 | 0.5 | 0.5 |
 | `REST005` | Schema name ends in Request | `naming` | 0.5 |  |  |
 | `REST006` | Schema name ends in Response | `naming` | 0.5 |  |  |
+| `REST007` | All paths share a common prefix | `path-prefix` |  |  | 0.5 |
 
 ## Security
 
@@ -218,9 +224,9 @@ There are **139 rules** across **20 categories**, built on
 | `STANDARD009` | Collection query parameter uses the wrong serialization | `query-collection` | 0.5 | 0.5 | 0.5 |
 | `STANDARD010` | OpenAPI version is unsupported or missing | `openapi-version` | 0.5 | 0.5 | 0.5 |
 | `STANDARD011` | Operation declares too many parameters | `parameter` | 0.5 |  |  |
-| `STANDARD012` | Path parameter is not marked required | `parameter` | 0.5 |  |  |
-| `STANDARD013` | Path parameter does not match the path template | `parameter` | 0.5 |  |  |
-| `STANDARD014` | Parameter has no schema or content | `parameter` | 0.5 |  |  |
+| `STANDARD012` | Path parameter is not marked required | `parameter` | 0.5 |  | 0.5 |
+| `STANDARD013` | Path parameter does not match the path template | `parameter` | 0.5 |  | 0.5 |
+| `STANDARD014` | Parameter has no schema or content | `parameter` | 0.5 |  | 0.5 |
 | `STANDARD015` | Request body is not marked required | `request-body` | 0.5 |  |  |
 | `STANDARD016` | Duplicate path structure | `path-set` | 0.5 |  |  |
 | `STANDARD017` | Response header has no schema | `header-schema` | 0.5 |  |  |
@@ -229,7 +235,8 @@ There are **139 rules** across **20 categories**, built on
 | `STANDARD020` | Request or response body uses an inline object schema | `schema-composition` | 0.5 |  |  |
 | `STANDARD021` | Unresolved reference | `document-lint` | 0.5 |  |  |
 | `STANDARD022` | HTTP status keys are bare numbers | `document-lint` | 0.5 |  |  |
-| `STANDARD023` | Server URL is not on the approved pattern | `server-url` |  |  |  |
+| `STANDARD023` | Server URL is not on the approved pattern | `server-url` |  |  | 0.5 |
+| `STANDARD024` | Component schema is never referenced | `component-usage` |  |  | 0.5 |
 
 ## Status codes
 

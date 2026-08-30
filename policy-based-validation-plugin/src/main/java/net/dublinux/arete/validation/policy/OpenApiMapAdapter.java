@@ -18,6 +18,10 @@ final class OpenApiMapAdapter {
     private static final java.util.regex.Pattern UNQUOTED_STATUS_KEY =
             java.util.regex.Pattern.compile("(?m)^\\s+([1-5][0-9]{2})\\s*:");
 
+    /** Matches a {@code $ref} target in either JSON (`"$ref": "..."`) or YAML (`$ref: ...`) form. */
+    private static final java.util.regex.Pattern REF_TARGET =
+            java.util.regex.Pattern.compile("[\"']?\\$ref[\"']?\\s*:\\s*[\"']?([^\"'\\s#][^\"'\\s]*|#[^\"'\\s]*)[\"']?");
+
     private OpenApiMapAdapter() { }
 
     /** Adds a {@code lint} block sourced from parser diagnostics and the raw document. */
@@ -31,6 +35,15 @@ final class OpenApiMapAdapter {
             while (matcher.find()) numericStatusKeys.add(matcher.group(1));
         }
         lint.put("numericStatusKeys", numericStatusKeys);
+        List<String> refs = new ArrayList<>();
+        if (rawContent != null) {
+            java.util.regex.Matcher refMatcher = REF_TARGET.matcher(rawContent);
+            while (refMatcher.find()) {
+                String target = refMatcher.group(1);
+                if (!refs.contains(target)) refs.add(target);
+            }
+        }
+        lint.put("refs", refs);
         result.put("lint", lint);
         return result;
     }
@@ -215,11 +228,23 @@ final class OpenApiMapAdapter {
             info.put("audience", openApi.getExtensions().get("x-audience"));
         }
         List<String> servers = openApi.getServers() == null ? List.of() : openApi.getServers().stream().map(server -> server.getUrl()).toList();
+        List<Map<String, Object>> tags = new ArrayList<>();
+        if (openApi.getTags() != null) {
+            for (int index = 0; index < openApi.getTags().size(); index++) {
+                io.swagger.v3.oas.models.tags.Tag tag = openApi.getTags().get(index);
+                Map<String, Object> tagMap = new LinkedHashMap<>();
+                tagMap.put("name", tag.getName());
+                tagMap.put("description", tag.getDescription());
+                tagMap.put("pointer", "/tags/" + index);
+                tags.add(tagMap);
+            }
+        }
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("paths", paths);
         result.put("schemas", schemas);
         result.put("info", info);
         result.put("servers", servers);
+        result.put("tags", tags);
         result.put("security", openApi.getSecurity() == null ? null : securityRequirements(openApi.getSecurity()));
         return result;
     }
