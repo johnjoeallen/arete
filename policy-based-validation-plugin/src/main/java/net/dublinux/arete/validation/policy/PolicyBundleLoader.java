@@ -57,11 +57,22 @@ final class PolicyBundleLoader {
         yaml = new Yaml(new SafeConstructor(options));
     }
 
+    /**
+     * A policy document supplied from outside the classpath bundle — a file
+     * under {@code ~/.arete/policies/}, say. {@code name} is used only in
+     * validation error messages.
+     */
+    record OverlayPolicy(String name, String content) { }
+
     PolicyBundle load(BundleResources resources) {
-        return load(resources, LoadOptions.defaults());
+        return load(resources, LoadOptions.defaults(), List.of());
     }
 
     PolicyBundle load(BundleResources resources, LoadOptions loadOptions) {
+        return load(resources, loadOptions, List.of());
+    }
+
+    PolicyBundle load(BundleResources resources, LoadOptions loadOptions, List<OverlayPolicy> overlayPolicies) {
         Map<String, Object> manifest = yamlMap("PolicyBundle.yaml", resources.read("PolicyBundle.yaml"));
         rejectUnknown("PolicyBundle.yaml", manifest, Set.of("formatVersion", "bundleId", "bundleVersion", "rules", "policies", "matchers"));
         if (!Integer.valueOf(1).equals(manifest.get("formatVersion"))) throw new BundleValidationException("PolicyBundle.yaml: formatVersion must be 1");
@@ -114,6 +125,15 @@ final class PolicyBundleLoader {
             Policy policy = parsePolicy(path, resources.read(path), rules, matchers);
             if (!entry.getKey().equals(policy.id())) throw new BundleValidationException(path + ": manifest policy id does not match policy id");
             for (String matcherId : policy.dispositions().keySet()) if (!rules.containsKey(matcherId)) throw new BundleValidationException(path + ": unknown policy rule '" + matcherId + "'");
+            policies.put(policy.id(), policy);
+        }
+
+        // Overlay policies (e.g. from ~/.arete/policies/) are parsed against
+        // the same rules and matchers and merged last, so a user policy that
+        // reuses a bundled id deliberately overrides it.
+        for (OverlayPolicy overlay : overlayPolicies) {
+            Policy policy = parsePolicy(overlay.name(), overlay.content(), rules, matchers);
+            for (String matcherId : policy.dispositions().keySet()) if (!rules.containsKey(matcherId)) throw new BundleValidationException(overlay.name() + ": unknown policy rule '" + matcherId + "'");
             policies.put(policy.id(), policy);
         }
         return new PolicyBundle(rules, policies, matchers);

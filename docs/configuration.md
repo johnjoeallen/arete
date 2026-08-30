@@ -27,6 +27,7 @@ you launch from:
 | `~/.arete/data` | The embedded H2 database. |
 | `~/.arete/specs` | Drop spec files here to have them loaded and watched automatically. |
 | `~/.arete/plugins` | Drop extra validation plugin jars here — see [Writing a Plugin](validation/writing-a-plugin.md). |
+| `~/.arete/policies` | Drop extra `*.md` policy files here to add them to the bundled [Areté Policy Engine](validation/policy-engine.md#user-policies). |
 
 `~/.arete/plugins` is created automatically on startup if it doesn't exist.
 The `plugins/` folder next to `arete.jar` (shipped in the release zip) is

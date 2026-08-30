@@ -1,6 +1,6 @@
 # Distill reference
 
-Distill is the default language for policy-bundle rules (`Matcher.dsl`). A
+Distill is the default language for policy-bundle matchers (`Matcher.dsl`). A
 Distill script *distills* the API model down to the occurrences that violate a rule:
 it is a single expression that walks `api`, keeps what matches, and returns a
 list of `occurrence(...)` values.
@@ -11,8 +11,8 @@ only the immutable `api` and `rule` values, a fixed set of builtins, and
 [RE2/J](https://github.com/google/re2j) regular expressions. There is no I/O,
 reflection, recursion, or unbounded iteration.
 
-Groovy remains available as a fallback matcher runtime and is used for
-validation against the Distill implementation.
+Groovy matchers are only used as a matcher runtime for validation against the
+Distill implementation.
 
 ## The entry point
 

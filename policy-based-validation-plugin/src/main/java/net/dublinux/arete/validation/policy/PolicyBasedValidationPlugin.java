@@ -11,7 +11,13 @@ import net.dublinux.arete.validation.spi.RuleDocumentation;
 import net.dublinux.arete.validation.spi.RuleDocumentationProvider;
 import net.dublinux.arete.validation.spi.ValidationResult;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
@@ -51,7 +57,7 @@ public final class PolicyBasedValidationPlugin implements SpecValidationPlugin, 
     public synchronized void configure(Map<String, String> config) {
         List<String> precedence = resolveLanguagePrecedence(config);
         bundle = bundleLoader.load(new ClasspathBundleResources(getClass().getClassLoader()),
-                new PolicyBundleLoader.LoadOptions(precedence));
+                new PolicyBundleLoader.LoadOptions(precedence), loadUserPolicies(config));
         forkRules = booleanConfig(config, "fork-rules", "arete.policy.fork-rules", false);
         forkRuleTimeoutMillis = longConfig(config, "fork-rule-timeout-ms", "arete.policy.fork-rule-timeout-ms", 5000);
     }
@@ -84,6 +90,41 @@ public final class PolicyBasedValidationPlugin implements SpecValidationPlugin, 
             return List.copyOf(precedence);
         }
         return DEFAULT_LANGUAGE_PRECEDENCE;
+    }
+
+    /**
+     * Loads user-supplied policy documents from a directory outside the
+     * bundled jar — every {@code *.md} file in it, in filename order. The
+     * directory is the {@code policies-dir} plugin config key, else the
+     * {@code arete.policy.policies-dir} system property, else
+     * {@code ~/.arete/policies}. A missing directory yields no policies; an
+     * unreadable file aborts the load, as a malformed bundle does.
+     */
+    private static List<PolicyBundleLoader.OverlayPolicy> loadUserPolicies(Map<String, String> config) {
+        String configured = configOrProperty(config, "policies-dir", "arete.policy.policies-dir");
+        Path dir = configured != null && !configured.isBlank()
+                ? Path.of(configured.trim())
+                : Path.of(System.getProperty("user.home", ""), ".arete", "policies");
+        if (!Files.isDirectory(dir)) return List.of();
+
+        List<PolicyBundleLoader.OverlayPolicy> policies = new ArrayList<>();
+        try (var entries = Files.list(dir)) {
+            List<Path> files = entries
+                    .filter(p -> Files.isRegularFile(p) && p.getFileName().toString().endsWith(".md"))
+                    .sorted(Comparator.comparing(p -> p.getFileName().toString()))
+                    .toList();
+            for (Path file : files) {
+                policies.add(new PolicyBundleLoader.OverlayPolicy(
+                        dir.getFileName() + "/" + file.getFileName(),
+                        Files.readString(file, StandardCharsets.UTF_8)));
+            }
+        } catch (IOException e) {
+            throw new UncheckedIOException("Could not read policy directory " + dir, e);
+        }
+        if (!policies.isEmpty()) {
+            LOG.log(System.Logger.Level.INFO, "Loaded {0} user policy file(s) from {1}", policies.size(), dir);
+        }
+        return policies;
     }
 
     private static String configOrProperty(Map<String, String> config, String configKey, String propertyKey) {
