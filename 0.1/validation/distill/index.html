@@ -1097,8 +1097,11 @@ no user-defined functions — and safe by construction: the interpreter exposes
 only the immutable <code>api</code> and <code>rule</code> values, a fixed set of builtins, and
 <a href="https://github.com/google/re2j">RE2/J</a> regular expressions. There is no I/O,
 reflection, recursion, or unbounded iteration.</p>
-<p>Groovy matchers are only used as a matcher runtime for validation against the
-Distill implementation.</p>
+<p>Groovy matchers are <strong>not used at runtime</strong>. Every bundled matcher ships a
+<code>Matcher.dsl</code>, so a deployed Areté always evaluates with Distill. A
+<code>Matcher.groovy</code> exists only for Areté's own build, where the test suite runs it
+alongside the corresponding <code>Matcher.dsl</code> to confirm the two implementations
+agree.</p>
 <h2 id="the-entry-point">The entry point<a class="headerlink" href="#the-entry-point" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">distill</span><span class="p">(</span><span class="n">api</span><span class="p">,</span><span class="w"> </span><span class="n">rule</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="o">&lt;</span><span class="n">expression</span><span class="o">&gt;</span><span class="p">;</span>
