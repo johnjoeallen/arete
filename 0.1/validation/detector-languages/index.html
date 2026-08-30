@@ -1062,10 +1062,11 @@ grammar and builtin catalogue are in the <a href="../sift/">Sift reference</a>.<
 pins every <code>Detector.sift</code> to its <code>Detector.star</code>, and <code>GroovyStarlarkParityTest</code>
 sweeps every bundle rule against both other runtimes so a <code>Detector.groovy</code> can
 never drift from its Starlark twin.</p>
-<p><strong>All 45 bundled detectors ship a <code>Detector.sift</code>.</strong> The two that need a
-running accumulator (<code>operation-metadata</code>'s duplicate-<code>operationId</code> check,
-<code>response-example</code>'s duplicate-payload check) express it by scanning
-<code>enumerate(...)</code> for an earlier matching entry rather than mutating state.</p>
+<p><strong>All 45 bundled detectors ship a <code>Detector.sift</code>.</strong> The two "uniqueness"
+checks (<code>operation-metadata</code>'s duplicate-<code>operationId</code>, <code>response-example</code>'s
+duplicate-payload) use <code>.groupBy { … }</code> — group the entries by key, keep the
+groups with more than one member, report all but the first — rather than
+mutating a <code>seen</code> map.</p>
 
 
 
