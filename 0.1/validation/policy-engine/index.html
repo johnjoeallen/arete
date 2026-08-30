@@ -528,15 +528,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#rule-languages" class="md-nav__link">
+  <a href="#matcher-languages" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Rule languages
+        Matcher languages
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Rule languages">
+    <nav class="md-nav" aria-label="Matcher languages">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -551,10 +551,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#distill-default" class="md-nav__link">
+  <a href="#distill" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Distill (default)
+        Distill
       
     </span>
   </a>
@@ -976,15 +976,15 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#rule-languages" class="md-nav__link">
+  <a href="#matcher-languages" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Rule languages
+        Matcher languages
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Rule languages">
+    <nav class="md-nav" aria-label="Matcher languages">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -999,10 +999,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#distill-default" class="md-nav__link">
+  <a href="#distill" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Distill (default)
+        Distill
       
     </span>
   </a>
@@ -1291,37 +1291,38 @@ Areté UI as selectable rule sets.</p>
 <li>A score is computed (see <a href="#scoring">Scoring</a>) and returned with the
    diagnostics.</li>
 </ol>
-<h3 id="rule-languages">Rule languages<a class="headerlink" href="#rule-languages" title="Permanent link">&para;</a></h3>
-<p>The engine ships Distill and Groovy rule runtimes. A configurable <strong>language
-precedence</strong> decides which source is loaded for each rule.</p>
+<h3 id="matcher-languages">Matcher languages<a class="headerlink" href="#matcher-languages" title="Permanent link">&para;</a></h3>
+<p>Every bundled matcher is written in <strong>Distill</strong> (<code>Matcher.dsl</code>) and runs on
+Distill. The engine also carries a Groovy runtime, but Groovy is not used in
+normal operation — see below.</p>
 <table>
 <thead>
 <tr>
 <th>Language</th>
 <th>Source file</th>
-<th>Status</th>
+<th>Role</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>distill</code></td>
 <td><code>Matcher.dsl</code></td>
-<td><strong>Default.</strong> Sandboxed; see the <a href="../distill/">Distill reference</a>.</td>
+<td>The language every matcher is written in. Sandboxed; see the <a href="../distill/">Distill reference</a>.</td>
 </tr>
 <tr>
 <td><code>groovy</code></td>
 <td><code>Matcher.groovy</code></td>
-<td>Available for validation and execution.</td>
+<td>A parallel implementation of some matchers, run only by the build's parity tests.</td>
 </tr>
 </tbody>
 </table>
-<p>Where both implementations are provided, the Distill and Groovy sources are
-kept in lock-step by the validation tests.</p>
+<p>Where both sources exist, the validation tests keep them in lock-step.</p>
 <h4 id="language-precedence">Language precedence<a class="headerlink" href="#language-precedence" title="Permanent link">&para;</a></h4>
-<p>For each rule the loader walks the configured precedence list and uses the
-<strong>first language whose source file is present</strong>. The default precedence is
-<code>distill,groovy</code> — Distill first, with Groovy available where no Distill source
-exists:</p>
+<p>A matcher's runtime is chosen by a configurable <strong>precedence list</strong>: for each
+matcher the loader walks the list and uses the first language whose source file
+is present. The default is <code>distill,groovy</code> — Distill always wins, since every
+matcher ships a <code>Matcher.dsl</code>. Overriding it to prefer or force Groovy is a
+development/validation aid, not a supported production mode:</p>
 <ul>
 <li>precedence <code>distill,groovy</code> — prefer Distill, then Groovy;</li>
 <li>precedence <code>groovy,distill</code> — prefer Groovy, then Distill;</li>
@@ -1371,8 +1372,8 @@ exists:</p>
 </div>
 </div>
 </div>
-<h4 id="distill-default">Distill (default)<a class="headerlink" href="#distill-default" title="Permanent link">&para;</a></h4>
-<p>Rules run as <a href="../distill/">Distill</a> sources — a small expression language shaped
+<h4 id="distill">Distill<a class="headerlink" href="#distill" title="Permanent link">&para;</a></h4>
+<p>Matchers run as <a href="../distill/">Distill</a> sources — a small expression language shaped
 for rule pipelines (<code>.map</code> / <code>.filter</code> / <code>.expand</code>, slashy regex literals,
 <code>occurrence(...)</code>).</p>
 <ul>
@@ -1383,8 +1384,9 @@ for rule pipelines (<code>.map</code> / <code>.filter</code> / <code>.expand</co
 </ul>
 <h4 id="groovy">Groovy<a class="headerlink" href="#groovy" title="Permanent link">&para;</a></h4>
 <p><code>GroovyMatcherEvaluator</code> runs a <code>Matcher.groovy</code> source directly in the plugin
-JVM via a bare <code>GroovyShell</code> — <strong>with no sandbox</strong>. It is enabled after
-Distill when no Distill source is present.</p>
+JVM via a bare <code>GroovyShell</code> — <strong>with no sandbox</strong>. It is reached only when the
+language precedence is overridden to prefer Groovy, or for a matcher that ships
+no <code>Matcher.dsl</code> — neither of which happens in a normal deployment.</p>
 <div class="admonition danger">
 <p class="admonition-title">Groovy rules are unsandboxed</p>
 <p>A <code>Matcher.groovy</code> runs with the full authority of the plugin JVM —
@@ -1399,8 +1401,8 @@ policy bundle you fully trust and control.</p>
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>├── rules/
 <a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>│   └── &lt;rule-id&gt;/
 <a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>│       ├── Matcher.md          # descriptor (YAML front matter) + prose
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>│       ├── Matcher.dsl         # the rule — Distill (default runtime)
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>│       └── Matcher.groovy      # the same rule — Groovy
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>│       ├── Matcher.dsl         # the matcher, in Distill — the only runtime used
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>│       └── Matcher.groovy      # a parity-test reimplementation (optional)
 <a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>├── rules/
 <a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>│   └── &lt;RULE-ID&gt;.md             # rule front matter + human documentation
 <a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>└── policies/
@@ -1511,7 +1513,7 @@ parser:</p>
 global requirement. JSON Pointers are pre-escaped and safe to return verbatim
 as <code>pointer</code>.</p>
 <h3 id="writing-a-rule">Writing a rule<a class="headerlink" href="#writing-a-rule" title="Permanent link">&para;</a></h3>
-<p>The default runtime is <strong>Distill</strong> (<code>Matcher.dsl</code>); its grammar and builtins
+<p>Matchers are written in <strong>Distill</strong> (<code>Matcher.dsl</code>); its grammar and builtins
 have their own chapter — the <a href="../distill/">Distill reference</a>.</p>
 <p>Rules:</p>
 <ul>
