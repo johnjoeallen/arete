@@ -168,6 +168,26 @@ a:hover { color: var(--link-hover); }
 
 .paste-divider { color: var(--muted-fg); font-size: 0.9em; margin: 1.5em 0 0.8em; }
 
+.matcher-test-page { max-width: 1500px; }
+.matcher-test-form { display: flex; flex-direction: column; gap: 1em; }
+.matcher-test-options { display: flex; flex-wrap: wrap; gap: 0.8em 1.2em; align-items: end; }
+.matcher-test-options label, .matcher-test-editors label { display: flex; flex-direction: column; gap: 0.3em; color: var(--muted-fg); font-size: 0.9em; }
+.matcher-test-options input, .matcher-test-options select, .matcher-test-editors textarea { padding: 0.45em 0.6em; background: var(--bg); color: var(--fg); border: 1px solid var(--border); border-radius: 4px; }
+.matcher-test-options input { min-width: 11em; }
+.matcher-test-editors { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1em; }
+.matcher-test-editors textarea { width: 100%; min-height: 22em; resize: vertical; font-family: var(--font-code); font-size: 0.9em; line-height: 1.4; }
+.matcher-test-form > button { align-self: flex-start; padding: 0.45em 1em; border: 1px solid var(--link); border-radius: 4px; background: var(--link); color: #fff; cursor: pointer; }
+.matcher-test-form > button:hover { background: var(--link-hover); border-color: var(--link-hover); }
+.matcher-test-results { margin-top: 2em; }
+.matcher-test-results table { width: 100%; border-collapse: collapse; }
+.matcher-test-results th, .matcher-test-results td { text-align: left; vertical-align: top; padding: 0.55em; border-bottom: 1px solid var(--border); }
+.matcher-test-results th { color: var(--muted-fg); font-weight: 600; }
+.error-message { margin-top: 1em; padding: 0.8em 1em; color: var(--danger); background: var(--danger-bg); border: 1px solid var(--danger-border); border-radius: 4px; white-space: pre-wrap; }
+
+@media (max-width: 900px) {
+    .matcher-test-editors { grid-template-columns: 1fr; }
+}
+
 .validation-picker { display: flex; flex-direction: column; align-items: flex-start; gap: 0.8em; }
 .validation-picker button { padding: 0.4em 0.9em; border: 1px solid var(--link); border-radius: 4px; background: var(--link); color: #fff; cursor: pointer; }
 .validation-picker button:hover:not(:disabled) { background: var(--link-hover); border-color: var(--link-hover); }
