@@ -188,7 +188,7 @@ class GenericPolicyValidationPluginTest {
                 ---
                 id: FUTURE001
                 category: Documentation
-                rule: future-rule
+                matcher: future-rule
                 scope: operation
                 parameters:
                   initial-capital: false

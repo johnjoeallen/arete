@@ -135,7 +135,7 @@ appear in trailing position.
 | `xs.all { x -> ... }` | `true` if the closure is truthy for every item |
 | `xs.find { x -> ... }` | first matching item, or `null` |
 | `xs.count { x -> ... }` | number of matching items |
-| `xs.groupBy { x -> key }` | a map of key → list of items with that key, in first-seen key order (keys compared by string value); iterate it with `.values` |
+| `xs.group { x -> key }` | a map of key → list of items with that key, in first-seen key order (keys compared by string value); iterate it with `.values` |
 | `xs.toList()` | shallow copy |
 
 `expand` is the Distill form of a nested loop:
@@ -210,7 +210,7 @@ Each row is a complete expression and the value it produces.
 | `last(["a", "b"])` &nbsp; `last([])` | `"b"` &nbsp; `""` |
 | `"Order-1" ==~ /[A-Za-z]+-[0-9]+/` | `true` |
 | `enumerate(["a", "b"]).map { p -> p[0] + "=" + p[1] }` | `["0=a", "1=b"]` |
-| `["ax", "ay", "bz"].groupBy { s -> s.startsWith("a") }.values` | `[["ax", "ay"], ["bz"]]` |
+| `["ax", "ay", "bz"].group { s -> s.startsWith("a") }.values` | `[["ax", "ay"], ["bz"]]` |
 
 ### Rules
 
@@ -297,7 +297,7 @@ distill(api, rule) {
     return api.paths
         .expand { path -> path.operationDetails.map { op ->
             [op.pointer, op.method + " " + path.path, op.operationId] } }
-        .groupBy { entry -> "" + entry[2] }
+        .group { entry -> "" + entry[2] }
         .values
         .filter { group -> size(group) > 1 }
         .expand { group -> enumerate(group)
@@ -345,7 +345,7 @@ distill(api, rule) {
 }
 ```
 
-**"Seen already?" — group, don't accumulate.** `groupBy` replaces a mutable
+**"Seen already?" — group, don't accumulate.** `group` replaces a mutable
 `seen` map: group the entries by their key, keep the groups with more than one
 member, and report all but the first (see the duplicate-`operationId` example
 above). `enumerate` then supplies the positional "all but the first" filter,
@@ -362,5 +362,5 @@ info.extensionKeys.filter { k -> ... }.map { k -> diagnostic(...) }
 
 All 45 bundled rules ship a `Matcher.dsl`. The two "uniqueness" rules —
 `operation-metadata` (duplicate `operationId`) and `response-example`
-(duplicate error payloads) — use `groupBy` as shown above. `path-count` uses
+(duplicate error payloads) — use `group` as shown above. `path-count` uses
 `pathSegments(...)` to stay within the grammar.

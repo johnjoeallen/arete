@@ -141,7 +141,7 @@ Implement `AreteRuleSandbox extends GroovyInterceptor`:
   `CharSequence`/`String`/`GString`, `StringBuilder`, `Number`, `Boolean`,
   `Character`, `Pattern`, `Matcher`, `Closure`, `Range`, `Comparable`,
   `Enum`. Covers every GDK helper the rules use (`collect`,
-  `collectMany`, `findAll`, `any`, `every`, `count`, `unique`, `groupBy`,
+  `collectMany`, `findAll`, `any`, `every`, `count`, `unique`, `group`,
   `leftShift`, `toLowerCase`, `endsWith`, `split`, `trim`, `matches`, `==~`,
   `=~`).
 - **Method-name denylist, applied regardless of receiver** (these are GDK

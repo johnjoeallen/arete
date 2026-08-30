@@ -173,6 +173,6 @@ never drift from its Starlark twin.
 
 **All 45 bundled rules ship a `Matcher.dsl`.** The two "uniqueness"
 checks (`operation-metadata`'s duplicate-`operationId`, `response-example`'s
-duplicate-payload) use `.groupBy { … }` — group the entries by key, keep the
+duplicate-payload) use `.group { … }` — group the entries by key, keep the
 groups with more than one member, report all but the first — rather than
 mutating a `seen` map.

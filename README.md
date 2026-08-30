@@ -4,6 +4,8 @@
 
 # Areté
 
+Areté — the pursuit of API excellence.
+
 Areté stands for **API Review, Inspection & Scoring Engine**.
 
 **[Documentation &rarr;](https://johnjoeallen.github.io/arete/)**

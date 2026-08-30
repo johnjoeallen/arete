@@ -1,5 +1,7 @@
 # Areté
 
+Areté — the pursuit of API excellence.
+
 Areté is a **local-first API explorer** for OpenAPI/Swagger specs. Paste a
 spec, or point Areté at one on disk, and get instant browsable docs —
 endpoints, parameters, schemas, request/response examples — plus pluggable,

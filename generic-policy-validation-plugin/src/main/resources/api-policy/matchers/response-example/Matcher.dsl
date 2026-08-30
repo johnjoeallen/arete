@@ -6,7 +6,7 @@ distill(api, rule) {
                 .filter { resp -> parseInt(resp.status, -1) >= 400 && parseInt(resp.status, -1) < 600 }
                 .expand { resp -> (resp.exampleStrings == null ? [] : resp.exampleStrings)
                     .map { example -> ["" + resp.status, example] } }
-                .groupBy { pair -> pair[1] }
+                .group { pair -> pair[1] }
                 .values
                 .expand { group -> enumerate(group)
                     .filter { indexed -> indexed[0] > 0 }

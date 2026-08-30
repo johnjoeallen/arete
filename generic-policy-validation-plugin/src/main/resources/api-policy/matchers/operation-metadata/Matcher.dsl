@@ -8,7 +8,7 @@ distill(api, rule) {
         ? api.paths
             .expand { path -> path.operationDetails.map { op ->
                 [op.pointer, op.method + " " + path.path, op.operationId] } }
-            .groupBy { entry -> "" + entry[2] }
+            .group { entry -> "" + entry[2] }
             .values
             .expand { group ->
                 (group[0][2] == null

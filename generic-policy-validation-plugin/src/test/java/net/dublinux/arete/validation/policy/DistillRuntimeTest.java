@@ -180,12 +180,12 @@ class DistillMatcherEvaluatorTest {
     }
 
     @Test
-    void groupByBucketsItemsByKeyInFirstSeenOrder() {
+    void groupBucketsItemsByKeyInFirstSeenOrder() {
         // Flag every path whose first segment is shared by another path.
         String source = """
                 distill(api, rule) {
                     return api.paths
-                        .groupBy { path -> pathSegments(path.path)[0] }
+                        .group { path -> pathSegments(path.path)[0] }
                         .values
                         .filter { g -> size(g) > 1 }
                         .expand { g -> g.map { path -> diagnostic(path.pointer, path.path,

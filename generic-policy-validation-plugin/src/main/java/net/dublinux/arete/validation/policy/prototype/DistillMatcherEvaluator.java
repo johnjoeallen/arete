@@ -109,7 +109,7 @@ public final class DistillMatcherEvaluator {
                 case "all" -> values.stream().allMatch(value -> truthy(closure.apply(value)));
                 case "find" -> values.stream().filter(value -> truthy(closure.apply(value))).findFirst().orElse(null);
                 case "count" -> values.stream().filter(value -> truthy(closure.apply(value))).count();
-                case "groupBy" -> {
+                case "group" -> {
                     // key -> items with that key, in first-seen key order. Keys are
                     // compared by string value, matching distinct().
                     Map<String, List<Object>> groups = new LinkedHashMap<>();
