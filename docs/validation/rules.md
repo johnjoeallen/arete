@@ -4,11 +4,11 @@
 
 Every rule in the bundled **Areté Policy Engine** policy bundle, grouped
 by category. A rule is only evaluated when a [policy](policies.md) references
-it. See [the policy engine](policy-engine.md) for how rules, rules, and
+it. See [the policy engine](policy-engine.md) for how matchers, rules, and
 policies fit together.
 
 There are **139 rules** across **20 categories**, built on
-**45 rules**.
+**45 matchers**.
 
 !!! note "Reading the policy columns"
     A number is the point deduction applied once if the rule matches;

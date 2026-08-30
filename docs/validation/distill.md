@@ -11,11 +11,9 @@ only the immutable `api` and `rule` values, a fixed set of builtins, and
 [RE2/J](https://github.com/google/re2j) regular expressions. There is no I/O,
 reflection, recursion, or unbounded iteration.
 
-Groovy matchers are **not used at runtime**. Every bundled matcher ships a
-`Matcher.dsl`, so a deployed Areté always evaluates with Distill. A
-`Matcher.groovy` exists only for Areté's own build, where the test suite runs it
-alongside the corresponding `Matcher.dsl` to confirm the two implementations
-agree.
+The build may include a corresponding `Matcher.groovy` source for parity
+testing, but it is not deployed as a supported runtime language. A deployed
+Areté always evaluates matchers with Distill.
 
 ## The entry point
 
@@ -172,7 +170,7 @@ not something a script can reach around.
 
 ## Regular expressions
 
-Distill borrows Groovy's slashy literal. `/pattern/` is a regex **wherever an
+Distill supports a slashy regex literal. `/pattern/` is a regex **wherever an
 operand is expected** — after `==~`, `=~`, `(`, `,`, `&&`, `||`, `return`, and
 so on. The explicit `~/pattern/` form is a regex anywhere. Inside the literal,
 backslashes are taken literally — write `\b`, `\d`, `\.` — and only `\/` is an
@@ -362,7 +360,12 @@ info.extensionKeys.filter { k -> ... }.map { k -> occurrence(...) }
 
 ## Coverage
 
-All 45 bundled rules ship a `Matcher.dsl`. The two "uniqueness" rules —
-`operation-metadata` (duplicate `operationId`) and `response-example`
-(duplicate error payloads) — use `group` as shown above. `path-count` uses
-`pathSegments(...)` to stay within the grammar.
+All 45 bundled matchers ship a `Matcher.dsl`, and all 139 bundled rules are
+built on those matchers. The `operation-metadata` matcher handles duplicate
+`operationId` values and the `response-example` matcher handles duplicate error
+payloads; both use `group` as shown above. `path-count` uses `pathSegments(...)`
+to stay within the grammar.
+
+This demonstrates the flexibility of the multi-level matcher/rule model: a
+single matcher can support several named rules, while policies decide which
+rules are active and can override their parameters for a particular policy.

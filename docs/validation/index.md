@@ -72,6 +72,12 @@ Areté Policy Engine exposes one rule set per bundled [policy](policies.md):
 
 ## Where plugins come from
 
+The core engine discovers each plugin from its shaded jar using Java's
+`ServiceLoader`. A plugin registers an implementation through
+`META-INF/services/net.dublinux.arete.validation.spi.SpecValidationPlugin` and
+is loaded in an isolated classloader. This is the common plugin lifecycle; the
+Policy Engine is not special in this respect.
+
 Plugin `.jar` files are discovered from two folders at startup:
 
 - **`plugins/`, next to `arete.jar`** — where the release zip ships the
@@ -89,7 +95,7 @@ a narrower, additional switch layered on top of the global setting.
 ## Next
 
 - [Areté Policy Engine](policy-engine.md) — how the bundled plugin's
-  rules, rules, and policies work, and how to extend the bundle.
+  matchers, rules, and policies work, and how to extend the bundle.
 - [Rule Catalogue](rules.md) — every rule in the bundle and which policies use it.
 - [Policies](policies.md) — the bundled Enterprise Grade, Zalando, and Zalando
   Extended rule sets.

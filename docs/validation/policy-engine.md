@@ -3,112 +3,42 @@
 The **Areté Policy Engine** (`policy-based-validation-plugin`, plugin id
 `generic-policy`) is the built-in, policy-driven validation plugin. Instead of
 hard-coding checks in Java, it ships a **policy bundle**: a tree of Markdown +
-YAML files describing *rules* (how to find facts in a spec), *rules* (a
-named concern built on a rule), and *policies* (which rules are active and
-how much each one costs). Anyone can add or change a rule by editing text
-files — no host code changes.
+YAML files defining **matchers** (Distill programs that inspect the normalized
+API model and return occurrences), **rules** (named checks that select a
+matcher, scope, and parameters), and **policies** (which rules are active and
+what disposition each match has, such as a point deduction or `PROHIBITED`).
+Matchers, rule descriptions, and policy definitions can be added or changed
+as text files without changing the host application code.
 
 ## How it works
-
-The engine is discovered by the host exactly like any other validation plugin:
-it is a shaded jar dropped in `~/.arete/plugins/`, registered through
-`META-INF/services/net.dublinux.arete.validation.spi.SpecValidationPlugin`,
-and loaded via `ServiceLoader` into an isolated classloader. It supports
-OpenAPI 3 and Swagger 2 input.
 
 On first use the plugin loads its **policy bundle** from the classpath
 (`api-policy/` inside the jar) and validates every file in it. `getRuleSets()`
 then returns one entry per policy in the bundle — these appear in the
 Areté UI as selectable rule sets.
 
-For each `validate(spec)` call:
+When validation runs, the plugin resolves the requested policy. If the name is
+unknown, the **first policy declared** in the bundle manifest is used as the
+default. Each rule listed in that policy is then evaluated **in declaration
+order**: its matcher runs against the normalized API model and the rule's
+`{id, scope, parameters}`, returning zero or more occurrences. If a rule
+returns occurrences, the policy's **disposition** (a point deduction or
+`PROHIBITED`) is applied once, and one finding is emitted for each occurrence.
 
-1. The spec is parsed once (swagger-parser) and converted to a small, stable
-   `Map` model by `OpenApiMapAdapter`. Rules never see parser types.
-2. The requested policy is resolved (`SpecInput.getRuleSet()`); if the name is
-   unknown, the **first policy declared** in the manifest is used as the
-   default.
-3. Each rule listed in that policy is evaluated **in declaration order**:
-   - the rule's rule is run against the `api` model plus the rule's own
-     `{id, scope, parameters}`;
-   - the rule returns zero or more **diagnostics** (`{pointer, path,
-     message}`);
-   - if there is at least one diagnostic, the rule's policy **disposition**
-     (a point deduction, or `PROHIBITED`) is applied **once**, and one
-     `Diagnostic` is emitted per diagnostic.
-4. A score is computed (see [Scoring](#scoring)) and returned with the
-   diagnostics.
+### Matcher language
 
-### Matcher languages
-
-Matchers are written in **Distill** (`Matcher.dsl`) and run on Distill. The
-engine also carries a Groovy runtime, but Groovy is not used in normal
-operation — see below.
-
-| Language | Source file | Role |
-|---|---|---|
-| `distill` | `Matcher.dsl` | The language matchers are written in. Sandboxed; see the [Distill reference](distill.md). |
-| `groovy` | `Matcher.groovy` | A parallel implementation of some matchers, run only by the build's parity tests. |
-
-Where both sources exist, the validation tests keep them in lock-step.
-
-#### Language precedence
-
-A matcher's runtime is chosen by a configurable **precedence list**: for each
-matcher the loader walks the list and uses the first language whose source file
-is present. The default is `distill,groovy` — Distill always wins, since every
-matcher ships a `Matcher.dsl`. Overriding it to prefer or force Groovy is a
-development/validation aid, not a supported production mode:
-
-- precedence `distill,groovy` — prefer Distill, then Groovy;
-- precedence `groovy,distill` — prefer Groovy, then Distill;
-- precedence `groovy` — Groovy only; a rule with no `Matcher.groovy`
-  fails the bundle.
-
-Configure it (highest precedence first):
-
-| Mechanism | Value |
-|---|---|
-| Plugin config key `rule-languages` | comma-separated list, e.g. `distill,groovy` |
-| Plugin config key `rule-language` | a single extra language (appended to `distill,groovy`) |
-| System property `-Darete.policy.rule-languages` | comma-separated list |
-| System property `-Darete.policy.rule-language` | single language |
-| Launcher `--rule-languages LIST` | comma-separated list |
-
-=== "Launcher"
-
-    ```bash
-    ./arete.sh --rule-languages distill,groovy
-    ```
-
-=== "System property"
-
-    ```bash
-    java -Darete.policy.rule-languages=distill,groovy -jar arete.jar
-    ```
-
-#### Distill
-
-Matchers run as [Distill](distill.md) sources — a small expression language shaped
-for rule pipelines (`.map` / `.filter` / `.expand`, slashy regex literals,
-`occurrence(...)`).
+Matchers are written in [Distill](distill.md) (`Matcher.dsl`), which is
+currently the only supported matcher language. Distill is a small expression language
+shaped for rule pipelines (`.map` / `.filter` / `.expand`, slashy regex
+literals, `occurrence(...)`).
 
 - **Safe by construction** — the interpreter exposes only the immutable `api`
   and `rule` values, a fixed builtin set, and RE2/J regex. No filesystem,
   network, reflection, or unbounded loops.
 - See the [Distill reference](distill.md) for the full grammar and builtin catalogue.
 
-#### Groovy
-
-`GroovyMatcherEvaluator` runs a `Matcher.groovy` source directly in the plugin
-JVM via a bare `GroovyShell` — **with no sandbox**. It is reached only when the
-language precedence is overridden to prefer Groovy, or for a matcher that ships
-no `Matcher.dsl` — neither of which happens in a normal deployment.
-
-!!! danger "Groovy rules are unsandboxed"
-    A `Matcher.groovy` runs with the full authority of the plugin JVM —
-    filesystem, network, process execution, reflection. Use it only with a
-    policy bundle you fully trust and control.
+The build also runs optional `Matcher.groovy` counterparts as parity checks;
+they are not part of the deployed matcher runtime.
 
 ---
 
@@ -118,12 +48,12 @@ Everything lives under `policy-based-validation-plugin/src/main/resources/api-po
 
 ```
 api-policy/
-├── PolicyBundle.yaml            # manifest: id → file for every rule, policy, rule
-├── rules/
-│   └── <rule-id>/
+├── PolicyBundle.yaml            # manifest: id → file for every matcher, rule, policy
+├── matchers/
+│   └── <matcher-id>/
 │       ├── Matcher.md          # descriptor (YAML front matter) + prose
 │       ├── Matcher.dsl         # the matcher, in Distill — the only runtime used
-│       └── Matcher.groovy      # a parity-test reimplementation (optional)
+│       └── Matcher.groovy      # build-time parity check (optional)
 ├── rules/
 │   └── <RULE-ID>.md             # rule front matter + human documentation
 └── policies/
@@ -143,24 +73,24 @@ rules:
 policies:
   "Enterprise Grade": policies/EnterpriseGrade.md
   Zalando: policies/Zalando.md
-rules:
+matchers:
   naming: matchers/naming/Matcher.md
 ```
 
-`rules`, `policies`, and `rules` must each be non-empty. Every referenced
+`rules`, `policies`, and `matchers` must each be non-empty. Every referenced
 path is relative, and `..`, absolute paths, and backslashes are rejected.
 
-Each rule/policy/rule file is Markdown with a **YAML front matter block**
+Each matcher/rule/policy file is Markdown with a **YAML front matter block**
 delimited by `---` lines; the body after the closing `---` is human-readable
 documentation.
 
 ---
 
-## Rules
+## Matchers
 
-A rule is a reusable, parameterised fact-finder. It reports **what it
-observed** and takes no position on severity or score — that is the policy's
-job.
+A matcher is a reusable, parameterised Distill program. It reports **what it
+observed** by returning occurrences and takes no position on severity or score
+— that is the rule and policy's job.
 
 ### Descriptor (`Matcher.md` front matter)
 
@@ -196,48 +126,115 @@ scripts can trust their inputs):
 
 ### The `api` model
 
-`OpenApiMapAdapter` exposes only these keys — rules are independent of the
-parser:
+`OpenApiMapAdapter` exposes a stable JSON-shaped model rather than parser
+objects. A matcher sees data like this:
 
+```json
+{
+  "info": {
+    "title": "Library API",
+    "description": "Books and authors",
+    "version": "1.0.0",
+    "contactName": null,
+    "contactEmail": null,
+    "openapiVersion": "3.0.0",
+    "apiId": null,
+    "audience": null,
+    "extensionKeys": []
+  },
+  "servers": ["https://api.example.com/v1"],
+  "security": null,
+  "lint": {"parserMessages": [], "numericStatusKeys": []},
+  "paths": [
+    {
+      "path": "/books/{bookId}",
+      "pointer": "/paths/~1books~1{bookId}",
+      "segments": [{"name": "books", "pointer": "/paths/~1books~1{bookId}"}],
+      "templateParameters": ["bookId"],
+      "operations": ["GET"],
+      "operationDetails": [
+        {
+          "method": "GET",
+          "pointer": "/paths/~1books~1{bookId}/get",
+          "summary": "Get a book",
+          "description": null,
+          "operationId": "getBook",
+          "tags": ["Books"],
+          "extensionKeys": [],
+          "security": null,
+          "requestBodyPresent": false,
+          "requestBodyRequired": false,
+          "requestBodyInlineObject": false,
+          "mediaTypes": ["application/json"],
+          "requestMediaTypes": [],
+          "parameters": [
+            {
+              "name": "bookId",
+              "in": "path",
+              "pointer": "/paths/~1books~1{bookId}/get/parameters/0",
+              "required": true,
+              "schemaPresent": true,
+              "description": "The book identifier",
+              "examplePresent": false,
+              "extensionKeys": [],
+              "style": null,
+              "explode": null,
+              "schemaType": "string",
+              "schemaMaximum": null
+            }
+          ],
+          "responses": [
+            {
+              "status": "200",
+              "description": "A book",
+              "headers": [],
+              "headerDetails": [],
+              "schemaTypes": ["object"],
+              "mediaTypes": ["application/json"],
+              "schemaInlineObject": false,
+              "exampleStrings": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "schemas": [
+    {
+      "name": "Book",
+      "pointer": "/components/schemas/Book",
+      "type": "object",
+      "array": false,
+      "maxItems": null,
+      "description": "A book",
+      "examplePresent": false,
+      "example": null,
+      "requiredFields": ["id", "title"],
+      "extensionKeys": [],
+      "compositionKind": null,
+      "inlineCompositionMembers": [],
+      "properties": []
+    }
+  ]
+}
 ```
-api.info      { title, description, version, contactName, contactEmail,
-                openapiVersion, apiId, audience, extensionKeys[] }
-api.servers   [ "https://api.example.com/v1", ... ]
-api.security  [ { <schemeName>: [scopes...] }, ... ]  or null   # global requirement
-api.lint      { parserMessages[], numericStatusKeys[] }         # parser + raw-document diagnostics
-api.paths[]   { path, pointer, segments[], templateParameters[], operations[], operationDetails[] }
-  .segments[]           { name, pointer }                 # literal segments only, no {params}
-  .templateParameters[] "customerId"                      # the {names} in the path string
-  .operationDetails[]   { method, pointer, summary, description, operationId, tags[],
-                          extensionKeys[], security, requestBodyPresent, requestBodyRequired,
-                          requestBodyInlineObject, mediaTypes[], requestMediaTypes[],
-                          parameters[], responses[] }
-    .parameters[]       { name, in, pointer, required, schemaPresent, description,
-                          examplePresent, extensionKeys[], style, explode,
-                          schemaType, schemaMaximum }
-    .responses[]        { status, description, headers[], headerDetails[], schemaTypes[],
-                          mediaTypes[], schemaInlineObject, exampleStrings[] }
-      .headerDetails[]  { name, schemaPresent }
-api.schemas[]  { name, pointer, type, array, maxItems, description, examplePresent,
-                 example, requiredFields[], extensionKeys[], compositionKind,
-                 inlineCompositionMembers, properties[] }
-  .properties[]         { name, pointer, type, array, maxItems, format, description,
-                          examplePresent, example, pattern, minLength, maxLength,
-                          minimum, maximum, exclusiveMinimum, exclusiveMaximum,
-                          extensionKeys[], nullable, required, enumPresent,
-                          enumValues[], extensibleEnum }
-```
+
+The example shows the main nesting used by matchers; collections such as
+schemas, properties, parameters, responses, and headers expose the additional
+fields described by their corresponding objects. `operationDetails[].security`
+is `null` unless the operation overrides the global requirement. JSON Pointers
+are pre-escaped and safe to return verbatim as `pointer`.
 
 `operationDetails[].security` is `null` unless the operation overrides the
 global requirement. JSON Pointers are pre-escaped and safe to return verbatim
 as `pointer`.
 
-### Writing a rule
+### Writing a matcher
 
 Matchers are written in **Distill** (`Matcher.dsl`); its grammar and builtins
 have their own chapter — the [Distill reference](distill.md).
 
-Rules:
+Matchers:
 
 - `message` is required and must be non-blank; `pointer` and `path` are
   optional strings.
@@ -272,8 +269,8 @@ from an OpenAPI document.
 
 ## Rules
 
-A rule binds a rule to a specific scope and parameter set, and carries the
-human explanation.
+A rule binds a matcher to a specific scope and parameter set, and carries the
+human explanation used for its findings.
 
 ```markdown
 ---
@@ -375,19 +372,19 @@ The result reports `overallScore` (`effectiveScore`) and
 
 ## Adding to the bundle
 
-### A new rule (existing rule)
+### A new rule (using an existing matcher)
 
 1. Create `rules/<ID>.md` with front matter (`id`, `category`, `rule`,
    `scope`, `parameters`) and a `# <ID> — <title>` body.
 2. Add `<ID>: rules/<ID>.md` to `PolicyBundle.yaml` under `rules:`.
 3. Reference `<ID>` from one or more policies with a deduction or `PROHIBITED`.
 
-### A new rule
+### A new matcher and rule
 
 1. Create `matchers/<id>/Matcher.md` (descriptor) and
    `matchers/<id>/Matcher.dsl` (the Distill expression).
 2. Add `<id>: matchers/<id>/Matcher.md` to `PolicyBundle.yaml` under
-   `rules:`.
+   `matchers:`.
 3. Add rules that use it.
 
 ### A new policy
@@ -429,13 +426,13 @@ rule-compile error.
 
 The bundle fails fast (`BundleValidationException`) on:
 
-- `formatVersion` ≠ 1; empty `rules`/`policies`/`rules`; unknown top-level
+- `formatVersion` ≠ 1; empty `rules`/`policies`/`matchers`; unknown top-level
   or front-matter fields; unsafe resource paths.
 - A manifest key that doesn't match the `id` inside the referenced file.
-- A rule: an uncompilable matcher source, a missing source, an `enum`
+- A matcher: an uncompilable source, a missing source, an `enum`
   parameter with no `values`, a
   scalar parameter that declares `values`, an unsupported parameter type.
-- A rule: a `scope` not in the rule's `scopes`, an unknown parameter, a
+- A rule: a `scope` not in the matcher's `scopes`, an unknown parameter, a
   wrong-typed parameter value, a missing required parameter, a body with no
   `#` heading. (Skipped only when the rule isn't bundled yet.)
 - A policy: a disposition that is neither `0`–`100` nor `PROHIBITED`, or a
