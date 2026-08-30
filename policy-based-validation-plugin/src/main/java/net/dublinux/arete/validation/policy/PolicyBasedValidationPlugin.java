@@ -7,6 +7,8 @@ import net.dublinux.arete.validation.spi.Severity;
 import net.dublinux.arete.validation.spi.SpecFormat;
 import net.dublinux.arete.validation.spi.SpecInput;
 import net.dublinux.arete.validation.spi.SpecValidationPlugin;
+import net.dublinux.arete.validation.spi.MatcherTestProvider;
+import net.dublinux.arete.validation.spi.MatcherTestRequest;
 import net.dublinux.arete.validation.spi.RuleDocumentation;
 import net.dublinux.arete.validation.spi.RuleDocumentationProvider;
 import net.dublinux.arete.validation.spi.ValidationResult;
@@ -26,7 +28,7 @@ import java.util.Optional;
 import java.util.Set;
 
 /** First working implementation of the bundled generic policy engine. */
-public final class PolicyBasedValidationPlugin implements SpecValidationPlugin, RuleDocumentationProvider {
+public final class PolicyBasedValidationPlugin implements SpecValidationPlugin, RuleDocumentationProvider, MatcherTestProvider {
     private static final String DOCUMENTATION_BASE_URL = "http://localhost:6809/plugins/generic-policy/rules/";
     private static final System.Logger LOG = System.getLogger(PolicyBasedValidationPlugin.class.getName());
     private volatile PolicyBundle bundle;
@@ -218,6 +220,45 @@ public final class PolicyBasedValidationPlugin implements SpecValidationPlugin, 
         return ValidationResult.builder().status(ValidationResult.Status.SUCCESS).diagnostics(diagnostics)
                 .rulesEvaluatedCount(rulesEvaluated).overallScore(effectiveScore)
                 .overallScoreWithoutBlockers(qualityScore).build();
+    }
+
+    @Override
+    public ValidationResult testMatcher(MatcherTestRequest request) {
+        try {
+            SwaggerParseResult parsed = new OpenAPIV3Parser().readContents(request.spec(), null, new ParseOptions());
+            if (parsed.getOpenAPI() == null) {
+                String detail = parsed.getMessages() == null ? "unknown parse error" : String.join("; ", parsed.getMessages());
+                return ValidationResult.parseError("OpenAPI parsing failed: " + detail);
+            }
+            Matcher matcher = new Matcher(request.matcherId(), request.language(), request.source(),
+                    List.of(request.scope()), Map.of());
+            switch (request.language()) {
+                case "distill" -> distillRuntime.validate(matcher);
+                case "groovy" -> groovyRuntime.validate(matcher);
+                default -> throw new MatcherEvaluationException("Unsupported matcher language: " + request.language());
+            }
+            Map<String, Object> api = OpenApiMapAdapter.toMap(parsed.getOpenAPI(), parsed.getMessages(), request.spec());
+            PolicyRule rule = new PolicyRule(request.matcherId(), request.matcherId(), "Matcher test",
+                    request.matcherId(), request.scope(), request.parameters(), "");
+            List<Diagnostic> matches = switch (request.language()) {
+                case "distill" -> distillRuntime.execute(matcher, api, rule);
+                case "groovy" -> groovyRuntime.execute(matcher, api, rule);
+                default -> throw new MatcherEvaluationException("Unsupported matcher language: " + request.language());
+            };
+            List<net.dublinux.arete.validation.spi.Diagnostic> diagnostics = matches.stream().map(match -> {
+                net.dublinux.arete.validation.spi.Diagnostic.Builder diagnostic = net.dublinux.arete.validation.spi.Diagnostic.builder()
+                        .ruleId(request.matcherId()).title(request.matcherId()).description(match.message())
+                        .severity(Severity.WARNING);
+                if (match.pointer() != null) diagnostic.pointer(match.pointer());
+                if (match.path() != null) diagnostic.paths(List.of(match.path()));
+                return diagnostic.build();
+            }).toList();
+            return ValidationResult.success(diagnostics, 1);
+        } catch (MatcherEvaluationException | BundleValidationException e) {
+            return ValidationResult.pluginError(e.getMessage());
+        } catch (RuntimeException e) {
+            return ValidationResult.pluginError("Matcher test failed: " + e.getMessage());
+        }
     }
 
     private PolicyBundle activeBundle() {

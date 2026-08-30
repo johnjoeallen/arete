@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Matcher test - Areté</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="alternate icon" href="/favicon.ico">
+    <script>
+        (function () {
+            var saved = localStorage.getItem('openapi-viewer:theme');
+            var theme = saved || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+    <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+<div th:replace="~{fragments/sidebar :: sidebar(${specs}, ${q}, null)}"></div>
+<div class="main">
+    <nav id="tab-bar" class="tab-bar"></nav>
+    <div class="main-content matcher-test-page">
+        <h1>Test a matcher</h1>
+        <p class="muted">Paste a matcher and an OpenAPI document to execute it without adding anything to the policy bundle.</p>
+        <form method="post" action="/matcher-test" class="matcher-test-form">
+            <div class="matcher-test-options">
+                <label>Language
+                    <select name="language">
+                        <option value="distill" th:selected="${language == 'distill'}">Distill</option>
+                        <option value="groovy" th:selected="${language == 'groovy'}">Groovy</option>
+                    </select>
+                </label>
+                <label>Matcher ID <input type="text" name="matcherId" th:value="${matcherId}"></label>
+                <label>Scope <input type="text" name="scope" th:value="${scope}"></label>
+                <label>Parameters (JSON)
+                    <input type="text" name="parameters" th:value="${parameters}">
+                </label>
+            </div>
+            <div class="matcher-test-editors">
+                <label>Matcher source
+                    <textarea name="matcherSource" rows="18" th:text="${matcherSource}"></textarea>
+                </label>
+                <label>OpenAPI / Swagger spec
+                    <textarea name="spec" rows="18" th:text="${spec}"></textarea>
+                </label>
+            </div>
+            <button type="submit">Run matcher</button>
+        </form>
+
+        <div class="error-message" th:if="${testError != null}" th:text="${testError}"></div>
+        <section class="matcher-test-results" th:if="${diagnostics != null}">
+            <h2 th:text="${diagnostics.size()} + ' occurrence' + (${diagnostics.size()} == 1 ? '' : 's')">0 occurrences</h2>
+            <p class="muted" th:if="${diagnostics.isEmpty()}">The matcher returned no occurrences.</p>
+            <table th:if="${!diagnostics.isEmpty()}">
+                <thead><tr><th>Pointer</th><th>Path</th><th>Message</th></tr></thead>
+                <tbody>
+                <tr th:each="diagnostic : ${diagnostics}">
+                    <td><code th:text="${diagnostic.getPointer()}"></code></td>
+                    <td th:text="${diagnostic.getPaths()}"></td>
+                    <td th:text="${diagnostic.getDescription()}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+    </div>
+</div>
+<script src="/js/tabs.js" defer></script>
+<script src="/js/sidebar-refresh.js" defer></script>
+<script src="/js/theme.js" defer></script>
+</body>
+</html>
