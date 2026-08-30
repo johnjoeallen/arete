@@ -39,25 +39,26 @@ For each `validate(spec)` call:
 4. A score is computed (see [Scoring](#scoring)) and returned with the
    diagnostics.
 
-### Rule languages
+### Matcher languages
 
-The engine ships Distill and Groovy rule runtimes. A configurable **language
-precedence** decides which source is loaded for each rule.
+Every bundled matcher is written in **Distill** (`Matcher.dsl`) and runs on
+Distill. The engine also carries a Groovy runtime, but Groovy is not used in
+normal operation — see below.
 
-| Language | Source file | Status |
+| Language | Source file | Role |
 |---|---|---|
-| `distill` | `Matcher.dsl` | **Default.** Sandboxed; see the [Distill reference](distill.md). |
-| `groovy` | `Matcher.groovy` | Available for validation and execution. |
+| `distill` | `Matcher.dsl` | The language every matcher is written in. Sandboxed; see the [Distill reference](distill.md). |
+| `groovy` | `Matcher.groovy` | A parallel implementation of some matchers, run only by the build's parity tests. |
 
-Where both implementations are provided, the Distill and Groovy sources are
-kept in lock-step by the validation tests.
+Where both sources exist, the validation tests keep them in lock-step.
 
 #### Language precedence
 
-For each rule the loader walks the configured precedence list and uses the
-**first language whose source file is present**. The default precedence is
-`distill,groovy` — Distill first, with Groovy available where no Distill source
-exists:
+A matcher's runtime is chosen by a configurable **precedence list**: for each
+matcher the loader walks the list and uses the first language whose source file
+is present. The default is `distill,groovy` — Distill always wins, since every
+matcher ships a `Matcher.dsl`. Overriding it to prefer or force Groovy is a
+development/validation aid, not a supported production mode:
 
 - precedence `distill,groovy` — prefer Distill, then Groovy;
 - precedence `groovy,distill` — prefer Groovy, then Distill;
@@ -86,9 +87,9 @@ Configure it (highest precedence first):
     java -Darete.policy.rule-languages=distill,groovy -jar arete.jar
     ```
 
-#### Distill (default)
+#### Distill
 
-Rules run as [Distill](distill.md) sources — a small expression language shaped
+Matchers run as [Distill](distill.md) sources — a small expression language shaped
 for rule pipelines (`.map` / `.filter` / `.expand`, slashy regex literals,
 `occurrence(...)`).
 
@@ -100,8 +101,9 @@ for rule pipelines (`.map` / `.filter` / `.expand`, slashy regex literals,
 #### Groovy
 
 `GroovyMatcherEvaluator` runs a `Matcher.groovy` source directly in the plugin
-JVM via a bare `GroovyShell` — **with no sandbox**. It is enabled after
-Distill when no Distill source is present.
+JVM via a bare `GroovyShell` — **with no sandbox**. It is reached only when the
+language precedence is overridden to prefer Groovy, or for a matcher that ships
+no `Matcher.dsl` — neither of which happens in a normal deployment.
 
 !!! danger "Groovy rules are unsandboxed"
     A `Matcher.groovy` runs with the full authority of the plugin JVM —
@@ -120,8 +122,8 @@ api-policy/
 ├── rules/
 │   └── <rule-id>/
 │       ├── Matcher.md          # descriptor (YAML front matter) + prose
-│       ├── Matcher.dsl         # the rule — Distill (default runtime)
-│       └── Matcher.groovy      # the same rule — Groovy
+│       ├── Matcher.dsl         # the matcher, in Distill — the only runtime used
+│       └── Matcher.groovy      # a parity-test reimplementation (optional)
 ├── rules/
 │   └── <RULE-ID>.md             # rule front matter + human documentation
 └── policies/
@@ -232,7 +234,7 @@ as `pointer`.
 
 ### Writing a rule
 
-The default runtime is **Distill** (`Matcher.dsl`); its grammar and builtins
+Matchers are written in **Distill** (`Matcher.dsl`); its grammar and builtins
 have their own chapter — the [Distill reference](distill.md).
 
 Rules:
