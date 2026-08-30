@@ -1088,10 +1088,10 @@
 
 
 <h1 id="distill-reference">Distill reference<a class="headerlink" href="#distill-reference" title="Permanent link">&para;</a></h1>
-<p>Distill is the language every policy-bundle matcher is written in (<code>Matcher.dsl</code>).
-A Distill script <em>distills</em> the API model down to the occurrences that violate a
-rule: it is a single expression that walks <code>api</code>, keeps what matches, and returns
-a list of <code>occurrence(...)</code> values.</p>
+<p>Policy-bundle matchers are written in Distill (<code>Matcher.dsl</code>). A Distill script
+<em>distills</em> the API model down to the occurrences that violate a rule: it is a
+single expression that walks <code>api</code>, keeps what matches, and returns a list of
+<code>occurrence(...)</code> values.</p>
 <p>It is deliberately small — one expression, no statements, no local variables,
 no user-defined functions — and safe by construction: the interpreter exposes
 only the immutable <code>api</code> and <code>rule</code> values, a fixed set of builtins, and
