@@ -9,7 +9,7 @@ import pathlib
 import yaml
 
 REPO = pathlib.Path(__file__).resolve().parents[2]
-BUNDLE = REPO / "generic-policy-validation-plugin/src/main/resources/api-policy"
+BUNDLE = REPO / "policy-based-validation-plugin/src/main/resources/api-policy"
 OUT = REPO / "docs/validation"
 
 manifest = yaml.safe_load((BUNDLE / "PolicyBundle.yaml").read_text())

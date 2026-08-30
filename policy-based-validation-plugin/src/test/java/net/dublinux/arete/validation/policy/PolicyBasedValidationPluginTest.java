@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class GenericPolicyValidationPluginTest {
+class PolicyBasedValidationPluginTest {
     private static final String ACTION_PATH_SPEC = """
             openapi: 3.0.0
             info:
@@ -112,7 +112,7 @@ class GenericPolicyValidationPluginTest {
 
     @Test
     void executesTheEnterpriseGradePolicyAndDeductsOnlyOncePerRule() {
-        GenericPolicyValidationPlugin plugin = new GenericPolicyValidationPlugin();
+        PolicyBasedValidationPlugin plugin = new PolicyBasedValidationPlugin();
         plugin.configure(Map.of());
 
         ValidationResult result = plugin.validate(input(ACTION_PATH_SPEC));
@@ -134,7 +134,7 @@ class GenericPolicyValidationPluginTest {
 
     @Test
     void returnsAFullScoreWhenNoRuleMatches() {
-        GenericPolicyValidationPlugin plugin = new GenericPolicyValidationPlugin();
+        PolicyBasedValidationPlugin plugin = new PolicyBasedValidationPlugin();
         plugin.configure(Map.of());
 
         ValidationResult result = plugin.validate(input(COMPLIANT_STARTER_SPEC));
@@ -955,7 +955,7 @@ class GenericPolicyValidationPluginTest {
     }
 
     private static void assertResource(String resource) {
-        try (InputStream stream = GenericPolicyValidationPlugin.class.getClassLoader().getResourceAsStream(resource)) {
+        try (InputStream stream = PolicyBasedValidationPlugin.class.getClassLoader().getResourceAsStream(resource)) {
             assertNotNull(stream, resource + " must be packaged");
         } catch (Exception e) {
             throw new AssertionError("Could not read " + resource, e);
@@ -963,7 +963,7 @@ class GenericPolicyValidationPluginTest {
     }
 
     private static String readResource(String resource) {
-        try (InputStream stream = GenericPolicyValidationPlugin.class.getClassLoader().getResourceAsStream(resource)) {
+        try (InputStream stream = PolicyBasedValidationPlugin.class.getClassLoader().getResourceAsStream(resource)) {
             assertNotNull(stream, resource + " must be packaged");
             return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
         } catch (Exception e) {
@@ -974,7 +974,7 @@ class GenericPolicyValidationPluginTest {
     /** Bundle pinned to the Starlark runtime for tests that drive it directly. */
     private static PolicyBundle starlarkBundle() {
         return new PolicyBundleLoader().load(
-                new ClasspathBundleResources(GenericPolicyValidationPluginTest.class.getClassLoader()),
+                new ClasspathBundleResources(PolicyBasedValidationPluginTest.class.getClassLoader()),
                 new PolicyBundleLoader.LoadOptions(java.util.List.of("starlark")));
     }
 }

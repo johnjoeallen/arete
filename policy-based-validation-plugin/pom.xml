@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>net.dublinux.arete</groupId>
-    <artifactId>generic-policy-validation-plugin</artifactId>
+    <artifactId>policy-based-validation-plugin</artifactId>
     <version>0.1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>generic-policy-validation-plugin</name>
+    <name>policy-based-validation-plugin</name>
     <description>Generic API policy validation plugin for Areté</description>
 
     <properties>

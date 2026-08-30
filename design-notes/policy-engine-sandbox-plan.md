@@ -1,7 +1,7 @@
 # Plan — Sandboxing rule scripts
 
 Status: **active — gates re-enabling the Groovy runtime** · Target module:
-`generic-policy-validation-plugin`
+`policy-based-validation-plugin`
 
 > **Where this stands.** The default rule runtime is now Starlark, which is
 > safe by construction — see
@@ -239,7 +239,7 @@ def host = (url =~ /^[a-zA-Z][a-zA-Z0-9+.-]*:\/\/([^\/?#:]+)/) ? Matcher.lastMat
 or a plain `url.replaceFirst(~'^\\w[\\w+.-]*://', '').split(~'[/?#:]')[0]`.
 The rule stays entirely within the `Map`/`String`/regex allowlist. Update
 the rule + its one test (`namingRuleInspects…`? — it's covered by the
-`hostname` cases in `GenericPolicyValidationPluginTest`). Do this first; it
+`hostname` cases in `PolicyBasedValidationPluginTest`). Do this first; it
 removes the only reason to touch anything outside the sandbox layers.
 
 ### 5b (fallback) — narrowly whitelist `java.net.URI`
@@ -274,7 +274,7 @@ the remote-loading feature.
 
 ## 7. Testing
 
-- **Regression**: existing `GenericPolicyValidationPluginTest` /
+- **Regression**: existing `PolicyBasedValidationPluginTest` /
   `...LoadIT` already assert exact diagnostic counts and scores for every
   bundled rule — they must pass unchanged with the sandbox enforcing.
 - **Attack suite** (new `RuleSandboxTest`): a parameterised list, each

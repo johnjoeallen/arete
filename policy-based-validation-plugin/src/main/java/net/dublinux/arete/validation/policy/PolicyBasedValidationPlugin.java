@@ -20,9 +20,9 @@ import java.util.Optional;
 import java.util.Set;
 
 /** First working implementation of the bundled generic policy engine. */
-public final class GenericPolicyValidationPlugin implements SpecValidationPlugin, RuleDocumentationProvider {
+public final class PolicyBasedValidationPlugin implements SpecValidationPlugin, RuleDocumentationProvider {
     private static final String DOCUMENTATION_BASE_URL = "http://localhost:6809/plugins/generic-policy/rules/";
-    private static final System.Logger LOG = System.getLogger(GenericPolicyValidationPlugin.class.getName());
+    private static final System.Logger LOG = System.getLogger(PolicyBasedValidationPlugin.class.getName());
     private volatile PolicyBundle bundle;
     private final PolicyBundleLoader bundleLoader = new PolicyBundleLoader();
     private final GroovyMatcherEvaluator groovyRuntime = new GroovyMatcherEvaluator();

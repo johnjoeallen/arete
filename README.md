@@ -6,8 +6,6 @@
 
 Areté — the pursuit of API excellence.
 
-Areté stands for **API Review, Inspection & Scoring Engine**.
-
 **[Documentation &rarr;](https://johnjoeallen.github.io/arete/)**
 
 Areté is a local-first API explorer for OpenAPI/Swagger specs. Paste a
@@ -56,7 +54,7 @@ endpoint with severity badges, JSON Pointer locations, and links to rule
 docs.
 
 The release bundles the **Areté Policy Engine**
-(`generic-policy-validation-plugin`) — a policy-driven linter whose rules
+(`policy-based-validation-plugin`) — a policy-driven linter whose rules
 and rules are plain text files, with rules running in a
 safe-by-construction runtime (Distill by default, Starlark as a fallback). It
 ships the Enterprise Grade,
@@ -76,7 +74,7 @@ Zalando, and Zalando Extended policies. Drop additional plugin jars into
 | Module | Purpose |
 |---|---|
 | `arete-validation-spi` | Plugin SPI, published to Maven Central (`net.dublinux.arete:arete-validation-spi`). |
-| `generic-policy-validation-plugin` | The bundled Areté Policy Engine. |
+| `policy-based-validation-plugin` | The bundled Areté Policy Engine. |
 | `arete-app` | The Spring Boot application. |
 
 ## Release

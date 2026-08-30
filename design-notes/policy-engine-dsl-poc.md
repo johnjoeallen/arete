@@ -10,10 +10,10 @@ the trusted-Groovy runtime, while being safe by construction.
 
 | File | Purpose |
 |---|---|
-| `generic-policy-validation-plugin/.../star/StarlarkMatcherEvaluator.java` | Loads a `detect(api, rule)` Starlark function, deep-converts the host model to **immutable** Starlark values (int/float/bool/str/list/dict), runs it with a hard step cap, normalises the result to diagnostic maps. |
+| `policy-based-validation-plugin/.../star/StarlarkMatcherEvaluator.java` | Loads a `detect(api, rule)` Starlark function, deep-converts the host model to **immutable** Starlark values (int/float/bool/str/list/dict), runs it with a hard step cap, normalises the result to diagnostic maps. |
 | `.../star/StarlarkBuiltins.java` | The entire extra capability surface: `re_fullmatch`, `re_search` (RE2/J), `tokenize` (Groovy `String.tokenize` semantics), `parse_int`, `url_host`. |
 | `.../api-policy/rules/*/Matcher.star` (×22) | Ports of every `Matcher.groovy`, sitting next to the originals in the bundle. |
-| `.../StarlarkParityTest.java` | Drives the whole bundle the way `GenericPolicyValidationPlugin.validate` does — every policy, every disposition, effective (rule + policy-override) params, plus a direct per-rule sweep — over a 10-spec messy corpus, asserting Groovy and Starlark diagnostic lists are byte-identical. |
+| `.../StarlarkParityTest.java` | Drives the whole bundle the way `PolicyBasedValidationPlugin.validate` does — every policy, every disposition, effective (rule + policy-override) params, plus a direct per-rule sweep — over a 10-spec messy corpus, asserting Groovy and Starlark diagnostic lists are byte-identical. |
 
 Dependencies added: `com.eed3si9n.starlark:starlark:4.2.1` (community repackage
 of Bazel's `net.starlark.java`, spike-only) and `com.google.re2j:re2j:1.7`.
@@ -59,7 +59,7 @@ and both stay unavailable.
 ## Wired in
 
 - The engine **runs Starlark by default.** `PolicyBundleLoader` loads
-  `Matcher.star` for every rule; `GenericPolicyValidationPlugin`
+  `Matcher.star` for every rule; `PolicyBasedValidationPlugin`
   dispatches per `rule.language()`.
 - **Groovy is supported but disabled by default** (not deprecated) — it is
   unsandboxed, so it stays off until the sandbox plan lands, then returns as a

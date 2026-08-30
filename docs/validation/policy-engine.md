@@ -1,6 +1,6 @@
 # Areté Policy Engine
 
-The **Areté Policy Engine** (`generic-policy-validation-plugin`, plugin id
+The **Areté Policy Engine** (`policy-based-validation-plugin`, plugin id
 `generic-policy`) is the built-in, policy-driven validation plugin. Instead of
 hard-coding checks in Java, it ships a **policy bundle**: a tree of Markdown +
 YAML files describing *rules* (how to find facts in a spec), *rules* (a
@@ -141,7 +141,7 @@ option once bundle-supplied Groovy can be run safely.
 
 ## The policy bundle
 
-Everything lives under `generic-policy-validation-plugin/src/main/resources/api-policy/`:
+Everything lives under `policy-based-validation-plugin/src/main/resources/api-policy/`:
 
 ```
 api-policy/
@@ -442,12 +442,12 @@ declaration with no overrides.
 ### Build & install
 
 ```bash
-mvn -q -pl generic-policy-validation-plugin -am package -DskipTests
-cp generic-policy-validation-plugin/target/generic-policy-validation-plugin-*.jar \
+mvn -q -pl policy-based-validation-plugin -am package -DskipTests
+cp policy-based-validation-plugin/target/policy-based-validation-plugin-*.jar \
    ~/.arete/plugins/
 ```
 
-`GenericPolicyValidationPluginTest` / `...LoadIT` load the real bundle and will
+`PolicyBasedValidationPluginTest` / `...LoadIT` load the real bundle and will
 fail the build on any manifest, front-matter, scope, parameter, or
 rule-compile error.
 

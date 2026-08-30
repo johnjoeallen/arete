@@ -11,14 +11,14 @@ if "%JAR%"=="" (
     exit /b 1
 )
 
-set "GENERIC_POLICY_PLUGIN_JAR="
-for %%f in ("%~dp0generic-policy-validation-plugin\target\generic-policy-validation-plugin-*.jar") do set "GENERIC_POLICY_PLUGIN_JAR=%%f"
-if "%GENERIC_POLICY_PLUGIN_JAR%"=="" (
-    echo Build succeeded but no plugin JAR found in generic-policy-validation-plugin\target\ >&2
+set "POLICY_BASED_PLUGIN_JAR="
+for %%f in ("%~dp0policy-based-validation-plugin\target\policy-based-validation-plugin-*.jar") do set "POLICY_BASED_PLUGIN_JAR=%%f"
+if "%POLICY_BASED_PLUGIN_JAR%"=="" (
+    echo Build succeeded but no plugin JAR found in policy-based-validation-plugin\target\ >&2
     exit /b 1
 )
 
 copy /y "%JAR%" "%~dp0scripts\arete.jar" >nul
 if not exist "%~dp0scripts\plugins" mkdir "%~dp0scripts\plugins"
-copy /y "%GENERIC_POLICY_PLUGIN_JAR%" "%~dp0scripts\plugins\generic-policy-validation-plugin.jar" >nul
+copy /y "%POLICY_BASED_PLUGIN_JAR%" "%~dp0scripts\plugins\policy-based-validation-plugin.jar" >nul
 echo Built: scripts\arete.jar (+ bundled validation plugins)

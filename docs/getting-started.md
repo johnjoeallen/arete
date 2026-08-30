@@ -34,7 +34,7 @@ This produces:
 
 - the runnable app jar at `arete-app/target/arete-<version>.jar`
 - the bundled plugin jar at
-  `generic-policy-validation-plugin/target/generic-policy-validation-plugin-<version>.jar`
+  `policy-based-validation-plugin/target/policy-based-validation-plugin-<version>.jar`
 
 ### Quick start with the helper scripts
 

@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /** Verifies the shaded bundle loads exactly like a jar placed in plugins/. */
-class GenericPolicyValidationPluginLoadIT {
+class PolicyBasedValidationPluginLoadIT {
     @Test
     void discoversAndExecutesThroughAnIsolatedClassLoader() throws Exception {
         File jar = findBuiltJar();
@@ -50,7 +50,7 @@ class GenericPolicyValidationPluginLoadIT {
 
     private static File findBuiltJar() {
         File[] jars = new File("target").listFiles((directory, name) ->
-                name.startsWith("generic-policy-validation-plugin-") && name.endsWith(".jar"));
+                name.startsWith("policy-based-validation-plugin-") && name.endsWith(".jar"));
         if (jars == null || jars.length == 0) throw new IllegalStateException("No packaged generic-policy plugin jar found");
         return jars[0];
     }
