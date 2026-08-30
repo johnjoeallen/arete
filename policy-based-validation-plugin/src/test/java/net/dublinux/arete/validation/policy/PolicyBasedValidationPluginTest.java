@@ -823,7 +823,11 @@ class PolicyBasedValidationPluginTest {
     }
 
     private static SpecInput input(String content) {
-        return SpecInput.builder().content(content).format(SpecFormat.OPENAPI3).ruleSet("Enterprise Grade").build();
+        return input(content, "Enterprise Grade");
+    }
+
+    private static SpecInput input(String content, String ruleSet) {
+        return SpecInput.builder().content(content).format(SpecFormat.OPENAPI3).ruleSet(ruleSet).build();
     }
 
     private static Map<String, String> bundledResources() {
@@ -931,6 +935,52 @@ class PolicyBasedValidationPluginTest {
         } catch (Exception e) {
             throw new AssertionError("Could not read " + resource, e);
         }
+    }
+
+    @Test
+    void loadsUserPoliciesFromAConfiguredDirectoryAndOverridesBundledOnes(@org.junit.jupiter.api.io.TempDir java.nio.file.Path dir) throws Exception {
+        java.nio.file.Files.writeString(dir.resolve("Lenient.md"), """
+                ---
+                id: Lenient
+                rules:
+                  REST001: 0.1
+                ---
+
+                # Lenient Policy
+
+                A light-touch profile.
+                """);
+        // Same id as a bundled policy: the user file must win.
+        java.nio.file.Files.writeString(dir.resolve("Zzz-EnterpriseGrade.md"), """
+                ---
+                id: Enterprise Grade
+                rules:
+                  REST001: PROHIBITED
+                ---
+
+                # Overridden
+
+                Replaces the bundled Enterprise Grade.
+                """);
+
+        PolicyBasedValidationPlugin plugin = new PolicyBasedValidationPlugin();
+        plugin.configure(Map.of("policies-dir", dir.toString()));
+
+        assertTrue(plugin.getRuleSets().contains("Lenient"));
+
+        ValidationResult lenient = plugin.validate(input(ACTION_PATH_SPEC, "Lenient"));
+        ValidationResult enterprise = plugin.validate(input(ACTION_PATH_SPEC, "Enterprise Grade"));
+        // Lenient enables only REST001 and deducts 0.1 once for it.
+        assertEquals(99.9, lenient.getOverallScore(), 1e-9);
+        // The overridden Enterprise Grade prohibits REST001, so it blocks.
+        assertEquals(0.0, enterprise.getOverallScore());
+    }
+
+    @Test
+    void ignoresAMissingUserPolicyDirectory() {
+        PolicyBasedValidationPlugin plugin = new PolicyBasedValidationPlugin();
+        plugin.configure(Map.of("policies-dir", "/no/such/arete/policies"));
+        assertTrue(plugin.getRuleSets().contains("Enterprise Grade"));
     }
 
     /** Bundle pinned to the Distill runtime for tests that drive it directly. */

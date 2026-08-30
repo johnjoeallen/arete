@@ -335,6 +335,26 @@ Bundled policies: `Enterprise Grade` (the default), `Zalando`, and
 `Zalando Extended` — see [Policies](policies.md). Every rule they can reference
 is in the [Rule Catalogue](rules.md).
 
+### User policies
+
+You can add policies without rebuilding the plugin. On startup the engine also
+reads every `*.md` file in **`~/.arete/policies/`** (filename order), parses each
+one exactly like a bundled policy — against the same rules and matchers — and
+merges them in. They then appear in the validation picker alongside the bundled
+policies.
+
+- A user policy can only reference rules that already exist in the bundle; it
+  cannot add rules or matchers.
+- If a user policy reuses a bundled `id` (e.g. `Enterprise Grade`), the user
+  file **wins** — handy for retuning a bundled policy's deductions locally.
+- A malformed file fails the whole engine load, the same way a bad bundle does,
+  so the error is impossible to miss.
+- The directory is overridable with the `policies-dir` plugin config key or the
+  `arete.policy.policies-dir` system property.
+
+Two ready-made examples, `Lenient` (every rule, 0.1 each) and `Pedantic` (every
+rule, 2.0 each, security rules `PROHIBITED`), make good starting points.
+
 ---
 
 ## Scoring

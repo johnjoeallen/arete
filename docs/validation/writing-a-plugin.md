@@ -8,8 +8,8 @@ from the `arete-validation-spi` module and registers itself via
 !!! tip "Prefer the policy bundle for rule changes"
     If you just want different **rules**, you probably don't need a new plugin
     at all. The bundled [Areté Policy Engine](policy-engine.md) is
-    driven entirely by text files — add a rule, rule, or policy by editing
-    Markdown, YAML, and a [Distill](distill.md) rule. Write a
+    driven entirely by text files — add a rule, matcher, or policy by editing
+    Markdown, YAML, and a [Distill](distill.md) matcher. Write a
     `SpecValidationPlugin` only when you need a different **engine**.
 
 ## The SPI
