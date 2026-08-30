@@ -2,6 +2,11 @@
 
 Areté — the pursuit of API excellence.
 
+<div class="arete-actions">
+  <a class="arete-button" href="https://github.com/johnjoeallen/arete/releases">Releases</a>
+  <a class="arete-button arete-button-secondary" href="https://github.com/johnjoeallen/arete">GitHub</a>
+</div>
+
 Areté is a **local-first API explorer** for OpenAPI/Swagger specs. Paste a
 spec, or point Areté at one on disk, and get instant browsable docs —
 endpoints, parameters, schemas, request/response examples — plus pluggable,
