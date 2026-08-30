@@ -170,6 +170,14 @@ a:hover { color: var(--link-hover); }
 
 .matcher-test-page { max-width: 1500px; }
 .matcher-test-form { display: flex; flex-direction: column; gap: 1em; }
+.matcher-example-picker { display: flex; flex-direction: column; gap: 0.3em; max-width: 28em; color: var(--muted-fg); font-size: 0.9em; }
+.matcher-example-picker select { padding: 0.45em 0.6em; background: var(--bg); color: var(--fg); border: 1px solid var(--border); border-radius: 4px; }
+.matcher-example-frame { display: none; flex-direction: column; gap: 0.35em; padding: 0.8em 1em; border: 1px solid var(--border); border-radius: 4px; background: var(--surface-alt); }
+.matcher-example-frame.matcher-example-frame-selected { display: flex; }
+.matcher-example-parameter-control label { display: flex; flex-direction: column; gap: 0.25em; max-width: 14em; color: var(--muted-fg); font-size: 0.9em; }
+.matcher-example-parameter-control select, .matcher-example-parameter-control input { padding: 0.35em 0.5em; background: var(--bg); color: var(--fg); border: 1px solid var(--border); border-radius: 4px; }
+.matcher-scope-help { margin: -0.5em 0 0; }
+.matcher-example-data { display: none; }
 .matcher-test-options { display: flex; flex-wrap: wrap; gap: 0.8em 1.2em; align-items: end; }
 .matcher-test-options label, .matcher-test-editors label { display: flex; flex-direction: column; gap: 0.3em; color: var(--muted-fg); font-size: 0.9em; }
 .matcher-test-options input, .matcher-test-options select, .matcher-test-editors textarea { padding: 0.45em 0.6em; background: var(--bg); color: var(--fg); border: 1px solid var(--border); border-radius: 4px; }

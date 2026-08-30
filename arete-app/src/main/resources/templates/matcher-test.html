@@ -22,19 +22,22 @@
         <h1>Test a matcher</h1>
         <p class="muted">Paste a matcher and an OpenAPI document to execute it without adding anything to the policy bundle.</p>
         <form method="post" action="/matcher-test" class="matcher-test-form">
+            <label class="matcher-example-picker">Example matcher
+                <select id="matcher-example" name="example">
+                    <option value="">-- none --</option>
+                    <option th:each="example : ${matcherExamples}"
+                            th:value="${example.id}"
+                            th:text="${example.label}"
+                            th:selected="${example.id == selectedExample}"></option>
+                </select>
+            </label>
             <div class="matcher-test-options">
-                <label>Language
-                    <select name="language">
-                        <option value="distill" th:selected="${language == 'distill'}">Distill</option>
-                        <option value="groovy" th:selected="${language == 'groovy'}">Groovy</option>
-                    </select>
-                </label>
-                <label>Matcher ID <input type="text" name="matcherId" th:value="${matcherId}"></label>
-                <label>Scope <input type="text" name="scope" th:value="${scope}"></label>
-                <label>Parameters (JSON)
-                    <input type="text" name="parameters" th:value="${parameters}">
+                <label>Matcher ID <input id="matcher-id" type="text" name="matcherId" th:value="${matcherId}"></label>
+                <label>Selected parameters (JSON)
+                    <input id="matcher-parameters" type="text" name="parameters" th:value="${parameters}">
                 </label>
             </div>
+            <input id="matcher-scope" type="hidden" name="scope" th:value="${scope}">
             <div class="matcher-test-editors">
                 <label>Matcher source
                     <textarea name="matcherSource" rows="18" th:text="${matcherSource}"></textarea>
@@ -44,6 +47,44 @@
                 </label>
             </div>
             <button type="submit">Run matcher</button>
+            <button type="button" id="matcher-clear">Clear</button>
+
+            <div class="matcher-example-frames">
+                <div th:each="example : ${matcherExamples}"
+                     class="matcher-example-frame"
+                     th:classappend="${example.id == selectedExample} ? ' matcher-example-frame-selected' : ''"
+                     th:id="'matcher-example-frame-' + ${example.id}">
+                    <strong th:text="${example.label}"></strong>
+                    <span class="muted" th:text="${example.scope + ' scope · Parameters: ' + example.parameters}"></span>
+                    <div class="matcher-example-parameter-control" th:switch="${example.parameterType}">
+                        <label th:case="'method'">Method
+                            <select class="matcher-example-parameter" data-key="method">
+                                <option>GET</option>
+                                <option>POST</option>
+                                <option>PUT</option>
+                                <option>PATCH</option>
+                                <option>DELETE</option>
+                            </select>
+                        </label>
+                        <label th:case="'request-body'">Request body
+                            <select class="matcher-example-parameter" data-key="request-body">
+                                <option value="present">Present</option>
+                                <option value="absent">Absent</option>
+                            </select>
+                        </label>
+                        <label th:case="'suffix'">Required suffix
+                            <input class="matcher-example-parameter" data-key="suffix" value="Catalog">
+                        </label>
+                    </div>
+                    <div class="matcher-example-data">
+                        <textarea class="matcher-example-source" th:text="${example.source}"></textarea>
+                        <input class="matcher-example-id" th:value="${example.matcherId}">
+                        <input class="matcher-example-scope" th:value="${example.scope}">
+                        <input class="matcher-example-parameters" th:value="${example.parameters}">
+                        <textarea class="matcher-example-spec" th:text="${example.spec}"></textarea>
+                    </div>
+                </div>
+            </div>
         </form>
 
         <div class="error-message" th:if="${testError != null}" th:text="${testError}"></div>
@@ -66,5 +107,6 @@
 <script src="/js/tabs.js" defer></script>
 <script src="/js/sidebar-refresh.js" defer></script>
 <script src="/js/theme.js" defer></script>
+<script src="/js/matcher-test.js" defer></script>
 </body>
 </html>

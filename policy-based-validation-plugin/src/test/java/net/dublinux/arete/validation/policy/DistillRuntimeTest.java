@@ -63,6 +63,25 @@ class DistillMatcherEvaluatorTest {
     }
 
     @Test
+    void canFindOperationWithoutRequestBodyUsingConfiguredMethod() {
+        assertEquals(1, runtime.execute("""
+                distill(api, rule) {
+                    return api.paths
+                        .expand { path ->
+                            path.operationDetails
+                                .filter { operation ->
+                                    operation.method == rule.parameters["method"]
+                                        && !operation.requestBodyPresent
+                                }
+                                .map { operation -> occurrence(operation.pointer, path.path, "missing") }
+                        };
+                }
+                """, Map.of("paths", List.of(Map.of("path", "/books", "operationDetails", List.of(
+                        Map.of("method", "POST", "requestBodyPresent", false))))),
+                Map.of("parameters", Map.of("method", "POST"))).size());
+    }
+
+    @Test
     void nestedExpandFilterAndMapMatchOperationSemantics() {
         String source = """
                 distill(api, rule) {

@@ -15,10 +15,58 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 
 @Controller
 public class MatcherTestController {
+    private static final String MISSING_SUMMARY_SPEC = """
+            openapi: 3.0.0
+            info:
+              title: Library API
+              version: 1.0.0
+            paths:
+              /books:
+                get:
+                  responses:
+                    '200': { description: OK }
+            """;
+    private static final String METHOD_SPEC = """
+            openapi: 3.0.0
+            info:
+              title: Library API
+              version: 1.0.0
+            paths:
+              /books:
+                get:
+                  summary: Delete a book
+                  responses:
+                    '200': { description: OK }
+            """;
+    private static final String REQUEST_BODY_SPEC = """
+            openapi: 3.0.0
+            info:
+              title: Library API
+              version: 1.0.0
+            paths:
+              /books:
+                post:
+                  summary: Create a book
+                  responses:
+                    '201': { description: Created }
+            """;
+    private static final String TITLE_SUFFIX_SPEC = """
+            openapi: 3.0.0
+            info:
+              title: Library API
+              version: 1.0.0
+            paths:
+              /health:
+                get:
+                  summary: Check service health
+                  responses:
+                    '200': { description: OK }
+            """;
     private final PluginRegistry pluginRegistry;
     private final SpecStorageService specStorageService;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -35,16 +83,18 @@ public class MatcherTestController {
     }
 
     @PostMapping("/matcher-test")
-    public String test(@RequestParam String language, @RequestParam String matcherId,
+    public String test(@RequestParam String matcherId,
             @RequestParam String scope, @RequestParam String parameters,
-            @RequestParam String matcherSource, @RequestParam String spec, Model model) {
+            @RequestParam String matcherSource, @RequestParam String spec,
+            @RequestParam(defaultValue = "missing-summary") String example, Model model) {
         populate(model);
-        model.addAttribute("language", language);
+        model.addAttribute("language", "distill");
         model.addAttribute("matcherId", matcherId);
         model.addAttribute("scope", scope);
         model.addAttribute("parameters", parameters);
         model.addAttribute("matcherSource", matcherSource);
         model.addAttribute("spec", spec);
+        model.addAttribute("selectedExample", example);
 
         Map<String, Object> parsedParameters;
         try {
@@ -66,7 +116,7 @@ public class MatcherTestController {
         }
 
         try {
-            ValidationResult result = provider.testMatcher(new MatcherTestRequest(language, matcherId, matcherSource,
+            ValidationResult result = provider.testMatcher(new MatcherTestRequest("distill", matcherId, matcherSource,
                     scope, parsedParameters, spec));
             if (result.getStatus() == ValidationResult.Status.SUCCESS) {
                 model.addAttribute("diagnostics", result.getDiagnostics());
@@ -104,6 +154,76 @@ public class MatcherTestController {
                         };
                 }
                 """);
-        model.addAttribute("spec", "openapi: 3.0.0\ninfo:\n  title: Library API\n  version: 1.2.0\n  description: A small API for browsing and managing books.\nservers:\n  - url: https://api.example.com/v1\npaths:\n  /books:\n    get:\n      summary: List books\n      parameters:\n        - name: limit\n          in: query\n          description: Maximum number of books to return.\n          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }\n      responses:\n        '200':\n          description: A page of books.\n          content:\n            application/json:\n              schema: { type: array, items: { $ref: '#/components/schemas/Book' } }\n    post:\n      requestBody:\n        required: true\n        content:\n          application/json:\n            schema: { $ref: '#/components/schemas/NewBook' }\n      responses:\n        '201':\n          description: Book created.\n          content:\n            application/json:\n              schema: { $ref: '#/components/schemas/Book' }\n  /books/{bookId}:\n    get:\n      summary: Get a book\n      parameters:\n        - name: bookId\n          in: path\n          required: true\n          schema: { type: string }\n      responses:\n        '200':\n          description: A book.\n          content:\n            application/json:\n              schema: { $ref: '#/components/schemas/Book' }\n        '404': { description: Book not found. }\n    delete:\n      parameters:\n        - name: bookId\n          in: path\n          required: true\n          schema: { type: string }\n      responses:\n        '204': { description: Book deleted. }\ncomponents:\n  schemas:\n    Book:\n      type: object\n      required: [id, title, author]\n      properties:\n        id: { type: string, example: bk_123 }\n        title: { type: string, example: The Odyssey }\n        author: { type: string, example: Homer }\n        publishedYear: { type: integer, example: -700 }\n    NewBook:\n      type: object\n      required: [title, author]\n      properties:\n        title: { type: string }\n        author: { type: string }\n");
+        model.addAttribute("matcherExamples", List.of(
+                new MatcherTestExample("missing-summary", "Missing operation summaries",
+                        "my-matcher", "operation", "{}", "none", """
+                        distill(api, rule) {
+                            return api.paths
+                                .expand { path ->
+                                    path.operationDetails
+                                        .filter { operation -> operation.summary is blank }
+                                        .map { operation ->
+                                            occurrence(
+                                                operation.pointer,
+                                                operation.method + " " + path.path,
+                                                "Operation summary is missing")
+                                        }
+                                };
+                        }
+                        """, MISSING_SUMMARY_SPEC),
+                new MatcherTestExample("method-filter", "GET operations with mutation names",
+                        "method-check", "operation", "{\"method\":\"GET\"}", "method", """
+                        distill(api, rule) {
+                            return api.paths
+                                .expand { path ->
+                                    path.operationDetails
+                                        .filter { operation -> operation.method == rule.parameters["method"]
+                                            && regexSearch("(?i).*(create|update|delete|remove).*",
+                                                path.path + " " + operation.summary) }
+                                        .map { operation ->
+                                            occurrence(
+                                                operation.pointer,
+                                                operation.method + " " + path.path,
+                                                "GET operation appears to mutate state")
+                                        }
+                                };
+                        }
+                        """, METHOD_SPEC),
+                new MatcherTestExample("request-body", "POST operations without request bodies",
+                        "request-body-check", "operation", "{\"method\":\"POST\"}", "method", """
+                        distill(api, rule) {
+                            return api.paths
+                                .expand { path ->
+                                    path.operationDetails
+                                        .filter { operation ->
+                                            operation.method == rule.parameters["method"]
+                                                && !operation.requestBodyPresent
+                                        }
+                                        .map { operation ->
+                                            occurrence(
+                                                operation.pointer,
+                                                operation.method + " " + path.path,
+                                                "POST operation has no request body")
+                                        }
+                                };
+                        }
+                        """, REQUEST_BODY_SPEC),
+                new MatcherTestExample("title-suffix", "API title suffix",
+                        "title-check", "api", "{\"suffix\":\"Catalog\"}", "suffix", """
+                        distill(api, rule) {
+                            return !api.info.title.endsWith(rule.parameters["suffix"])
+                                ? [occurrence(
+                                    "/info/title",
+                                    api.info.title,
+                                    "API title does not end with the configured suffix")]
+                                : [];
+                        }
+                        """, TITLE_SUFFIX_SPEC)));
+        model.addAttribute("selectedExample", "missing-summary");
+        model.addAttribute("spec", MISSING_SUMMARY_SPEC);
+    }
+
+    private record MatcherTestExample(String id, String label, String matcherId, String scope,
+            String parameters, String parameterType, String source, String spec) {
     }
 }
