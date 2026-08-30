@@ -16,7 +16,7 @@
         <link rel="prev" href="../">
       
       
-        <link rel="next" href="../rule-languages/">
+        <link rel="next" href="../distill/">
       
       
         
@@ -535,21 +535,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#starlark-sandboxed-fallback" class="md-nav__link">
+  <a href="#groovy" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Starlark (sandboxed fallback)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#groovy-disabled-by-default" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Groovy (disabled by default)
+        Groovy
       
     </span>
   </a>
@@ -753,34 +742,6 @@
   
 </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../rule-languages/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Rule languages
-  
-
-    
-  </span>
-  
-  
-
-      </a>
     </li>
   
 
@@ -1005,21 +966,10 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#starlark-sandboxed-fallback" class="md-nav__link">
+  <a href="#groovy" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Starlark (sandboxed fallback)
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#groovy-disabled-by-default" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Groovy (disabled by default)
+        Groovy
       
     </span>
   </a>
@@ -1281,9 +1231,7 @@ Areté UI as selectable rule sets.</p>
    diagnostics.</li>
 </ol>
 <h3 id="rule-languages">Rule languages<a class="headerlink" href="#rule-languages" title="Permanent link">&para;</a></h3>
-<p>The engine ships three rule runtimes. A rule can be authored in any of
-the languages — <code>Matcher.dsl</code>, <code>Matcher.star</code> and <code>Matcher.groovy</code> sit side
-by side under the rule directory — and a configurable <strong>language
+<p>The engine ships Distill and Groovy rule runtimes. A configurable <strong>language
 precedence</strong> decides which source is loaded for each rule.</p>
 <table>
 <thead>
@@ -1300,33 +1248,22 @@ precedence</strong> decides which source is loaded for each rule.</p>
 <td><strong>Default.</strong> Sandboxed; see the <a href="../distill/">Distill reference</a>.</td>
 </tr>
 <tr>
-<td><code>starlark</code></td>
-<td><code>Matcher.star</code></td>
-<td>Sandboxed fallback; always available.</td>
-</tr>
-<tr>
 <td><code>groovy</code></td>
 <td><code>Matcher.groovy</code></td>
-<td><strong>Disabled by default</strong> — opt-in, unsandboxed.</td>
+<td>Available for validation and execution.</td>
 </tr>
 </tbody>
 </table>
-<p>Every bundled rule ships all three sources, kept in lock-step by
-<code>DistillParityTest</code> and <code>GroovyStarlarkParityTest</code>, so the language a bundle
-loads never changes its findings.</p>
+<p>Where both implementations are provided, the Distill and Groovy sources are
+kept in lock-step by the validation tests.</p>
 <h4 id="language-precedence">Language precedence<a class="headerlink" href="#language-precedence" title="Permanent link">&para;</a></h4>
 <p>For each rule the loader walks the configured precedence list and uses the
 <strong>first language whose source file is present</strong>. The default precedence is
-<code>distill,starlark</code> — Distill for every rule, with Starlark covering any
-rule (in a third-party bundle, say) that ships only a <code>Matcher.star</code>.
-Groovy never runs unless you opt in:</p>
+<code>distill,groovy</code> — Distill first, with Groovy available where no Distill source
+exists:</p>
 <ul>
-<li>precedence <code>starlark</code> — pin the Starlark runtime;</li>
-<li>precedence <code>distill,starlark,groovy</code> (what <code>--enable-groovy-rules</code> sets) —
-  Distill, then Starlark, then Groovy only where neither of the others has a
-  source;</li>
-<li>precedence <code>groovy,starlark</code> — prefer Groovy where a <code>Matcher.groovy</code>
-  exists, fall back to Starlark otherwise;</li>
+<li>precedence <code>distill,groovy</code> — prefer Distill, then Groovy;</li>
+<li>precedence <code>groovy,distill</code> — prefer Groovy, then Distill;</li>
 <li>precedence <code>groovy</code> — Groovy only; a rule with no <code>Matcher.groovy</code>
   fails the bundle.</li>
 </ul>
@@ -1341,11 +1278,11 @@ Groovy never runs unless you opt in:</p>
 <tbody>
 <tr>
 <td>Plugin config key <code>rule-languages</code></td>
-<td>comma-separated list, e.g. <code>starlark</code></td>
+<td>comma-separated list, e.g. <code>distill,groovy</code></td>
 </tr>
 <tr>
 <td>Plugin config key <code>rule-language</code></td>
-<td>a single extra language (appended to <code>distill,starlark</code>)</td>
+<td>a single extra language (appended to <code>distill,groovy</code>)</td>
 </tr>
 <tr>
 <td>System property <code>-Darete.policy.rule-languages</code></td>
@@ -1359,21 +1296,16 @@ Groovy never runs unless you opt in:</p>
 <td>Launcher <code>--rule-languages LIST</code></td>
 <td>comma-separated list</td>
 </tr>
-<tr>
-<td>Launcher <code>--enable-groovy-rules</code></td>
-<td>shorthand for <code>distill,starlark,groovy</code></td>
-</tr>
 </tbody>
 </table>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Launcher</label><label for="__tabbed_1_2">System property</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>./arete.sh<span class="w"> </span>--enable-groovy-rules
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>./arete.sh<span class="w"> </span>--rule-languages<span class="w"> </span>starlark
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>./arete.sh<span class="w"> </span>--rule-languages<span class="w"> </span>distill,groovy
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>java<span class="w"> </span>-Darete.policy.rule-languages<span class="o">=</span>starlark<span class="w"> </span>-jar<span class="w"> </span>arete.jar
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>java<span class="w"> </span>-Darete.policy.rule-languages<span class="o">=</span>distill,groovy<span class="w"> </span>-jar<span class="w"> </span>arete.jar
 </code></pre></div>
 </div>
 </div>
@@ -1381,39 +1313,22 @@ Groovy never runs unless you opt in:</p>
 <h4 id="distill-default">Distill (default)<a class="headerlink" href="#distill-default" title="Permanent link">&para;</a></h4>
 <p>Rules run as <a href="../distill/">Distill</a> sources — a small expression language shaped
 for rule pipelines (<code>.map</code> / <code>.filter</code> / <code>.expand</code>, slashy regex literals,
-<code>diagnostic(...)</code>).</p>
+<code>occurrence(...)</code>).</p>
 <ul>
 <li><strong>Safe by construction</strong> — the interpreter exposes only the immutable <code>api</code>
   and <code>rule</code> values, a fixed builtin set, and RE2/J regex. No filesystem,
   network, reflection, or unbounded loops.</li>
 <li>See the <a href="../distill/">Distill reference</a> for the full grammar and builtin catalogue.</li>
 </ul>
-<h4 id="starlark-sandboxed-fallback">Starlark (sandboxed fallback)<a class="headerlink" href="#starlark-sandboxed-fallback" title="Permanent link">&para;</a></h4>
-<p>Rules run as <a href="https://bazel.build/rules/language">Starlark</a> sources.</p>
-<ul>
-<li><strong>Safe by construction</strong> — a Starlark rule cannot touch the filesystem,
-  network, environment, threads, reflection, or any class outside the
-  whitelisted value model. It reads the immutable <code>api</code> and <code>rule</code> values and
-  returns a list of diagnostic dicts. Nothing to sandbox.</li>
-<li>Regex is <a href="https://github.com/google/re2j">RE2/J</a> — linear-time, no
-  catastrophic backtracking.</li>
-<li>The Starlark rules were verified against the Groovy implementations
-  across a corpus sweep.</li>
-</ul>
-<h4 id="groovy-disabled-by-default">Groovy (disabled by default)<a class="headerlink" href="#groovy-disabled-by-default" title="Permanent link">&para;</a></h4>
-<p><code>GroovyRuleRuntime</code> runs a <code>Matcher.groovy</code> source directly in the plugin
-JVM via a bare <code>GroovyShell</code> — <strong>with no sandbox</strong>. It is a deliberate, opt-in
-fallback and is <strong>disabled by default</strong> until the rule sandbox described in
-the
-<a href="https://github.com/johnjoeallen/arete/blob/main/design-notes/policy-engine-sandbox-plan.md">sandbox plan</a>
-lands. It is <em>not</em> deprecated — the intent is to re-enable it as a first-class
-option once bundle-supplied Groovy can be run safely.</p>
+<h4 id="groovy">Groovy<a class="headerlink" href="#groovy" title="Permanent link">&para;</a></h4>
+<p><code>GroovyMatcherEvaluator</code> runs a <code>Matcher.groovy</code> source directly in the plugin
+JVM via a bare <code>GroovyShell</code> — <strong>with no sandbox</strong>. It is enabled after
+Distill when no Distill source is present.</p>
 <div class="admonition danger">
 <p class="admonition-title">Groovy rules are unsandboxed</p>
 <p>A <code>Matcher.groovy</code> runs with the full authority of the plugin JVM —
-filesystem, network, process execution, reflection. Only add <code>groovy</code> to
-the precedence for a policy bundle you fully trust and control. That is why
-it is off by default.</p>
+filesystem, network, process execution, reflection. Use it only with a
+policy bundle you fully trust and control.</p>
 </div>
 <hr />
 <h2 id="the-policy-bundle">The policy bundle<a class="headerlink" href="#the-policy-bundle" title="Permanent link">&para;</a></h2>
@@ -1423,13 +1338,12 @@ it is off by default.</p>
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>├── rules/
 <a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>│   └── &lt;rule-id&gt;/
 <a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>│       ├── Matcher.md          # descriptor (YAML front matter) + prose
-<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>│       ├── Matcher.dsl        # the rule — Distill (default runtime)
-<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>│       ├── Matcher.star        # the same rule — Starlark (sandboxed fallback)
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>│       └── Matcher.groovy      # the same rule — Groovy (opt-in runtime)
-<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>├── rules/
-<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>│   └── &lt;RULE-ID&gt;.md             # rule front matter + human documentation
-<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>└── policies/
-<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>    └── &lt;Policy Name&gt;.md         # policy front matter + prose
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>│       ├── Matcher.dsl         # the rule — Distill (default runtime)
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>│       └── Matcher.groovy      # the same rule — Groovy
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>├── rules/
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>│   └── &lt;RULE-ID&gt;.md             # rule front matter + human documentation
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>└── policies/
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>    └── &lt;Policy Name&gt;.md         # policy front matter + prose
 </code></pre></div>
 <h3 id="policybundleyaml"><code>PolicyBundle.yaml</code><a class="headerlink" href="#policybundleyaml" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nt">formatVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span><span class="w">                 </span><span class="c1"># must be 1</span>
@@ -1458,8 +1372,8 @@ job.</p>
 <h3 id="descriptor-matchermd-front-matter">Descriptor (<code>Matcher.md</code> front matter)<a class="headerlink" href="#descriptor-matchermd-front-matter" title="Permanent link">&para;</a></h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nn">---</span>
 <a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">naming</span><span class="w">                       </span><span class="c1"># must match the manifest key</span>
-<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="nt">language</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">starlark</span><span class="w">                </span><span class="c1"># the rule language</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Matcher.star</span><span class="w">             </span><span class="c1"># the rule source</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span><span class="nt">language</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">distill</span><span class="w">                 </span><span class="c1"># the rule language</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">    </span><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Matcher.dsl</span><span class="w">               </span><span class="c1"># the rule source</span>
 <a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="nt">scopes</span><span class="p">:</span><span class="w">                          </span><span class="c1"># the scope values rules may request</span>
 <a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">property</span>
 <a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path-segment</span>
@@ -1537,30 +1451,13 @@ global requirement. JSON Pointers are pre-escaped and safe to return verbatim
 as <code>pointer</code>.</p>
 <h3 id="writing-a-rule">Writing a rule<a class="headerlink" href="#writing-a-rule" title="Permanent link">&para;</a></h3>
 <p>The default runtime is <strong>Distill</strong> (<code>Matcher.dsl</code>); its grammar and builtins
-have their own chapter — the <a href="../distill/">Distill reference</a>. The rest of this
-section describes the Starlark form, which every bundled rule also ships as
-a sandboxed fallback.</p>
-<p><code>Matcher.star</code> must define a top-level function <code>detect(api, rule)</code> that
-returns a list of diagnostic dicts:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">detect</span><span class="p">(</span><span class="n">api</span><span class="p">,</span> <span class="n">rule</span><span class="p">):</span>
-<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>    <span class="n">suffix</span> <span class="o">=</span> <span class="n">rule</span><span class="p">[</span><span class="s2">"parameters"</span><span class="p">][</span><span class="s2">"suffix"</span><span class="p">]</span>        <span class="c1"># rule = {"id", "scope", "parameters"}</span>
-<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
-<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    <span class="k">for</span> <span class="n">schema</span> <span class="ow">in</span> <span class="n">api</span><span class="p">[</span><span class="s2">"schemas"</span><span class="p">]:</span>
-<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>        <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">schema</span><span class="p">[</span><span class="s2">"properties"</span><span class="p">]:</span>
-<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>            <span class="k">if</span> <span class="n">prop</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">suffix</span><span class="p">):</span>
-<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>                <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
-<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>                    <span class="s2">"pointer"</span><span class="p">:</span> <span class="n">prop</span><span class="p">[</span><span class="s2">"pointer"</span><span class="p">],</span>          <span class="c1"># optional, string</span>
-<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>                    <span class="s2">"path"</span><span class="p">:</span> <span class="n">prop</span><span class="p">[</span><span class="s2">"name"</span><span class="p">],</span>                <span class="c1"># optional, string (shown as location)</span>
-<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>                    <span class="s2">"message"</span><span class="p">:</span> <span class="s2">"Property has the prohibited suffix "</span> <span class="o">+</span> <span class="n">suffix</span><span class="p">,</span>  <span class="c1"># required, non-blank</span>
-<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>                <span class="p">})</span>
-<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>    <span class="k">return</span> <span class="n">out</span>
-</code></pre></div>
+have their own chapter — the <a href="../distill/">Distill reference</a>.</p>
 <p>Rules:</p>
 <ul>
 <li><code>message</code> is required and must be non-blank; <code>pointer</code> and <code>path</code> are
   optional strings.</li>
-<li>Return <code>[]</code> when nothing matches — <strong>never</strong> return a score or a severity.</li>
-<li>More than 1000 diagnostics is a rule error.</li>
+<li>Return an empty list when nothing matches — <strong>never</strong> return a score or severity.</li>
+<li>More than 1000 occurrences is a rule error.</li>
 <li>Any error (raised, step-cap exceeded, wrong return shape) becomes a plugin
   error for that rule's run — it does not abort the other rules.</li>
 <li>The script is compiled when the bundle loads; a compile failure fails the
@@ -1602,24 +1499,24 @@ list/dict/string/<code>for</code>/comprehension work are these builtins:</p>
 </table>
 <p>If a rule needs something outside this list, that is a deliberate,
 reviewed addition to the runtime — not a workaround in the script.</p>
-<p>The <code>manual</code> rule is the deliberate no-op (<code>def detect(api, rule): return []</code>).
+<p>The <code>manual</code> rule is the deliberate no-op (<code>distill(api, rule) { return []; }</code>).
 It keeps a rule in the catalogue as a checklist item that cannot be inferred
 from an OpenAPI document.</p>
 <hr />
 <h2 id="rules_1">Rules<a class="headerlink" href="#rules_1" title="Permanent link">&para;</a></h2>
 <p>A rule binds a rule to a specific scope and parameter set, and carries the
 human explanation.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>---
-<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>id: CASE001                       # must match the manifest key
-<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>category: Naming                  # free-text grouping shown in the UI
-<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>matcher: naming                  # rule id
-<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>scope: property                   # must be one of that rule's <span class="sb">`scopes`</span>
-<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="gu">parameters: { convention: camelCase, match: non-conforming }</span>
-<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="gu">---</span>
-<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>
-<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="gh"># CASE001 — JSON property is not camelCase</span>
-<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>
-<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>JSON property names should use camelCase where required by policy.
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>---
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>id: CASE001                       # must match the manifest key
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>category: Naming                  # free-text grouping shown in the UI
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>matcher: naming                  # rule id
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>scope: property                   # must be one of that rule's <span class="sb">`scopes`</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="gu">parameters: { convention: camelCase, match: non-conforming }</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="gu">---</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="gh"># CASE001 — JSON property is not camelCase</span>
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>JSON property names should use camelCase where required by policy.
 </code></pre></div>
 <ul>
 <li>The body <strong>must</strong> start with a level-one heading (<code># ...</code>); its text becomes
@@ -1639,17 +1536,17 @@ human explanation.</p>
 <h2 id="policies">Policies<a class="headerlink" href="#policies" title="Permanent link">&para;</a></h2>
 <p>A policy is the deployable artifact: the list of active rules and what each one
 costs.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>---
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>id: Enterprise Grade              # must match the manifest key (quote if it has spaces)
-<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>rules:
-<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>  REST001: 0.5                    # deduct 0.5 points once if this rule matches
-<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>  CASE001: 0.5
-<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="gu">  SEC001: PROHIBITED              # any match forces the overall score to 0</span>
-<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="gu">---</span>
-<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>
-<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="gh"># Enterprise Grade Policy</span>
-<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a>
-<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a>Prose describing the policy's intent.
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>---
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>id: Enterprise Grade              # must match the manifest key (quote if it has spaces)
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>rules:
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>  REST001: 0.5                    # deduct 0.5 points once if this rule matches
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>  CASE001: 0.5
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="gu">  SEC001: PROHIBITED              # any match forces the overall score to 0</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="gu">---</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="gh"># Enterprise Grade Policy</span>
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>Prose describing the policy's intent.
 </code></pre></div>
 <ul>
 <li>Each value is either a <strong>number <code>0</code>–<code>100</code></strong> (a point deduction) or the
@@ -1666,8 +1563,8 @@ costs.</p>
 is in the <a href="../rules/">Rule Catalogue</a>.</p>
 <hr />
 <h2 id="scoring">Scoring<a class="headerlink" href="#scoring" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>qualityScore   = max(0, 100 − Σ deductions for matched rules)
-<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>effectiveScore = 0 if any PROHIBITED rule matched, else qualityScore
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>qualityScore   = max(0, 100 − Σ deductions for matched rules)
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>effectiveScore = 0 if any PROHIBITED rule matched, else qualityScore
 </code></pre></div>
 <p>The result reports <code>overallScore</code> (<code>effectiveScore</code>) and
 <code>overallScoreWithoutBlockers</code> (<code>qualityScore</code>). Severity is <code>ERROR</code> for a
@@ -1685,7 +1582,7 @@ is in the <a href="../rules/">Rule Catalogue</a>.</p>
 <h3 id="a-new-rule">A new rule<a class="headerlink" href="#a-new-rule" title="Permanent link">&para;</a></h3>
 <ol>
 <li>Create <code>matchers/&lt;id&gt;/Matcher.md</code> (descriptor) and
-   <code>rules/&lt;id&gt;/Matcher.star</code> (the <code>detect(api, rule)</code> function).</li>
+   <code>matchers/&lt;id&gt;/Matcher.dsl</code> (the Distill expression).</li>
 <li>Add <code>&lt;id&gt;: matchers/&lt;id&gt;/Matcher.md</code> to <code>PolicyBundle.yaml</code> under
    <code>rules:</code>.</li>
 <li>Add rules that use it.</li>
@@ -1697,20 +1594,20 @@ is in the <a href="../rules/">Rule Catalogue</a>.</p>
 </ol>
 <p>Rule entries may use the numeric or <code>PROHIBITED</code> shorthand, or a declaration
 when that policy needs different rule parameters:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nt">rules</span><span class="p">:</span>
-<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">  </span><span class="nt">STANDARD008</span><span class="p">:</span>
-<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">    </span><span class="nt">points</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span>
-<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="w">    </span><span class="nt">parameters</span><span class="p">:</span>
-<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="w">      </span><span class="nt">allowed</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">X-Request-Id,X-Correlation-Id</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nt">rules</span><span class="p">:</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">  </span><span class="nt">STANDARD008</span><span class="p">:</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">    </span><span class="nt">points</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">    </span><span class="nt">parameters</span><span class="p">:</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">      </span><span class="nt">allowed</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">X-Request-Id,X-Correlation-Id</span>
 </code></pre></div>
 <p>The policy parameters are merged over the rule defaults for that run. They are
 validated against the rule descriptor at bundle load time; unknown or
 incorrectly typed overrides fail fast. The shorthand remains equivalent to a
 declaration with no overrides.</p>
 <h3 id="build-install">Build &amp; install<a class="headerlink" href="#build-install" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>mvn<span class="w"> </span>-q<span class="w"> </span>-pl<span class="w"> </span>policy-based-validation-plugin<span class="w"> </span>-am<span class="w"> </span>package<span class="w"> </span>-DskipTests
-<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>cp<span class="w"> </span>policy-based-validation-plugin/target/policy-based-validation-plugin-*.jar<span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">   </span>~/.arete/plugins/
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>mvn<span class="w"> </span>-q<span class="w"> </span>-pl<span class="w"> </span>policy-based-validation-plugin<span class="w"> </span>-am<span class="w"> </span>package<span class="w"> </span>-DskipTests
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>cp<span class="w"> </span>policy-based-validation-plugin/target/policy-based-validation-plugin-*.jar<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">   </span>~/.arete/plugins/
 </code></pre></div>
 <p><code>PolicyBasedValidationPluginTest</code> / <code>...LoadIT</code> load the real bundle and will
 fail the build on any manifest, front-matter, scope, parameter, or
@@ -1722,7 +1619,7 @@ rule-compile error.</p>
 <li><code>formatVersion</code> ≠ 1; empty <code>rules</code>/<code>policies</code>/<code>rules</code>; unknown top-level
   or front-matter fields; unsafe resource paths.</li>
 <li>A manifest key that doesn't match the <code>id</code> inside the referenced file.</li>
-<li>A rule: an uncompilable <code>Matcher.star</code>, a missing source, an <code>enum</code>
+<li>A rule: an uncompilable matcher source, a missing source, an <code>enum</code>
   parameter with no <code>values</code>, a
   scalar parameter that declares <code>values</code>, an unsupported parameter type.</li>
 <li>A rule: a <code>scope</code> not in the rule's <code>scopes</code>, an unknown parameter, a
