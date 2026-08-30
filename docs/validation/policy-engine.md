@@ -1,138 +1,138 @@
-# Speculate Policy Engine
+# Areté Policy Engine
 
-The **Speculate Policy Engine** (`generic-policy-validation-plugin`, plugin id
+The **Areté Policy Engine** (`generic-policy-validation-plugin`, plugin id
 `generic-policy`) is the built-in, policy-driven validation plugin. Instead of
 hard-coding checks in Java, it ships a **policy bundle**: a tree of Markdown +
-YAML files describing *detectors* (how to find facts in a spec), *rules* (a
-named concern built on a detector), and *policies* (which rules are active and
+YAML files describing *rules* (how to find facts in a spec), *rules* (a
+named concern built on a rule), and *policies* (which rules are active and
 how much each one costs). Anyone can add or change a rule by editing text
 files — no host code changes.
 
 ## How it works
 
 The engine is discovered by the host exactly like any other validation plugin:
-it is a shaded jar dropped in `~/.speculate/plugins/`, registered through
-`META-INF/services/net.dublinux.speculate.validation.spi.SpecValidationPlugin`,
+it is a shaded jar dropped in `~/.arete/plugins/`, registered through
+`META-INF/services/net.dublinux.arete.validation.spi.SpecValidationPlugin`,
 and loaded via `ServiceLoader` into an isolated classloader. It supports
 OpenAPI 3 and Swagger 2 input.
 
 On first use the plugin loads its **policy bundle** from the classpath
 (`api-policy/` inside the jar) and validates every file in it. `getRuleSets()`
 then returns one entry per policy in the bundle — these appear in the
-Speculate UI as selectable rule sets.
+Areté UI as selectable rule sets.
 
 For each `validate(spec)` call:
 
 1. The spec is parsed once (swagger-parser) and converted to a small, stable
-   `Map` model by `OpenApiMapAdapter`. Detectors never see parser types.
+   `Map` model by `OpenApiMapAdapter`. Rules never see parser types.
 2. The requested policy is resolved (`SpecInput.getRuleSet()`); if the name is
    unknown, the **first policy declared** in the manifest is used as the
    default.
 3. Each rule listed in that policy is evaluated **in declaration order**:
-   - the rule's detector is run against the `api` model plus the rule's own
+   - the rule's rule is run against the `api` model plus the rule's own
      `{id, scope, parameters}`;
-   - the detector returns zero or more **occurrences** (`{pointer, path,
+   - the rule returns zero or more **diagnostics** (`{pointer, path,
      message}`);
-   - if there is at least one occurrence, the rule's policy **disposition**
+   - if there is at least one diagnostic, the rule's policy **disposition**
      (a point deduction, or `PROHIBITED`) is applied **once**, and one
-     `Violation` is emitted per occurrence.
+     `Diagnostic` is emitted per diagnostic.
 4. A score is computed (see [Scoring](#scoring)) and returned with the
-   violations.
+   diagnostics.
 
-### Detector languages
+### Rule languages
 
-The engine ships three detector runtimes. A detector can be authored in any of
-the languages — `Detector.sift`, `Detector.star` and `Detector.groovy` sit side
-by side under the detector directory — and a configurable **language
-precedence** decides which source is loaded for each detector.
+The engine ships three rule runtimes. A rule can be authored in any of
+the languages — `Matcher.dsl`, `Matcher.star` and `Matcher.groovy` sit side
+by side under the rule directory — and a configurable **language
+precedence** decides which source is loaded for each rule.
 
 | Language | Source file | Status |
 |---|---|---|
-| `sift` | `Detector.sift` | **Default.** Sandboxed; see the [Sift reference](sift.md). |
-| `starlark` | `Detector.star` | Sandboxed fallback; always available. |
-| `groovy` | `Detector.groovy` | **Disabled by default** — opt-in, unsandboxed. |
+| `distill` | `Matcher.dsl` | **Default.** Sandboxed; see the [Distill reference](distill.md). |
+| `starlark` | `Matcher.star` | Sandboxed fallback; always available. |
+| `groovy` | `Matcher.groovy` | **Disabled by default** — opt-in, unsandboxed. |
 
-Every bundled detector ships all three sources, kept in lock-step by
-`SiftParityTest` and `GroovyStarlarkParityTest`, so the language a bundle
+Every bundled rule ships all three sources, kept in lock-step by
+`DistillParityTest` and `GroovyStarlarkParityTest`, so the language a bundle
 loads never changes its findings.
 
 #### Language precedence
 
-For each detector the loader walks the configured precedence list and uses the
+For each rule the loader walks the configured precedence list and uses the
 **first language whose source file is present**. The default precedence is
-`sift,starlark` — Sift for every detector, with Starlark covering any
-detector (in a third-party bundle, say) that ships only a `Detector.star`.
+`distill,starlark` — Distill for every rule, with Starlark covering any
+rule (in a third-party bundle, say) that ships only a `Matcher.star`.
 Groovy never runs unless you opt in:
 
 - precedence `starlark` — pin the Starlark runtime;
-- precedence `sift,starlark,groovy` (what `--enable-groovy-detectors` sets) —
-  Sift, then Starlark, then Groovy only where neither of the others has a
+- precedence `distill,starlark,groovy` (what `--enable-groovy-rules` sets) —
+  Distill, then Starlark, then Groovy only where neither of the others has a
   source;
-- precedence `groovy,starlark` — prefer Groovy where a `Detector.groovy`
+- precedence `groovy,starlark` — prefer Groovy where a `Matcher.groovy`
   exists, fall back to Starlark otherwise;
-- precedence `groovy` — Groovy only; a detector with no `Detector.groovy`
+- precedence `groovy` — Groovy only; a rule with no `Matcher.groovy`
   fails the bundle.
 
 Configure it (highest precedence first):
 
 | Mechanism | Value |
 |---|---|
-| Plugin config key `detector-languages` | comma-separated list, e.g. `starlark` |
-| Plugin config key `detector-language` | a single extra language (appended to `sift,starlark`) |
-| System property `-Dspeculate.policy.detector-languages` | comma-separated list |
-| System property `-Dspeculate.policy.detector-language` | single language |
-| Launcher `--detector-languages LIST` | comma-separated list |
-| Launcher `--enable-groovy-detectors` | shorthand for `sift,starlark,groovy` |
+| Plugin config key `rule-languages` | comma-separated list, e.g. `starlark` |
+| Plugin config key `rule-language` | a single extra language (appended to `distill,starlark`) |
+| System property `-Darete.policy.rule-languages` | comma-separated list |
+| System property `-Darete.policy.rule-language` | single language |
+| Launcher `--rule-languages LIST` | comma-separated list |
+| Launcher `--enable-groovy-rules` | shorthand for `distill,starlark,groovy` |
 
 === "Launcher"
 
     ```bash
-    ./speculate.sh --enable-groovy-detectors
-    ./speculate.sh --detector-languages starlark
+    ./arete.sh --enable-groovy-rules
+    ./arete.sh --rule-languages starlark
     ```
 
 === "System property"
 
     ```bash
-    java -Dspeculate.policy.detector-languages=starlark -jar speculate.jar
+    java -Darete.policy.rule-languages=starlark -jar arete.jar
     ```
 
-#### Sift (default)
+#### Distill (default)
 
-Detectors run as [Sift](sift.md) sources — a small expression language shaped
-for detector pipelines (`.map` / `.filter` / `.expand`, slashy regex literals,
-`occurrence(...)`).
+Rules run as [Distill](distill.md) sources — a small expression language shaped
+for rule pipelines (`.map` / `.filter` / `.expand`, slashy regex literals,
+`diagnostic(...)`).
 
 - **Safe by construction** — the interpreter exposes only the immutable `api`
   and `rule` values, a fixed builtin set, and RE2/J regex. No filesystem,
   network, reflection, or unbounded loops.
-- See the [Sift reference](sift.md) for the full grammar and builtin catalogue.
+- See the [Distill reference](distill.md) for the full grammar and builtin catalogue.
 
 #### Starlark (sandboxed fallback)
 
-Detectors run as [Starlark](https://bazel.build/rules/language) sources.
+Rules run as [Starlark](https://bazel.build/rules/language) sources.
 
-- **Safe by construction** — a Starlark detector cannot touch the filesystem,
+- **Safe by construction** — a Starlark rule cannot touch the filesystem,
   network, environment, threads, reflection, or any class outside the
   whitelisted value model. It reads the immutable `api` and `rule` values and
-  returns a list of occurrence dicts. Nothing to sandbox.
+  returns a list of diagnostic dicts. Nothing to sandbox.
 - Regex is [RE2/J](https://github.com/google/re2j) — linear-time, no
   catastrophic backtracking.
-- The Starlark detectors were verified against the Groovy implementations
+- The Starlark rules were verified against the Groovy implementations
   across a corpus sweep.
 
 #### Groovy (disabled by default)
 
-`GroovyDetectorRuntime` runs a `Detector.groovy` source directly in the plugin
+`GroovyRuleRuntime` runs a `Matcher.groovy` source directly in the plugin
 JVM via a bare `GroovyShell` — **with no sandbox**. It is a deliberate, opt-in
-fallback and is **disabled by default** until the detector sandbox described in
+fallback and is **disabled by default** until the rule sandbox described in
 the
-[sandbox plan](https://github.com/johnjoeallen/speculate/blob/main/design-notes/policy-engine-sandbox-plan.md)
+[sandbox plan](https://github.com/johnjoeallen/arete/blob/main/design-notes/policy-engine-sandbox-plan.md)
 lands. It is *not* deprecated — the intent is to re-enable it as a first-class
 option once bundle-supplied Groovy can be run safely.
 
-!!! danger "Groovy detectors are unsandboxed"
-    A `Detector.groovy` runs with the full authority of the plugin JVM —
+!!! danger "Groovy rules are unsandboxed"
+    A `Matcher.groovy` runs with the full authority of the plugin JVM —
     filesystem, network, process execution, reflection. Only add `groovy` to
     the precedence for a policy bundle you fully trust and control. That is why
     it is off by default.
@@ -145,13 +145,13 @@ Everything lives under `generic-policy-validation-plugin/src/main/resources/api-
 
 ```
 api-policy/
-├── PolicyBundle.yaml            # manifest: id → file for every rule, policy, detector
-├── detectors/
-│   └── <detector-id>/
-│       ├── Detector.md          # descriptor (YAML front matter) + prose
-│       ├── Detector.sift        # the detector — Sift (default runtime)
-│       ├── Detector.star        # the same detector — Starlark (sandboxed fallback)
-│       └── Detector.groovy      # the same detector — Groovy (opt-in runtime)
+├── PolicyBundle.yaml            # manifest: id → file for every rule, policy, rule
+├── rules/
+│   └── <rule-id>/
+│       ├── Matcher.md          # descriptor (YAML front matter) + prose
+│       ├── Matcher.dsl        # the rule — Distill (default runtime)
+│       ├── Matcher.star        # the same rule — Starlark (sandboxed fallback)
+│       └── Matcher.groovy      # the same rule — Groovy (opt-in runtime)
 ├── rules/
 │   └── <RULE-ID>.md             # rule front matter + human documentation
 └── policies/
@@ -162,7 +162,7 @@ api-policy/
 
 ```yaml
 formatVersion: 1                 # must be 1
-bundleId: speculate-policy-bundle
+bundleId: arete-policy-bundle
 bundleVersion: 0.1.0
 
 rules:
@@ -171,32 +171,32 @@ rules:
 policies:
   "Enterprise Grade": policies/EnterpriseGrade.md
   Zalando: policies/Zalando.md
-detectors:
-  naming: detectors/naming/Detector.md
+rules:
+  naming: matchers/naming/Matcher.md
 ```
 
-`rules`, `policies`, and `detectors` must each be non-empty. Every referenced
+`rules`, `policies`, and `rules` must each be non-empty. Every referenced
 path is relative, and `..`, absolute paths, and backslashes are rejected.
 
-Each rule/policy/detector file is Markdown with a **YAML front matter block**
+Each rule/policy/rule file is Markdown with a **YAML front matter block**
 delimited by `---` lines; the body after the closing `---` is human-readable
 documentation.
 
 ---
 
-## Detectors
+## Rules
 
-A detector is a reusable, parameterised fact-finder. It reports **what it
+A rule is a reusable, parameterised fact-finder. It reports **what it
 observed** and takes no position on severity or score — that is the policy's
 job.
 
-### Descriptor (`Detector.md` front matter)
+### Descriptor (`Matcher.md` front matter)
 
 ```yaml
 ---
 id: naming                       # must match the manifest key
-language: starlark                # the detector language
-source: Detector.star             # the detector source
+language: starlark                # the rule language
+source: Matcher.star             # the rule source
 scopes:                          # the scope values rules may request
   - property
   - path-segment
@@ -224,7 +224,7 @@ scripts can trust their inputs):
 
 ### The `api` model
 
-`OpenApiMapAdapter` exposes only these keys — detectors are independent of the
+`OpenApiMapAdapter` exposes only these keys — rules are independent of the
 parser:
 
 ```
@@ -260,15 +260,15 @@ api.schemas[]  { name, pointer, type, array, maxItems, description, examplePrese
 global requirement. JSON Pointers are pre-escaped and safe to return verbatim
 as `pointer`.
 
-### Writing a detector
+### Writing a rule
 
-The default runtime is **Sift** (`Detector.sift`); its grammar and builtins
-have their own chapter — the [Sift reference](sift.md). The rest of this
-section describes the Starlark form, which every bundled detector also ships as
+The default runtime is **Distill** (`Matcher.dsl`); its grammar and builtins
+have their own chapter — the [Distill reference](distill.md). The rest of this
+section describes the Starlark form, which every bundled rule also ships as
 a sandboxed fallback.
 
-`Detector.star` must define a top-level function `detect(api, rule)` that
-returns a list of occurrence dicts:
+`Matcher.star` must define a top-level function `detect(api, rule)` that
+returns a list of diagnostic dicts:
 
 ```python
 def detect(api, rule):
@@ -290,7 +290,7 @@ Rules:
 - `message` is required and must be non-blank; `pointer` and `path` are
   optional strings.
 - Return `[]` when nothing matches — **never** return a score or a severity.
-- More than 1000 occurrences is a detector error.
+- More than 1000 diagnostics is a rule error.
 - Any error (raised, step-cap exceeded, wrong return shape) becomes a plugin
   error for that rule's run — it does not abort the other rules.
 - The script is compiled when the bundle loads; a compile failure fails the
@@ -309,10 +309,10 @@ list/dict/string/`for`/comprehension work are these builtins:
 | `parse_int(text, fallback)` | base-10 int, or `fallback` if not one |
 | `url_host(url)` | host component of a URL, or `None` |
 
-If a detector needs something outside this list, that is a deliberate,
+If a rule needs something outside this list, that is a deliberate,
 reviewed addition to the runtime — not a workaround in the script.
 
-The `manual` detector is the deliberate no-op (`def detect(api, rule): return []`).
+The `manual` rule is the deliberate no-op (`def detect(api, rule): return []`).
 It keeps a rule in the catalogue as a checklist item that cannot be inferred
 from an OpenAPI document.
 
@@ -320,15 +320,15 @@ from an OpenAPI document.
 
 ## Rules
 
-A rule binds a detector to a specific scope and parameter set, and carries the
+A rule binds a rule to a specific scope and parameter set, and carries the
 human explanation.
 
 ```markdown
 ---
 id: CASE001                       # must match the manifest key
 category: Naming                  # free-text grouping shown in the UI
-detector: naming                  # detector id
-scope: property                   # must be one of that detector's `scopes`
+matcher: naming                  # rule id
+scope: property                   # must be one of that rule's `scopes`
 parameters: { convention: camelCase, match: non-conforming }
 ---
 
@@ -342,12 +342,12 @@ JSON property names should use camelCase where required by policy.
 - `{{parameter-name}}` placeholders in the body are interpolated with the
   rule's parameter values when the documentation is served, e.g.
   `Should not exceed {{maximum-depth}} nested levels.`
-- `parameters` may be omitted if the detector needs none.
+- `parameters` may be omitted if the rule needs none.
 - Parameter names, value types, required-parameter presence, and the
-  scope-vs-detector match are all checked at load time — **unless** the
-  detector named by the rule is not yet in the bundle, in which case the rule
+  scope-vs-rule match are all checked at load time — **unless** the
+  rule named by the rule is not yet in the bundle, in which case the rule
   is still loaded but left unvalidated (this lets the catalogue document rules
-  ahead of their detector).
+  ahead of their rule).
 
 The rule is invisible until a policy references it.
 
@@ -374,8 +374,8 @@ Prose describing the policy's intent.
 
 - Each value is either a **number `0`–`100`** (a point deduction) or the
   literal **`PROHIBITED`**.
-- A deduction is applied **once per rule**, no matter how many occurrences the
-  detector reported.
+- A deduction is applied **once per rule**, no matter how many diagnostics the
+  rule reported.
 - Every rule id must exist in the bundle.
 - **Declaration order is report order** in the findings table.
 - The first policy in `PolicyBundle.yaml` is the fallback when a caller
@@ -396,26 +396,26 @@ effectiveScore = 0 if any PROHIBITED rule matched, else qualityScore
 
 The result reports `overallScore` (`effectiveScore`) and
 `overallScoreWithoutBlockers` (`qualityScore`). Severity is `ERROR` for a
-`PROHIBITED` match and `WARNING` for a deduction; each violation's
+`PROHIBITED` match and `WARNING` for a deduction; each diagnostic's
 `scoreImprovement` is the points recoverable by fixing that rule.
 
 ---
 
 ## Adding to the bundle
 
-### A new rule (existing detector)
+### A new rule (existing rule)
 
-1. Create `rules/<ID>.md` with front matter (`id`, `category`, `detector`,
+1. Create `rules/<ID>.md` with front matter (`id`, `category`, `rule`,
    `scope`, `parameters`) and a `# <ID> — <title>` body.
 2. Add `<ID>: rules/<ID>.md` to `PolicyBundle.yaml` under `rules:`.
 3. Reference `<ID>` from one or more policies with a deduction or `PROHIBITED`.
 
-### A new detector
+### A new rule
 
-1. Create `detectors/<id>/Detector.md` (descriptor) and
-   `detectors/<id>/Detector.star` (the `detect(api, rule)` function).
-2. Add `<id>: detectors/<id>/Detector.md` to `PolicyBundle.yaml` under
-   `detectors:`.
+1. Create `matchers/<id>/Matcher.md` (descriptor) and
+   `rules/<id>/Matcher.star` (the `detect(api, rule)` function).
+2. Add `<id>: matchers/<id>/Matcher.md` to `PolicyBundle.yaml` under
+   `rules:`.
 3. Add rules that use it.
 
 ### A new policy
@@ -424,7 +424,7 @@ The result reports `overallScore` (`effectiveScore`) and
 2. Add `<Name>: policies/<Name>.md` to `PolicyBundle.yaml` under `policies:`.
 
 Rule entries may use the numeric or `PROHIBITED` shorthand, or a declaration
-when that policy needs different detector parameters:
+when that policy needs different rule parameters:
 
 ```yaml
 rules:
@@ -435,7 +435,7 @@ rules:
 ```
 
 The policy parameters are merged over the rule defaults for that run. They are
-validated against the detector descriptor at bundle load time; unknown or
+validated against the rule descriptor at bundle load time; unknown or
 incorrectly typed overrides fail fast. The shorthand remains equivalent to a
 declaration with no overrides.
 
@@ -444,12 +444,12 @@ declaration with no overrides.
 ```bash
 mvn -q -pl generic-policy-validation-plugin -am package -DskipTests
 cp generic-policy-validation-plugin/target/generic-policy-validation-plugin-*.jar \
-   ~/.speculate/plugins/
+   ~/.arete/plugins/
 ```
 
 `GenericPolicyValidationPluginTest` / `...LoadIT` load the real bundle and will
 fail the build on any manifest, front-matter, scope, parameter, or
-detector-compile error.
+rule-compile error.
 
 ---
 
@@ -457,14 +457,14 @@ detector-compile error.
 
 The bundle fails fast (`BundleValidationException`) on:
 
-- `formatVersion` ≠ 1; empty `rules`/`policies`/`detectors`; unknown top-level
+- `formatVersion` ≠ 1; empty `rules`/`policies`/`rules`; unknown top-level
   or front-matter fields; unsafe resource paths.
 - A manifest key that doesn't match the `id` inside the referenced file.
-- A detector: an uncompilable `Detector.star`, a missing source, an `enum`
+- A rule: an uncompilable `Matcher.star`, a missing source, an `enum`
   parameter with no `values`, a
   scalar parameter that declares `values`, an unsupported parameter type.
-- A rule: a `scope` not in the detector's `scopes`, an unknown parameter, a
+- A rule: a `scope` not in the rule's `scopes`, an unknown parameter, a
   wrong-typed parameter value, a missing required parameter, a body with no
-  `#` heading. (Skipped only when the detector isn't bundled yet.)
+  `#` heading. (Skipped only when the rule isn't bundled yet.)
 - A policy: a disposition that is neither `0`–`100` nor `PROHIBITED`, or a
   reference to an unknown rule id.

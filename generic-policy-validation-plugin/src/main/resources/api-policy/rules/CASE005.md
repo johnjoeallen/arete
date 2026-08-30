@@ -1,7 +1,7 @@
 ---
 id: CASE005
 category: Naming
-detector: naming
+matcher: naming
 scope: path-segment
 parameters: { convention: kebab-case, match: non-conforming }
 ---
@@ -16,7 +16,7 @@ separator variants across clients.
 
 ## Detection and scope
 
-The rule has `path-segment` scope and uses the `naming` detector:
+The rule has `path-segment` scope and uses the `naming` rule:
 
 ```yaml
 parameters: { convention: kebab-case, match: non-conforming }
@@ -48,7 +48,7 @@ paths:
     get: { responses: { '200': { description: OK } } }
 ```
 
-The host excludes `{customer_id}` parameter segments from this detector’s
+The host excludes `{customer_id}` parameter segments from this rule’s
 path-segment candidates; review parameter naming separately with the
 appropriate rule.
 
@@ -56,7 +56,7 @@ appropriate rule.
 
 Both configured parameters select the kebab-case check. Matching is ASCII and
 case-sensitive; underscores, uppercase letters, empty segments, and leading
-digits do not conform. The detector does not inspect methods, schemas,
+digits do not conform. The rule does not inspect methods, schemas,
 descriptions, server URLs, or runtime routes. Referenced path items count only
 after host normalisation. Findings are naming-policy candidates, and domain
 terms or externally fixed paths may require exceptions.

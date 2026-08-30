@@ -1,5 +1,5 @@
 formatVersion: 1
-bundleId: speculate-policy-bundle
+bundleId: arete-policy-bundle
 bundleVersion: 0.1.0
 
 rules:
@@ -148,49 +148,49 @@ policies:
   Zalando: policies/Zalando.md
   "Zalando Extended": policies/ZalandoExtended.md
 
-detectors:
-  resource-path: detectors/resource-path/Detector.md
-  operation: detectors/operation/Detector.md
-  text-style: detectors/text-style/Detector.md
-  naming: detectors/naming/Detector.md
-  schema: detectors/schema/Detector.md
-  operation-semantics: detectors/operation-semantics/Detector.md
-  manual: detectors/manual/Detector.md
-  bulk-operation: detectors/bulk-operation/Detector.md
-  versioning: detectors/versioning/Detector.md
-  compatibility: detectors/compatibility/Detector.md
-  metadata: detectors/metadata/Detector.md
-  hostname: detectors/hostname/Detector.md
-  path-count: detectors/path-count/Detector.md
-  common-field: detectors/common-field/Detector.md
-  date-time-name: detectors/date-time-name/Detector.md
-  response-code: detectors/response-code/Detector.md
-  response-header: detectors/response-header/Detector.md
-  proprietary-header: detectors/proprietary-header/Detector.md
-  query-collection: detectors/query-collection/Detector.md
-  security: detectors/security/Detector.md
-  openapi-version: detectors/openapi-version/Detector.md
-  media-type: detectors/media-type/Detector.md
-  error-response: detectors/error-response/Detector.md
-  authentication-error: detectors/authentication-error/Detector.md
-  sensitive-data: detectors/sensitive-data/Detector.md
-  sensitive-search: detectors/sensitive-search/Detector.md
-  identifier: detectors/identifier/Detector.md
-  collection-capability: detectors/collection-capability/Detector.md
-  pagination: detectors/pagination/Detector.md
-  parameter: detectors/parameter/Detector.md
-  request-body: detectors/request-body/Detector.md
-  operation-metadata: detectors/operation-metadata/Detector.md
-  api-title: detectors/api-title/Detector.md
-  schema-name: detectors/schema-name/Detector.md
-  path-set: detectors/path-set/Detector.md
-  header-schema: detectors/header-schema/Detector.md
-  enum-values: detectors/enum-values/Detector.md
-  server-url: detectors/server-url/Detector.md
-  extensions: detectors/extensions/Detector.md
-  documentation-completeness: detectors/documentation-completeness/Detector.md
-  schema-composition: detectors/schema-composition/Detector.md
-  document-lint: detectors/document-lint/Detector.md
-  status-class: detectors/status-class/Detector.md
-  example-validity: detectors/example-validity/Detector.md
-  response-example: detectors/response-example/Detector.md
+matchers:
+  resource-path: matchers/resource-path/Matcher.md
+  operation: matchers/operation/Matcher.md
+  text-style: matchers/text-style/Matcher.md
+  naming: matchers/naming/Matcher.md
+  schema: matchers/schema/Matcher.md
+  operation-semantics: matchers/operation-semantics/Matcher.md
+  manual: matchers/manual/Matcher.md
+  bulk-operation: matchers/bulk-operation/Matcher.md
+  versioning: matchers/versioning/Matcher.md
+  compatibility: matchers/compatibility/Matcher.md
+  metadata: matchers/metadata/Matcher.md
+  hostname: matchers/hostname/Matcher.md
+  path-count: matchers/path-count/Matcher.md
+  common-field: matchers/common-field/Matcher.md
+  date-time-name: matchers/date-time-name/Matcher.md
+  response-code: matchers/response-code/Matcher.md
+  response-header: matchers/response-header/Matcher.md
+  proprietary-header: matchers/proprietary-header/Matcher.md
+  query-collection: matchers/query-collection/Matcher.md
+  security: matchers/security/Matcher.md
+  openapi-version: matchers/openapi-version/Matcher.md
+  media-type: matchers/media-type/Matcher.md
+  error-response: matchers/error-response/Matcher.md
+  authentication-error: matchers/authentication-error/Matcher.md
+  sensitive-data: matchers/sensitive-data/Matcher.md
+  sensitive-search: matchers/sensitive-search/Matcher.md
+  identifier: matchers/identifier/Matcher.md
+  collection-capability: matchers/collection-capability/Matcher.md
+  pagination: matchers/pagination/Matcher.md
+  parameter: matchers/parameter/Matcher.md
+  request-body: matchers/request-body/Matcher.md
+  operation-metadata: matchers/operation-metadata/Matcher.md
+  api-title: matchers/api-title/Matcher.md
+  schema-name: matchers/schema-name/Matcher.md
+  path-set: matchers/path-set/Matcher.md
+  header-schema: matchers/header-schema/Matcher.md
+  enum-values: matchers/enum-values/Matcher.md
+  server-url: matchers/server-url/Matcher.md
+  extensions: matchers/extensions/Matcher.md
+  documentation-completeness: matchers/documentation-completeness/Matcher.md
+  schema-composition: matchers/schema-composition/Matcher.md
+  document-lint: matchers/document-lint/Matcher.md
+  status-class: matchers/status-class/Matcher.md
+  example-validity: matchers/example-validity/Matcher.md
+  response-example: matchers/response-example/Matcher.md

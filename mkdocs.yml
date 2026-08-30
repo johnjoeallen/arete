@@ -1,8 +1,8 @@
-site_name: Speculate
+site_name: Areté
 site_description: Local-first API explorer for OpenAPI/Swagger specs with pluggable, policy-driven validation.
-site_url: https://johnjoeallen.github.io/speculate/
-repo_url: https://github.com/johnjoeallen/speculate
-repo_name: johnjoeallen/speculate
+site_url: https://johnjoeallen.github.io/arete/
+repo_url: https://github.com/johnjoeallen/arete
+repo_name: johnjoeallen/arete
 edit_uri: edit/main/docs/
 copyright: Apache License 2.0
 
@@ -66,9 +66,9 @@ nav:
   - Configuration: configuration.md
   - Validation:
       - Overview: validation/index.md
-      - Speculate Policy Engine: validation/policy-engine.md
-      - Detector languages: validation/detector-languages.md
-      - Sift reference: validation/sift.md
+      - Areté Policy Engine: validation/policy-engine.md
+      - Rule languages: validation/rule-languages.md
+      - Distill reference: validation/distill.md
       - Rule Catalogue: validation/rules.md
       - Policies: validation/policies.md
       - Writing a Plugin: validation/writing-a-plugin.md

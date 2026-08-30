@@ -1,7 +1,7 @@
 ---
 id: STATUS008
 category: HTTP status
-detector: status-class
+matcher: status-class
 scope: response
 parameters: { forbidden: server-error }
 ---
@@ -12,7 +12,7 @@ Some API programmes require `5xx` responses to be left out of the published
 contract: a server failure is not part of the interface a client codes
 against, and documenting it invites clients to treat it as a normal outcome.
 
-## Violation
+## Diagnostic
 
 ```yaml
 responses:
@@ -30,7 +30,7 @@ responses:
 
 ## Detection and scope
 
-The rule has `response` scope and uses the `status-class` detector with
+The rule has `response` scope and uses the `status-class` rule with
 `forbidden: server-error`. Every documented response whose status is in the
 `500`–`599` range is reported.
 

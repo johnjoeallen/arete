@@ -1,7 +1,7 @@
 ---
 id: STANDARD023
 category: Standards
-detector: server-url
+matcher: server-url
 scope: api
 parameters: { check: url-pattern, pattern: "https://[a-z0-9-]+(\\.[a-z0-9-]+)+(:[0-9]+)?(/[^\\s]*)?" }
 ---
@@ -13,7 +13,7 @@ shape. The default pattern only requires HTTPS and a dotted public host; an
 organisation overrides `pattern` with its real production / sandbox URL
 convention.
 
-## Violation
+## Diagnostic
 
 ```yaml
 servers:
@@ -38,7 +38,7 @@ servers:
 
 ## Detection and scope
 
-The rule has `api` scope and uses the `server-url` detector with
+The rule has `api` scope and uses the `server-url` rule with
 `check: url-pattern`. Every `servers[].url` that does not fully match
 `pattern` (RE2 syntax) is reported.
 

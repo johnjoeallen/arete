@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>net.dublinux.arete</groupId>
+    <artifactId>arete-validation-spi</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>arete-validation-spi</name>
+    <description>Engine-agnostic spec validation plugin interface for Areté</description>
+    <url>https://github.com/johnjoeallen/arete</url>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>John Allen</name>
+            <email>john.joe.allen@gmail.com</email>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:https://github.com/johnjoeallen/arete.git</connection>
+        <developerConnection>scm:git:https://github.com/johnjoeallen/arete.git</developerConnection>
+        <url>https://github.com/johnjoeallen/arete</url>
+    </scm>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <profiles>
+        <profile>
+            <!-- Everything Central-publishing-specific lives here, opt-in via
+                 -Prelease, rather than in the unconditional <build>: sources,
+                 Javadoc, and GPG signing have no business running on every
+                 plain `mvn package`/`verify` (local dev, or this reactor's
+                 existing CI test step) — GPG signing in particular would
+                 fail outright without a signing key configured, which no
+                 everyday build has. Only the dedicated release-workflow step
+                 that actually publishes to Central activates this. -->
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <!-- Sources and Javadoc jars are mandatory for every
+                             artifact published to Central, not optional. -->
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>3.4.0</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>3.12.0</version>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <!-- Central rejects unsigned artifacts. -->
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>3.2.8</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <gpgArguments>
+                                <arg>--pinentry-mode</arg>
+                                <arg>loopback</arg>
+                            </gpgArguments>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <!-- Uploads to Sonatype's Central Publishing Portal
+                             (the current replacement for the old OSSRH/Nexus
+                             staging flow). autoPublish is deliberately left
+                             false: the first several releases should be
+                             reviewed and published by hand from
+                             central.sonatype.com, since Central won't let a
+                             bad release be deleted or overwritten once live. -->
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>0.11.0</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <publishingServerId>central</publishingServerId>
+                            <autoPublish>false</autoPublish>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+</project>

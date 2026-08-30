@@ -1,9 +1,9 @@
-# Plan — Sandboxing detector scripts
+# Plan — Sandboxing rule scripts
 
 Status: **active — gates re-enabling the Groovy runtime** · Target module:
 `generic-policy-validation-plugin`
 
-> **Where this stands.** The default detector runtime is now Starlark, which is
+> **Where this stands.** The default rule runtime is now Starlark, which is
 > safe by construction — see
 > [`policy-engine-dsl-research.md`](policy-engine-dsl-research.md) and
 > [`policy-engine-dsl-poc.md`](policy-engine-dsl-poc.md). The Groovy runtime is
@@ -18,15 +18,15 @@ Status: **active — gates re-enabling the Groovy runtime** · Target module:
 
 ## 1. Problem
 
-`GroovyDetectorRuntime` today runs bundle-supplied Groovy with a bare
+`GroovyRuleRuntime` today runs bundle-supplied Groovy with a bare
 `GroovyShell`:
 
 ```java
-new GroovyShell().parse(detector.source());        // validate()
-new GroovyShell().evaluate(detector.source());      // execute() — re-parsed every call
+new GroovyShell().parse(rule.source());        // validate()
+new GroovyShell().evaluate(rule.source());      // execute() — re-parsed every call
 ```
 
-A detector script has the full authority of the plugin JVM: filesystem,
+A rule script has the full authority of the plugin JVM: filesystem,
 network, `System.exit`, reflection, thread creation, `String.execute()`,
 `@Grab`, unbounded loops.
 
@@ -34,39 +34,39 @@ network, `System.exit`, reflection, thread creation, `String.execute()`,
 
 Two changes make this a real security boundary, not a nicety:
 
-1. **Developer-supplied bundles.** Devs can already drop rule/policy/detector
-   files under `~/.speculate/…`. Those detectors are not reviewed by us and
+1. **Developer-supplied bundles.** Devs can already drop rule/policy/rule
+   files under `~/.arete/…`. Those rules are not reviewed by us and
    run with full JVM authority today — "drop a bundle" is as dangerous as
    "drop a jar".
 2. **Remote bundle loading (planned).** Bundles fetched over the network are
    attacker-controlled by definition: a MITM, a compromised host, or a
-   malicious publisher can ship a detector that reads `~/.ssh`, exfiltrates
+   malicious publisher can ship a rule that reads `~/.ssh`, exfiltrates
    over HTTP, or mines crypto.
 
-So the design target is now: **a detector is hostile code.** Its only
+So the design target is now: **a rule is hostile code.** Its only
 legitimate job is total — *read the `api` map and the `rule` map, return a
-`List<Map>` of occurrences* — and it needs no ambient capability. The runtime
-must enforce exactly that, and also survive a detector that is trying to
+`List<Map>` of diagnostics* — and it needs no ambient capability. The runtime
+must enforce exactly that, and also survive a rule that is trying to
 break out or burn resources.
 
-A buggy (not even malicious) detector — infinite loop, allocation bomb —
+A buggy (not even malicious) rule — infinite loop, allocation bomb —
 must also fail its own rule, not the whole run.
 
 ## 2. Goals / non-goals
 
 **Goals**
 
-1. A detector can touch only: the two input maps, JDK value types
+1. A rule can touch only: the two input maps, JDK value types
    (`String`, numbers, `Boolean`), collections, regex, `Math`. Nothing else.
-2. Violations are caught **at bundle load** where statically detectable, and
+2. Diagnostics are caught **at bundle load** where statically detectable, and
    **at execution** otherwise — never silently.
-3. Bounded execution: wall-clock timeout and output caps; a runaway detector
+3. Bounded execution: wall-clock timeout and output caps; a runaway rule
    fails its own rule, not the run.
-4. Every one of the 17 bundled detectors keeps producing identical results
+4. Every one of the 17 bundled rules keeps producing identical results
    (existing tests are the oracle).
 5. A clear, reviewed allowlist that a maintainer extends deliberately.
 
-6. **Contain resource abuse**, not just capability abuse: a detector cannot
+6. **Contain resource abuse**, not just capability abuse: a rule cannot
    OOM the host, spin a core indefinitely, or fill the disk.
 7. **Verify provenance** of remote bundles before a single line is compiled
    (§10).
@@ -80,7 +80,7 @@ must also fail its own rule, not the whole run.
   out-of-process tier (§9) reduces but does not eliminate this; a bundle you
   have no trust signal for at all should simply not be loaded.
 
-> **Alternative under evaluation.** Instead of hobbling Groovy, the detector
+> **Alternative under evaluation.** Instead of hobbling Groovy, the rule
 > language could be replaced with one that is *safe by construction* (Starlark
 > or a small purpose-built language) — no I/O or reflection to sandbox because
 > the interpreter cannot express them. That would remove Layers A + B below
@@ -104,14 +104,14 @@ and `execute()`:
     `java.lang.System.exit(...)` dodges)
   - `importsWhitelist` / `starImportsWhitelist` → empty, or a tiny set
     (`java.util`, `java.util.regex`). Everything else is a compile error.
-  - `setMethodDefinitionAllowed(false)` — detectors are a single closure
+  - `setMethodDefinitionAllowed(false)` — rules are a single closure
     expression; no top-level `def foo() {}`.
   - `setClosuresAllowed(true)`
   - receivers/constant-types blacklist: `System`, `Runtime`, `Thread`,
     `GroovySystem`, `Eval`, `ClassLoader`, `File`, `ProcessBuilder`,
     `ProcessGroovyMethods`.
 - Custom AST check: reject any annotation usage in the script
-  (`@Grab`, `@ASTTest`, `@AnnotationCollector`, …) — detectors need none.
+  (`@Grab`, `@ASTTest`, `@AnnotationCollector`, …) — rules need none.
 - `ASTTransformationCustomizer(TimedInterrupt, value: <timeoutMs>, unit:
   MILLISECONDS)` — injects time checks into every loop and method entry so a
   `while (true) {}` throws `TimeoutException` on its own.
@@ -128,7 +128,7 @@ compilation customizer that routes **every** method call, constructor,
 static call, property get/set, and attribute access through a
 `GroovyInterceptor`.
 
-Implement `SpeculateDetectorSandbox extends GroovyInterceptor`:
+Implement `AreteRuleSandbox extends GroovyInterceptor`:
 
 - **`onNewInstance`** — allow only: `ArrayList`, `LinkedList`, `HashMap`,
   `LinkedHashMap`, `HashSet`, `LinkedHashSet`, `StringBuilder`,
@@ -140,7 +140,7 @@ Implement `SpeculateDetectorSandbox extends GroovyInterceptor`:
   `Map`, `Map.Entry`, `Collection`, `List`, `Set`, `Iterator`, `Iterable`,
   `CharSequence`/`String`/`GString`, `StringBuilder`, `Number`, `Boolean`,
   `Character`, `Pattern`, `Matcher`, `Closure`, `Range`, `Comparable`,
-  `Enum`. Covers every GDK helper the detectors use (`collect`,
+  `Enum`. Covers every GDK helper the rules use (`collect`,
   `collectMany`, `findAll`, `any`, `every`, `count`, `unique`, `groupBy`,
   `leftShift`, `toLowerCase`, `endsWith`, `split`, `trim`, `matches`, `==~`,
   `=~`).
@@ -153,14 +153,14 @@ Implement `SpeculateDetectorSandbox extends GroovyInterceptor`:
 - **`onGetProperty`** — deny `class`, `metaClass`, `binding`, `properties`;
   allow map-key / bean-style reads on allowlisted types.
 - **`onSetProperty` / `onSetAttribute` / `onGetAttribute`** — deny outright
-  (no `.@field`, no mutation of `api`). Detectors build *new* structures.
+  (no `.@field`, no mutation of `api`). Rules build *new* structures.
 - **`onSuperCall` / `onSuperCall`** — deny.
 
 The interceptor is registered per-thread immediately around
 `closure.call(api, rule)` and unregistered in a `finally`. Enforcement =
 "a sandbox is registered on this thread"; scripts compiled with the
 transformer but run without a registered interceptor would be unguarded, so
-the runtime must never call a detector outside the try/finally.
+the runtime must never call a rule outside the try/finally.
 
 ### Why both, and why Layer A is not enough on its own
 
@@ -189,17 +189,17 @@ Layer A + code review would only be defensible if bundles stayed
 trusted-by-build — and per §1 they do not. Layer C (§9) is additionally
 required before remote loading ships.
 
-## 4. Execution model changes (`GroovyDetectorRuntime`)
+## 4. Execution model changes (`GroovyRuleRuntime`)
 
 Current `execute()` re-parses the script on every call. Fix as part of this
 work:
 
-1. `validate(Detector)` compiles the source **once** with the secure config,
-   caches the resulting `Class<Script>` keyed by detector id.
-2. `execute(Detector, api, rule)`:
+1. `validate(Rule)` compiles the source **once** with the secure config,
+   caches the resulting `Class<Script>` keyed by rule id.
+2. `execute(Rule, api, rule)`:
    - get cached class → `InvokerHelper.createScript(clazz, new Binding())`
      → `run()` → expect a `Closure`;
-   - `GroovyInterceptor sandbox = new SpeculateDetectorSandbox();
+   - `GroovyInterceptor sandbox = new AreteRuleSandbox();
      sandbox.register();`
    - submit `closure.call(api, rule)` to a bounded single-thread
      `ExecutorService`; `future.get(timeoutMs, MS)`; `future.cancel(true)` +
@@ -208,26 +208,26 @@ work:
 3. Wrap the whole thing in `catch (Throwable)` (currently
    `RuntimeException`) so `StackOverflowError`, `TimeoutException`,
    `SecurityException` from the interceptor, and sandbox
-   `RejectedAccessException` all become `DetectorException` →
+   `RejectedAccessException` all become `RuleException` →
    `ValidationResult.pluginError` for that rule. Keep the existing
-   ">1000 occurrences" and "non-blank message" checks.
+   ">1000 diagnostics" and "non-blank message" checks.
 
 Thread-safety: the cached `Class` is immutable; a fresh `Script`/`Closure`
 and a fresh interceptor per call keeps `validate()` concurrency intact. The
 executor can be a small shared pool.
 
-Config: `timeoutMs`, `maxOccurrences` (already 1000), `maxMessageLength`
+Config: `timeoutMs`, `maxDiagnostics` (already 1000), `maxMessageLength`
 from a `SandboxLimits` record; overridable via `configure(Map)` /
 system property for ops, with sane defaults (e.g. 2000 ms).
 
 ## 5. The one JDK constructor in the bundle: `new URI(url)`
 
-`detectors/hostname/Detector.groovy` is the only script that constructs a JDK
+`rules/hostname/Matcher.groovy` is the only script that constructs a JDK
 object — `new URI(url).host`, to get the host out of a declared server URL.
 Everything else is closures, collections, strings and regex. Three ways to
 deal with it, in preference order:
 
-### 5a (preferred) — extract the host in the detector with string ops
+### 5a (preferred) — extract the host in the rule with string ops
 
 No adapter change, no sandbox carve-out. `java.net.URI` parsing is overkill
 for a heuristic naming check; a regex does it:
@@ -237,8 +237,8 @@ def host = (url =~ /^[a-zA-Z][a-zA-Z0-9+.-]*:\/\/([^\/?#:]+)/) ? Matcher.lastMat
 ```
 
 or a plain `url.replaceFirst(~'^\\w[\\w+.-]*://', '').split(~'[/?#:]')[0]`.
-The detector stays entirely within the `Map`/`String`/regex allowlist. Update
-the detector + its one test (`namingDetectorInspects…`? — it's covered by the
+The rule stays entirely within the `Map`/`String`/regex allowlist. Update
+the rule + its one test (`namingRuleInspects…`? — it's covered by the
 `hostname` cases in `GenericPolicyValidationPluginTest`). Do this first; it
 removes the only reason to touch anything outside the sandbox layers.
 
@@ -253,16 +253,16 @@ denied. Cost: one named exception in `SandboxPolicy` with a comment.
 ### 5c (last resort) — structured servers in `OpenApiMapAdapter`
 
 `api.servers[] -> { url, host, scheme, port }`. Rejected unless 5a and 5b
-both fail, because it grows the adapter's contract for one detector's
+both fail, because it grows the adapter's contract for one rule's
 convenience.
 
 ## 6. Rollout
 
 | Phase | Change | Kill-switch |
 |-------|--------|-------------|
-| 0 | Rewrite `hostname` detector host-extraction (§5a); refactor `execute()` to cache compiled classes (no behaviour change) | — |
+| 0 | Rewrite `hostname` rule host-extraction (§5a); refactor `execute()` to cache compiled classes (no behaviour change) | — |
 | 1 | Land Layer A + Layer B in **audit mode**: log `WARN` on every access that *would* be denied, do not throw. Ship a release. | n/a (not enforcing) |
-| 2 | Flip to **enforce** (Layers A+B). `-Dspeculate.policy.sandbox=audit` (or `off`) as a documented, discouraged escape hatch for one release. | yes |
+| 2 | Flip to **enforce** (Layers A+B). `-Darete.policy.sandbox=audit` (or `off`) as a documented, discouraged escape hatch for one release. | yes |
 | 3 | Remove the escape hatch; `off` no longer honoured. Local dev bundles now run sandboxed. | no |
 | 4 | Layer C (§9): out-of-process worker + OS containment. | — |
 | 5 | Supply-chain verification (§10): signature check, pinning, explicit remote-source config. **Gate: remote loading does not ship before 4 + 5.** | — |
@@ -275,10 +275,10 @@ the remote-loading feature.
 ## 7. Testing
 
 - **Regression**: existing `GenericPolicyValidationPluginTest` /
-  `...LoadIT` already assert exact occurrence counts and scores for every
-  bundled detector — they must pass unchanged with the sandbox enforcing.
-- **Attack suite** (new `DetectorSandboxTest`): a parameterised list, each
-  expected to fail (compile-time *or* `DetectorException` at run):
+  `...LoadIT` already assert exact diagnostic counts and scores for every
+  bundled rule — they must pass unchanged with the sandbox enforcing.
+- **Attack suite** (new `RuleSandboxTest`): a parameterised list, each
+  expected to fail (compile-time *or* `RuleException` at run):
   - `System.exit(0)` / `java.lang.System.exit(0)`
   - `Runtime.runtime.exec('id')`
   - `'id'.execute().text`
@@ -292,15 +292,15 @@ the remote-loading feature.
   - `"${System.exit(0)}"` (GString dispatch)
   - `@Grab('x:y:1')` header
   - `while (true) { }`  → `TimeoutException`
-  - deep unbounded recursion → `StackOverflowError` → `DetectorException`
+  - deep unbounded recursion → `StackOverflowError` → `RuleException`
   - `api.clear()` / `api.paths << [:]` (input mutation) → denied
-  - returning 5000 occurrences → existing cap
-- **Load-time**: a detector with a disallowed import fails
+  - returning 5000 diagnostics → existing cap
+- **Load-time**: a rule with a disallowed import fails
   `PolicyBundleLoader.load` with a message naming the construct.
 - **Allowlist completeness**: a test that compiles + runs every
-  `detectors/*/Detector.groovy` against a representative spec with the
+  `rules/*/Matcher.groovy` against a representative spec with the
   sandbox enforcing and asserts no `RejectedAccessException` — this is the
-  guard that stops a future detector needing a silent allowlist bump.
+  guard that stops a future rule needing a silent allowlist bump.
 
 ## 8. Docs / comms
 
@@ -318,7 +318,7 @@ process, and a filesystem view with the host. It cannot hard-cap memory or
 CPU, and a Groovy/JDK gadget-chain 0-day escapes it entirely. Fine for
 locally-authored dev bundles; **not** acceptable for network-fetched code.
 
-Before remote loading ships, detector execution moves to a child process:
+Before remote loading ships, rule execution moves to a child process:
 
 - A small worker JVM launched with `-Xmx<small>`, `-XX:ActiveProcessorCount=1`,
   a distinct temp `user.home`, and Layers A+B still applied inside it.
@@ -326,9 +326,9 @@ Before remote loading ships, detector execution moves to a child process:
   network namespace**, a read-only and near-empty FS, a memory cgroup, and a
   hard CPU/wall limit (`ulimit -t`, cgroup `cpu.max`). (`SecurityManager` is
   gone in modern JDKs, so isolation has to come from the OS, not the JVM.)
-- Protocol: host sends `{detector source, api map, rule map}` as JSON/CBOR
-  over a pipe; worker returns `{occurrences}` or an error. The worker never
-  sees other specs, the DB, or `~/.speculate`.
+- Protocol: host sends `{rule source, api map, rule map}` as JSON/CBOR
+  over a pipe; worker returns `{diagnostics}` or an error. The worker never
+  sees other specs, the DB, or `~/.arete`.
 - Worker pool with recycling; a worker that times out or dies is replaced,
   and its rule reports `pluginError`.
 
@@ -351,7 +351,7 @@ all*. Before a remote bundle is compiled:
   deliberately (settings / config file), never auto-discovered. No implicit
   "load from URL in the spec".
 - **Bundle resource limits**: max archive size, max file count, max script
-  length, max rules/detectors/policies — enforced in `PolicyBundleLoader`
+  length, max rules/rules/policies — enforced in `PolicyBundleLoader`
   before parsing. The YAML path is already hardened (`SafeConstructor`,
   `setMaxAliasesForCollections(20)`, `safePath` zip-slip guard); re-audit it
   as untrusted input.
@@ -360,16 +360,16 @@ all*. Before a remote bundle is compiled:
 
 1. **Spike**: confirm `groovy-sandbox` version compatible with Groovy
    4.0.30; prototype `SandboxTransformer` + a 3-rule interceptor against the
-   `naming` detector. (0.5–1 d)
-2. Rewrite `hostname/Detector.groovy` to extract the host with regex/string
+   `naming` rule. (0.5–1 d)
+2. Rewrite `hostname/Matcher.groovy` to extract the host with regex/string
    ops (§5a); update its test. No adapter change. (0.25 d)
-3. `GroovyDetectorRuntime`: compiled-class cache, executor + timeout,
+3. `GroovyRuleRuntime`: compiled-class cache, executor + timeout,
    `catch (Throwable)`, `SandboxLimits`. (1 d)
 4. Layer A: shared secure `CompilerConfiguration`, wire into `validate()` +
    compile cache; load-time tests. (1 d)
-5. Layer B: `SpeculateDetectorSandbox` interceptor + `SandboxPolicy`
+5. Layer B: `AreteRuleSandbox` interceptor + `SandboxPolicy`
    allowlist constants; audit-mode flag. (1.5–2 d)
-6. `DetectorSandboxTest` attack suite + allowlist-completeness test. (1 d)
+6. `RuleSandboxTest` attack suite + allowlist-completeness test. (1 d)
 7. Docs + README + release notes. (0.5 d)
 8. Phase-2 flip + remove escape hatch in a later release. (0.25 d each)
 

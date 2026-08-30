@@ -1,7 +1,7 @@
 ---
 id: STANDARD019
 category: Standards
-detector: schema-composition
+matcher: schema-composition
 scope: schema
 parameters: { check: inline-composition }
 ---
@@ -12,7 +12,7 @@ parameters: { check: inline-composition }
 schemas rather than declare a schema inline, so the composed parts stay
 named and reusable.
 
-## Violation
+## Diagnostic
 
 ```yaml
 components:
@@ -38,12 +38,12 @@ components:
 
 ## Detection and scope
 
-The rule has `schema` scope and uses the `schema-composition` detector with
+The rule has `schema` scope and uses the `schema-composition` rule with
 `check: inline-composition`. A component schema that composes with `allOf`,
 `anyOf`, or `oneOf` and has at least one member without a `$ref` is reported
 once.
 
 ## Configuration and limitations
 
-The detector counts inline members; it does not report which one. Composition
+The rule counts inline members; it does not report which one. Composition
 inside request or response body schemas is covered by STANDARD020.

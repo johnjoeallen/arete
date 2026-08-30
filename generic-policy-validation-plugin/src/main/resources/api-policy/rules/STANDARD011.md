@@ -1,7 +1,7 @@
 ---
 id: STANDARD011
 category: Standards
-detector: parameter
+matcher: parameter
 scope: operation
 parameters: { check: max-count, maximum: 8 }
 ---
@@ -13,7 +13,7 @@ usually signals that filtering, projection, or a request body would model the
 input better. The active policy sets an upper bound; the default is
 {{maximum}}.
 
-## Violation
+## Diagnostic
 
 ```yaml
 /reports:
@@ -36,13 +36,13 @@ input better. The active policy sets an upper bound; the default is
 
 ## Detection and scope
 
-The rule has `operation` scope and uses the `parameter` detector with
+The rule has `operation` scope and uses the `parameter` rule with
 `check: max-count`. Path-level and operation-level parameters are counted
 together per operation. An operation is reported once when the count exceeds
 `maximum`.
 
 ## Configuration and limitations
 
-`maximum` is a policy parameter. The detector counts declared parameters only;
+`maximum` is a policy parameter. The rule counts declared parameters only;
 it does not weigh a parameter's importance, inspect `$ref` fan-out, or account
 for parameters supplied through a request body.

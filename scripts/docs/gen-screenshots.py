@@ -2,13 +2,13 @@
 """Regenerate the app screenshots in docs/assets/.
 
 Prereqs:
-  - a running Speculate instance (see BASE below or set SPECULATE_URL)
+  - a running Areté instance (see BASE below or set ARETE_URL)
   - pip install playwright && playwright install chromium
 
 Usage:
-  SPECULATE_URL=http://localhost:6809 python3 scripts/docs/gen-screenshots.py
+  ARETE_URL=http://localhost:6809 python3 scripts/docs/gen-screenshots.py
 
-It pastes scripts/docs/bookstore-demo.yaml, runs the bundled Speculate Policy
+It pastes scripts/docs/bookstore-demo.yaml, runs the bundled Areté Policy
 Engine, and captures: screenshot.png (Explore), screenshot-validation.png,
 screenshot-model.png, screenshot-general.png, screenshot-settings.png.
 Best run against a throwaway instance (isolated $HOME) so it doesn't touch a
@@ -19,7 +19,7 @@ import pathlib
 from playwright.sync_api import sync_playwright
 
 REPO = pathlib.Path(__file__).resolve().parents[2]
-BASE = os.environ.get("SPECULATE_URL", "http://localhost:6809").rstrip("/")
+BASE = os.environ.get("ARETE_URL", "http://localhost:6809").rstrip("/")
 OUT = REPO / "docs/assets"
 SPEC = (REPO / "scripts/docs/bookstore-demo.yaml").read_text()
 
@@ -31,7 +31,7 @@ UNCLIP = """
 
 
 def active_top(pg):
-    return pg.locator(".explore-audit-tabset > .tabset-panels > .tab-panel.active")
+    return pg.locator(".explore-score-tabset > .tabset-panels > .tab-panel.active")
 
 
 def shot(pg, name):
@@ -43,7 +43,7 @@ def shot(pg, name):
 
 
 def click_tab(pg, name):
-    pg.locator(".explore-audit-tabset > .tabset-nav .tab-btn", has_text=name).first.click()
+    pg.locator(".explore-score-tabset > .tabset-nav .tab-btn", has_text=name).first.click()
     pg.wait_for_timeout(300)
 
 
@@ -75,11 +75,11 @@ def main():
         expand_books_get(pg)
         shot(pg, "screenshot.png")
 
-        click_tab(pg, "Audit")
+        click_tab(pg, "Score")
         pg.get_by_role("button", name="Analyse", exact=True).click()
         pg.wait_for_load_state("networkidle")
         pg.wait_for_timeout(800)
-        click_tab(pg, "Audit")
+        click_tab(pg, "Score")
 
         click_subtab(pg, "Interface")
         expand_books_get(pg)

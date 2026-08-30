@@ -1,7 +1,7 @@
 ---
 id: VERSION003
 category: Versioning
-detector: versioning
+matcher: versioning
 scope: media-type
 parameters: { location: media-type, match: present }
 ---
@@ -19,13 +19,13 @@ incorrect.
 
 ## Detection
 
-The rule has `media-type` scope and uses the `versioning` detector with:
+The rule has `media-type` scope and uses the `versioning` rule with:
 
 ```yaml
 parameters: { location: media-type, match: present }
 ```
 
-For each path, the detector examines the host’s normalised `mediaTypes` list
+For each path, the rule examines the host’s normalised `mediaTypes` list
 for every operation. That list includes media types declared by both request
 bodies and responses. A path is reported when at least one media type matches
 either of these case-insensitive patterns:
@@ -35,7 +35,7 @@ either of these case-insensitive patterns:
 * any string containing `version` followed by one or more digits.
 
 The finding points to the path and has the message `Interface version is
-exposed through media-type`. The detector does not report the individual
+exposed through media-type`. The rule does not report the individual
 content-type location or distinguish request from response in the finding.
 
 ## Review-candidate example
@@ -99,7 +99,7 @@ paths:
 ```
 
 The corresponding wire representation is likewise not versioned according to
-this detector:
+this rule:
 
 ```http
 GET /customers HTTP/1.1
@@ -111,12 +111,12 @@ Content-Type: application/json
 
 ## Parameters, references, and limitations
 
-`location` must be `media-type` for this rule. The detector’s `match: present`
+`location` must be `media-type` for this rule. The rule’s `match: present`
 branch uses the configured location and reports every matching path; it does
 not perform an API-wide absence check. `match: absent` is supported by the
-detector for VERSION004, not by this rule’s metadata.
+rule for VERSION004, not by this rule’s metadata.
 
-The detector uses normalised operation facts, so referenced request bodies,
+The rule uses normalised operation facts, so referenced request bodies,
 responses, and content maps are considered only if the host resolves them
 into `mediaTypes`. An unresolved or incomplete `$ref` can hide a media type
 and cause a false negative. Media types without a version-like `v` or

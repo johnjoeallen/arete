@@ -1,7 +1,7 @@
 ---
 id: COMPAT004
 category: Compatibility
-detector: compatibility
+matcher: compatibility
 scope: operation
 parameters: { change: operation-removed }
 ---
@@ -12,15 +12,15 @@ Removing an existing operation can break consumers that use it. Requires a basel
 
 ## Detection and scope
 
-The rule has `operation` scope and uses the `compatibility` detector with:
+The rule has `operation` scope and uses the `compatibility` rule with:
 
 ```yaml
 parameters: { change: operation-removed }
 ```
 
 This change type is intended to compare operations in a current specification
-with a baseline. The current detector receives no baseline and deliberately
-returns no automated occurrences, so running COMPAT004 against one document
+with a baseline. The current rule receives no baseline and deliberately
+returns no automated diagnostics, so running COMPAT004 against one document
 does not report a finding.
 
 ## Review guidance
@@ -41,4 +41,4 @@ bookmarks, and integrations; assess deprecation and migration before removal.
 `change: operation-removed` selects the future comparison category. No baseline
 document, operation diff, client inventory, runtime traffic, or deprecation
 history is currently supplied. References and missing comparison input produce
-no evidence rather than an inferred violation.
+no evidence rather than an inferred diagnostic.

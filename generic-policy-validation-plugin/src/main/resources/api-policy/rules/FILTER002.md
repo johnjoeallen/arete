@@ -1,7 +1,7 @@
 ---
 id: FILTER002
 category: Collection capabilities
-detector: collection-capability
+matcher: collection-capability
 scope: query-parameter
 parameters: { name-pattern: "(^|[-_])filter([-_]|$)", check: string }
 ---

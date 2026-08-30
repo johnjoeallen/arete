@@ -1,7 +1,7 @@
 ---
 id: VERSION002
 category: Versioning
-detector: versioning
+matcher: versioning
 scope: header
 parameters: { location: header, match: present }
 ---
@@ -19,13 +19,13 @@ rather than proof of an API defect.
 
 ## Detection
 
-The rule has `header` scope and uses the `versioning` detector with:
+The rule has `header` scope and uses the `versioning` rule with:
 
 ```yaml
 parameters: { location: header, match: present }
 ```
 
-For each path, the detector examines the normalised header parameters of all
+For each path, the rule examines the normalised header parameters of all
 its operations. It reports the path when any operation has a parameter whose
 `in` value is `header` and whose name, matched case-insensitively, is exactly
 one of:
@@ -106,16 +106,16 @@ mechanisms.
 
 ## Parameters, references, and limitations
 
-`location` must be `header` for this rule. The detector’s `match: present`
+`location` must be `header` for this rule. The rule’s `match: present`
 branch reports every matching path. `match: absent` is supported by the
-detector for VERSION004’s API-level check, but is not this rule’s configured
+rule for VERSION004’s API-level check, but is not this rule’s configured
 behavior.
 
-The detector uses the host’s normalised operation parameter facts. A
+The rule uses the host’s normalised operation parameter facts. A
 referenced parameter is considered only if the host resolves it into those
 facts; an unresolved or incomplete `$ref` can therefore cause a false
 negative. Header parameters declared only by an external gateway or runtime
-middleware are invisible to this OpenAPI-based check. The detector also does
+middleware are invisible to this OpenAPI-based check. The rule also does
 not infer headers from descriptions, examples, security schemes, or arbitrary
 extension fields.
 
@@ -125,4 +125,4 @@ values exchanged at runtime. It does not validate the version format,
 requiredness, allowed values, negotiation semantics, or consistency across
 operations. Header-name recognition is deliberately heuristic; custom
 conventions such as `X-Contract-Revision` are not matched and should be
-reviewed using an appropriate policy or detector.
+reviewed using an appropriate policy or rule.

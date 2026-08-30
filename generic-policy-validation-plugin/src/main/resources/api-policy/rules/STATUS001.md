@@ -1,7 +1,7 @@
 ---
 id: STATUS001
 category: HTTP status
-detector: response-code
+matcher: response-code
 scope: operation
 parameters: { operation-type: create, required-status: 201 }
 ---
@@ -18,14 +18,14 @@ are separate design considerations.
 
 ## Detection and scope
 
-The rule has `operation` scope and uses the `response-code` detector:
+The rule has `operation` scope and uses the `response-code` rule:
 
 ```yaml
 parameters: { operation-type: create, required-status: 201 }
 ```
 
 An operation is treated as a creation operation when its method is POST or
-PUT. If none of its documented responses has numeric status 201, the detector
+PUT. If none of its documented responses has numeric status 201, the rule
 reports the operation at its operation pointer with `Operation lacks the
 required documented status`.
 
@@ -63,7 +63,7 @@ paths:
 
 The rule requires both configured parameters. Status keys are normalised to
 integers before comparison, and referenced responses count only when resolved
-into the host’s response facts. The detector does not inspect summaries,
+into the host’s response facts. The rule does not inspect summaries,
 request bodies, response descriptions, Location headers, runtime behavior, or
 whether PUT really creates a resource. It does not accept 202 for asynchronous
 creation in its current contract.

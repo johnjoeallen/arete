@@ -1,7 +1,7 @@
 ---
 id: SORT004
 category: Collection capabilities
-detector: collection-capability
+matcher: collection-capability
 scope: query-parameter
 parameters: { name-pattern: "(^|[-_])(sort|order)([-_]|$)", check: form }
 ---

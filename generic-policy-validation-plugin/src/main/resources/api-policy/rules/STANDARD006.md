@@ -1,7 +1,7 @@
 ---
 id: STANDARD006
 category: Standards
-detector: path-count
+matcher: path-count
 scope: api
 parameters: { maximum: 8, nested-root: true }
 ---
@@ -17,13 +17,13 @@ This is a convention, not a universal requirement.
 
 ## Detection and scope
 
-The rule has `api` scope and uses the `path-count` detector:
+The rule has `api` scope and uses the `path-count` rule:
 
 ```yaml
 parameters: { maximum: 8, nested-root: true }
 ```
 
-With `nested-root: true`, the detector collects the first non-parameter path
+With `nested-root: true`, the rule collects the first non-parameter path
 segment from every path as a root set. It reports a path when it has more than
 one non-parameter segment and its final non-parameter segment is not in that
 root set. The finding points to the path and says `Nested resource type is not
@@ -61,8 +61,8 @@ paths:
 ## Parameters, references, and limitations
 
 The rule’s `maximum: 8` parameter is retained in its metadata but is not used
-when `nested-root: true` selects this detector branch. Path segments beginning
-with `{` are ignored, and the detector compares literal segment names without
+when `nested-root: true` selects this rule branch. Path segments beginning
+with `{` are ignored, and the rule compares literal segment names without
 domain or schema knowledge. It does not judge whether a nested resource
 should be independently addressable, inspect operations or references, or
 consider runtime routes. Missing or unusual path representations can affect

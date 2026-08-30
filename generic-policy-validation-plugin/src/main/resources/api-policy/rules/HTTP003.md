@@ -1,7 +1,7 @@
 ---
 id: HTTP003
 category: HTTP
-detector: operation-semantics
+matcher: operation-semantics
 scope: operation
 parameters: { method: PUT, match: partial-update }
 ---
@@ -22,7 +22,7 @@ The rule has `operation` scope and uses `operation-semantics`:
 parameters: { method: PUT, match: partial-update }
 ```
 
-For PUT operations, the detector combines the path and summary and performs a
+For PUT operations, the rule combines the path and summary and performs a
 case-insensitive word-boundary search for `partial`, `patch`, or `update`.
 Matching operations are reported at their operation pointer with `PUT appears
 to perform a partial update`.

@@ -1,7 +1,7 @@
 ---
 id: VERSION001
 category: Versioning
-detector: versioning
+matcher: versioning
 scope: path
 parameters: { location: uri, match: present }
 ---
@@ -19,13 +19,13 @@ proof of an API defect.
 
 ## Detection
 
-The rule has `path` scope and uses the `versioning` detector with:
+The rule has `path` scope and uses the `versioning` rule with:
 
 ```yaml
 parameters: { location: uri, match: present }
 ```
 
-For each OpenAPI path, the detector matches the complete path against this
+For each OpenAPI path, the rule matches the complete path against this
 case-sensitive pattern:
 
 ```text
@@ -77,7 +77,7 @@ by VERSION001; the path is what causes the finding.
 
 ## Compliant example
 
-This path has no segment matching the detector’s pattern, so it does not
+This path has no segment matching the rule’s pattern, so it does not
 produce a VERSION001 finding:
 
 ```yaml
@@ -99,12 +99,12 @@ VERSION002 or VERSION003, not by this rule.
 
 ## Parameters, references, and limitations
 
-`location` must be `uri` for this rule. The detector’s `match: present` branch
-reports all matching paths. `match: absent` is supported by the detector for
+`location` must be `uri` for this rule. The rule’s `match: present` branch
+reports all matching paths. `match: absent` is supported by the rule for
 VERSION004’s API-level absence check, but is not this rule’s configured
 behavior.
 
-The detector examines the host’s normalised path facts. It does not resolve a
+The rule examines the host’s normalised path facts. It does not resolve a
 version from a server URL, server variable, path parameter value, query
 parameter, header, media type, payload field, example, or description. A
 `$ref` affects this rule only insofar as the host resolves it into the path

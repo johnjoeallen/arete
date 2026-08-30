@@ -1,7 +1,7 @@
 ---
 id: COMPAT005
 category: Compatibility
-detector: compatibility
+matcher: compatibility
 scope: schema-property
 parameters: { change: enum-value-removed }
 ---
@@ -12,7 +12,7 @@ Consumers may depend on existing enum values. Removing one is potentially incomp
 
 ## Detection and scope
 
-The rule has `schema-property` scope and uses the `compatibility` detector
+The rule has `schema-property` scope and uses the `compatibility` rule
 with:
 
 ```yaml
@@ -20,8 +20,8 @@ parameters: { change: enum-value-removed }
 ```
 
 This change type is intended to compare an enum property with the same
-property in a baseline specification. The current detector receives no
-baseline and deliberately returns no automated occurrences. Running the rule
+property in a baseline specification. The current rule receives no
+baseline and deliberately returns no automated diagnostics. Running the rule
 against one current document therefore does not report a finding.
 
 ## Review guidance
@@ -43,6 +43,6 @@ period is required, and whether the change needs a new compatibility version.
 
 `change: enum-value-removed` selects the future comparison category. No
 baseline path, enum diff, runtime payload, client inventory, or compatibility
-policy is currently supplied to the detector. References and missing
+policy is currently supplied to the rule. References and missing
 comparison input produce no evidence. This rule is a placeholder for
 baseline-aware analysis, not an active current-document enum validator.

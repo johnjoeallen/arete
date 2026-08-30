@@ -1,7 +1,7 @@
 ---
 id: ERROR010
 category: Authentication errors
-detector: authentication-error
+matcher: authentication-error
 scope: response
 parameters: { status: 403, forbidden-header: WWW-Authenticate }
 ---

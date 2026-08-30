@@ -4,18 +4,18 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.speculate</groupId>
-    <artifactId>speculate-parent</artifactId>
+    <groupId>net.dublinux.arete</groupId>
+    <artifactId>arete-parent</artifactId>
     <version>0.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>speculate-parent</name>
-    <description>Reactor build for Speculate and its validation plugin modules</description>
+    <name>arete-parent</name>
+    <description>Reactor build for Areté and its validation plugin modules</description>
 
     <modules>
-        <module>speculate-validation-spi</module>
+        <module>arete-validation-spi</module>
         <module>generic-policy-validation-plugin</module>
-        <module>speculate-app</module>
+        <module>arete-app</module>
     </modules>
 
 </project>

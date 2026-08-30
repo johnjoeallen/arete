@@ -1,7 +1,7 @@
 ---
 id: HTTP005
 category: HTTP
-detector: operation
+matcher: operation
 scope: operation
 parameters: { method: GET, request-body: present }
 ---
@@ -17,15 +17,15 @@ selection criteria.
 
 ## Detection and scope
 
-The rule has `operation` scope and uses the `operation` detector:
+The rule has `operation` scope and uses the `operation` rule:
 
 ```yaml
 parameters: { method: GET, request-body: present }
 ```
 
 It reports every GET operation whose normalised `requestBodyPresent` fact is
-true. The occurrence points to the operation and says `GET operation has a
-request body`. The detector does not inspect the body’s schema or media type.
+true. The diagnostic points to the operation and says `GET operation has a
+request body`. The rule does not inspect the body’s schema or media type.
 
 ## Review-candidate example
 
@@ -61,7 +61,7 @@ paths:
 
 ## Parameters, references, and limitations
 
-Both configured parameters must match. The detector checks only HTTP method and
+Both configured parameters must match. The rule checks only HTTP method and
 the host’s boolean request-body fact; referenced bodies count only when the
 host resolves them. It does not judge runtime support, body content, query
 equivalence, caching headers, or custom client behavior. Findings are policy

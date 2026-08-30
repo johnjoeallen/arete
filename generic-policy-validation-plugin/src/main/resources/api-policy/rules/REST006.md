@@ -1,7 +1,7 @@
 ---
 id: REST006
 category: Resource design
-detector: naming
+matcher: naming
 scope: schema
 parameters: { suffix: Response, match: present }
 ---
@@ -17,14 +17,14 @@ provided by the operation and make reusable models harder to discover.
 
 ## Detection and scope
 
-The rule has `schema` scope and uses the `naming` detector:
+The rule has `schema` scope and uses the `naming` rule:
 
 ```yaml
 parameters: { suffix: Response, match: present }
 ```
 
-The detector examines each normalised component schema name. It reports names
-that end exactly in the case-sensitive suffix `Response`, with an occurrence
+The rule examines each normalised component schema name. It reports names
+that end exactly in the case-sensitive suffix `Response`, with an diagnostic
 at the schema pointer and the message `Name has prohibited suffix Response`.
 No operation, path, schema properties, or schema content is inspected.
 
@@ -63,7 +63,7 @@ suffix matching is case-sensitive.
 
 ## Parameters, references, and limitations
 
-The rule fixes `suffix: Response` and `match: present`; the naming detector’s
+The rule fixes `suffix: Response` and `match: present`; the naming rule’s
 other conventions and semantic modes are not used. It does not infer whether
 a schema is used for requests or responses, inspect `$ref` usage, evaluate
 properties, or judge whether the suffix is semantically justified. Unusual

@@ -1,7 +1,7 @@
 ---
 id: STATUS006
 category: Status codes
-detector: response-code
+matcher: response-code
 scope: response
 parameters: { error-format: problem-json }
 ---
@@ -17,18 +17,18 @@ convention: an API may intentionally use another documented error format.
 
 ## Detection and scope
 
-The rule has `response` scope and uses the `response-code` detector with:
+The rule has `response` scope and uses the `response-code` rule with:
 
 ```yaml
 parameters: { error-format: problem-json }
 ```
 
-For each documented response with a status from 400 through 599, the detector
+For each documented response with a status from 400 through 599, the rule
 reports when `application/problem+json` is not present in the operation’s
-normalised media-type facts. The occurrence points to the operation’s path
+normalised media-type facts. The diagnostic points to the operation’s path
 pointer and says `Error response does not declare application/problem+json`.
-The current detector does not identify which response was missing the media
-type in the occurrence.
+The current rule does not identify which response was missing the media
+type in the diagnostic.
 
 ## Review-candidate example
 
@@ -56,7 +56,7 @@ Content-Type: application/problem+json
 
 ## Compliant example
 
-Declaring the media type on the error response satisfies the detector:
+Declaring the media type on the error response satisfies the rule:
 
 ```yaml
 responses:
@@ -72,7 +72,7 @@ responses:
 `error-format: problem-json` selects this check; it does not validate the
 Problem Details schema, required fields, status consistency, or response
 body. Referenced responses and content are considered only insofar as the
-host resolves them into normalised facts. The detector uses the operation’s
+host resolves them into normalised facts. The rule uses the operation’s
 aggregate media-type facts, so another media type on the same operation may
 currently satisfy the check even when an individual error response omits
 Problem JSON. It does not inspect runtime headers, examples, descriptions, or

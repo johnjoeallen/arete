@@ -1,7 +1,7 @@
 ---
 id: ERROR009
 category: Authentication errors
-detector: authentication-error
+matcher: authentication-error
 scope: operation
 parameters: { required-status: 403 }
 ---

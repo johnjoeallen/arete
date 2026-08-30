@@ -1,7 +1,7 @@
 ---
 id: HTTP006
 category: HTTP
-detector: operation-semantics
+matcher: operation-semantics
 scope: operation
 parameters: { match: inconsistent-method-resource-semantics }
 ---
@@ -18,13 +18,13 @@ behavior.
 
 ## Detection and scope
 
-The rule has `operation` scope and uses the `operation-semantics` detector:
+The rule has `operation` scope and uses the `operation-semantics` rule:
 
 ```yaml
 parameters: { match: inconsistent-method-resource-semantics }
 ```
 
-For each operation, the detector combines the path and summary and reports
+For each operation, the rule combines the path and summary and reports
 either of these signals:
 
 * a GET whose combined text contains a mutation word (`create`, `update`,
@@ -32,7 +32,7 @@ either of these signals:
 * a POST on a path containing a `{parameter}` whose combined text contains
   `replace` or `replacement`.
 
-The occurrence points to the operation and says `HTTP method and resource
+The diagnostic points to the operation and says `HTTP method and resource
 semantics appear inconsistent`.
 
 ## Review-candidate examples
@@ -70,7 +70,7 @@ paths:
 ## Parameters, references, and limitations
 
 `match: inconsistent-method-resource-semantics` selects both heuristics. The
-detector does not inspect request/response bodies, status codes, schemas,
+rule does not inspect request/response bodies, status codes, schemas,
 descriptions beyond summary, runtime behavior, or actual idempotency. Word
 matching is case-insensitive and intentionally limited; legitimate commands
 or unusual terminology can be missed or flagged. Unresolved path details may

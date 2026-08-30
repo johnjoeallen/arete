@@ -1,7 +1,7 @@
 ---
 id: JSON006
 category: JSON
-detector: schema
+matcher: schema
 scope: property
 parameters: { required: false, nullable: true, semantics: undefined }
 ---
@@ -18,13 +18,13 @@ declaration; it cannot prove the semantics are undefined.
 
 ## Detection and scope
 
-The rule has `property` scope and uses the `schema` detector:
+The rule has `property` scope and uses the `schema` rule:
 
 ```yaml
 parameters: { required: false, nullable: true, semantics: undefined }
 ```
 
-The detector reports a property when it is not required and is explicitly
+The rule reports a property when it is not required and is explicitly
 nullable. `semantics: undefined` records the policy concern but does not add a
 machine-checkable condition. Findings point to the property with
 `Optional property explicitly permits null`.
@@ -73,9 +73,9 @@ properties:
 ## Parameters, references, and limitations
 
 The rule requires `required: false` and `nullable: true`; `semantics:
-undefined` is metadata for a concern that the detector cannot establish.
+undefined` is metadata for a concern that the rule cannot establish.
 OpenAPI 3.1 union forms such as `type: [string, 'null']` are considered only
-if the host normalises them into its nullable fact. The detector does not
+if the host normalises them into its nullable fact. The rule does not
 inspect descriptions, examples, JSON payloads, PATCH behavior, defaults,
 serialization, or runtime semantics. Referenced properties count only after
 host normalisation. Findings require human review of the intended meaning of

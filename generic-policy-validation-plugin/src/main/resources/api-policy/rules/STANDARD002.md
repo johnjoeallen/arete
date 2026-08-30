@@ -1,7 +1,7 @@
 ---
 id: STANDARD002
 category: Standards
-detector: resource-path
+matcher: resource-path
 scope: path
 parameters: { match: trailing-slash }
 ---
@@ -17,15 +17,15 @@ so this rule is a convention for review.
 
 ## Detection and scope
 
-The rule has `path` scope and uses the `resource-path` detector:
+The rule has `path` scope and uses the `resource-path` rule:
 
 ```yaml
 parameters: { match: trailing-slash }
 ```
 
 It reports every path longer than one character whose path string ends with
-`/`. The occurrence points to the path and says `Resource path has an
-unnecessary trailing slash`. The detector does not compare the path with a
+`/`. The diagnostic points to the path and says `Resource path has an
+unnecessary trailing slash`. The rule does not compare the path with a
 second canonical route.
 
 ## Review-candidate example
@@ -51,7 +51,7 @@ paths:
     get: { responses: { '200': { description: Customer collection } } }
 ```
 
-The root path `/` is also excluded by the detector’s length check.
+The root path `/` is also excluded by the rule’s length check.
 
 ## Parameters, references, and limitations
 

@@ -1,7 +1,7 @@
 ---
 id: ERROR005
 category: Error responses
-detector: error-response
+matcher: error-response
 scope: response
 parameters: { problem-json: true }
 ---

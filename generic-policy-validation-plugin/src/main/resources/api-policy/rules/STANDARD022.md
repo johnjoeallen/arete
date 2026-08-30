@@ -1,7 +1,7 @@
 ---
 id: STANDARD022
 category: Standards
-detector: document-lint
+matcher: document-lint
 scope: api
 parameters: { check: numeric-status-key }
 ---
@@ -11,7 +11,7 @@ parameters: { check: numeric-status-key }
 Response status keys must be quoted strings. A bare `200:` is a YAML integer
 key; some tools coerce it, others reject the document.
 
-## Violation
+## Diagnostic
 
 ```yaml
 responses:
@@ -29,7 +29,7 @@ responses:
 
 ## Detection and scope
 
-The rule has `api` scope and uses the `document-lint` detector with
+The rule has `api` scope and uses the `document-lint` rule with
 `check: numeric-status-key`. It scans the raw document for indented lines of
 the form `NNN:` where `NNN` is a 1xx–5xx number, and reports once if any are
 found.

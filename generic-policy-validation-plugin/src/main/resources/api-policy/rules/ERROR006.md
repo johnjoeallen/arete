@@ -1,7 +1,7 @@
 ---
 id: ERROR006
 category: Error responses
-detector: error-response
+matcher: error-response
 scope: response
 parameters: { status: 401, required-header: WWW-Authenticate }
 ---

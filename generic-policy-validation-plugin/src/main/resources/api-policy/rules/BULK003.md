@@ -1,7 +1,7 @@
 ---
 id: BULK003
 category: Bulk operations
-detector: bulk-operation
+matcher: bulk-operation
 scope: operation
 parameters:
   method: PUT
@@ -19,7 +19,7 @@ rule is a conservative review heuristic and cannot prove request cardinality.
 
 ## Detection and scope
 
-The rule has `operation` scope and uses the `bulk-operation` detector:
+The rule has `operation` scope and uses the `bulk-operation` rule:
 
 ```yaml
 parameters:
@@ -27,9 +27,9 @@ parameters:
   target-selection: search-criteria
 ```
 
-For each operation, the detector lowercases the path and summary, then reports
+For each operation, the rule lowercases the path and summary, then reports
 when the operation method is PUT and that combined text contains `search`,
-`filter`, `criteria`, or `query`. The occurrence points to the operation with
+`filter`, `criteria`, or `query`. The diagnostic points to the operation with
 `Bulk mutation uses search criteria`.
 
 ## Review-candidate example
@@ -61,7 +61,7 @@ paths:
 ## Parameters, references, and limitations
 
 `method: PUT` and `target-selection: search-criteria` select the check. The
-detector inspects only method, path, and summary; it does not inspect query
+rule inspects only method, path, and summary; it does not inspect query
 parameters, request bodies, schemas, response codes, runtime cardinality, or
 atomicity. It may miss equivalent selection wording and flag a single-resource
 operation whose summary mentions “query.” Referenced operations count only

@@ -1,7 +1,7 @@
 ---
 id: CASE004
 category: Naming
-detector: naming
+matcher: naming
 scope: header
 parameters: { convention: hyphenated, match: non-conforming }
 ---
@@ -15,7 +15,7 @@ keeps field names readable and compatible with normal HTTP tooling.
 
 ## Detection and scope
 
-The rule has `header` scope and uses the `naming` detector:
+The rule has `header` scope and uses the `naming` rule:
 
 ```yaml
 parameters: { convention: hyphenated, match: non-conforming }

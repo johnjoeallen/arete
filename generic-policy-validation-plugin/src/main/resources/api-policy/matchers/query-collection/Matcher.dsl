@@ -1,0 +1,13 @@
+distill(api, rule) {
+    return api.paths.expand { path -> path.operationDetails.expand { operation -> operation.parameters
+        .filter { param -> param.in == "query" && param.schemaType == "array"
+            && ((param.style == null ? "form" : param.style) != rule.parameters["style"]
+                || (param.explode == null
+                        ? (param.style == null ? "form" : param.style) == "form"
+                        : param.explode) != rule.parameters["explode"]) }
+        .map { param -> diagnostic(param.pointer, operation.method + " " + path.path,
+            "Collection query parameter " + param.name
+                + " does not use " + rule.parameters["style"]
+                + " serialization with explode="
+                + (rule.parameters["explode"] ? "true" : "false")) } } };
+}

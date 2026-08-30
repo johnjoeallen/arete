@@ -1,7 +1,7 @@
 ---
 id: CASE007
 category: Naming
-detector: schema-name
+matcher: schema-name
 scope: schema
 parameters: { pattern: "(?i).*(request|response)", case: pascal-case }
 ---
@@ -12,7 +12,7 @@ Where a programme keeps the `Request` / `Response` suffix on payload schemas,
 those names should be PascalCase (`CreateCustomerRequest`, `CustomerResponse`)
 so generated model classes are idiomatic.
 
-## Violation
+## Diagnostic
 
 ```yaml
 components:
@@ -32,7 +32,7 @@ components:
 
 ## Detection and scope
 
-The rule has `schema` scope and uses the `schema-name` detector with
+The rule has `schema` scope and uses the `schema-name` rule with
 `case: pascal-case`. A component schema whose name ends in `request` or
 `response` (case-insensitively) and does not match `[A-Z][A-Za-z0-9]*` is
 reported.

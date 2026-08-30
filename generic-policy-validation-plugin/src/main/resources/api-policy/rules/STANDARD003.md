@@ -1,7 +1,7 @@
 ---
 id: STANDARD003
 category: Standards
-detector: response-header
+matcher: response-header
 scope: response
 parameters: { status: 200, header: Link, required: false }
 ---
@@ -18,13 +18,13 @@ convention, not a prohibition on every legitimate use of Web Linking.
 
 ## Detection and scope
 
-The rule has `response` scope and uses the `response-header` detector:
+The rule has `response` scope and uses the `response-header` rule:
 
 ```yaml
 parameters: { status: 200, header: Link, required: false }
 ```
 
-For each documented 200 response, the detector checks response header names
+For each documented 200 response, the rule checks response header names
 case-insensitively. Because `required: false`, it reports when `Link` is
 present, at the operation pointer, with a message that the response contains
 an unexpected header. Header values are not inspected.

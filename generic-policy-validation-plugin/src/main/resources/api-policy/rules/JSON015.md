@@ -1,7 +1,7 @@
 ---
 id: JSON015
 category: JSON
-detector: schema
+matcher: schema
 scope: property
 parameters: { enum-case: upper-snake-case }
 ---
@@ -17,13 +17,13 @@ external or human-readable values.
 
 ## Detection and scope
 
-The rule has `property` scope and uses the `schema` detector:
+The rule has `property` scope and uses the `schema` rule:
 
 ```yaml
 parameters: { enum-case: upper-snake-case }
 ```
 
-For each schema property with an enum, the detector checks every string enum
+For each schema property with an enum, the rule checks every string enum
 value against the case-sensitive pattern:
 
 ```text
@@ -73,7 +73,7 @@ components:
 `enum-case: upper-snake-case` is the rule’s only configured mode. It does not
 require the property itself to be declared as `type: string`; non-string enum
 values are simply ignored, and a mixed enum is reported only when a string
-value fails. The detector does not inspect runtime values, descriptions,
+value fails. The rule does not inspect runtime values, descriptions,
 examples, payloads, localization, or whether a value is externally mandated.
 Referenced schemas count only when the host resolves their properties into the
 normalised model. Findings are convention candidates for review.

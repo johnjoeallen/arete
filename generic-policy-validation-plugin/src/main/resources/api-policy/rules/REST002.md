@@ -1,7 +1,7 @@
 ---
 id: REST002
 category: Resource design
-detector: naming
+matcher: naming
 scope: path-segment
 parameters: { semantic: collection }
 ---
@@ -17,13 +17,13 @@ term, so findings are candidates for review.
 
 ## Detection and scope
 
-The rule has `path-segment` scope and uses the `naming` detector:
+The rule has `path-segment` scope and uses the `naming` rule:
 
 ```yaml
 parameters: { semantic: collection }
 ```
 
-The detector examines every normalised path segment. A segment is considered
+The rule examines every normalised path segment. A segment is considered
 plural when its lowercase spelling ends in `s` and has more than one
 character. With `semantic: collection`, it reports segments that fail that
 test, at the segment pointer, with `Collection name is singular`.
@@ -53,7 +53,7 @@ paths:
 ## Parameters, references, and limitations
 
 The rule configures only `semantic: collection`; it does not use the naming
-detector’s conventions, suffixes, or type filters. It does not understand
+rule’s conventions, suffixes, or type filters. It does not understand
 irregular plurals such as `people`, uncountable nouns, locale, path parameter
 values, schemas, methods, or runtime semantics. Parameters are exposed as
 separate segments by the host and should be reviewed in context. Referenced

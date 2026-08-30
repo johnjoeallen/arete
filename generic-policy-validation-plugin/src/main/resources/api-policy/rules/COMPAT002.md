@@ -1,7 +1,7 @@
 ---
 id: COMPAT002
 category: Compatibility
-detector: compatibility
+matcher: compatibility
 scope: schema-property
 parameters: { change: property-removed }
 ---
@@ -12,14 +12,14 @@ Removing an existing field can break consumers that depend upon it. Requires a b
 
 ## Detection and scope
 
-The rule has `schema-property` scope and uses the `compatibility` detector:
+The rule has `schema-property` scope and uses the `compatibility` rule:
 
 ```yaml
 parameters: { change: property-removed }
 ```
 
 It is intended to compare schema properties in a current document with a
-baseline. The current detector deliberately returns no occurrences without
+baseline. The current rule deliberately returns no diagnostics without
 that comparison input, so no finding is produced from a single current
 specification.
 
@@ -38,6 +38,6 @@ models, or client logic. Assess deprecation and a migration path first.
 ## Configuration and limitations
 
 `change: property-removed` selects the future comparison category. The
-detector currently receives no baseline, property diff, runtime data, or client
+rule currently receives no baseline, property diff, runtime data, or client
 inventory. References and missing comparison input produce no inferred
-violation.
+diagnostic.

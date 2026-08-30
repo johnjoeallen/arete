@@ -1,7 +1,7 @@
 ---
 id: JSON007
 category: JSON
-detector: schema
+matcher: schema
 scope: property
 parameters: { type: string, enum: present }
 ---
@@ -17,7 +17,7 @@ finding is a compatibility review candidate.
 
 ## Detection and scope
 
-The rule has `property` scope and uses the `schema` detector:
+The rule has `property` scope and uses the `schema` rule:
 
 ```yaml
 parameters: { type: string, enum: present }
@@ -25,7 +25,7 @@ parameters: { type: string, enum: present }
 
 It reports each schema property whose declared type is exactly `string` and
 that declares an enum. Findings point to the property and use the generic
-message `Property uses an enum`. The detector does not distinguish extensible
+message `Property uses an enum`. The rule does not distinguish extensible
 from closed enums in this rule.
 
 ## Review-candidate example

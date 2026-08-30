@@ -1,0 +1,18 @@
+distill(api, rule) {
+    return rule.scope == "query-parameter"
+        ? api.paths.expand { path -> path.operationDetails.expand { operation -> operation.parameters
+            .filter { param -> param.in == "query"
+                && param.name =~ ("(?i)" + rule.parameters["search-pattern"]) }
+            .map { param -> diagnostic(param.pointer,
+                operation.method + " " + path.path,
+                "Search query parameter may carry sensitive data: " + param.name) } } }
+        : api.paths.expand { path -> path.operationDetails.expand { operation ->
+            (size(operation.parameters.filter { param -> param.in == "query"
+                    && param.name =~ ("(?i)" + rule.parameters["search-pattern"]) }) > 0
+             && size(operation.parameters.filter { param -> param.in == "query"
+                    && param.name =~ ("(?i)" + rule.parameters["sensitive-pattern"]) }) > 0)
+                ? tokenize(",", "x").map { u -> diagnostic(operation.pointer,
+                    operation.method + " " + path.path,
+                    "Operation permits searching sensitive query data") }
+                : tokenize(",", "x").filter { u -> false } } };
+}

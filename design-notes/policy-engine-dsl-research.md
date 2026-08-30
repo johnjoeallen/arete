@@ -1,21 +1,21 @@
-# Research — a restricted detector language instead of a Groovy sandbox
+# Research — a restricted rule language instead of a Groovy sandbox
 
-Status: **adopted** — Starlark is the default detector runtime. See
+Status: **adopted** — Starlark is the default rule runtime. See
 [`policy-engine-dsl-poc.md`](policy-engine-dsl-poc.md) for the implementation
-and [`policy-engine.md`](policy-engine.md#writing-a-detector-starlark) for how
+and [`policy-engine.md`](policy-engine.md#writing-a-rule-starlark) for how
 to write one. Companion to
 [`policy-engine-sandbox-plan.md`](policy-engine-sandbox-plan.md).
 
 The sandbox plan hobbles a general-purpose language (Groovy) down to a safe
 subset with two enforcement layers plus, for remote bundles, a worker
-process. This note asks the opposite question: **what if the detector
+process. This note asks the opposite question: **what if the rule
 language were safe by construction** — small enough that there is nothing to
 sandbox because the interpreter simply cannot express I/O, reflection, or
 unbounded computation?
 
-## 1. What detectors actually need
+## 1. What rules actually need
 
-Inventory of every operation used across the 17 bundled `Detector.groovy`
+Inventory of every operation used across the 17 bundled `Matcher.groovy`
 scripts:
 
 | Category | Operations actually used |
@@ -30,7 +30,7 @@ scripts:
 | **Control** | ternary, elvis `?:`, safe-nav, `switch`, `if`, `&& || !`, early `return`, one `try/catch` (around `parseInt`) |
 | **Abstraction** | local `def` bindings; **named local closures** that call each other (`def matches = { … }`, `def conforms = { … }`); closures passed to list ops |
 
-What detectors **never** need: loops, mutation of the input, recursion, dates,
+What rules **never** need: loops, mutation of the input, recursion, dates,
 object construction (except the one `new URI(url)` — §5 of the sandbox plan),
 file/network/env/reflection, threads, arbitrary Java classes.
 
@@ -42,17 +42,17 @@ string functions, and regex.** This is a well-known, well-bounded category.
 
 ### Adopt an existing safe language runtime (JVM)
 
-| Runtime | Safe by construction? | Fit for detectors | Regex | Verdict |
+| Runtime | Safe by construction? | Fit for rules | Regex | Verdict |
 |---|---|---|---|---|
 | **Starlark** (`net.starlark.java`, extracted from Bazel) | **Yes** — no I/O, no `import`, bounded steps + memory, deterministic | **Excellent** — lists, dicts, comprehensions, `def` functions, string methods; current Groovy reads almost 1:1 | Not built-in — add a host builtin (`re.fullmatch`, `re.search`) | **Top pick** |
-| **CEL** (`dev.cel:cel`, Google) | **Yes** — non-Turing-complete, designed for policy eval | **Weak** — single-expression; no in-language named sub-predicates; multi-branch message building and the `def matches`/`def conforms` pattern force every detector to be restructured into one nested macro | `matches()` only; partial match & dynamic patterns workable | Rejected on fit |
+| **CEL** (`dev.cel:cel`, Google) | **Yes** — non-Turing-complete, designed for policy eval | **Weak** — single-expression; no in-language named sub-predicates; multi-branch message building and the `def matches`/`def conforms` pattern force every rule to be restructured into one nested macro | `matches()` only; partial match & dynamic patterns workable | Rejected on fit |
 | **Jsonnet** (`sjsonnet`, JVM) | **Yes** — hermetic, deterministic, `import` disable-able | **Good** — `function(api, rule)`, `std.map/filter/foldl`, string funcs | `std.regex*` parity across the JVM port is shaky | Backup |
 | **JEXL3** (`commons-jexl3`) | **No** — it invokes Java methods; safety is a `JexlSandbox` allowlist | Good | `java.util.regex` | Rejected — same "sandbox a general engine" problem, just smaller |
 | **MVEL / SpEL** | **No** — full Java access; SpEL sandboxing is historically leaky | — | — | Rejected |
 | **Rego / OPA** | Yes | Good semantically | n/a | Rejected — no first-class embeddable JVM runtime; operationally heavy |
 | **JSONLogic / JMESPath** | Yes | Too weak — can't build the computed `message` strings or the multi-condition predicates cleanly | limited | Rejected |
 
-### Build a tiny expression language ("SPQL" — Speculate Policy Query Language)
+### Build a tiny expression language ("SPQL" — Areté Policy Query Language)
 
 A hand-rolled Pratt parser + tree-walking evaluator over a fixed value model
 (`null`, bool, number, string, list, map, lambda). Closed grammar:
@@ -75,7 +75,7 @@ contributors must learn it.
 
 ## 3. The regex problem (applies to every option)
 
-Nearly every detector uses regex, several **build the pattern from rule
+Nearly every rule uses regex, several **build the pattern from rule
 parameters**, and rule parameters will come from untrusted/remote bundles.
 Requirements: full-match + partial-match, `(?i)`, `\b`, dynamic construction —
 and **ReDoS resistance**, because `java.util.regex` allows catastrophic
@@ -83,7 +83,7 @@ backtracking on an attacker-chosen pattern *or* input.
 
 **Use `com.google.re2j`** (pure-Java RE2) behind whatever regex builtin the
 language exposes: linear-time guaranteed, no catastrophic backtracking. It
-lacks backreferences and lookaround — neither is used by any current detector,
+lacks backreferences and lookaround — neither is used by any current rule,
 and both should stay unavailable. This single choice removes an entire class
 of DoS that the Groovy-sandbox path would still have to mitigate separately
 (timeout only).
@@ -97,7 +97,7 @@ outright — there is no Groovy, no `SecureASTCustomizer`, no
 Still needed from that plan:
 
 - **§4 execution hardening** — timeout, output caps, `catch (Throwable)`,
-  per-detector compiled-form cache. (Smaller: a total language with step
+  per-rule compiled-form cache. (Smaller: a total language with step
   caps barely needs a timeout, but keep one as a backstop.)
 - **§9 Layer C (worker process)** — *reduced but not eliminated*. A pure
   interpreter with hard step/memory caps is a far weaker RCE target than
@@ -108,19 +108,19 @@ Still needed from that plan:
   orthogonal to the execution model.
 
 It also dissolves **§5** (the `new URI(url)` carve-out): expose a
-`url_host(s)` builtin and the hostname detector needs no JDK type and no
+`url_host(s)` builtin and the hostname rule needs no JDK type and no
 `OpenApiMapAdapter` change.
 
-The `Detector.md` descriptor already carries `language: groovy`. Add
-`language: starlark` (or `spql`) and migrate detectors incrementally; the
+The `Matcher.md` descriptor already carries `language: groovy`. Add
+`language: starlark` (or `spql`) and migrate rules incrementally; the
 loader picks the runtime per descriptor.
 
 ## 5. Migration cost
 
-All 17 detectors are rewritten under *either* the sandbox plan (to the safe
+All 17 rules are rewritten under *either* the sandbox plan (to the safe
 Groovy subset, and re-verified against the interceptor) or this plan (to the
-new language). The existing tests assert exact occurrence counts and scores
-per detector and are the oracle for both.
+new language). The existing tests assert exact diagnostic counts and scores
+per rule and are the oracle for both.
 
 - **→ Starlark**: near-mechanical. `collectMany{…}` → list comprehension or
   `[x for … for …]`; `findAll` → `filter` / comprehension `if`; `def matches
@@ -135,7 +135,7 @@ per detector and are the oracle for both.
 1. **Prefer adopting Starlark** (`net.starlark.java`) + `re2j`-backed regex
    builtins + a handful of string builtins (`tokenize`, `url_host`). It is
    safe by construction, deterministic, resource-bounded out of the box,
-   battle-tested (Bazel), and the detectors stay readable. This removes
+   battle-tested (Bazel), and the rules stay readable. This removes
    Layers A+B entirely and likely downgrades Layer C from "hard gate" to
    "optional".
 2. **Fall back to a hand-rolled SPQL** only if Starlark's footprint,
@@ -147,8 +147,8 @@ per detector and are the oracle for both.
 
 ### Suggested next step
 
-Spike: port the 3 most regex-heavy detectors (`operation-semantics`,
+Spike: port the 3 most regex-heavy rules (`operation-semantics`,
 `resource-path`, `versioning`) to Starlark + `re2j`, run them against the
-existing test specs, and confirm identical occurrence output. That exercises
+existing test specs, and confirm identical diagnostic output. That exercises
 comprehensions, dynamic patterns, `(?i)`/`\b`, and nested helper functions —
 the parts most likely to reveal a blocker. ~1–2 days.

@@ -1,7 +1,7 @@
 ---
 id: CONTENT002
 category: Content
-detector: media-type
+matcher: media-type
 scope: media-type
 parameters: { location: response, match: absent }
 ---

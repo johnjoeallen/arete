@@ -1,7 +1,7 @@
 ---
 id: STATUS002
 category: HTTP status
-detector: response-header
+matcher: response-header
 scope: response
 parameters: { status: 201, header: Location, required: true }
 ---
@@ -18,14 +18,14 @@ is actually addressable.
 
 ## Detection and scope
 
-The rule has `response` scope and uses the `response-header` detector:
+The rule has `response` scope and uses the `response-header` rule:
 
 ```yaml
 parameters: { status: 201, header: Location, required: true }
 ```
 
-For every documented 201 response, the detector compares response header names
-case-insensitively. It reports an occurrence when `Location` is absent, at the
+For every documented 201 response, the rule compares response header names
+case-insensitively. It reports an diagnostic when `Location` is absent, at the
 containing operation pointer, with a message that the response is missing the
 required header. Header values are not inspected.
 
@@ -67,7 +67,7 @@ responses:
 
 ## Parameters, references, and limitations
 
-The detector supports a required header or an unexpected-header mode, but this
+The rule supports a required header or an unexpected-header mode, but this
 rule fixes `status: 201`, `header: Location`, and `required: true`. It does
 not validate the URI, header value, response body, creation semantics, or
 whether 201 is the appropriate status. Referenced responses count only if the

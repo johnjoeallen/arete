@@ -1,7 +1,7 @@
 ---
 id: JSON004
 category: JSON
-detector: naming
+matcher: naming
 scope: property
 parameters: { schema-type: array, semantic: singular }
 ---
@@ -16,7 +16,7 @@ convention and is not reliable for every language or domain term.
 
 ## Detection and scope
 
-The rule has `property` scope and uses the `naming` detector:
+The rule has `property` scope and uses the `naming` rule:
 
 ```yaml
 parameters: { schema-type: array, semantic: singular }
@@ -56,7 +56,7 @@ properties:
 
 ## Parameters, references, and limitations
 
-Both configured parameters are required for the intended check. The detector
+Both configured parameters are required for the intended check. The rule
 uses only the property’s normalised name and top-level type; it does not
 inspect item schemas, values, descriptions, or runtime JSON. Irregular plurals
 such as `people` may be flagged, while a word ending in `s` may be a singular

@@ -1,7 +1,7 @@
 ---
 id: JSON017
 category: JSON
-detector: enum-values
+matcher: enum-values
 scope: property
 parameters: { check: no-duplicates }
 ---
@@ -11,7 +11,7 @@ parameters: { check: no-duplicates }
 An `enum` list should not repeat a value. A duplicate is almost always a
 copy-paste error and produces ambiguous generated code.
 
-## Violation
+## Diagnostic
 
 ```yaml
 status:
@@ -29,11 +29,11 @@ status:
 
 ## Detection and scope
 
-The rule has `property` scope and uses the `enum-values` detector with
+The rule has `property` scope and uses the `enum-values` rule with
 `check: no-duplicates`. Each schema property that declares an `enum` is
 checked; a property whose list contains a repeated value is reported once.
 
 ## Configuration and limitations
 
-Values are compared by their string form. The detector inspects component
+Values are compared by their string form. The rule inspects component
 schema properties; it does not resolve inline request or response schemas.

@@ -1,7 +1,7 @@
 ---
 id: JSON016
 category: JSON
-detector: response-code
+matcher: response-code
 scope: response
 parameters: { response-shape: json-object }
 ---
@@ -15,7 +15,7 @@ usually forces a breaking change when additional metadata is needed.
 
 ## What this rule checks
 
-For each documented `2xx` response, the detector examines the schemas attached
+For each documented `2xx` response, the rule examines the schemas attached
 to the response content. If a response schema is present and its top-level type
 is not `object`, the response is reported. The rule is concerned with the
 contract declared in OpenAPI; it does not inspect runtime payloads.
@@ -27,7 +27,7 @@ scalars.
 
 ## Examples
 
-### Violation
+### Diagnostic
 
 ```yaml
 responses:
@@ -57,7 +57,7 @@ responses:
 ```
 
 Responses without a documented schema are not flagged by this rule: the
-detector cannot infer a top-level shape that the contract does not declare.
+rule cannot infer a top-level shape that the contract does not declare.
 
 ## Payload examples
 
@@ -95,7 +95,7 @@ into a different top-level JSON shape.
 ## Configuration, references, and limitations
 
 The rule is configured with `response-shape: json-object`; it has no threshold
-or property-list configuration. The detector uses the host’s normalised
+or property-list configuration. The rule uses the host’s normalised
 response schema types, so referenced schemas count only when resolved into
 those facts. A response with no schema is not flagged, and a response with
 multiple content types is reported if any exposed schema type is not

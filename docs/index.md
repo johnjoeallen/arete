@@ -1,19 +1,19 @@
-# Speculate
+# Areté
 
-Speculate is a **local-first API explorer** for OpenAPI/Swagger specs. Paste a
-spec, or point Speculate at one on disk, and get instant browsable docs —
+Areté is a **local-first API explorer** for OpenAPI/Swagger specs. Paste a
+spec, or point Areté at one on disk, and get instant browsable docs —
 endpoints, parameters, schemas, request/response examples — plus pluggable,
 policy-driven validation, with search, multi-spec tabs, and light/dark themes.
 
 No cloud, no build step for the reader, no account: it's a single runnable jar
-that keeps its data on your machine under `~/.speculate`.
+that keeps its data on your machine under `~/.arete`.
 
-![Speculate browsing a spec](assets/screenshot.png)
+![Areté browsing a spec](assets/screenshot.png)
 
 ## What it does
 
 Paste an OpenAPI or Swagger definition (JSON or YAML) into the textbox on the
-home page and Speculate parses it, saves it locally (keyed by the spec's
+home page and Areté parses it, saves it locally (keyed by the spec's
 `title`, so re-pasting an updated version replaces it rather than piling up
 duplicates), and renders it as browsable docs:
 
@@ -35,13 +35,13 @@ duplicates), and renders it as browsable docs:
 
 ### Load from disk and stay in sync
 
-You don't have to paste — Speculate can also load a spec straight from disk and
+You don't have to paste — Areté can also load a spec straight from disk and
 keep it current:
 
 - Enter a file's full path in the *"load a file from elsewhere on disk"* field
-  on the home page. Speculate reads it immediately and then watches it, so
+  on the home page. Areté reads it immediately and then watches it, so
   saving a change updates the stored copy automatically.
-- Drop a file into `~/.speculate/specs` and Speculate loads and watches it the
+- Drop a file into `~/.arete/specs` and Areté loads and watches it the
   same way, with no path to type. This folder is scanned on startup too, so
   files already sitting there when you launch get picked up.
 
@@ -54,8 +54,8 @@ delete it.
 
 ### Validation
 
-Validation is **on-demand and pluggable**. Speculate ships the
-[Speculate Policy Engine](validation/policy-engine.md) — a policy-driven plugin
+Validation is **on-demand and pluggable**. Areté ships the
+[Areté Policy Engine](validation/policy-engine.md) — a policy-driven plugin
 that lints a spec against a bundle of text-defined rules and policies
 (Enterprise Grade, Zalando, Zalando Extended) — and you can drop in your own
 validation plugins alongside it. See

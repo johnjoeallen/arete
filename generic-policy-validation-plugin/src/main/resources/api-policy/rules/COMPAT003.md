@@ -1,7 +1,7 @@
 ---
 id: COMPAT003
 category: Compatibility
-detector: compatibility
+matcher: compatibility
 scope: schema-property
 parameters: { change: property-renamed }
 ---
@@ -12,15 +12,15 @@ Renaming an existing field is normally equivalent to removing the old field and 
 
 ## Detection and scope
 
-The rule has `schema-property` scope and uses the `compatibility` detector:
+The rule has `schema-property` scope and uses the `compatibility` rule:
 
 ```yaml
 parameters: { change: property-renamed }
 ```
 
 The category is intended to compare a schema property with its baseline
-counterpart. Since the current detector has no baseline input, it deliberately
-returns no automated occurrences; COMPAT003 is not an active current-document
+counterpart. Since the current rule has no baseline input, it deliberately
+returns no automated diagnostics; COMPAT003 is not an active current-document
 check.
 
 ## Review guidance
@@ -39,5 +39,5 @@ Consider aliases, a deprecation period, or a compatibility version.
 
 `change: property-renamed` selects the future comparison category. No property
 diff, baseline, reference resolution strategy, runtime payload, or client
-inventory is currently available to the detector. Missing comparison input
+inventory is currently available to the rule. Missing comparison input
 produces no evidence.

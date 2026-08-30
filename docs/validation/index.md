@@ -1,10 +1,10 @@
 # Validation
 
-Validation in Speculate is **on-demand and pluggable**. Opening a spec doesn't
+Validation in Areté is **on-demand and pluggable**. Opening a spec doesn't
 run anything by itself — you choose what runs and when.
 
-Speculate ships one bundled plugin, the
-[**Speculate Policy Engine**](policy-engine.md) (`generic-policy`), and
+Areté ships one bundled plugin, the
+[**Areté Policy Engine**](policy-engine.md) (`generic-policy`), and
 discovers any additional plugin jars you drop in. Multiple plugins can run
 together — for example a general API-guidelines linter alongside a specialised,
 organization-specific plugin such as a breaking-changes checker.
@@ -39,7 +39,7 @@ endpoint lists those findings in full:
 ### Scores
 
 A plugin may optionally report an overall compliance score (0–100) and, per
-violation, how many points fixing it would recover. Speculate shows these as
+diagnostic, how many points fixing it would recover. Areté shows these as
 percentages when present — but **only ever from a single plugin's scoring
 model**. With more than one scoring plugin checked, the score is hidden rather
 than combining two unrelated models into a meaningless number.
@@ -61,7 +61,7 @@ rule-set dropdown; a plugin with only the implicit default set just has one
 entry.
 
 A rule set is a **plugin-chosen name**, not an engine-specific concept. The
-Speculate Policy Engine exposes one rule set per bundled [policy](policies.md):
+Areté Policy Engine exposes one rule set per bundled [policy](policies.md):
 **Enterprise Grade** (the default), **Zalando**, and **Zalando Extended**.
 
 !!! note "`getRuleSets()` returns a `List`, not a `Set`"
@@ -74,10 +74,10 @@ Speculate Policy Engine exposes one rule set per bundled [policy](policies.md):
 
 Plugin `.jar` files are discovered from two folders at startup:
 
-- **`plugins/`, next to `speculate.jar`** — where the release zip ships the
-  bundled [Speculate Policy Engine](policy-engine.md). Not created
+- **`plugins/`, next to `arete.jar`** — where the release zip ships the
+  bundled [Areté Policy Engine](policy-engine.md). Not created
   automatically if missing.
-- **`~/.speculate/plugins`** — a stable location independent of where Speculate
+- **`~/.arete/plugins`** — a stable location independent of where Areté
   is installed, created automatically if it doesn't exist. Drop your own plugin
   jars here.
 
@@ -88,8 +88,8 @@ a narrower, additional switch layered on top of the global setting.
 
 ## Next
 
-- [Speculate Policy Engine](policy-engine.md) — how the bundled plugin's
-  detectors, rules, and policies work, and how to extend the bundle.
+- [Areté Policy Engine](policy-engine.md) — how the bundled plugin's
+  rules, rules, and policies work, and how to extend the bundle.
 - [Rule Catalogue](rules.md) — every rule in the bundle and which policies use it.
 - [Policies](policies.md) — the bundled Enterprise Grade, Zalando, and Zalando
   Extended rule sets.

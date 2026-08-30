@@ -1,7 +1,7 @@
 ---
 id: HTTP002
 category: HTTP
-detector: operation-semantics
+matcher: operation-semantics
 scope: operation
 parameters: { method: POST, match: full-resource-replacement }
 ---
@@ -13,7 +13,7 @@ parameters: { method: POST, match: full-resource-replacement }
 PUT is normally more appropriate when replacing the complete representation of
 an identified resource. POST may still be correct for commands or processing
 resources, so this rule identifies a design candidate rather than a universal
-HTTP violation.
+HTTP diagnostic.
 
 ## Detection and scope
 
@@ -25,7 +25,7 @@ parameters: { method: POST, match: full-resource-replacement }
 
 It reports a POST when its path matches an identified-resource shape containing
 `/{...}` and the combined path plus summary contains the case-insensitive word
-`replace` or `replacement`. The occurrence points to the operation with `POST
+`replace` or `replacement`. The diagnostic points to the operation with `POST
 appears to replace an identified resource`.
 
 ## Review-candidate example
@@ -56,7 +56,7 @@ paths:
 
 ## Parameters, references, and limitations
 
-The detector inspects only method, path text, and summary. It does not inspect
+The rule inspects only method, path text, and summary. It does not inspect
 schemas, status codes, request bodies, descriptions, references, idempotency,
 or runtime behavior. It may miss replacement wording outside the recognised
 terms and may flag a legitimate command. Findings require design review.

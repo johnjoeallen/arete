@@ -9,8 +9,8 @@
 | `-h` / `--help` | Show usage. |
 
 ```bash
-./scripts/speculate.sh --port 8080
-./scripts/speculate.sh --wipe-db
+./scripts/arete.sh --port 8080
+./scripts/arete.sh --wipe-db
 ```
 
 The launcher scripts respect `JAVA_HOME` if it's set — checked before `java` is
@@ -19,16 +19,16 @@ point at rather than whichever `java` happens to be first on `PATH`.
 
 ## Data locations
 
-Speculate keeps everything under `~/.speculate`, regardless of which directory
+Areté keeps everything under `~/.arete`, regardless of which directory
 you launch from:
 
 | Path | Contents |
 |---|---|
-| `~/.speculate/data` | The embedded H2 database. |
-| `~/.speculate/specs` | Drop spec files here to have them loaded and watched automatically. |
-| `~/.speculate/plugins` | Drop extra validation plugin jars here — see [Writing a Plugin](validation/writing-a-plugin.md). |
+| `~/.arete/data` | The embedded H2 database. |
+| `~/.arete/specs` | Drop spec files here to have them loaded and watched automatically. |
+| `~/.arete/plugins` | Drop extra validation plugin jars here — see [Writing a Plugin](validation/writing-a-plugin.md). |
 
-`~/.speculate/plugins` is created automatically on startup if it doesn't exist.
-The `plugins/` folder next to `speculate.jar` (shipped in the release zip) is
+`~/.arete/plugins` is created automatically on startup if it doesn't exist.
+The `plugins/` folder next to `arete.jar` (shipped in the release zip) is
 **not** created automatically when missing — in a from-source dev run it would
 otherwise resolve under `target/classes`.

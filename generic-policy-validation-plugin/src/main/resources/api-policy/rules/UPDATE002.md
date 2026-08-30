@@ -1,7 +1,7 @@
 ---
 id: UPDATE002
 category: Update semantics
-detector: operation
+matcher: operation
 scope: operation
 parameters: { method: PATCH }
 ---
@@ -19,18 +19,18 @@ operation is wrong.
 
 ## Detection and scope
 
-The rule has `operation` scope and uses the `operation` detector:
+The rule has `operation` scope and uses the `operation` rule:
 
 ```yaml
 id: UPDATE002
 category: Update semantics
-detector: operation
+matcher: operation
 scope: operation
 parameters: { method: PATCH }
 ```
 
-The detector checks each OpenAPI operation’s HTTP method. Every `PATCH`
-operation produces an occurrence, pointing to that operation and displaying a
+The rule checks each OpenAPI operation’s HTTP method. Every `PATCH`
+operation produces an diagnostic, pointing to that operation and displaying a
 message equivalent to `PATCH operation is used`. No summary, path name,
 request-body schema, response, or payload content is inspected. The rule does
 not determine whether the PATCH is a standards-compliant patch document or
@@ -79,7 +79,7 @@ chosen patch media type matches the server behavior.
 
 ## Compliant example
 
-This operation does not produce an UPDATE002 occurrence because its method is
+This operation does not produce an UPDATE002 diagnostic because its method is
 PUT, not PATCH:
 
 ```yaml
@@ -103,13 +103,13 @@ review may still be appropriate.
 
 ## Parameters, references, and limitations
 
-The bundled rule supplies only `method: PATCH`. The operation detector accepts
+The bundled rule supplies only `method: PATCH`. The operation rule accepts
 additional parameters such as `summary` and `request-body`, but those are not
 part of UPDATE002 and changing the rule metadata would change its contract.
 There is no `match` mode, severity setting, or configuration that makes this
 rule distinguish full replacement from partial modification.
 
-The detector operates on normalised operation facts and reports operations
+The rule operates on normalised operation facts and reports operations
 from the host’s parsed `paths` collection. Referenced request bodies,
 responses, and schemas do not affect matching. Missing or unresolved
 references can affect the surrounding OpenAPI model, but they cannot turn a

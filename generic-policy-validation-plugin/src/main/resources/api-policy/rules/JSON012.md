@@ -1,7 +1,7 @@
 ---
 id: JSON012
 category: JSON
-detector: schema
+matcher: schema
 scope: property
 parameters: { format: absent }
 ---
@@ -17,14 +17,14 @@ rule is a policy review aid.
 
 ## Detection and scope
 
-The rule has `property` scope and uses the `schema` detector:
+The rule has `property` scope and uses the `schema` rule:
 
 ```yaml
 parameters: { format: absent }
 ```
 
-The detector selects integer and number properties whose `format` is absent.
-The occurrence points to the property with the generic schema-rule message.
+The rule selects integer and number properties whose `format` is absent.
+The diagnostic points to the property with the generic schema-rule message.
 
 ## Review-candidate example
 
@@ -65,7 +65,7 @@ not prescribe which format is appropriate for a particular domain.
 
 ## Parameters, references, and limitations
 
-`format: absent` is the configured parameter. The detector does not infer a
+`format: absent` is the configured parameter. The rule does not infer a
 suitable format, validate numeric ranges, inspect runtime serialization, or
 distinguish integer and number formats beyond their primitive types. Referenced
 properties count only when resolved into the host’s normalised schema facts.

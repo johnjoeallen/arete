@@ -1,7 +1,7 @@
 ---
 id: JSON018
 category: JSON
-detector: schema
+matcher: schema
 scope: property
 parameters: { type: integer, format: absent }
 ---
@@ -11,7 +11,7 @@ parameters: { type: integer, format: absent }
 An `integer` property should declare `format: int32` or `format: int64` so
 that clients pick the right numeric type and range.
 
-## Violation
+## Diagnostic
 
 ```yaml
 quantity:
@@ -28,11 +28,11 @@ quantity:
 
 ## Detection and scope
 
-The rule has `property` scope and uses the `schema` detector with
+The rule has `property` scope and uses the `schema` rule with
 `type: integer` and `format: absent`. A component-schema property whose type
 is `integer` and that declares no `format` is reported.
 
 ## Configuration and limitations
 
-The detector checks for the presence of a `format`, not that the value is one
+The rule checks for the presence of a `format`, not that the value is one
 of `int32` / `int64`. Inline request and response schemas are not inspected.

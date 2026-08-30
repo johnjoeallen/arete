@@ -7,7 +7,7 @@ Helpers for keeping the docs site (`docs/`) in sync with the code.
 Regenerates `docs/validation/rules.md` and `docs/validation/policies.md` from
 the policy bundle
 (`generic-policy-validation-plugin/src/main/resources/api-policy/`). Run it
-after adding or changing a rule, policy, or detector.
+after adding or changing a rule, policy, or rule.
 
 ```bash
 pip install pyyaml
@@ -19,15 +19,15 @@ Both files carry a "do not edit by hand" marker — edit the bundle, then rerun.
 ## `gen-screenshots.py`
 
 Recaptures the app screenshots in `docs/assets/` by driving a running
-Speculate instance with Playwright, using `bookstore-demo.yaml` as the sample
+Areté instance with Playwright, using `bookstore-demo.yaml` as the sample
 spec.
 
 ```bash
 pip install playwright && playwright install chromium
 
 # Start a throwaway instance so it can't touch a real spec collection:
-HOME=$(mktemp -d) java -jar scripts/speculate.jar --server.port=6810 &
-SPECULATE_URL=http://localhost:6810 python3 scripts/docs/gen-screenshots.py
+HOME=$(mktemp -d) java -jar scripts/arete.jar --server.port=6810 &
+ARETE_URL=http://localhost:6810 python3 scripts/docs/gen-screenshots.py
 ```
 
 Captures `screenshot.png` (Explore), `screenshot-validation.png`,

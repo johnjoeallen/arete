@@ -1,7 +1,7 @@
 ---
 id: PAGE005
 category: Pagination
-detector: pagination
+matcher: pagination
 scope: response
 parameters: { name-pattern: ".*", check: link }
 ---

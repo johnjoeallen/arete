@@ -1,7 +1,7 @@
 ---
 id: STATUS004
 category: HTTP status
-detector: response-code
+matcher: response-code
 scope: operation
 parameters: { operation-type: identifiable-resource-retrieval, required-status: 404 }
 ---
@@ -16,7 +16,7 @@ missing resource from a successful representation or a server failure.
 
 ## Detection and scope
 
-The rule has `operation` scope and uses the `response-code` detector with:
+The rule has `operation` scope and uses the `response-code` rule with:
 
 ```yaml
 parameters: { operation-type: identifiable-resource-retrieval, required-status: 404 }
@@ -24,7 +24,7 @@ parameters: { operation-type: identifiable-resource-retrieval, required-status: 
 
 An operation is considered identifiable-resource retrieval when its method is
 GET and its path contains `{`. If none of its documented responses has status
-404, the detector reports the operation with `Operation lacks the required
+404, the rule reports the operation with `Operation lacks the required
 documented status`. The test is based on the path template and method, not on
 the operation summary or schema.
 
@@ -55,11 +55,11 @@ paths:
 ```
 
 Collection retrieval at `/customers` is not considered identifiable-resource
-retrieval by this detector.
+retrieval by this rule.
 
 ## Parameters, references, and limitations
 
-Both parameters are part of the rule contract. The detector compares status
+Both parameters are part of the rule contract. The rule compares status
 codes numerically, so equivalent documented integer response keys are
 recognised after normalisation. Referenced responses count only when resolved
 into the host’s response facts. The rule does not verify the response body,

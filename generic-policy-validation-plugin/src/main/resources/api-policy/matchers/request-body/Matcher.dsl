@@ -1,0 +1,16 @@
+distill(api, rule) {
+    return api.paths
+        .expand { path -> path.operationDetails
+            .filter { operation ->
+                (rule.parameters.check == "forbidden-on-methods"
+                    && operation.requestBodyPresent
+                    && tokenize(",", rule.parameters.methods).any { m -> m.trim() == operation.method })
+                || (rule.parameters.check == "required-flag-missing"
+                    && operation.requestBodyPresent
+                    && !operation.requestBodyRequired) }
+            .map { operation -> diagnostic(operation.pointer,
+                operation.method + " " + path.path,
+                rule.parameters.check == "forbidden-on-methods"
+                    ? operation.method + " operation declares a request body"
+                    : "Request body is present but not marked required: true") } };
+}

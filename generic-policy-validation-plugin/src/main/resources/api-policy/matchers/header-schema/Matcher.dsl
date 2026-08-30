@@ -1,0 +1,10 @@
+distill(api, rule) {
+    return api.paths
+        .expand { path -> path.operationDetails
+            .expand { operation -> operation.responses
+                .expand { response -> response.headerDetails
+                    .filter { header -> !header.schemaPresent }
+                    .map { header -> diagnostic(operation.pointer,
+                        operation.method + " " + path.path + " " + response.status,
+                        "Response header '" + header.name + "' defines neither a schema nor content") } } } };
+}

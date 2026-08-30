@@ -1,7 +1,7 @@
 ---
 id: JSON011
 category: JSON
-detector: date-time-name
+matcher: date-time-name
 scope: property
 parameters: { suffix: _at }
 ---
@@ -16,7 +16,7 @@ ordinary strings and improves generated documentation.
 
 ## Detection and scope
 
-The rule has `property` scope and uses the `date-time-name` detector:
+The rule has `property` scope and uses the `date-time-name` rule:
 
 ```yaml
 parameters: { suffix: _at }
@@ -61,7 +61,7 @@ rule, even if their names do not end in `_at`.
 ## Parameters, references, and limitations
 
 `suffix` is required and is fixed to `_at` by this rule; matching is
-case-sensitive. The detector does not infer temporal meaning from names,
+case-sensitive. The rule does not infer temporal meaning from names,
 examples, descriptions, JSON values, or runtime payloads, and it does not
 validate timestamp syntax or timezone handling. Referenced schemas count only
 when the host resolves their properties into its normalised collection.

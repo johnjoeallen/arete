@@ -1,7 +1,7 @@
 ---
 id: JSON010
 category: JSON
-detector: common-field
+matcher: common-field
 scope: property
 parameters: { convention: default }
 ---
@@ -16,13 +16,13 @@ strings, reducing client special cases and improving reuse.
 
 ## Detection and scope
 
-The rule has `property` scope and uses the `common-field` detector:
+The rule has `property` scope and uses the `common-field` rule:
 
 ```yaml
 parameters: { convention: default }
 ```
 
-The detector checks properties with the exact, case-sensitive names `id`,
+The rule checks properties with the exact, case-sensitive names `id`,
 `created`, and `modified`. It reports `id` unless its type is `string`; it
 reports `created` and `modified` unless both type `string` and format
 `date-time` are present. Findings point to the property and say `Common field
@@ -57,7 +57,7 @@ properties:
 
 `convention: default` selects the fixed convention; it does not configure
 different names or types. Names such as `ID`, `createdAt`, and `modified_at`
-are not checked by this detector. It does not inspect examples, serialization,
+are not checked by this rule. It does not inspect examples, serialization,
 runtime values, schema inheritance, or business-specific identifier formats.
 Referenced schemas count only when their properties are resolved into the
 normalised model. Findings are policy candidates, not universal type rules.

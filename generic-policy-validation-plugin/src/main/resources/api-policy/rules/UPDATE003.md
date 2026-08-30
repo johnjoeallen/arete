@@ -1,7 +1,7 @@
 ---
 id: UPDATE003
 category: Update semantics
-detector: manual
+matcher: manual
 scope: operation
 ---
 
@@ -14,21 +14,21 @@ as a sub-resource. Giving that concept its own resource identity can make its
 lifecycle, permissions, and representation easier to understand than exposing
 it only as a field of a larger resource. The best design depends on domain
 boundaries and client workflows, so this rule is a human design review prompt,
-not a mechanically provable violation.
+not a mechanically provable diagnostic.
 
 ## Detection and scope
 
-The rule has `operation` scope and uses the `manual` detector:
+The rule has `operation` scope and uses the `manual` rule:
 
 ```yaml
 id: UPDATE003
 category: Update semantics
-detector: manual
+matcher: manual
 scope: operation
 ```
 
-It has no parameters. The manual detector intentionally returns no automated
-occurrences for any OpenAPI document. Consequently, running validation does
+It has no parameters. The manual rule intentionally returns no automated
+diagnostics for any OpenAPI document. Consequently, running validation does
 not create an UPDATE003 finding at an operation pointer, even when an
 operation looks like an update of a nested concept. The rule remains in the
 policy catalogue as guidance for a reviewer who is assessing update design.
@@ -64,7 +64,7 @@ paths:
         '204': { description: Updated }
 ```
 
-This is not labelled as a detector violation. Reviewers should consider:
+This is not labelled as a rule diagnostic. Reviewers should consider:
 
 * Is `notification-settings` independently created, read, replaced, or
   deleted?
@@ -99,14 +99,14 @@ a design to compare during review, not a required rewrite.
 
 ## Configuration, references, and limitations
 
-Because this rule uses the manual detector, there are no rule parameters,
+Because this rule uses the manual rule, there are no rule parameters,
 matching modes, severity thresholds, or configuration switches that change
 its behavior. References, missing descriptions, HTTP methods, path depth, and
-request or response schemas do not cause the rule to report an occurrence.
+request or response schemas do not cause the rule to report an diagnostic.
 
 An OpenAPI document cannot reliably establish whether a concept is
 independently updateable, whether a PUT replaces the whole concept, or how
-clients and the server behave at runtime. The detector therefore does not
+clients and the server behave at runtime. The rule therefore does not
 infer semantics from verbs, path names, nesting, schemas, summaries, or JSON
 payloads. Use the operation documentation and domain knowledge to resolve the
 question; automated rules such as UPDATE001–002 address different update

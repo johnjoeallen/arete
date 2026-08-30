@@ -1,7 +1,7 @@
 ---
 id: JSON020
 category: JSON
-detector: example-validity
+matcher: example-validity
 scope: property
 parameters: { check: satisfies-constraints }
 ---
@@ -12,7 +12,7 @@ A property `example` should be a value the schema would accept. An example
 that fails the property's `pattern`, length, range, or `enum` is misleading
 and breaks example-driven tooling.
 
-## Violation
+## Diagnostic
 
 ```yaml
 age:
@@ -42,9 +42,9 @@ countryCode:
 
 ## Detection and scope
 
-The rule has `property` scope and uses the `example-validity` detector with
+The rule has `property` scope and uses the `example-validity` rule with
 `check: satisfies-constraints`. For each component-schema property that
-declares an `example`, the detector checks `pattern` (RE2, unanchored),
+declares an `example`, the rule checks `pattern` (RE2, unanchored),
 `minLength` / `maxLength`, `minimum` / `maximum` (honouring
 `exclusiveMinimum` / `exclusiveMaximum`), and `enum` membership.
 

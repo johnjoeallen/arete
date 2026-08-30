@@ -1,7 +1,7 @@
 ---
 id: JSON014
 category: JSON
-detector: schema
+matcher: schema
 scope: property
 parameters: { extensible: required }
 ---
@@ -17,14 +17,14 @@ for every finite domain, especially when unknown values would be unsafe.
 
 ## Detection and scope
 
-The rule has `property` scope and uses the `schema` detector:
+The rule has `property` scope and uses the `schema` rule:
 
 ```yaml
 parameters: { extensible: required }
 ```
 
-For each property that declares an enum, the detector reports it when the
-normalised property does not have `x-extensible-enum` enabled. The occurrence
+For each property that declares an enum, the rule reports it when the
+normalised property does not have `x-extensible-enum` enabled. The diagnostic
 points to the property and says `Property matches the configured schema rule`.
 Properties without an enum are not reported.
 
@@ -61,7 +61,7 @@ components:
 
 ## Parameters, references, and limitations
 
-`extensible: required` selects the check. The detector checks only the
+`extensible: required` selects the check. The rule checks only the
 presence/truth of the host’s normalised extensible-enum fact; it does not
 validate the extension’s value semantics, enum types, descriptions, or client
 behavior. It does not report properties without an enum. Referenced schemas

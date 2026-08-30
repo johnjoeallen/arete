@@ -1,7 +1,7 @@
 ---
 id: ERROR003
 category: Error responses
-detector: error-response
+matcher: error-response
 scope: operation
 parameters: { required-class: server-error }
 ---

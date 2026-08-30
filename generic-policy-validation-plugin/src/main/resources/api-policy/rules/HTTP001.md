@@ -1,7 +1,7 @@
 ---
 id: HTTP001
 category: HTTP
-detector: operation-semantics
+matcher: operation-semantics
 scope: operation
 parameters: { method: GET, expected: safe }
 ---
@@ -23,7 +23,7 @@ The rule has `operation` scope and uses `operation-semantics`:
 parameters: { method: GET, expected: safe }
 ```
 
-For GET operations, the detector combines the path and summary and looks for a
+For GET operations, the rule combines the path and summary and looks for a
 case-insensitive word-boundary mutation term: `create`, `update`, `delete`,
 `remove`, `activate`, `deactivate`, `cancel`, `change`, or `set`. Matching
 operations are reported at their operation pointer with `GET operation appears
@@ -54,7 +54,7 @@ paths:
 
 ## Parameters, references, and limitations
 
-`method: GET` and `expected: safe` select this heuristic. The detector does
+`method: GET` and `expected: safe` select this heuristic. The rule does
 not inspect request bodies, responses, schemas, descriptions, runtime calls,
 or actual state changes. It may miss mutation terms not in the fixed list or
 flag a read operation whose summary mentions one incidentally. Findings are

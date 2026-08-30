@@ -1,7 +1,7 @@
 ---
 id: REST004
 category: Resource design
-detector: resource-path
+matcher: resource-path
 scope: operation
 parameters: { match: custom-action }
 ---
@@ -18,13 +18,13 @@ candidate for design review rather than banning commands.
 
 ## Detection and scope
 
-The rule has `operation` scope and uses the `resource-path` detector:
+The rule has `operation` scope and uses the `resource-path` rule:
 
 ```yaml
 parameters: { match: custom-action }
 ```
 
-The detector matches paths, case-insensitively, against a pattern equivalent
+The rule matches paths, case-insensitively, against a pattern equivalent
 to `/actions` at the end of a path, optionally followed by one additional
 segment. Thus `/customers/actions` and `/customers/actions/archive` match.
 Every operation on a matching path is reported at its operation pointer with
@@ -47,7 +47,7 @@ change, such as a PATCH to the customer or a dedicated status resource.
 
 ## Compliant example
 
-This path does not contain the detector’s `/actions` form:
+This path does not contain the rule’s `/actions` form:
 
 ```yaml
 paths:
@@ -62,7 +62,7 @@ semantics; it only means this path pattern was not matched.
 
 ## Parameters, references, and limitations
 
-`match: custom-action` is the rule’s only configured behavior. The detector
+`match: custom-action` is the rule’s only configured behavior. The rule
 does not inspect methods, summaries, schemas, request bodies, or runtime
 behavior. It does not match arbitrary command-like segments unless they use
 the recognised `actions` path form. Referenced path items count only when the

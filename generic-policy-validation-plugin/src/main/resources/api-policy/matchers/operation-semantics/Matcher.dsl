@@ -1,0 +1,30 @@
+distill(api, rule) {
+    return api.paths
+        .expand { path -> path.operationDetails
+            .filter { operation ->
+                (rule.parameters.method == null || operation.method == rule.parameters.method)
+                && (
+                    (rule.parameters.expected == "safe"
+                        && operation.method == "GET"
+                        && path.path + " " + operation.summary ==~ /(?i).*\b(create|update|delete|remove|activate|deactivate|cancel|change|set)\b.*/)
+                    || (rule.parameters.match == "full-resource-replacement"
+                        && operation.method == "POST"
+                        && path.path ==~ /.+\/\{[^}]+\}.*/
+                        && path.path + " " + operation.summary ==~ /(?i).*\b(replace|replacement)\b.*/)
+                    || (rule.parameters.match == "partial-update"
+                        && operation.method == "PUT"
+                        && path.path + " " + operation.summary ==~ /(?i).*\b(partial|patch|update)\b.*/)
+                    || (rule.parameters.match == "inconsistent-method-resource-semantics"
+                        && (
+                            (operation.method == "GET"
+                                && path.path + " " + operation.summary ==~ /(?i).*\b(create|update|delete|remove|activate|deactivate|cancel|change|set)\b.*/)
+                            || (operation.method == "POST"
+                                && path.path ==~ /.+\/\{[^}]+\}.*/
+                                && path.path + " " + operation.summary ==~ /(?i).*\b(replace|replacement)\b.*/)))
+                )
+            }
+            .map { operation -> diagnostic(
+                operation.pointer,
+                operation.method + " " + path.path,
+                operationMessage(rule.parameters)) } };
+}

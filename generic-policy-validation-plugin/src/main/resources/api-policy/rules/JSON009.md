@@ -1,7 +1,7 @@
 ---
 id: JSON009
 category: JSON
-detector: schema
+matcher: schema
 scope: property
 parameters: { type: integer, enum: present }
 ---
@@ -18,15 +18,15 @@ candidate.
 
 ## Detection and scope
 
-The rule has `property` scope and uses the `schema` detector:
+The rule has `property` scope and uses the `schema` rule:
 
 ```yaml
 parameters: { type: integer, enum: present }
 ```
 
 It reports every schema property whose declared type is exactly `integer` and
-whose enum is present. The occurrence points to the property and uses the
-generic schema-rule message `Property uses an enum`. The detector does not
+whose enum is present. The diagnostic points to the property and uses the
+generic schema-rule message `Property uses an enum`. The rule does not
 inspect the individual values beyond the presence of the enum declaration.
 
 ## Review-candidate example

@@ -1,7 +1,7 @@
 ---
 id: ERROR011
 category: Error responses
-detector: response-example
+matcher: response-example
 scope: operation
 parameters: { check: unique-error-payloads }
 ---
@@ -12,7 +12,7 @@ When an operation's error responses (`4xx` / `5xx`) all show the same example
 body, the documentation gives a caller no way to tell the failure modes
 apart. Each error response should illustrate its own case.
 
-## Violation
+## Diagnostic
 
 ```yaml
 responses:
@@ -34,7 +34,7 @@ responses:
 
 ## Detection and scope
 
-The rule has `operation` scope and uses the `response-example` detector with
+The rule has `operation` scope and uses the `response-example` rule with
 `check: unique-error-payloads`. Within each operation, the example bodies of
 `4xx` / `5xx` responses are compared; a pair with identical examples is
 reported.

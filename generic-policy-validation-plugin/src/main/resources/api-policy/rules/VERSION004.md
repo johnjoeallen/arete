@@ -1,7 +1,7 @@
 ---
 id: VERSION004
 category: Versioning
-detector: versioning
+matcher: versioning
 scope: api
 parameters: { match: absent }
 ---
@@ -19,7 +19,7 @@ API is invalid.
 
 ## Detection
 
-The rule has API scope and uses the `versioning` detector with
+The rule has API scope and uses the `versioning` rule with
 `parameters: { match: absent }`. It reports one finding at `/paths` when no
 path in the API exposes a recognised version in any of these locations:
 
@@ -32,7 +32,7 @@ path in the API exposes a recognised version in any of these locations:
   `v`-number or `version`-number sequence (for example,
   `application/vnd.example.v2+json`).
 
-The detector stops after finding the first recognised location. Therefore an
+The rule stops after finding the first recognised location. Therefore an
 API with even one versioned path, header, or media type is considered
 versioned for this rule; the rule does not require every operation to use the
 same mechanism.
@@ -56,7 +56,7 @@ paths:
 
 It produces a VERSION004 finding at `/paths`. The `info.version` value is the
 version of this document, not one of the version locations inspected by this
-detector, so it does not prevent the finding.
+rule, so it does not prevent the finding.
 
 ## Compliant examples
 
@@ -104,7 +104,7 @@ match a present version.
 ## Parameters, references, and missing information
 
 VERSION004 accepts only `match: absent`; `location` is not used for this
-API-level check. The detector reads the host’s normalised path, operation
+API-level check. The rule reads the host’s normalised path, operation
 parameter, and media-type facts, so `$ref` values are handled only to the
 extent that the host resolves them into those facts. An unresolved reference,
 an omitted operation detail, or an incomplete specification can therefore

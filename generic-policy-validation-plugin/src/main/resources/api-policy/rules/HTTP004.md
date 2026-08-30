@@ -1,7 +1,7 @@
 ---
 id: HTTP004
 category: HTTP
-detector: operation
+matcher: operation
 scope: operation
 parameters: { method: DELETE, request-body: present }
 ---
@@ -17,14 +17,14 @@ reason to use one.
 
 ## Detection and scope
 
-The rule has `operation` scope and uses the `operation` detector:
+The rule has `operation` scope and uses the `operation` rule:
 
 ```yaml
 parameters: { method: DELETE, request-body: present }
 ```
 
 It reports every DELETE operation whose normalised request-body-present fact
-is true. The occurrence points to the operation and says `DELETE operation has
+is true. The diagnostic points to the operation and says `DELETE operation has
 a request body`. No body schema, media type, path, or summary is inspected.
 
 ## Review-candidate example
@@ -54,6 +54,6 @@ paths:
 ## Parameters, references, and limitations
 
 Both configured parameters must match. Referenced request bodies count only
-when resolved by the host. The detector does not inspect runtime behavior,
+when resolved by the host. The rule does not inspect runtime behavior,
 body contents, authorization, idempotency, or interoperability; the result is
 a policy review candidate.

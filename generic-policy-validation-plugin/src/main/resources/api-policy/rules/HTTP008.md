@@ -1,7 +1,7 @@
 ---
 id: HTTP008
 category: HTTP
-detector: operation-semantics
+matcher: operation-semantics
 scope: path
 parameters: { match: unsupported-operation-semantics-unclear }
 ---
@@ -17,20 +17,20 @@ methods.
 
 ## Detection and scope
 
-The rule has `path` scope and uses the `operation-semantics` detector:
+The rule has `path` scope and uses the `operation-semantics` rule:
 
 ```yaml
 parameters: { match: unsupported-operation-semantics-unclear }
 ```
 
-The detector’s `unsupported-operation-semantics-unclear` vocabulary is
-currently a no-op: it returns no occurrences for the standard OpenAPI
+The rule’s `unsupported-operation-semantics-unclear` vocabulary is
+currently a no-op: it returns no diagnostics for the standard OpenAPI
 operations represented by the host. Therefore HTTP008 produces no automated
 findings in the current implementation.
 
 ## Examples and review guidance
 
-Standard operations such as this are accepted without an HTTP008 occurrence:
+Standard operations such as this are accepted without an HTTP008 diagnostic:
 
 ```yaml
 paths:
@@ -45,8 +45,8 @@ stable model extension exists.
 ## Parameters, references, and limitations
 
 `match: unsupported-operation-semantics-unclear` selects the currently empty
-branch. The detector does not inspect descriptions, schemas, runtime behavior,
+branch. The rule does not inspect descriptions, schemas, runtime behavior,
 custom HTTP methods, or server routing, and it cannot infer unclear semantics
 from an otherwise valid operation. References and missing information do not
-create occurrences. This documentation records a policy capability reserved
-for a future detector extension, not an active automated check.
+create diagnostics. This documentation records a policy capability reserved
+for a future rule extension, not an active automated check.

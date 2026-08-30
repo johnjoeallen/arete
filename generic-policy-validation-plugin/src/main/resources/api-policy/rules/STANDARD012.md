@@ -1,7 +1,7 @@
 ---
 id: STANDARD012
 category: Standards
-detector: parameter
+matcher: parameter
 scope: parameter
 parameters: { check: path-required }
 ---
@@ -12,7 +12,7 @@ OpenAPI requires every path parameter to be `required: true`. A path parameter
 without the flag is an invalid contract that generators and validators handle
 inconsistently.
 
-## Violation
+## Diagnostic
 
 ```yaml
 /customers/{customerId}:
@@ -37,12 +37,12 @@ inconsistently.
 
 ## Detection and scope
 
-The rule has `parameter` scope and uses the `parameter` detector with
+The rule has `parameter` scope and uses the `parameter` rule with
 `check: path-required`. Every parameter whose `in` is `path` is checked; one
-occurrence is reported per parameter whose `required` value is not `true`.
+diagnostic is reported per parameter whose `required` value is not `true`.
 
 ## Configuration and limitations
 
-The detector reads the declared `required` value from the stable model. It
+The rule reads the declared `required` value from the stable model. It
 does not attempt to repair the contract or infer intent from the path
 template.

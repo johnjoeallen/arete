@@ -1,7 +1,7 @@
 ---
 id: CASE003
 category: Naming
-detector: naming
+matcher: naming
 scope: query-parameter
 parameters: { convention: snake_case, match: non-conforming }
 ---
@@ -15,7 +15,7 @@ clients can construct URLs consistently.
 
 ## Detection and scope
 
-The rule has `query-parameter` scope and uses the `naming` detector:
+The rule has `query-parameter` scope and uses the `naming` rule:
 
 ```yaml
 parameters: { convention: snake_case, match: non-conforming }

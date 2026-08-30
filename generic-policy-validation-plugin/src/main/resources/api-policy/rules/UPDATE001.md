@@ -1,7 +1,7 @@
 ---
 id: UPDATE001
 category: Update semantics
-detector: operation-semantics
+matcher: operation-semantics
 scope: operation
 parameters:
   method: PUT
@@ -20,7 +20,7 @@ cannot prove the server’s behavior from an OpenAPI contract.
 
 ## Detection and scope
 
-The rule has `operation` scope and uses the `operation-semantics` detector:
+The rule has `operation` scope and uses the `operation-semantics` rule:
 
 ```yaml
 parameters:
@@ -28,7 +28,7 @@ parameters:
   match: partial-update
 ```
 
-For each PUT operation, the detector concatenates the path template and
+For each PUT operation, the rule concatenates the path template and
 operation summary, then performs a case-insensitive word-boundary search for
 `partial`, `patch`, or `update`. A matching operation is reported at its
 operation pointer with the message `PUT appears to perform a partial update`.
@@ -74,7 +74,7 @@ whole resource.
 ## Parameters, references, and limitations
 
 The bundled parameters are fixed to `method: PUT` and `match: partial-update`.
-The detector supports other matching modes, but they are not part of
+The rule supports other matching modes, but they are not part of
 UPDATE001. It does not inspect `$ref` targets, request bodies, response codes,
 or runtime traffic. A partial-update description that uses different wording
 may be missed, while an update-related word used harmlessly may be flagged.

@@ -1,7 +1,7 @@
 ---
 id: ERROR002
 category: Error responses
-detector: error-response
+matcher: error-response
 scope: operation
 parameters: { required-class: client-error }
 ---

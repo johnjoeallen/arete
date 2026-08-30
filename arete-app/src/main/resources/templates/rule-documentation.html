@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${documentationTitle} + ' - Areté'">Rule documentation - Areté</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="alternate icon" href="/favicon.ico">
+    <script>
+        (function () {
+            var saved = localStorage.getItem('openapi-viewer:theme');
+            var theme = saved || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+    <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+<main class="main">
+    <div class="main-content">
+        <article class="markdown-body" th:utext="${renderedDocumentation}"></article>
+    </div>
+</main>
+</body>
+</html>

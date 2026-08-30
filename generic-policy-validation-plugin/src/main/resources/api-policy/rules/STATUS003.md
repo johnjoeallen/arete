@@ -1,7 +1,7 @@
 ---
 id: STATUS003
 category: HTTP status
-detector: response-code
+matcher: response-code
 scope: response
 parameters: { status: 403, expected-status: 401 }
 ---
@@ -19,17 +19,17 @@ the actual reason a response is returned.
 
 ## Detection and scope
 
-The rule has `response` scope and uses the `response-code` detector with:
+The rule has `response` scope and uses the `response-code` rule with:
 
 ```yaml
 parameters: { status: 403, expected-status: 401 }
 ```
 
-The current detector matches every response whose normalised status is 403
+The current rule matches every response whose normalised status is 403
 and reports it at the containing operation pointer with `Response uses the
 configured status code`. The `expected-status: 401` value documents the
 policy expectation but is not currently used by this response-matching
-branch; the detector does not determine whether the 403 is an authentication
+branch; the rule does not determine whether the 403 is an authentication
 failure.
 
 ## Review-candidate example
@@ -66,7 +66,7 @@ This does not prove that all authorization semantics are correct.
 ## Parameters, references, and limitations
 
 `status: 403` selects the response being inspected and `expected-status: 401`
-is the policy metadata for the intended alternative. The detector does not
+is the policy metadata for the intended alternative. The rule does not
 inspect response descriptions, `WWW-Authenticate`, security requirements,
 runtime authentication state, or response bodies. Referenced responses count
 only when the host resolves them into normalised facts. Because the current

@@ -4,13 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.speculate</groupId>
+    <groupId>net.dublinux.arete</groupId>
     <artifactId>generic-policy-validation-plugin</artifactId>
     <version>0.1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>generic-policy-validation-plugin</name>
-    <description>Generic API policy validation plugin for Speculate</description>
+    <description>Generic API policy validation plugin for Areté</description>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -30,18 +30,18 @@
         </dependency>
         <!-- The host supplies this shared interface through the parent classloader. -->
         <dependency>
-            <groupId>net.dublinux.speculate</groupId>
-            <artifactId>speculate-validation-spi</artifactId>
+            <groupId>net.dublinux.arete</groupId>
+            <artifactId>arete-validation-spi</artifactId>
             <version>0.1.0-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
-        <!-- Used only by the explicit legacy Groovy detector opt-in. -->
+        <!-- Used only by the explicit legacy Groovy rule opt-in. -->
         <dependency>
             <groupId>org.apache.groovy</groupId>
             <artifactId>groovy</artifactId>
             <version>${groovy.version}</version>
         </dependency>
-        <!-- POC (issue #125): safe-by-construction detector language.
+        <!-- POC (issue #125): safe-by-construction rule language.
              The eed3si9n build is a community repackage of Bazel's
              net.starlark.java used only to de-risk the approach; production
              would vendor a current upstream revision (see the issue). -->

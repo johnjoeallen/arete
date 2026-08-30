@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<span th:fragment="findingBadges(findings)" th:if="${findings != null and findings.counts().total() > 0}" class="finding-badges">
+    <span class="finding-badge finding-badge-error" th:if="${findings.counts().errorCount() > 0}"
+          th:text="'❌ ' + ${findings.counts().errorCount()}" th:title="${findings.counts().errorCount()} + ' error(s)'"></span>
+    <span class="finding-badge finding-badge-warning" th:if="${findings.counts().warningCount() > 0}"
+          th:text="'⚠️ ' + ${findings.counts().warningCount()}" th:title="${findings.counts().warningCount()} + ' warning(s)'"></span>
+    <span class="finding-badge finding-badge-info" th:if="${findings.counts().infoCount() > 0}"
+          th:text="'ℹ️ ' + ${findings.counts().infoCount()}" th:title="${findings.counts().infoCount()} + ' info finding(s)'"></span>
+    <span class="finding-badge finding-badge-hint" th:if="${findings.counts().hintCount() > 0}"
+          th:text="'💡 ' + ${findings.counts().hintCount()}" th:title="${findings.counts().hintCount()} + ' hint(s)'"></span>
+</span>
+<div th:fragment="findingsTable(findings, severityLabels)" th:if="${findings != null and !findings.diagnostics().isEmpty()}" class="section validation-findings-section">
+    <h3>Validation findings</h3>
+    <table class="endpoint-findings">
+        <thead>
+            <tr><th>Severity</th><th>Rule</th><th>Finding</th><th>Location</th><th>Source</th></tr>
+        </thead>
+        <tbody>
+            <tr th:each="av : ${findings.diagnostics()}" th:attr="data-severity=${av.diagnostic().getSeverity()}">
+                <td>
+                    <span class="severity-badge"
+                          th:classappend="'severity-' + ${#strings.toLowerCase(av.diagnostic().getSeverity())}"
+                          th:text="${severityLabels != null ? severityLabels.get(av.diagnostic().getSeverity().name()) : av.diagnostic().getSeverity()}"></span>
+                    <th:block th:if="${!T(java.lang.Double).isNaN(av.diagnostic().getScoreImprovement())}"
+                              th:with="scoreCostStr=${#numbers.formatDecimal(-av.diagnostic().getScoreImprovement(), 1, 1)}">
+                        <span th:if="${scoreCostStr != '0.0' and scoreCostStr != '-0.0'}"
+                              class="score-improvement-badge"
+                              th:classappend="${#strings.startsWith(scoreCostStr, '-')} ? 'score-improvement-negative' : 'score-improvement-positive'"
+                              th:text="${(#strings.startsWith(scoreCostStr, '-') ? '' : '+') + scoreCostStr + '%'}"
+                              th:title="'Score currently lost to this finding'"></span>
+                    </th:block>
+                </td>
+                <td><code th:text="${av.diagnostic().getRuleId()}"></code></td>
+                <td>
+                    <div th:text="${av.diagnostic().getTitle()}"></div>
+                    <div th:if="${av.diagnostic().getDescription() != null}" class="diagnostic-description" th:text="${av.diagnostic().getDescription()}"></div>
+                    <a th:if="${av.diagnostic().getDocumentationUrl() != null}"
+                       th:href="${av.diagnostic().getDocumentationUrl()}"
+                       target="_blank" rel="noopener noreferrer"
+                       class="diagnostic-doc-link">Learn more &#8599;</a>
+                </td>
+                <td th:text="${@jsonPointers.toDisplayPath(av.diagnostic().getPointer())}"></td>
+                <td><span class="diagnostic-source" th:text="${av.pluginName()}"></span></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

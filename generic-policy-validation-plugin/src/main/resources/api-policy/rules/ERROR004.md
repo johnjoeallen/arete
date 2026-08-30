@@ -1,7 +1,7 @@
 ---
 id: ERROR004
 category: Error responses
-detector: error-response
+matcher: error-response
 scope: response
 parameters: { require-description: true }
 ---

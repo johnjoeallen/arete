@@ -1,7 +1,7 @@
 ---
 id: CASE002
 category: Naming
-detector: naming
+matcher: naming
 scope: path-parameter
 parameters: { convention: snake_case, match: non-conforming }
 ---
@@ -15,7 +15,7 @@ template and its parameter declaration remain easy to connect.
 
 ## Detection and scope
 
-The rule has `path-parameter` scope and uses the `naming` detector:
+The rule has `path-parameter` scope and uses the `naming` rule:
 
 ```yaml
 parameters: { convention: snake_case, match: non-conforming }

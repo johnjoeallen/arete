@@ -1,7 +1,7 @@
 ---
 id: STANDARD014
 category: Standards
-detector: parameter
+matcher: parameter
 scope: parameter
 parameters: { check: schema-present }
 ---
@@ -12,7 +12,7 @@ Every parameter must define its type through either a `schema` or a `content`
 object. A parameter with neither is untyped and cannot be validated or used to
 generate a client.
 
-## Violation
+## Diagnostic
 
 ```yaml
 parameters:
@@ -31,13 +31,13 @@ parameters:
 
 ## Detection and scope
 
-The rule has `parameter` scope and uses the `parameter` detector with
+The rule has `parameter` scope and uses the `parameter` rule with
 `check: schema-present`. Path-level and operation-level parameters are checked;
-one occurrence is reported per parameter that declares neither `schema` nor
+one diagnostic is reported per parameter that declares neither `schema` nor
 `content`.
 
 ## Configuration and limitations
 
-The detector checks for the presence of a schema or content object, not its
+The rule checks for the presence of a schema or content object, not its
 correctness. A parameter whose schema is an unresolved `$ref` counts as
 present.

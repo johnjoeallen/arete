@@ -52,4 +52,4 @@ rules:
 # Zalando Extended Policy
 
 Contains only implemented Zalando-catalogue rules. It will gain the ten
-Zally-extension-only rules when those rule definitions and detectors exist.
+Zally-extension-only rules when those matcher definitions and rules exist.

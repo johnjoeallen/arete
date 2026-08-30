@@ -1,7 +1,7 @@
 ---
 id: STANDARD021
 category: Standards
-detector: document-lint
+matcher: document-lint
 scope: api
 parameters: { check: parser-message, pattern: "(?i)(#/\\S+ is missing|is not of type .?schema|could not resolve|unable to (load|resolve))" }
 ---
@@ -12,7 +12,7 @@ Every `$ref` must resolve to a definition that exists in the document (or a
 reachable external document). An unresolved reference produces an invalid
 contract that generators cannot process.
 
-## Violation
+## Diagnostic
 
 ```yaml
 paths:
@@ -35,7 +35,7 @@ components:
 
 ## Detection and scope
 
-The rule has `api` scope and uses the `document-lint` detector with
+The rule has `api` scope and uses the `document-lint` rule with
 `check: parser-message`. It reports each message the OpenAPI parser produced
 that matches `pattern` — the parser emits a diagnostic such as
 `attribute components.schemas.X.Y is not of type \`schema\`` for an

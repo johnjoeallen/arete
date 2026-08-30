@@ -1,7 +1,7 @@
 ---
 id: CASE001
 category: Naming
-detector: naming
+matcher: naming
 scope: property
 parameters: { convention: camelCase, match: non-conforming }
 ---
@@ -15,7 +15,7 @@ property naming reduces client mapping code and makes payloads easier to read.
 
 ## Detection and scope
 
-The rule has `property` scope and uses the `naming` detector:
+The rule has `property` scope and uses the `naming` rule:
 
 ```yaml
 parameters: { convention: camelCase, match: non-conforming }

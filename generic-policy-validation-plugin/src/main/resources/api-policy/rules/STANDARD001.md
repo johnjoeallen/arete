@@ -1,7 +1,7 @@
 ---
 id: STANDARD001
 category: Standards
-detector: hostname
+matcher: hostname
 scope: api
 parameters: { convention: lowercase-hyphenated }
 ---
@@ -17,16 +17,16 @@ underscores.
 
 ## Detection and scope
 
-The rule has `api` scope and uses the `hostname` detector:
+The rule has `api` scope and uses the `hostname` rule:
 
 ```yaml
 parameters: { convention: lowercase-hyphenated }
 ```
 
-For each declared OpenAPI server URL, the detector extracts its host. A host
+For each declared OpenAPI server URL, the rule extracts its host. A host
 is accepted when it matches the entire case-sensitive pattern
 `[a-z0-9]+(?:-[a-z0-9]+)*`, meaning lowercase letters/digits in labels joined
-by hyphens. Hosts that are absent or fail this pattern produce an occurrence at
+by hyphens. Hosts that are absent or fail this pattern produce an diagnostic at
 `/servers` with `Server hostname is not lowercase hyphenated`.
 
 ## Review-candidate example
@@ -54,7 +54,7 @@ matching.
 ## Parameters, references, and limitations
 
 `convention: lowercase-hyphenated` is the only configured convention. The
-detector checks only declared server URLs and does not inspect DNS, certificates,
+rule checks only declared server URLs and does not inspect DNS, certificates,
 runtime requests, documentation prose, or hosts supplied by a gateway. It
 does not validate that a hostname is resolvable or functionally meaningful,
 only its extracted host spelling. Invalid or unresolved server URLs may have

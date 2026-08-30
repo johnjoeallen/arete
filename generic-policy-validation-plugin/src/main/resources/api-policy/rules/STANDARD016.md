@@ -1,7 +1,7 @@
 ---
 id: STANDARD016
 category: Standards
-detector: path-set
+matcher: path-set
 scope: api
 parameters: { check: unique }
 ---
@@ -11,7 +11,7 @@ parameters: { check: unique }
 Two paths that differ only in the name of a template parameter resolve to the
 same route. OpenAPI tooling rejects or silently drops one of them.
 
-## Violation
+## Diagnostic
 
 ```yaml
 paths:
@@ -29,7 +29,7 @@ paths:
 
 ## Detection and scope
 
-The rule has `api` scope and uses the `path-set` detector with `check: unique`.
+The rule has `api` scope and uses the `path-set` rule with `check: unique`.
 Each path is normalised by replacing every `{...}` segment with `{}`; the
 second and later paths that share a normalised form are reported.
 

@@ -1,7 +1,7 @@
 ---
 id: HTTP009
 category: HTTP
-detector: request-body
+matcher: request-body
 scope: operation
 parameters: { check: forbidden-on-methods, methods: DELETE }
 ---
@@ -12,7 +12,7 @@ A `DELETE` should identify the resource to remove through the path. A request
 body on `DELETE` is poorly supported by intermediaries and client libraries
 and often indicates the operation should be modelled differently.
 
-## Violation
+## Diagnostic
 
 ```yaml
 /carts/{cartId}/items:
@@ -34,11 +34,11 @@ and often indicates the operation should be modelled differently.
 
 ## Detection and scope
 
-The rule has `operation` scope and uses the `request-body` detector with
+The rule has `operation` scope and uses the `request-body` rule with
 `check: forbidden-on-methods` and `methods: DELETE`. An operation whose method
 is in the list and that declares a request body is reported.
 
 ## Configuration and limitations
 
-`methods` is a policy parameter and may list other methods. The detector
+`methods` is a policy parameter and may list other methods. The rule
 checks for the presence of a request body, not its content.

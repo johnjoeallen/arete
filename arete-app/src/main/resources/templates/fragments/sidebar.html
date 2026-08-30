@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<aside th:fragment="sidebar(specs, q, activeId)" class="sidebar">
+    <h2><a href="/" class="brand"><img src="/favicon.svg" alt="" width="22" height="22" class="brand-logo">Areté</a></h2>
+    <form method="get" class="sidebar-search">
+        <input type="text" name="q" placeholder="Search specs..." th:value="${q}">
+        <button type="submit">Search</button>
+    </form>
+    <ul class="spec-list">
+        <li th:each="spec : ${specs}" class="spec-list-item">
+            <a th:href="@{/spec/{id}(id=${spec.id})}"
+               th:classappend="${activeId != null and activeId.equals(spec.id)} ? 'active'"
+               th:text="${spec.title}">Spec title</a>
+            <form method="post" th:action="@{/api/specs/{id}/delete(id=${spec.id})}" class="delete-form">
+                <button type="submit" class="delete-btn" title="Delete">&times;</button>
+            </form>
+        </li>
+        <li th:if="${specs == null or specs.isEmpty()}" class="spec-list-empty">No specs saved yet.</li>
+    </ul>
+    <div class="sidebar-footer">
+        <a href="/settings" class="sidebar-footer-link">⚙️ Settings</a>
+        <button type="button" id="theme-toggle" class="theme-toggle-btn">🌙 Dark mode</button>
+    </div>
+</aside>
+</body>
+</html>

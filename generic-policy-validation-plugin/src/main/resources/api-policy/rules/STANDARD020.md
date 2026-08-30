@@ -1,7 +1,7 @@
 ---
 id: STANDARD020
 category: Standards
-detector: schema-composition
+matcher: schema-composition
 scope: operation
 parameters: { check: inline-body }
 ---
@@ -12,7 +12,7 @@ Request and response bodies should reference a reusable component schema. An
 inline object schema cannot be reused, versioned, or referenced from a
 generated model.
 
-## Violation
+## Diagnostic
 
 ```yaml
 post:
@@ -37,7 +37,7 @@ post:
 
 ## Detection and scope
 
-The rule has `operation` scope and uses the `schema-composition` detector with
+The rule has `operation` scope and uses the `schema-composition` rule with
 `check: inline-body`. An operation whose request body, or any documented
 response, declares an inline object schema (properties present, no `$ref`) is
 reported.
@@ -45,4 +45,4 @@ reported.
 ## Configuration and limitations
 
 Only object schemas are reported; inline scalars and arrays are allowed. The
-detector inspects the media types exposed by the stable model.
+rule inspects the media types exposed by the stable model.

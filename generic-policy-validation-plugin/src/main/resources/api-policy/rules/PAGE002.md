@@ -1,7 +1,7 @@
 ---
 id: PAGE002
 category: Pagination
-detector: pagination
+matcher: pagination
 scope: query-parameter
 parameters: { name-pattern: "(^|[-_])(page|offset)([-_]|$)", check: integer }
 ---

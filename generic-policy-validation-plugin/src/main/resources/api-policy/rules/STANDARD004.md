@@ -1,7 +1,7 @@
 ---
 id: STANDARD004
 category: Standards
-detector: path-count
+matcher: path-count
 scope: api
 parameters: { maximum: 8 }
 ---
@@ -16,15 +16,15 @@ the limit is a convention and may not suit a deliberately broad platform API.
 
 ## Detection and scope
 
-The rule has `api` scope and uses the `path-count` detector:
+The rule has `api` scope and uses the `path-count` rule:
 
 ```yaml
 parameters: { maximum: 8 }
 ```
 
-The detector takes the first non-parameter segment of every declared path,
+The rule takes the first non-parameter segment of every declared path,
 deduplicates those segments, and compares the count with eight. If the count
-is greater than eight, it reports one API-level occurrence at `/paths`, with a
+is greater than eight, it reports one API-level diagnostic at `/paths`, with a
 message containing the count and configured maximum. Segments beginning with
 `{` are ignored.
 
@@ -49,10 +49,10 @@ paths:
 
 ## Parameters, references, and limitations
 
-`maximum: 8` is the threshold for this rule. The detector also supports
+`maximum: 8` is the threshold for this rule. The rule also supports
 maximum-depth and nested-root modes, but those are separate branches and are
 not configured here. It counts literal normalised path segments rather than
 schemas, tags, ownership metadata, or runtime routes. Referenced path items
 count only if resolved by the host. Version prefixes or technical paths may
-be counted as resources, and the detector cannot judge whether a broad API is
+be counted as resources, and the rule cannot judge whether a broad API is
 actually over-scoped; findings are review candidates.

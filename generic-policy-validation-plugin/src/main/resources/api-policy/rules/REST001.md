@@ -1,7 +1,7 @@
 ---
 id: REST001
 category: Resource design
-detector: resource-path
+matcher: resource-path
 scope: path
 parameters:
   match: operation-verb
@@ -17,14 +17,14 @@ more uniform URLs and allowing clients to apply familiar HTTP semantics.
 
 ## Detection and scope
 
-The rule has `path` scope and uses the `resource-path` detector with:
+The rule has `path` scope and uses the `resource-path` rule with:
 
 ```yaml
 parameters:
   match: operation-verb
 ```
 
-The detector looks only at the terminal path segment. After lowercasing it, it
+The rule looks only at the terminal path segment. After lowercasing it, it
 reports the path when the segment starts with one of `get`, `list`, `create`,
 `update`, `delete`, `remove`, `add`, or `set`. Matching is prefix-based, so
 names such as `getCustomers` also match. Every operation on a matching path is

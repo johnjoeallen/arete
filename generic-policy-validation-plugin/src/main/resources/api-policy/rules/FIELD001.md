@@ -1,7 +1,7 @@
 ---
 id: FIELD001
 category: Collection capabilities
-detector: collection-capability
+matcher: collection-capability
 scope: operation
 parameters: { name-pattern: "(^|[-_])(fields|select)([-_]|$)", check: present }
 ---

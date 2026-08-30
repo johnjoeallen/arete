@@ -1,7 +1,7 @@
 ---
 id: ERROR007
 category: Error responses
-detector: error-response
+matcher: error-response
 scope: response
 parameters: { status: 405, required-header: Allow }
 ---

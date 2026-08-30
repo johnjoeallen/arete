@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Areté</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="alternate icon" href="/favicon.ico">
+    <script>
+        (function () {
+            var saved = localStorage.getItem('openapi-viewer:theme');
+            var theme = saved || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+    <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+<div class="error-page">
+    <img src="/favicon.svg" alt="" width="48" height="48">
+    <h1 th:text="(${status} ?: '') + ' ' + (${error} ?: 'Error')">Error</h1>
+    <p th:if="${status == 404}">The spec you're looking for doesn't exist — it may have been deleted, or the link is wrong.</p>
+    <p th:unless="${status == 404}">Something went wrong handling that request.</p>
+    <p><a href="/">&larr; Back to Areté</a></p>
+</div>
+</body>
+</html>

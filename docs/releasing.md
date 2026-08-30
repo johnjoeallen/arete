@@ -10,7 +10,7 @@ produces:
 
 | Artifact | Path |
 |---|---|
-| App fat jar | `speculate-app/target/speculate-<version>.jar` |
+| App fat jar | `arete-app/target/arete-<version>.jar` |
 | Bundled plugin jar | `generic-policy-validation-plugin/target/generic-policy-validation-plugin-<version>.jar` |
 
 `build.sh` / `build.bat` run this and copy both into `scripts/` (the plugin jar
@@ -19,16 +19,16 @@ under `scripts/plugins/`) so the launcher scripts can run straight away.
 ## Tagged releases
 
 Pushing a tag matching `v*.*.*` runs
-[`.github/workflows/release.yml`](https://github.com/johnjoeallen/speculate/blob/main/.github/workflows/release.yml),
+[`.github/workflows/release.yml`](https://github.com/johnjoeallen/arete/blob/main/.github/workflows/release.yml),
 which sets the Maven version from the tag, builds, packages a zip
-(`speculate.jar`, both launcher scripts, and `plugins/` with the bundled
+(`arete.jar`, both launcher scripts, and `plugins/` with the bundled
 plugin), and publishes it as a GitHub release.
 
 ## Publishing the SPI to Maven Central
 
-Publishing `speculate-validation-spi` to Maven Central is **not** part of the
+Publishing `arete-validation-spi` to Maven Central is **not** part of the
 release workflow — it doesn't belong on every tag push. It runs from
-[`.github/workflows/publish-spi.yml`](https://github.com/johnjoeallen/speculate/blob/main/.github/workflows/publish-spi.yml),
+[`.github/workflows/publish-spi.yml`](https://github.com/johnjoeallen/arete/blob/main/.github/workflows/publish-spi.yml),
 triggered by hand from the Actions tab against a specific tag once that release
 is ready to be published externally.
 

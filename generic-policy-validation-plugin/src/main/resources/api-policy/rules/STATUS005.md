@@ -1,7 +1,7 @@
 ---
 id: STATUS005
 category: HTTP status
-detector: response-code
+matcher: response-code
 scope: response
 parameters: { match: semantic-conflict }
 ---
@@ -18,7 +18,7 @@ runtime contradictions.
 
 ## Detection and scope
 
-The rule has `response` scope and uses the `response-code` detector with:
+The rule has `response` scope and uses the `response-code` rule with:
 
 ```yaml
 parameters: { match: semantic-conflict }
@@ -26,8 +26,8 @@ parameters: { match: semantic-conflict }
 
 It examines documented 2xx responses and checks their descriptions for
 case-insensitive error wording: `error`, `failure`, `failed`, or `invalid`.
-Matching descriptions produce an occurrence at the operation pointer with the
-message `Status code conflicts with response semantics`. The detector does not
+Matching descriptions produce an diagnostic at the operation pointer with the
+message `Status code conflicts with response semantics`. The rule does not
 inspect response bodies or infer semantics from the HTTP method.
 
 ## Review-candidate example

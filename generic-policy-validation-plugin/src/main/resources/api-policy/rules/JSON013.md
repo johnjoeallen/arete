@@ -1,7 +1,7 @@
 ---
 id: JSON013
 category: JSON
-detector: schema
+matcher: schema
 scope: property
 parameters: { enum-type: consistent }
 ---
@@ -16,13 +16,13 @@ example, can cause validation failures or incompatible generated clients.
 
 ## Detection and scope
 
-The rule has `property` scope and uses the `schema` detector:
+The rule has `property` scope and uses the `schema` rule:
 
 ```yaml
 parameters: { enum-type: consistent }
 ```
 
-For each property with an enum, the detector compares values with the
+For each property with an enum, the rule compares values with the
 declared primitive type. String properties require string values; integer
 properties require integer values; number properties accept integer or floating
 point values. If any enum value is inconsistent, the property is reported at
@@ -61,7 +61,7 @@ components:
 
 ## Parameters, references, and limitations
 
-`enum-type: consistent` selects this check. The detector handles only string,
+`enum-type: consistent` selects this check. The rule handles only string,
 integer, and number primitive declarations; other or missing property types do
 not produce a type inconsistency from this branch. It does not validate enum
 uniqueness, bounds, nullable values, serialization quirks, runtime payloads,

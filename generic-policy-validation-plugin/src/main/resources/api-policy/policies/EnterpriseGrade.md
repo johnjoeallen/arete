@@ -116,10 +116,10 @@ rules:
 # Enterprise Grade Policy
 
 The default policy: it enables every generally-applicable bundled rule, with a
-few detector parameters calibrated for a typical enterprise API (allow-listed
+few rule parameters calibrated for a typical enterprise API (allow-listed
 proprietary headers, expected OAuth2 scopes, standard rate-limit headers).
 
-Each matched rule deducts half a point once, regardless of how many occurrences
+Each matched rule deducts half a point once, regardless of how many diagnostics
 it reports — a deliberately simple, uniform baseline. Organisations should
 publish their own policy with calibrated deductions and `PROHIBITED`
 dispositions rather than relying on this one unchanged.

@@ -1,7 +1,7 @@
 ---
 id: REST003
 category: Resource design
-detector: resource-path
+matcher: resource-path
 scope: operation
 parameters: { match: rpc-style }
 ---
@@ -18,13 +18,13 @@ candidate.
 
 ## Detection and scope
 
-The rule has `operation` scope and uses the `resource-path` detector:
+The rule has `operation` scope and uses the `resource-path` rule:
 
 ```yaml
 parameters: { match: rpc-style }
 ```
 
-The detector tokenizes the path by `/`. A path matches when it has more than
+The rule tokenizes the path by `/`. A path matches when it has more than
 one token and its terminal segment, compared case-insensitively, is exactly one
 of `get`, `list`, `create`, `update`, `delete`, `remove`, `add`, or `set`.
 Every operation on a matching path is reported at its operation pointer with
@@ -60,7 +60,7 @@ paths:
 
 `match: rpc-style` selects the fixed verb list. The rule does not inspect the
 HTTP method, summary, schemas, request/response data, or runtime behavior; a
-verb-looking path may still be an intentional resource name. The detector’s
+verb-looking path may still be an intentional resource name. The rule’s
 tokenization and exact terminal comparison mean verbs embedded in longer
 segments, such as `/getCustomers`, are not matched by REST003 (REST001 covers
 operation-verb prefixes). Unresolved path references may omit evidence.
