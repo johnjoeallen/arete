@@ -4,7 +4,7 @@ The **Areté Policy Engine** (`policy-based-validation-plugin`, plugin id
 `generic-policy`) is the built-in, policy-driven validation plugin. Instead of
 hard-coding checks in Java, it ships a **policy bundle**: a tree of Markdown +
 YAML files defining **matchers** (Distill programs that inspect the normalised
-API model and return occurrences), **rules** (named checks that select a
+API model and return occurrences), **rules** (named checks that specify a
 matcher, scope, and parameters), and **policies** (which rules are active and
 what disposition each match has, such as a point deduction or `PROHIBITED`).
 Matchers, rule descriptions, and policy definitions can be added or changed
