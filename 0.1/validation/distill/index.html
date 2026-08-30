@@ -1318,7 +1318,7 @@ appear in trailing position.</p>
 <td>number of matching items</td>
 </tr>
 <tr>
-<td><code>xs.groupBy { x -&gt; key }</code></td>
+<td><code>xs.group { x -&gt; key }</code></td>
 <td>a map of key → list of items with that key, in first-seen key order (keys compared by string value); iterate it with <code>.values</code></td>
 </tr>
 <tr>
@@ -1496,7 +1496,7 @@ linear-time, no backreferences, no catastrophic backtracking.</p>
 <td><code>["0=a", "1=b"]</code></td>
 </tr>
 <tr>
-<td><code>["ax", "ay", "bz"].groupBy { s -&gt; s.startsWith("a") }.values</code></td>
+<td><code>["ax", "ay", "bz"].group { s -&gt; s.startsWith("a") }.values</code></td>
 <td><code>[["ax", "ay"], ["bz"]]</code></td>
 </tr>
 </tbody>
@@ -1561,7 +1561,7 @@ the first entry can be skipped.</p>
 <a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">api</span><span class="p">.</span><span class="na">paths</span>
 <a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">        </span><span class="p">.</span><span class="na">expand</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">path</span><span class="p">.</span><span class="na">operationDetails</span><span class="p">.</span><span class="na">map</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">op</span><span class="w"> </span><span class="o">-&gt;</span>
 <a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">            </span><span class="o">[</span><span class="n">op</span><span class="p">.</span><span class="na">pointer</span><span class="p">,</span><span class="w"> </span><span class="n">op</span><span class="p">.</span><span class="na">method</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">" "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">path</span><span class="p">.</span><span class="na">path</span><span class="p">,</span><span class="w"> </span><span class="n">op</span><span class="p">.</span><span class="na">operationId</span><span class="o">]</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span>
-<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">        </span><span class="p">.</span><span class="na">groupBy</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">entry</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="s">""</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">entry</span><span class="o">[</span><span class="mi">2</span><span class="o">]</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">        </span><span class="p">.</span><span class="na">group</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">entry</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="s">""</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">entry</span><span class="o">[</span><span class="mi">2</span><span class="o">]</span><span class="w"> </span><span class="p">}</span>
 <a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="w">        </span><span class="p">.</span><span class="na">values</span>
 <a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="w">        </span><span class="p">.</span><span class="na">filter</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">group</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">size</span><span class="p">(</span><span class="n">group</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">}</span>
 <a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="w">        </span><span class="p">.</span><span class="na">expand</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">group</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">enumerate</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
@@ -1595,7 +1595,7 @@ nothing" branches, then let the surrounding <code>expand</code> flatten it:</p>
 <a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="w">        </span><span class="p">:</span><span class="w"> </span><span class="o">[]</span><span class="p">;</span>
 <a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="p">}</span>
 </code></pre></div>
-<p><strong>"Seen already?" — group, don't accumulate.</strong> <code>groupBy</code> replaces a mutable
+<p><strong>"Seen already?" — group, don't accumulate.</strong> <code>group</code> replaces a mutable
 <code>seen</code> map: group the entries by their key, keep the groups with more than one
 member, and report all but the first (see the duplicate-<code>operationId</code> example
 above). <code>enumerate</code> then supplies the positional "all but the first" filter,
@@ -1607,7 +1607,7 @@ above). <code>enumerate</code> then supplies the positional "all but the first" 
 <h2 id="coverage">Coverage<a class="headerlink" href="#coverage" title="Permanent link">&para;</a></h2>
 <p>All 45 bundled rules ship a <code>Matcher.dsl</code>. The two "uniqueness" rules —
 <code>operation-metadata</code> (duplicate <code>operationId</code>) and <code>response-example</code>
-(duplicate error payloads) — use <code>groupBy</code> as shown above. <code>path-count</code> uses
+(duplicate error payloads) — use <code>group</code> as shown above. <code>path-count</code> uses
 <code>pathSegments(...)</code> to stay within the grammar.</p>
 
 

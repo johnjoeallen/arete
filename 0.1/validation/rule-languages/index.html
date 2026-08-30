@@ -1064,7 +1064,7 @@ sweeps every bundle rule against both other runtimes so a <code>Matcher.groovy</
 never drift from its Starlark twin.</p>
 <p><strong>All 45 bundled rules ship a <code>Matcher.dsl</code>.</strong> The two "uniqueness"
 checks (<code>operation-metadata</code>'s duplicate-<code>operationId</code>, <code>response-example</code>'s
-duplicate-payload) use <code>.groupBy { … }</code> — group the entries by key, keep the
+duplicate-payload) use <code>.group { … }</code> — group the entries by key, keep the
 groups with more than one member, report all but the first — rather than
 mutating a <code>seen</code> map.</p>
 
