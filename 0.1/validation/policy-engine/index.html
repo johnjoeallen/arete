@@ -1245,7 +1245,7 @@
 
 
 <h1 id="arete-policy-engine">Areté Policy Engine<a class="headerlink" href="#arete-policy-engine" title="Permanent link">&para;</a></h1>
-<p>The <strong>Areté Policy Engine</strong> (<code>generic-policy-validation-plugin</code>, plugin id
+<p>The <strong>Areté Policy Engine</strong> (<code>policy-based-validation-plugin</code>, plugin id
 <code>generic-policy</code>) is the built-in, policy-driven validation plugin. Instead of
 hard-coding checks in Java, it ships a <strong>policy bundle</strong>: a tree of Markdown +
 YAML files describing <em>rules</em> (how to find facts in a spec), <em>rules</em> (a
@@ -1417,7 +1417,7 @@ it is off by default.</p>
 </div>
 <hr />
 <h2 id="the-policy-bundle">The policy bundle<a class="headerlink" href="#the-policy-bundle" title="Permanent link">&para;</a></h2>
-<p>Everything lives under <code>generic-policy-validation-plugin/src/main/resources/api-policy/</code>:</p>
+<p>Everything lives under <code>policy-based-validation-plugin/src/main/resources/api-policy/</code>:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>api-policy/
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>├── PolicyBundle.yaml            # manifest: id → file for every rule, policy, rule
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>├── rules/
@@ -1708,11 +1708,11 @@ validated against the rule descriptor at bundle load time; unknown or
 incorrectly typed overrides fail fast. The shorthand remains equivalent to a
 declaration with no overrides.</p>
 <h3 id="build-install">Build &amp; install<a class="headerlink" href="#build-install" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>mvn<span class="w"> </span>-q<span class="w"> </span>-pl<span class="w"> </span>generic-policy-validation-plugin<span class="w"> </span>-am<span class="w"> </span>package<span class="w"> </span>-DskipTests
-<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>cp<span class="w"> </span>generic-policy-validation-plugin/target/generic-policy-validation-plugin-*.jar<span class="w"> </span><span class="se">\</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>mvn<span class="w"> </span>-q<span class="w"> </span>-pl<span class="w"> </span>policy-based-validation-plugin<span class="w"> </span>-am<span class="w"> </span>package<span class="w"> </span>-DskipTests
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>cp<span class="w"> </span>policy-based-validation-plugin/target/policy-based-validation-plugin-*.jar<span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">   </span>~/.arete/plugins/
 </code></pre></div>
-<p><code>GenericPolicyValidationPluginTest</code> / <code>...LoadIT</code> load the real bundle and will
+<p><code>PolicyBasedValidationPluginTest</code> / <code>...LoadIT</code> load the real bundle and will
 fail the build on any manifest, front-matter, scope, parameter, or
 rule-compile error.</p>
 <hr />
