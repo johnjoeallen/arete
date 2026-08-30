@@ -29,25 +29,25 @@ jobs:
       - name: Package zip
         run: |
           VERSION=${GITHUB_REF_NAME#v}
-          mkdir -p dist/speculate/plugins
-          cp speculate-app/target/speculate-${VERSION}.jar dist/speculate/speculate.jar
-          cp scripts/speculate.sh dist/speculate/
-          cp scripts/speculate.bat dist/speculate/
-          cp policy-based-validation-plugin/target/policy-based-validation-plugin-${VERSION}.jar dist/speculate/plugins/policy-based-validation-plugin.jar
-          chmod +x dist/speculate/speculate.sh
-          ZIP="$(pwd)/speculate-${VERSION}.zip"
-          (cd dist && zip -r "$ZIP" speculate)
+          mkdir -p dist/arete/plugins
+          cp arete-app/target/arete-${VERSION}.jar dist/arete/arete.jar
+          cp scripts/arete.sh dist/arete/
+          cp scripts/arete.bat dist/arete/
+          cp policy-based-validation-plugin/target/policy-based-validation-plugin-${VERSION}.jar dist/arete/plugins/policy-based-validation-plugin.jar
+          chmod +x dist/arete/arete.sh
+          ZIP="$(pwd)/arete-${VERSION}.zip"
+          (cd dist && zip -r "$ZIP" arete)
 
       - name: Create GitHub release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release create "$GITHUB_REF_NAME" \
-            speculate-${GITHUB_REF_NAME#v}.zip \
+            arete-${GITHUB_REF_NAME#v}.zip \
             --title "$GITHUB_REF_NAME" \
             --generate-notes
 
-      # Publishing speculate-validation-spi to Maven Central is NOT part of
+      # Publishing arete-validation-spi to Maven Central is NOT part of
       # this workflow — it doesn't belong on every tag push. See
       # publish-spi.yml, triggered by hand from the Actions tab against a
       # specific tag once that release is ready to be published externally.

@@ -1,17 +1,17 @@
 name: Publish SPI to Maven Central
 
 # Deliberately workflow_dispatch-only, never on a tag push: publishing
-# speculate-validation-spi to Central is a one-off, reviewed action for a
+# arete-validation-spi to Central is a one-off, reviewed action for a
 # release that's meant to be depended on externally, not something every
 # tagged release should trigger automatically. Run from the Actions tab,
 # pointing at the tag to publish; the upload still lands as a pending
 # deployment at central.sonatype.com/publishing/deployments for manual
-# review (autoPublish is off — see speculate-validation-spi/pom.xml).
+# review (autoPublish is off — see arete-validation-spi/pom.xml).
 on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Release tag to publish speculate-validation-spi from (e.g. v0.99.11)'
+        description: 'Release tag to publish arete-validation-spi from (e.g. v0.99.11)'
         required: true
 
 jobs:
@@ -39,7 +39,7 @@ jobs:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
 
-      - name: Publish speculate-validation-spi to Maven Central
+      - name: Publish arete-validation-spi to Maven Central
         env:
           MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
           MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
@@ -57,5 +57,5 @@ jobs:
             echo '  </servers>'
             echo '</settings>'
           } > ~/.m2/settings.xml
-          mvn --no-transfer-progress -pl speculate-validation-spi -Prelease deploy
+          mvn --no-transfer-progress -pl arete-validation-spi -Prelease deploy
           echo "Uploaded to Central Portal — review and publish manually at https://central.sonatype.com/publishing/deployments"

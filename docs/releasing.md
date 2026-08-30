@@ -31,6 +31,8 @@ release workflow — it doesn't belong on every tag push. It runs from
 [`.github/workflows/publish-spi.yml`](https://github.com/johnjoeallen/arete/blob/main/.github/workflows/publish-spi.yml),
 triggered by hand from the Actions tab against a specific tag once that release
 is ready to be published externally.
+See [Publishing the SPI](publishing-spi.md) for the Central Portal setup and
+release procedure.
 
 ## Documentation
 
