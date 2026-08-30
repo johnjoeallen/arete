@@ -973,6 +973,11 @@ two or more elements has no iteration-order guarantee in Java, so rule sets
 would reshuffle on every restart. Keep the order stable across releases.</p>
 </div>
 <h2 id="where-plugins-come-from">Where plugins come from<a class="headerlink" href="#where-plugins-come-from" title="Permanent link">&para;</a></h2>
+<p>The core engine discovers each plugin from its shaded jar using Java's
+<code>ServiceLoader</code>. A plugin registers an implementation through
+<code>META-INF/services/net.dublinux.arete.validation.spi.SpecValidationPlugin</code> and
+is loaded in an isolated classloader. This is the common plugin lifecycle; the
+Policy Engine is not special in this respect.</p>
 <p>Plugin <code>.jar</code> files are discovered from two folders at startup:</p>
 <ul>
 <li><strong><code>plugins/</code>, next to <code>arete.jar</code></strong> — where the release zip ships the
@@ -989,7 +994,7 @@ a narrower, additional switch layered on top of the global setting.</p>
 <h2 id="next">Next<a class="headerlink" href="#next" title="Permanent link">&para;</a></h2>
 <ul>
 <li><a href="policy-engine/">Areté Policy Engine</a> — how the bundled plugin's
-  rules, rules, and policies work, and how to extend the bundle.</li>
+  matchers, rules, and policies work, and how to extend the bundle.</li>
 <li><a href="rules/">Rule Catalogue</a> — every rule in the bundle and which policies use it.</li>
 <li><a href="policies/">Policies</a> — the bundled Enterprise Grade, Zalando, and Zalando
   Extended rule sets.</li>
