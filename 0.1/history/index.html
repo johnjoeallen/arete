@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://johnjoeallen.github.io/arete/0.1/configuration/">
+        <link rel="canonical" href="https://johnjoeallen.github.io/arete/0.1/history/">
       
       
-        <link rel="prev" href="../getting-started/">
+        <link rel="prev" href="../configuration/">
       
       
-        <link rel="next" href="../history/">
+        <link rel="next" href="../validation/">
       
       
         
@@ -27,7 +27,7 @@
     
     
       
-        <title>Configuration - Areté</title>
+        <title>History - Areté</title>
       
     
     
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#configuration" class="md-skip">
+        <a href="#history" class="md-skip">
           Skip to content
         </a>
       
@@ -119,7 +119,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Configuration
+              History
             
           </span>
         </div>
@@ -317,6 +317,33 @@
       
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
     
   
   
@@ -336,7 +363,7 @@
   <span class="md-ellipsis">
     
   
-    Configuration
+    History
   
 
     
@@ -354,7 +381,7 @@
   <span class="md-ellipsis">
     
   
-    Configuration
+    History
   
 
     
@@ -380,10 +407,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#launcher-flags" class="md-nav__link">
+  <a href="#project-identity" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Launcher flags
+        Project identity
       
     </span>
   </a>
@@ -391,10 +418,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#data-locations" class="md-nav__link">
+  <a href="#validation-engine" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Data locations
+        Validation engine
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#user-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        User interface
       
     </span>
   </a>
@@ -405,33 +443,6 @@
   
 </nav>
       
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../history/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    History
-  
-
-    
-  </span>
-  
-  
-
-      </a>
     </li>
   
 
@@ -717,10 +728,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#launcher-flags" class="md-nav__link">
+  <a href="#project-identity" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Launcher flags
+        Project identity
       
     </span>
   </a>
@@ -728,10 +739,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#data-locations" class="md-nav__link">
+  <a href="#validation-engine" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Data locations
+        Validation engine
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#user-interface" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        User interface
       
     </span>
   </a>
@@ -755,7 +777,7 @@
 
 
   
-    <a href="https://github.com/johnjoeallen/arete/edit/main/docs/configuration.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/johnjoeallen/arete/edit/main/docs/history.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -763,65 +785,36 @@
   
 
 
-<h1 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h1>
-<h2 id="launcher-flags">Launcher flags<a class="headerlink" href="#launcher-flags" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Flag</th>
-<th>Effect</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>--port PORT</code> / <code>-p PORT</code></td>
-<td>Run on <code>PORT</code> instead of the default <code>6809</code>.</td>
-</tr>
-<tr>
-<td><code>--wipe-db</code> / <code>--reset-db</code></td>
-<td>Delete the local database before starting, so you get a completely empty spec list.</td>
-</tr>
-<tr>
-<td><code>-h</code> / <code>--help</code></td>
-<td>Show usage.</td>
-</tr>
-</tbody>
-</table>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>./scripts/arete.sh<span class="w"> </span>--port<span class="w"> </span><span class="m">8080</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>./scripts/arete.sh<span class="w"> </span>--wipe-db
-</code></pre></div>
-<p>The launcher scripts respect <code>JAVA_HOME</code> if it's set — checked before <code>java</code> is
-resolved from <code>PATH</code>, so a machine with several JDKs installed uses the one you
-point at rather than whichever <code>java</code> happens to be first on <code>PATH</code>.</p>
-<h2 id="data-locations">Data locations<a class="headerlink" href="#data-locations" title="Permanent link">&para;</a></h2>
-<p>Areté keeps everything under <code>~/.arete</code>, regardless of which directory
-you launch from:</p>
-<table>
-<thead>
-<tr>
-<th>Path</th>
-<th>Contents</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>~/.arete/data</code></td>
-<td>The embedded H2 database.</td>
-</tr>
-<tr>
-<td><code>~/.arete/specs</code></td>
-<td>Drop spec files here to have them loaded and watched automatically.</td>
-</tr>
-<tr>
-<td><code>~/.arete/plugins</code></td>
-<td>Drop extra validation plugin jars here — see <a href="../validation/writing-a-plugin/">Writing a Plugin</a>.</td>
-</tr>
-</tbody>
-</table>
-<p><code>~/.arete/plugins</code> is created automatically on startup if it doesn't exist.
-The <code>plugins/</code> folder next to <code>arete.jar</code> (shipped in the release zip) is
-<strong>not</strong> created automatically when missing — in a from-source dev run it would
-otherwise resolve under <code>target/classes</code>.</p>
+<h1 id="history">History<a class="headerlink" href="#history" title="Permanent link">&para;</a></h1>
+<p>This page records the significant product and implementation decisions that
+shaped Areté. The rest of the documentation describes the current product
+without repeating this background.</p>
+<h2 id="project-identity">Project identity<a class="headerlink" href="#project-identity" title="Permanent link">&para;</a></h2>
+<p>Areté began as a local-first API exploration tool under the name Speculate.
+The project was renamed to Areté and its repository, package namespace,
+launchers, documentation, and branding were aligned with that name.</p>
+<p>The current tagline is:</p>
+<blockquote>
+<p>Areté — the pursuit of API excellence.</p>
+</blockquote>
+<p>The visual identity is a white “A” monogram on a blue rounded-square badge,
+with raster exports for browser, Apple touch, and application icons.</p>
+<h2 id="validation-engine">Validation engine<a class="headerlink" href="#validation-engine" title="Permanent link">&para;</a></h2>
+<p>Validation began as a policy-driven plugin architecture. The bundled plugin
+was subsequently renamed from the generic policy-validation name to
+<code>policy-based-validation-plugin</code>, and its Java entry point was renamed to
+<code>PolicyBasedValidationPlugin</code>.</p>
+<p>The policy engine’s declarative matcher language is Distill. Its result model
+uses <code>occurrence(...)</code>, reflecting that Distill reports observed rule
+occurrences rather than a separate diagnostic abstraction. The collection
+operator is <code>group</code>.</p>
+<p>The former Starlark matcher runtime and its resources were removed. Groovy
+matcher scripts are retained as an implementation comparison for the Distill
+scripts, and the build includes parity tests to detect differences between
+the two implementations.</p>
+<h2 id="user-interface">User interface<a class="headerlink" href="#user-interface" title="Permanent link">&para;</a></h2>
+<p>The validation action is named <strong>Score</strong>. It is available from the validation
+view and is also used for the empty-state action that starts scoring.</p>
 
 
 
