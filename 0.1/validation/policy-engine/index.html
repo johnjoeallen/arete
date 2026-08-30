@@ -680,6 +680,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Policies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#user-policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        User policies
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1110,6 +1127,23 @@
       
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Policies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#user-policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        User policies
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1588,6 +1622,24 @@ costs.</p>
 <p>Bundled policies: <code>Enterprise Grade</code> (the default), <code>Zalando</code>, and
 <code>Zalando Extended</code> — see <a href="../policies/">Policies</a>. Every rule they can reference
 is in the <a href="../rules/">Rule Catalogue</a>.</p>
+<h3 id="user-policies">User policies<a class="headerlink" href="#user-policies" title="Permanent link">&para;</a></h3>
+<p>You can add policies without rebuilding the plugin. On startup the engine also
+reads every <code>*.md</code> file in <strong><code>~/.arete/policies/</code></strong> (filename order), parses each
+one exactly like a bundled policy — against the same rules and matchers — and
+merges them in. They then appear in the validation picker alongside the bundled
+policies.</p>
+<ul>
+<li>A user policy can only reference rules that already exist in the bundle; it
+  cannot add rules or matchers.</li>
+<li>If a user policy reuses a bundled <code>id</code> (e.g. <code>Enterprise Grade</code>), the user
+  file <strong>wins</strong> — handy for retuning a bundled policy's deductions locally.</li>
+<li>A malformed file fails the whole engine load, the same way a bad bundle does,
+  so the error is impossible to miss.</li>
+<li>The directory is overridable with the <code>policies-dir</code> plugin config key or the
+  <code>arete.policy.policies-dir</code> system property.</li>
+</ul>
+<p>Two ready-made examples, <code>Lenient</code> (every rule, 0.1 each) and <code>Pedantic</code> (every
+rule, 2.0 each, security rules <code>PROHIBITED</code>), make good starting points.</p>
 <hr />
 <h2 id="scoring">Scoring<a class="headerlink" href="#scoring" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>qualityScore   = max(0, 100 − Σ deductions for matched rules)
