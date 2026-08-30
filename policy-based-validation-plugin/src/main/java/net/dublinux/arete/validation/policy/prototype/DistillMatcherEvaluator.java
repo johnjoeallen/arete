@@ -399,17 +399,19 @@ public final class DistillMatcherEvaluator {
             "operationMessage");
 
     private static final Set<String> KNOWN_MEMBERS = Set.of(
-            "all", "allowed", "any", "array", "audience", "case", "check", "compositionKind", "contains",
-            "count", "description", "distinct", "endsWith", "enumPresent", "enumValues", "example",
+            "all", "allowed", "any", "array", "audience", "case", "check", "components", "compositionKind", "contains",
+            "contactEmail", "contactName", "contactUrl", "count", "description", "descriptions", "distinct", "endsWith",
+            "enumPresent", "enumValues", "example",
             "examplePresent", "exampleStrings", "exclusiveMaximum", "exclusiveMinimum", "expand", "expected",
             "explode", "extensibleEnum", "extensionKeys", "filter", "find", "forbidden", "format", "group",
-            "headerDetails", "headers", "in", "info", "inlineCompositionMembers", "keys", "length", "lint",
+            "headerDetails", "headers", "in", "info", "inlineCompositionMembers", "itemsPresent", "keys", "length", "licenseName",
+            "licenseUrl", "lint",
             "location", "lower", "map", "match", "maxItems", "maxLength", "maximum", "mediaTypes", "method",
             "methods", "minLength", "minimum", "name", "nullable", "numericStatusKeys", "openapiVersion",
             "operationDetails", "operationId", "operations", "parameters", "parserMessages", "path", "paths",
             "pattern", "pointer", "properties", "refs", "requestBodyInlineObject", "requestBodyPresent",
             "requestBodyRequired", "requestMediaTypes", "require", "required", "requiredFields", "responses",
             "schemaInlineObject", "schemaMaximum", "schemaPresent", "schemaType", "schemaTypes", "schemas",
-            "scope", "security", "segments", "servers", "startsWith", "status", "style", "suffix", "summary",
-            "tags", "templateParameters", "title", "toList", "trim", "type", "values");
+            "securitySchemes", "scope", "security", "segments", "servers", "startsWith", "status", "style", "suffix", "summary",
+            "tags", "templateParameters", "text", "title", "toList", "trim", "type", "values");
 }

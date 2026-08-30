@@ -174,6 +174,7 @@ final class OpenApiMapAdapter {
                 schemaMap.put("extensionKeys", schema == null ? List.of() : extensionKeys(schema.getExtensions()));
                 schemaMap.put("compositionKind", compositionKind(schema));
                 schemaMap.put("inlineCompositionMembers", schema == null ? 0 : inlineCompositionMembers(schema));
+                schemaMap.put("itemsPresent", schema != null && schema.getItems() != null);
                 List<Map<String, Object>> properties = new ArrayList<>();
                 if (schema != null && schema.getProperties() != null) {
                     for (Object propertyEntryObject : schema.getProperties().entrySet()) {
@@ -202,6 +203,7 @@ final class OpenApiMapAdapter {
                         propertyMap.put("enumPresent", property.getEnum() != null && !property.getEnum().isEmpty());
                         propertyMap.put("enumValues", property.getEnum() == null ? List.of() : property.getEnum());
                         propertyMap.put("extensibleEnum", property.getExtensions() != null && property.getExtensions().containsKey("x-extensible-enum"));
+                        propertyMap.put("itemsPresent", property.getItems() != null);
                         properties.add(propertyMap);
                     }
                 }
@@ -210,6 +212,7 @@ final class OpenApiMapAdapter {
             }
         }
         Map<String, Object> info = new LinkedHashMap<>();
+        info.put("pointer", "/info");
         if (openApi.getInfo() != null) {
             info.put("title", openApi.getInfo().getTitle());
             info.put("description", openApi.getInfo().getDescription());
@@ -217,6 +220,11 @@ final class OpenApiMapAdapter {
             if (openApi.getInfo().getContact() != null) {
                 info.put("contactName", openApi.getInfo().getContact().getName());
                 info.put("contactEmail", openApi.getInfo().getContact().getEmail());
+                info.put("contactUrl", openApi.getInfo().getContact().getUrl());
+            }
+            if (openApi.getInfo().getLicense() != null) {
+                info.put("licenseName", openApi.getInfo().getLicense().getName());
+                info.put("licenseUrl", openApi.getInfo().getLicense().getUrl());
             }
         }
         info.put("openapiVersion", openApi.getOpenapi());
@@ -239,14 +247,47 @@ final class OpenApiMapAdapter {
                 tags.add(tagMap);
             }
         }
+        List<String> securitySchemes = new ArrayList<>();
+        if (openApi.getComponents() != null && openApi.getComponents().getSecuritySchemes() != null) {
+            securitySchemes.addAll(openApi.getComponents().getSecuritySchemes().keySet());
+        }
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("paths", paths);
         result.put("schemas", schemas);
         result.put("info", info);
         result.put("servers", servers);
         result.put("tags", tags);
+        result.put("components", Map.of("securitySchemes", securitySchemes));
         result.put("security", openApi.getSecurity() == null ? null : securityRequirements(openApi.getSecurity()));
+        result.put("descriptions", collectDescriptions(result));
         return result;
+    }
+
+    /**
+     * Flattens every {@code description} / {@code summary} string in the model
+     * into {@code {pointer, text}} entries so a matcher can scan documentation
+     * prose without walking the whole tree itself.
+     */
+    private static List<Map<String, Object>> collectDescriptions(Map<String, Object> root) {
+        List<Map<String, Object>> out = new ArrayList<>();
+        walkText(root, "/", out);
+        return out;
+    }
+
+    private static void walkText(Object node, String fallbackPointer, List<Map<String, Object>> out) {
+        if (node instanceof Map<?, ?> map) {
+            String pointer = map.get("pointer") instanceof String own ? own : fallbackPointer;
+            for (String key : new String[] {"description", "summary"}) {
+                if (map.get(key) instanceof String text && !text.isBlank()) {
+                    out.add(Map.of("pointer", pointer, "text", text));
+                }
+            }
+            for (Map.Entry<?, ?> entry : map.entrySet()) {
+                if (!"pointer".equals(entry.getKey())) walkText(entry.getValue(), pointer, out);
+            }
+        } else if (node instanceof List<?> list) {
+            for (Object item : list) walkText(item, fallbackPointer, out);
+        }
     }
 
     private static void addParameters(List<Map<String, Object>> destination, List<Parameter> source, String pointer) {

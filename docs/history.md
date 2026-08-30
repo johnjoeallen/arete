@@ -43,6 +43,15 @@ shared path prefixes. The pack's HATEOAS/hypermedia items were left out as
 not statically checkable, and its "at most one body parameter" item does not
 apply once a spec is normalised to OpenAPI 3.
 
+A further pass drew from Spectral's OpenAPI ruleset, adding the non-overlapping
+validity and safety checks: arrays must declare `items`, `security`
+requirements must name a defined scheme, `description` prose must not carry
+active markup, path keys must not contain a query string, parameters must be
+unique, server URLs must be well-formed, tags must be unique, and the API
+must state a license. A candidate rule for wrong-typed property examples was
+dropped because the parser coerces or discards mismatched example values
+before a matcher can see them.
+
 ## User interface
 
 The validation action is named **Score**. It is available from the validation

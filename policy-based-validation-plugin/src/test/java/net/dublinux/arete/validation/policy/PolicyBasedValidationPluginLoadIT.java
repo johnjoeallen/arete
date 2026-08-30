@@ -44,8 +44,8 @@ class PolicyBasedValidationPluginLoadIT {
                 .build());
 
         assertEquals(ValidationResult.Status.SUCCESS, result.getStatus());
-        assertEquals(18, result.getDiagnostics().size());
-        assertEquals(93.0, result.getOverallScore());
+        assertEquals(19, result.getDiagnostics().size());
+        assertEquals(92.5, result.getOverallScore());
     }
 
     private static File findBuiltJar() {

@@ -7,8 +7,8 @@ by category. A rule is only evaluated when a [policy](policies.md) references
 it. See [the policy engine](policy-engine.md) for how matchers, rules, and
 policies fit together.
 
-There are **146 rules** across **20 categories**, built on
-**48 matchers**.
+There are **155 rules** across **20 categories**, built on
+**52 matchers**.
 
 !!! note "Reading the policy columns"
     A number is the point deduction applied once if the rule matches;
@@ -85,6 +85,8 @@ There are **146 rules** across **20 categories**, built on
 | `DOC016` | Schema example omits a required field | `example-validity` | 0.5 |  |  |
 | `DOC017` | Tag has no description | `tag` |  |  | 0.5 |
 | `DOC018` | Operation uses an undeclared tag | `tag` |  |  | 0.5 |
+| `DOC019` | Tag is declared more than once | `tag` | 0.5 |  | 0.5 |
+| `DOC020` | API does not declare a license | `metadata` | 0.5 |  | 0.5 |
 
 ## Error responses
 
@@ -153,6 +155,7 @@ There are **146 rules** across **20 categories**, built on
 | `JSON020` | Property example violates its own constraints | `example-validity` | 0.5 |  |  |
 | `JSON021` | Numeric property has no minimum and maximum | `schema` |  |  | 0.5 |
 | `JSON022` | String property has no maximum length | `schema` |  |  | 0.5 |
+| `JSON023` | Array schema declares no items | `array-items` | 0.5 |  | 0.5 |
 
 ## Naming
 
@@ -196,6 +199,8 @@ There are **146 rules** across **20 categories**, built on
 |---|---|---|---|---|---|
 | `SECURITY001` | Operation does not require the configured security scheme | `security` | 0.5 | 0.5 | 0.5 |
 | `SECURITY002` | Operation security requirement lacks the configured scopes | `security` | 0.5 | 0.5 | 0.5 |
+| `SECURITY003` | Security requirement names an undefined scheme | `security-scheme` | 0.5 |  | 0.5 |
+| `SECURITY004` | Description contains active markup | `markdown-safety` | 0.5 |  | 0.5 |
 
 ## Sensitive data
 
@@ -237,6 +242,10 @@ There are **146 rules** across **20 categories**, built on
 | `STANDARD022` | HTTP status keys are bare numbers | `document-lint` | 0.5 |  |  |
 | `STANDARD023` | Server URL is not on the approved pattern | `server-url` |  |  | 0.5 |
 | `STANDARD024` | Component schema is never referenced | `component-usage` |  |  | 0.5 |
+| `STANDARD025` | Path key contains a query string | `path-syntax` | 0.5 |  | 0.5 |
+| `STANDARD026` | Parameter is declared more than once | `parameter` | 0.5 |  | 0.5 |
+| `STANDARD027` | Server URL has a trailing slash | `server-url` | 0.5 |  | 0.5 |
+| `STANDARD028` | Server URL uses a placeholder host | `server-url` |  |  | 0.5 |
 
 ## Status codes
 
