@@ -1,9 +1,9 @@
 # Distill reference
 
-Distill is the default language for policy-bundle matchers (`Matcher.dsl`). A
-Distill script *distills* the API model down to the occurrences that violate a rule:
-it is a single expression that walks `api`, keeps what matches, and returns a
-list of `occurrence(...)` values.
+Distill is the language every policy-bundle matcher is written in (`Matcher.dsl`).
+A Distill script *distills* the API model down to the occurrences that violate a
+rule: it is a single expression that walks `api`, keeps what matches, and returns
+a list of `occurrence(...)` values.
 
 It is deliberately small — one expression, no statements, no local variables,
 no user-defined functions — and safe by construction: the interpreter exposes
