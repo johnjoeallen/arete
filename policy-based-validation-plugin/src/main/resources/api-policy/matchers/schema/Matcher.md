@@ -35,6 +35,14 @@ parameters:
     type: enum
     required: false
     values: [upper-snake-case]
+  bounds:
+    type: enum
+    required: false
+    values: [complete]
+  max-length:
+    type: enum
+    required: false
+    values: [absent]
   nullable:
     type: boolean
     required: false
@@ -64,3 +72,8 @@ Rules may combine supplied parameters; all conditions must match. A
 `semantics: undefined` value documents a policy concern but cannot establish
 business semantics from OpenAPI alone, so it never broadens the check beyond
 the objective nullable/optional conditions.
+
+- `bounds: complete` — reports an `integer` or `number` property that does not
+  declare both `minimum` and `maximum`.
+- `max-length: absent` — reports a `string` property that does not declare
+  `maxLength`.

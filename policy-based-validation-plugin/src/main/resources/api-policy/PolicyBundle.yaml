@@ -142,6 +142,13 @@ rules:
   DOC016: rules/DOC016.md
   ERROR011: rules/ERROR011.md
   STANDARD023: rules/STANDARD023.md
+  JSON021: rules/JSON021.md
+  JSON022: rules/JSON022.md
+  REST007: rules/REST007.md
+  CASE008: rules/CASE008.md
+  DOC017: rules/DOC017.md
+  DOC018: rules/DOC018.md
+  STANDARD024: rules/STANDARD024.md
 
 policies:
   "Enterprise Grade": policies/EnterpriseGrade.md
@@ -194,3 +201,6 @@ matchers:
   status-class: matchers/status-class/Matcher.md
   example-validity: matchers/example-validity/Matcher.md
   response-example: matchers/response-example/Matcher.md
+  path-prefix: matchers/path-prefix/Matcher.md
+  tag: matchers/tag/Matcher.md
+  component-usage: matchers/component-usage/Matcher.md

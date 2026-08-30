@@ -31,7 +31,8 @@ occurrences is a matcher error.
 
 - `api` is the deep-immutable API model. Its shape (`api.paths`,
   `path.operationDetails`, `api.schemas`,
-  `schema.properties`, `api.info`, `api.security`, …) is documented under
+  `schema.properties`, `api.info`, `api.security`, `api.tags`,
+  `api.lint.refs`, …) is documented under
   [The `api` model](policy-engine.md#the-api-model).
 - `rule` is `{ id, scope, parameters }`. Rule configuration is
   `rule.parameters` — e.g. `rule.parameters["max-items"]` or, for a key that
@@ -360,7 +361,7 @@ info.extensionKeys.filter { k -> ... }.map { k -> occurrence(...) }
 
 ## Coverage
 
-All 45 bundled matchers ship a `Matcher.dsl`, and all 139 bundled rules are
+All 48 bundled matchers ship a `Matcher.dsl`, and all 146 bundled rules are
 built on those matchers. The `operation-metadata` matcher handles duplicate
 `operationId` values and the `response-example` matcher handles duplicate error
 payloads; both use `group` as shown above. `path-count` uses `pathSegments(...)`

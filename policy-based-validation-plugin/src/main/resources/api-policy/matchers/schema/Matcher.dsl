@@ -18,6 +18,11 @@ distill(api, rule) {
                         type(v) == "string" && !(("" + v) ==~ /[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*/) })
             : ((rule.parameters["max-items"] == "absent") && prop.maxItems != null) ? false
             : ((rule.parameters["max-items"] == "present") && prop.maxItems == null) ? false
+            : ((rule.parameters["bounds"] == "complete")
+                    && (!(["integer", "number"].any { t -> t == prop.type })
+                        || (prop.minimum != null && prop.maximum != null))) ? false
+            : ((rule.parameters["max-length"] == "absent")
+                    && (prop.type != "string" || prop.maxLength != null)) ? false
             : ((rule.parameters["enum"] == "present") && !truthy(prop.enumPresent)) ? false
             : ((rule.parameters["enum"] == "absent") && truthy(prop.enumPresent)) ? false
             : (rule.parameters.keys.any { k -> k == "nullable" } && prop.nullable != rule.parameters["nullable"]) ? false
@@ -29,6 +34,8 @@ distill(api, rule) {
             : (rule.parameters.keys.any { k -> k == "nullable" } && rule.parameters["required"] == false)
                 ? "Optional property explicitly permits null"
             : rule.parameters["max-items"] == "absent" ? "Array property has no maximum item count"
+            : rule.parameters["bounds"] == "complete" ? "Numeric property does not declare both a minimum and a maximum"
+            : rule.parameters["max-length"] == "absent" ? "String property does not declare a maximum length"
             : rule.parameters["format"] == "absent" ? "Numeric property does not declare a format"
             : "Property matches the configured schema rule") } };
 }

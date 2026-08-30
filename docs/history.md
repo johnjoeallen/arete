@@ -34,6 +34,15 @@ matcher scripts are retained as an implementation comparison for the Distill
 scripts, and the build includes parity tests to detect differences between
 the two implementations.
 
+The `Zalando Extended` policy was a placeholder identical to `Zalando` while
+its extra checks were unimplemented. Those checks — drawn from Zalando's
+supplementary linter rule pack — were added as Areté rules under Areté's own
+identifiers, covering path-parameter hygiene, numeric and string schema
+bounds, tag naming and documentation, unreferenced component schemas, and
+shared path prefixes. The pack's HATEOAS/hypermedia items were left out as
+not statically checkable, and its "at most one body parameter" item does not
+apply once a spec is normalised to OpenAPI 3.
+
 ## User interface
 
 The validation action is named **Score**. It is available from the validation

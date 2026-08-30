@@ -192,9 +192,9 @@ Parameter overrides:
 
 ## Zalando Extended
 
-Contains only implemented Zalando-catalogue rules. It will gain the ten Zally-extension-only rules when those matcher definitions and rules exist.
+Everything in the `Zalando` policy, plus the checks that were previously only in Zalando's supplementary linter rule pack, reworked as Areté rules.
 
-- **40** rules active
+- **52** rules active
 
 Parameter overrides:
 
@@ -203,7 +203,7 @@ Parameter overrides:
 | `SECURITY002` | `scopes` = `read` |
 | `STANDARD008` | `allowed` = `X-Request-Id,X-Correlation-Id` |
 
-??? example "All 40 rules in Zalando Extended"
+??? example "All 52 rules in Zalando Extended"
 
     | Rule | Disposition | Title |
     |---|---|---|
@@ -247,3 +247,15 @@ Parameter overrides:
     | `SECURITY002` | −0.5 | Operation security requirement lacks the configured scopes |
     | `STATUS007` | −0.5 | Rate-limit response lacks required headers |
     | `STANDARD010` | −0.5 | OpenAPI version is unsupported or missing |
+    | `STANDARD012` | −0.5 | Path parameter is not marked required |
+    | `STANDARD013` | −0.5 | Path parameter does not match the path template |
+    | `STANDARD014` | −0.5 | Parameter has no schema or content |
+    | `STANDARD023` | −0.5 | Server URL is not on the approved pattern |
+    | `STANDARD024` | −0.5 | Component schema is never referenced |
+    | `CASE008` | −0.5 | Tag name does not follow the naming convention |
+    | `DOC011` | −0.5 | Operation is not tagged |
+    | `DOC017` | −0.5 | Tag has no description |
+    | `DOC018` | −0.5 | Operation uses an undeclared tag |
+    | `JSON021` | −0.5 | Numeric property has no minimum and maximum |
+    | `JSON022` | −0.5 | String property has no maximum length |
+    | `REST007` | −0.5 | All paths share a common prefix |
