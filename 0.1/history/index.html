@@ -847,6 +847,14 @@ bounds, tag naming and documentation, unreferenced component schemas, and
 shared path prefixes. The pack's HATEOAS/hypermedia items were left out as
 not statically checkable, and its "at most one body parameter" item does not
 apply once a spec is normalised to OpenAPI 3.</p>
+<p>A further pass drew from Spectral's OpenAPI ruleset, adding the non-overlapping
+validity and safety checks: arrays must declare <code>items</code>, <code>security</code>
+requirements must name a defined scheme, <code>description</code> prose must not carry
+active markup, path keys must not contain a query string, parameters must be
+unique, server URLs must be well-formed, tags must be unique, and the API
+must state a license. A candidate rule for wrong-typed property examples was
+dropped because the parser coerces or discards mismatched example values
+before a matcher can see them.</p>
 <h2 id="user-interface">User interface<a class="headerlink" href="#user-interface" title="Permanent link">&para;</a></h2>
 <p>The validation action is named <strong>Score</strong>. It is available from the validation
 view and is also used for the empty-state action that starts scoring.</p>

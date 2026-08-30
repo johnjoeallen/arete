@@ -1195,8 +1195,8 @@
 by category. A rule is only evaluated when a <a href="../policies/">policy</a> references
 it. See <a href="../policy-engine/">the policy engine</a> for how matchers, rules, and
 policies fit together.</p>
-<p>There are <strong>146 rules</strong> across <strong>20 categories</strong>, built on
-<strong>48 matchers</strong>.</p>
+<p>There are <strong>155 rules</strong> across <strong>20 categories</strong>, built on
+<strong>52 matchers</strong>.</p>
 <div class="admonition note">
 <p class="admonition-title">Reading the policy columns</p>
 <p>A number is the point deduction applied once if the rule matches;
@@ -1619,6 +1619,22 @@ a blank cell means that policy does not include the rule.</p>
 <td></td>
 <td>0.5</td>
 </tr>
+<tr>
+<td><code>DOC019</code></td>
+<td>Tag is declared more than once</td>
+<td><code>tag</code></td>
+<td>0.5</td>
+<td></td>
+<td>0.5</td>
+</tr>
+<tr>
+<td><code>DOC020</code></td>
+<td>API does not declare a license</td>
+<td><code>metadata</code></td>
+<td>0.5</td>
+<td></td>
+<td>0.5</td>
+</tr>
 </tbody>
 </table>
 <h2 id="error-responses">Error responses<a class="headerlink" href="#error-responses" title="Permanent link">&para;</a></h2>
@@ -2038,6 +2054,14 @@ a blank cell means that policy does not include the rule.</p>
 <td></td>
 <td>0.5</td>
 </tr>
+<tr>
+<td><code>JSON023</code></td>
+<td>Array schema declares no items</td>
+<td><code>array-items</code></td>
+<td>0.5</td>
+<td></td>
+<td>0.5</td>
+</tr>
 </tbody>
 </table>
 <h2 id="naming">Naming<a class="headerlink" href="#naming" title="Permanent link">&para;</a></h2>
@@ -2280,6 +2304,22 @@ a blank cell means that policy does not include the rule.</p>
 <td><code>security</code></td>
 <td>0.5</td>
 <td>0.5</td>
+<td>0.5</td>
+</tr>
+<tr>
+<td><code>SECURITY003</code></td>
+<td>Security requirement names an undefined scheme</td>
+<td><code>security-scheme</code></td>
+<td>0.5</td>
+<td></td>
+<td>0.5</td>
+</tr>
+<tr>
+<td><code>SECURITY004</code></td>
+<td>Description contains active markup</td>
+<td><code>markdown-safety</code></td>
+<td>0.5</td>
+<td></td>
 <td>0.5</td>
 </tr>
 </tbody>
@@ -2556,6 +2596,38 @@ a blank cell means that policy does not include the rule.</p>
 <td><code>STANDARD024</code></td>
 <td>Component schema is never referenced</td>
 <td><code>component-usage</code></td>
+<td></td>
+<td></td>
+<td>0.5</td>
+</tr>
+<tr>
+<td><code>STANDARD025</code></td>
+<td>Path key contains a query string</td>
+<td><code>path-syntax</code></td>
+<td>0.5</td>
+<td></td>
+<td>0.5</td>
+</tr>
+<tr>
+<td><code>STANDARD026</code></td>
+<td>Parameter is declared more than once</td>
+<td><code>parameter</code></td>
+<td>0.5</td>
+<td></td>
+<td>0.5</td>
+</tr>
+<tr>
+<td><code>STANDARD027</code></td>
+<td>Server URL has a trailing slash</td>
+<td><code>server-url</code></td>
+<td>0.5</td>
+<td></td>
+<td>0.5</td>
+</tr>
+<tr>
+<td><code>STANDARD028</code></td>
+<td>Server URL uses a placeholder host</td>
+<td><code>server-url</code></td>
 <td></td>
 <td></td>
 <td>0.5</td>

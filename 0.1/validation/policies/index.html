@@ -827,7 +827,7 @@ listed here is the default when an unknown rule set is requested.</p>
 <h2 id="enterprise-grade">Enterprise Grade<a class="headerlink" href="#enterprise-grade" title="Permanent link">&para;</a></h2>
 <p>The default policy: it enables every generally-applicable bundled rule, with a few rule parameters calibrated for a typical enterprise API (allow-listed proprietary headers, expected OAuth2 scopes, standard rate-limit headers).</p>
 <ul>
-<li><strong>101</strong> rules active</li>
+<li><strong>109</strong> rules active</li>
 </ul>
 <p>Parameter overrides:</p>
 <table>
@@ -853,7 +853,7 @@ listed here is the default when an unknown rule set is requested.</p>
 </tbody>
 </table>
 <details class="example">
-<summary>All 101 rules in Enterprise Grade</summary>
+<summary>All 109 rules in Enterprise Grade</summary>
 <table>
 <thead>
 <tr>
@@ -1368,6 +1368,46 @@ listed here is the default when an unknown rule set is requested.</p>
 <td>−0.5</td>
 <td>Error responses share an example payload</td>
 </tr>
+<tr>
+<td><code>JSON023</code></td>
+<td>−0.5</td>
+<td>Array schema declares no items</td>
+</tr>
+<tr>
+<td><code>SECURITY003</code></td>
+<td>−0.5</td>
+<td>Security requirement names an undefined scheme</td>
+</tr>
+<tr>
+<td><code>SECURITY004</code></td>
+<td>−0.5</td>
+<td>Description contains active markup</td>
+</tr>
+<tr>
+<td><code>STANDARD025</code></td>
+<td>−0.5</td>
+<td>Path key contains a query string</td>
+</tr>
+<tr>
+<td><code>STANDARD026</code></td>
+<td>−0.5</td>
+<td>Parameter is declared more than once</td>
+</tr>
+<tr>
+<td><code>STANDARD027</code></td>
+<td>−0.5</td>
+<td>Server URL has a trailing slash</td>
+</tr>
+<tr>
+<td><code>DOC019</code></td>
+<td>−0.5</td>
+<td>Tag is declared more than once</td>
+</tr>
+<tr>
+<td><code>DOC020</code></td>
+<td>−0.5</td>
+<td>API does not declare a license</td>
+</tr>
 </tbody>
 </table>
 </details>
@@ -1612,7 +1652,7 @@ listed here is the default when an unknown rule set is requested.</p>
 <h2 id="zalando-extended">Zalando Extended<a class="headerlink" href="#zalando-extended" title="Permanent link">&para;</a></h2>
 <p>Everything in the <code>Zalando</code> policy, plus the checks that were previously only in Zalando's supplementary linter rule pack, reworked as Areté rules.</p>
 <ul>
-<li><strong>52</strong> rules active</li>
+<li><strong>61</strong> rules active</li>
 </ul>
 <p>Parameter overrides:</p>
 <table>
@@ -1634,7 +1674,7 @@ listed here is the default when an unknown rule set is requested.</p>
 </tbody>
 </table>
 <details class="example">
-<summary>All 52 rules in Zalando Extended</summary>
+<summary>All 61 rules in Zalando Extended</summary>
 <table>
 <thead>
 <tr>
@@ -1900,9 +1940,54 @@ listed here is the default when an unknown rule set is requested.</p>
 <td>String property has no maximum length</td>
 </tr>
 <tr>
+<td><code>JSON023</code></td>
+<td>−0.5</td>
+<td>Array schema declares no items</td>
+</tr>
+<tr>
 <td><code>REST007</code></td>
 <td>−0.5</td>
 <td>All paths share a common prefix</td>
+</tr>
+<tr>
+<td><code>SECURITY003</code></td>
+<td>−0.5</td>
+<td>Security requirement names an undefined scheme</td>
+</tr>
+<tr>
+<td><code>SECURITY004</code></td>
+<td>−0.5</td>
+<td>Description contains active markup</td>
+</tr>
+<tr>
+<td><code>STANDARD025</code></td>
+<td>−0.5</td>
+<td>Path key contains a query string</td>
+</tr>
+<tr>
+<td><code>STANDARD026</code></td>
+<td>−0.5</td>
+<td>Parameter is declared more than once</td>
+</tr>
+<tr>
+<td><code>STANDARD027</code></td>
+<td>−0.5</td>
+<td>Server URL has a trailing slash</td>
+</tr>
+<tr>
+<td><code>STANDARD028</code></td>
+<td>−0.5</td>
+<td>Server URL uses a placeholder host</td>
+</tr>
+<tr>
+<td><code>DOC019</code></td>
+<td>−0.5</td>
+<td>Tag is declared more than once</td>
+</tr>
+<tr>
+<td><code>DOC020</code></td>
+<td>−0.5</td>
+<td>API does not declare a license</td>
 </tr>
 </tbody>
 </table>

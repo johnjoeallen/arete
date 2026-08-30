@@ -1141,7 +1141,7 @@ occurrences is a matcher error.</p>
 <li><code>api</code> is the deep-immutable API model. Its shape (<code>api.paths</code>,
   <code>path.operationDetails</code>, <code>api.schemas</code>,
   <code>schema.properties</code>, <code>api.info</code>, <code>api.security</code>, <code>api.tags</code>,
-  <code>api.lint.refs</code>, …) is documented under
+  <code>api.components</code>, <code>api.descriptions</code>, <code>api.lint.refs</code>, …) is documented under
   <a href="../policy-engine/#the-api-model">The <code>api</code> model</a>.</li>
 <li><code>rule</code> is <code>{ id, scope, parameters }</code>. Rule configuration is
   <code>rule.parameters</code> — e.g. <code>rule.parameters["max-items"]</code> or, for a key that
@@ -1632,7 +1632,7 @@ above). <code>enumerate</code> then supplies the positional "all but the first" 
 <a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="w">  </span><span class="o">+</span><span class="w"> </span><span class="n">api</span><span class="p">.</span><span class="na">paths</span><span class="p">.</span><span class="na">expand</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
 <h2 id="coverage">Coverage<a class="headerlink" href="#coverage" title="Permanent link">&para;</a></h2>
-<p>All 48 bundled matchers ship a <code>Matcher.dsl</code>, and all 146 bundled rules are
+<p>All 52 bundled matchers ship a <code>Matcher.dsl</code>, and all 155 bundled rules are
 built on those matchers. The <code>operation-metadata</code> matcher handles duplicate
 <code>operationId</code> values and the <code>response-example</code> matcher handles duplicate error
 payloads; both use <code>group</code> as shown above. <code>path-count</code> uses <code>pathSegments(...)</code>
