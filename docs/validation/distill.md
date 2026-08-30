@@ -11,9 +11,9 @@ only the immutable `api` and `rule` values, a fixed set of builtins, and
 [RE2/J](https://github.com/google/re2j) regular expressions. There is no I/O,
 reflection, recursion, or unbounded iteration.
 
-The build may include a corresponding `Matcher.groovy` source for parity
-testing, but it is not deployed as a supported runtime language. A deployed
-Areté always evaluates matchers with Distill.
+The build also runs a matching `Matcher.groovy` for some matchers as a parity
+check; Groovy is not part of the deployed runtime. A deployed Areté always
+evaluates matchers with Distill.
 
 ## The entry point
 
@@ -27,12 +27,12 @@ That is the whole grammar at the top level: the keyword `distill`, two parameter
 names (`api` and `rule` by convention), then `return` **one** expression
 terminated by `;`. The expression must evaluate to a list of occurrences
 (often built with `.map { … -> occurrence(...) }`); returning more than 1000
-occurrences is a rule error.
+occurrences is a matcher error.
 
 - `api` is the deep-immutable API model. Its shape (`api.paths`,
   `path.operationDetails`, `api.schemas`,
   `schema.properties`, `api.info`, `api.security`, …) is documented under
-  [Writing a rule](policy-engine.md#writing-a-rule).
+  [The `api` model](policy-engine.md#the-api-model).
 - `rule` is `{ id, scope, parameters }`. Rule configuration is
   `rule.parameters` — e.g. `rule.parameters["max-items"]` or, for a key that
   is a plain identifier, `rule.parameters.suffix`.
@@ -76,7 +76,7 @@ Highest precedence first:
 Notes:
 
 - `+` is the **only** arithmetic operator — there is no `-`, `*`, `/` or `%`
-  binary operator (`-a` is unary negation only). Rules compare and count;
+  binary operator (`-a` is unary negation only). Matchers compare and count;
   they do not do arithmetic.
 - `+` on two numbers is **integer** addition. To build a message string from a
   number write `"" + n`, which takes the string-concatenation branch.
@@ -212,7 +212,7 @@ Each row is a complete expression and the value it produces.
 | `enumerate(["a", "b"]).map { p -> p[0] + "=" + p[1] }` | `["0=a", "1=b"]` |
 | `["ax", "ay", "bz"].group { s -> s.startsWith("a") }.values` | `[["ax", "ay"], ["bz"]]` |
 
-### Rules
+### Matchers
 
 Each example is a full `Matcher.dsl` run against the spec beside it; the
 output is the list of occurrences (`pointer` &nbsp;\|&nbsp; `path` &nbsp;\|&nbsp; `message`).
@@ -287,7 +287,7 @@ info: { title: Payments, version: 1.0.0 }
 ```
 
 **Duplicate `operationId`** — group by id, then report every operation after
-the first in a group. This is the `operation-metadata` rule's real
+the first in a group. This is the `operation-metadata` matcher's real
 `unique-operation-id` shape (blank-id handling elided). `group` is a list of
 `[pointer, location, operationId]` entries; `enumerate` supplies the index so
 the first entry can be skipped.

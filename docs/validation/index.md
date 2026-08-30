@@ -7,7 +7,7 @@ Areté ships one bundled plugin, the
 [**Areté Policy Engine**](policy-engine.md) (`generic-policy`), and
 discovers any additional plugin jars you drop in. Multiple plugins can run
 together — for example a general API-guidelines linter alongside a specialised,
-organization-specific plugin such as a breaking-changes checker.
+organisation-specific plugin such as a breaking-changes checker.
 
 ![The validation picker and findings](../assets/screenshot-validation.png)
 
@@ -55,7 +55,7 @@ so a plugin can surface its own vocabulary (e.g. `Must` / `Should` / `May` /
 ## Rule sets
 
 A plugin can declare more than one named rule set — e.g. an
-`internal` / `external` split for an organization that lints differently by API
+`internal` / `external` split for an organisation that lints differently by API
 audience. Every enabled plugin gets its own row in the picker with its own
 rule-set dropdown; a plugin with only the implicit default set just has one
 entry.
