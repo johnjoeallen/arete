@@ -8,6 +8,8 @@ parameters: { allowed: "X-Request-Id,X-Correlation-Id" }
 
 # STANDARD008 — Proprietary header is not allow-listed
 
+## Intent
+
 Proprietary HTTP headers should be limited to the headers explicitly allowed
 by the API policy. The rule checks declared request header parameters and
 response headers, compares names case-insensitively, and ignores standard HTTP

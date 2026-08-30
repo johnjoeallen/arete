@@ -8,6 +8,8 @@ parameters: { check: forbidden-on-methods, methods: DELETE }
 
 # HTTP009 — DELETE operation declares a request body
 
+## Intent
+
 A `DELETE` should identify the resource to remove through the path. A request
 body on `DELETE` is poorly supported by intermediaries and client libraries
 and often indicates the operation should be modelled differently.

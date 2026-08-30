@@ -8,6 +8,8 @@ parameters: { check: numeric-status-key }
 
 # STANDARD022 — HTTP status keys are bare numbers
 
+## Intent
+
 Response status keys must be quoted strings. A bare `200:` is a YAML integer
 key; some tools coerce it, others reject the document.
 

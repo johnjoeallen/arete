@@ -8,6 +8,8 @@ parameters: { change: operation-removed }
 
 # COMPAT004 — Existing operation is removed
 
+## Intent
+
 Removing an existing operation can break consumers that use it. Requires a baseline specification.
 
 ## Detection and scope
@@ -35,6 +37,11 @@ paths:
 
 with the proposed contract. Removing the GET can break generated clients,
 bookmarks, and integrations; assess deprecation and migration before removal.
+
+## Unchanged comparison example
+
+With no baseline change supplied, the current document is not reported. A
+future comparison retaining the same operation should produce no finding.
 
 ## Configuration and limitations
 

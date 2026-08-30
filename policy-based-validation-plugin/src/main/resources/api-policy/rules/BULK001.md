@@ -11,6 +11,8 @@ parameters:
 
 # BULK001 — Bulk creation is not represented as POST of a collection
 
+## Intent
+
 Bulk creation should normally POST a collection of entities to an appropriate collection resource. The rule flags create-like operations that do not use the configured method and collection-shaped path.
 
 ## Detection and scope

@@ -8,6 +8,8 @@ parameters: { change: property-removed }
 
 # COMPAT002 — Existing field is removed
 
+## Intent
+
 Removing an existing field can break consumers that depend upon it. Requires a baseline specification.
 
 ## Detection and scope
@@ -34,6 +36,11 @@ properties:
 
 removing `email` from a proposed contract may break deserialisation, generated
 models, or client logic. Assess deprecation and a migration path first.
+
+## Unchanged comparison example
+
+With no baseline change supplied, the current document is not reported. A
+future comparison retaining the same property should produce no finding.
 
 ## Configuration and limitations
 

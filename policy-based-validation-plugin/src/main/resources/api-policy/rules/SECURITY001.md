@@ -8,6 +8,8 @@ parameters: { scheme: bearerAuth }
 
 # SECURITY001 — Operation does not require the configured security scheme
 
+## Intent
+
 Every operation should require the security scheme selected by the active
 policy. The rule checks effective OpenAPI security requirements: an
 operation-level `security` declaration overrides the document-level value,

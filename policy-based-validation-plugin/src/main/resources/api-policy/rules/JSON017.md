@@ -8,6 +8,8 @@ parameters: { check: no-duplicates }
 
 # JSON017 — Enum contains duplicate values
 
+## Intent
+
 An `enum` list should not repeat a value. A duplicate is almost always a
 copy-paste error and produces ambiguous generated code.
 

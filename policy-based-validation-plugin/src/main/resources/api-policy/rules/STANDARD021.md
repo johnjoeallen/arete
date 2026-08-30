@@ -8,6 +8,8 @@ parameters: { check: parser-message, pattern: "(?i)(#/\\S+ is missing|is not of 
 
 # STANDARD021 — Unresolved reference
 
+## Intent
+
 Every `$ref` must resolve to a definition that exists in the document (or a
 reachable external document). An unresolved reference produces an invalid
 contract that generators cannot process.

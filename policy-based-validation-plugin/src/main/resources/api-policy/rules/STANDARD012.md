@@ -8,6 +8,8 @@ parameters: { check: path-required }
 
 # STANDARD012 — Path parameter is not marked required
 
+## Intent
+
 OpenAPI requires every path parameter to be `required: true`. A path parameter
 without the flag is an invalid contract that generators and validators handle
 inconsistently.

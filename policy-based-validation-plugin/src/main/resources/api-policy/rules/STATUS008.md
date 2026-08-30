@@ -8,6 +8,8 @@ parameters: { forbidden: server-error }
 
 # STATUS008 — Server-error response is documented
 
+## Intent
+
 Some API programmes require `5xx` responses to be left out of the published
 contract: a server failure is not part of the interface a client codes
 against, and documenting it invites clients to treat it as a normal outcome.

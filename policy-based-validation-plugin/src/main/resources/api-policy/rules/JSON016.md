@@ -8,12 +8,14 @@ parameters: { response-shape: json-object }
 
 # JSON016 — Successful response is not a JSON object
 
+## Intent
+
 Successful JSON responses should use an object as their top-level
 representation. Objects provide a stable envelope that can gain fields later
 without changing the shape clients already consume. A bare scalar or array
 usually forces a breaking change when additional metadata is needed.
 
-## What this rule checks
+## Detection and scope
 
 For each documented `2xx` response, the rule examines the schemas attached
 to the response content. If a response schema is present and its top-level type

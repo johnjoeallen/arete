@@ -8,6 +8,8 @@ parameters: { check: max-count, maximum: 8 }
 
 # STANDARD011 — Operation declares too many parameters
 
+## Intent
+
 An operation with a large number of parameters is hard to call correctly and
 usually signals that filtering, projection, or a request body would model the
 input better. The active policy sets an upper bound; the default is

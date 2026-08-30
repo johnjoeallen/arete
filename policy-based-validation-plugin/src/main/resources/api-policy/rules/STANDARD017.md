@@ -8,6 +8,8 @@ parameters: {}
 
 # STANDARD017 — Response header has no schema
 
+## Intent
+
 A documented response header should declare its type through a `schema` (or a
 `content` object). An untyped header cannot be validated or represented in a
 generated client.

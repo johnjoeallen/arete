@@ -8,6 +8,8 @@ parameters: { check: required-flag-missing }
 
 # STANDARD015 — Request body is not marked required
 
+## Intent
+
 `POST`, `PUT`, and `PATCH` operations that declare a request body should set
 `required: true`. Without it, OpenAPI treats the body as optional and
 generated clients and server stubs may accept an empty payload.

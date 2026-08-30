@@ -8,6 +8,8 @@ parameters: { allowed: "x-api-id,x-audience,x-extensible-enum" }
 
 # STANDARD018 — Non-standard specification extension
 
+## Intent
+
 Vendor `x-` extensions couple the contract to a specific toolchain. A policy
 should allow-list the extensions it recognises and flag the rest.
 

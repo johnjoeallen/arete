@@ -8,6 +8,8 @@ parameters: { style: form, explode: true }
 
 # STANDARD009 — Collection query parameter uses the wrong serialization
 
+## Intent
+
 Collection-valued query parameters should use the serialization configured by
 the active policy. The default policy requires OpenAPI `form` style with
 `explode: true`, which serializes `tags: [red, blue]` as

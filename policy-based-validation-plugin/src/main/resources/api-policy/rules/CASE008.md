@@ -36,6 +36,16 @@ paths:
 
 `Order Management` is reported; `order-management` satisfies the convention.
 
+## Compliant example
+
+```yaml
+paths:
+  /orders:
+    get:
+      tags: [order-management]
+      responses: { '200': { description: OK } }
+```
+
 ## Parameters, references, and limitations
 
 `convention` accepts `camelCase`, `snake_case`, `kebab-case`, or `hyphenated`.

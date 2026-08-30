@@ -8,6 +8,8 @@ parameters: { check: satisfies-constraints }
 
 # JSON020 — Property example violates its own constraints
 
+## Intent
+
 A property `example` should be a value the schema would accept. An example
 that fails the property's `pattern`, length, range, or `enum` is misleading
 and breaks example-driven tooling.

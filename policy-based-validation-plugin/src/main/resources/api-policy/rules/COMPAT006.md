@@ -8,6 +8,8 @@ parameters: { change: http-binding-changed }
 
 # COMPAT006 — HTTP binding is changed
 
+## Intent
+
 Changing an operation's HTTP method, path or other binding can break existing consumers. Requires a baseline specification.
 
 ## Detection and scope
@@ -39,6 +41,11 @@ with a proposed contract that changes the method or path, for example
 `/customers/{id}` or POST. Determine whether existing clients can continue to
 call the old binding or whether a compatibility version and migration are
 needed.
+
+## Unchanged comparison example
+
+With no baseline change supplied, the current document is not reported. A
+future comparison retaining the same method and path should produce no finding.
 
 ## Configuration and limitations
 

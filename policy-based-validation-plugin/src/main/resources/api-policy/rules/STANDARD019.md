@@ -8,6 +8,8 @@ parameters: { check: inline-composition }
 
 # STANDARD019 — Inline composition member
 
+## Intent
+
 `allOf` / `anyOf` / `oneOf` members should reference reusable component
 schemas rather than declare a schema inline, so the composed parts stay
 named and reusable.

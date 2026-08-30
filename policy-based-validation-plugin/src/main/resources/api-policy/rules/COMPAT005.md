@@ -8,6 +8,8 @@ parameters: { change: enum-value-removed }
 
 # COMPAT005 — Existing enum value is removed
 
+## Intent
+
 Consumers may depend on existing enum values. Removing one is potentially incompatible. Requires a baseline specification.
 
 ## Detection and scope
@@ -38,6 +40,11 @@ properties:
 Removing `CANCELLED` from a proposed version can break clients that still send
 or expect it. Assess whether the value is truly retired, whether a deprecation
 period is required, and whether the change needs a new compatibility version.
+
+## Unchanged comparison example
+
+With no baseline change supplied, the current document is not reported. A
+future comparison retaining the same enum values should produce no finding.
 
 ## Configuration and limitations
 

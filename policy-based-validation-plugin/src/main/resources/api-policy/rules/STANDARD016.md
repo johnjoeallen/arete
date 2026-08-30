@@ -8,6 +8,8 @@ parameters: { check: unique }
 
 # STANDARD016 — Duplicate path structure
 
+## Intent
+
 Two paths that differ only in the name of a template parameter resolve to the
 same route. OpenAPI tooling rejects or silently drops one of them.
 

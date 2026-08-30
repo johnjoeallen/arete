@@ -8,6 +8,8 @@ parameters: { allowed: "3.0,3.1" }
 
 # STANDARD010 — OpenAPI version is unsupported or missing
 
+## Intent
+
 The API document should declare an OpenAPI version supported by the active
 policy. The default policy accepts OpenAPI 3.0 and 3.1 documents.
 

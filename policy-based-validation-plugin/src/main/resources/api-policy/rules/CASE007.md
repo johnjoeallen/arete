@@ -8,6 +8,8 @@ parameters: { pattern: "(?i).*(request|response)", case: pascal-case }
 
 # CASE007 — Request/response object is not PascalCase
 
+## Intent
+
 Where a programme keeps the `Request` / `Response` suffix on payload schemas,
 those names should be PascalCase (`CreateCustomerRequest`, `CustomerResponse`)
 so generated model classes are idiomatic.

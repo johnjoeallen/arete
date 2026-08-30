@@ -8,6 +8,8 @@ parameters: { check: unique-error-payloads }
 
 # ERROR011 — Error responses share an example payload
 
+## Intent
+
 When an operation's error responses (`4xx` / `5xx`) all show the same example
 body, the documentation gives a caller no way to tell the failure modes
 apart. Each error response should illustrate its own case.

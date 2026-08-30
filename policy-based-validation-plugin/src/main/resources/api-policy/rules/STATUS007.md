@@ -8,6 +8,8 @@ parameters: { status: 429, headers: "RateLimit-Limit,RateLimit-Remaining,RateLim
 
 # STATUS007 — Rate-limit response lacks required headers
 
+## Intent
+
 A `429 Too Many Requests` response should describe the applicable rate limit
 using the headers configured by the active policy. Header names are matched
 case-insensitively and every configured header is required.

@@ -8,6 +8,8 @@ parameters: { type: integer, format: absent }
 
 # JSON018 — Integer property does not declare a format
 
+## Intent
+
 An `integer` property should declare `format: int32` or `format: int64` so
 that clients pick the right numeric type and range.
 

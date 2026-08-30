@@ -8,6 +8,8 @@ parameters: { check: schema-present }
 
 # STANDARD014 — Parameter has no schema or content
 
+## Intent
+
 Every parameter must define its type through either a `schema` or a `content`
 object. A parameter with neither is untyped and cannot be validated or used to
 generate a client.

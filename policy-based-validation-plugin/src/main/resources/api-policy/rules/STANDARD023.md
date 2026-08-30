@@ -8,6 +8,8 @@ parameters: { check: url-pattern, pattern: "https://[a-z0-9-]+(\\.[a-z0-9-]+)+(:
 
 # STANDARD023 — Server URL is not on the approved pattern
 
+## Intent
+
 A published `servers` entry should match the organisation's approved URL
 shape. The default pattern only requires HTTPS and a dotted public host; an
 organisation overrides `pattern` with its real production / sandbox URL

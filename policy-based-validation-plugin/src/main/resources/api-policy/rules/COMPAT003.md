@@ -8,6 +8,8 @@ parameters: { change: property-renamed }
 
 # COMPAT003 — Existing field is renamed
 
+## Intent
+
 Renaming an existing field is normally equivalent to removing the old field and adding another. Requires a baseline specification.
 
 ## Detection and scope
@@ -34,6 +36,11 @@ properties:
 
 Changing it to `id` can break clients just as removing the old field would.
 Consider aliases, a deprecation period, or a compatibility version.
+
+## Unchanged comparison example
+
+With no baseline change supplied, the current document is not reported. A
+future comparison retaining the same property name should produce no finding.
 
 ## Configuration and limitations
 

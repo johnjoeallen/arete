@@ -8,11 +8,32 @@ parameters: { status: 403, forbidden-header: WWW-Authenticate }
 
 # ERROR010 — Authorization failure must not issue an authentication challenge
 
+## Intent
+
 A `403 Forbidden` response indicates that authentication succeeded but the
 client is not authorized. It should not include `WWW-Authenticate`, which is
 reserved for authentication challenges.
+
+## Review-candidate example
+
+```yaml
+headers:
+  WWW-Authenticate: { schema: { type: string } }
+```
+
+## Compliant example
 
 ```yaml
 headers:
   X-Reason: { schema: { type: string } }
 ```
+
+## Detection and scope
+
+The rule has `response` scope and reports a `403` response containing a
+case-insensitive `WWW-Authenticate` header.
+
+## Configuration and limitations
+
+`status: 403` and `forbidden-header: WWW-Authenticate` select this check. The
+rule does not classify the actual authentication or authorization behaviour.

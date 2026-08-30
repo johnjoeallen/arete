@@ -8,6 +8,8 @@ parameters: { check: template-match }
 
 # STANDARD013 — Path parameter does not match the path template
 
+## Intent
+
 Every `{placeholder}` in a path template must have a matching path parameter,
 and every declared path parameter must correspond to a placeholder. A mismatch
 means the operation cannot be routed as written.

@@ -8,6 +8,8 @@ parameters: { scheme: bearerAuth, scopes: read }
 
 # SECURITY002 — Operation security requirement lacks the configured scopes
 
+## Intent
+
 Protected operations should require the configured security scheme with the
 scopes required by the active policy. The rule checks effective OpenAPI
 security requirements, including document-level requirements inherited by an

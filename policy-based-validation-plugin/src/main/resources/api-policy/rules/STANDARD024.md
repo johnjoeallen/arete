@@ -40,6 +40,22 @@ components:
 
 `LegacyOrder` is reported.
 
+## Compliant example
+
+```yaml
+components:
+  schemas:
+    Order: { type: object }
+paths:
+  /orders:
+    get:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Order' }
+```
+
 ## Limitations
 
 The match is textual and exact: a schema referenced only by an unusual `$ref`

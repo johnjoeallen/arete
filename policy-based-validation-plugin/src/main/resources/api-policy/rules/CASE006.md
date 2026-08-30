@@ -8,6 +8,8 @@ parameters: { pattern: "(?i)(definition|response|request|schema|object|model|typ
 
 # CASE006 — Schema name is a placeholder
 
+## Intent
+
 Component schema names should describe a domain concept. Auto-generated names
 such as `Response1` or `InlineObject2` carry no meaning and make generated
 clients hard to read.

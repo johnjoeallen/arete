@@ -28,7 +28,7 @@ currently a no-op: it returns no diagnostics for the standard OpenAPI
 operations represented by the host. Therefore HTTP008 produces no automated
 findings in the current implementation.
 
-## Examples and review guidance
+## Compliant example
 
 Standard operations such as this are accepted without an HTTP008 diagnostic:
 
@@ -41,6 +41,12 @@ paths:
 This rule does not currently flag a non-standard method if a parser or host
 cannot represent it. Reviewers should assess such operations manually until a
 stable model extension exists.
+
+## Review guidance
+
+The example above is accepted because the current matcher has no active branch
+for standard OpenAPI operations. This rule is a documented policy capability,
+not an automated finding in the current implementation.
 
 ## Parameters, references, and limitations
 

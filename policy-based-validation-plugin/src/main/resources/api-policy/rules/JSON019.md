@@ -8,6 +8,8 @@ parameters: { type: number, format: absent }
 
 # JSON019 — Number property does not declare a format
 
+## Intent
+
 A `number` property should declare `format: float` or `format: double` so
 that clients pick the right numeric type and precision.
 

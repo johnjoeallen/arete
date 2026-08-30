@@ -8,6 +8,8 @@ parameters: { check: inline-body }
 
 # STANDARD020 — Request or response body uses an inline object schema
 
+## Intent
+
 Request and response bodies should reference a reusable component schema. An
 inline object schema cannot be reused, versioned, or referenced from a
 generated model.
