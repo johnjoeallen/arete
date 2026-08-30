@@ -1,6 +1,6 @@
 # Distill reference
 
-Policy-bundle matchers are written in Distill (`Matcher.dsl`). A Distill script
+Matchers are written in Distill (`Matcher.dsl`). A Distill script
 *distills* the API model down to the occurrences that violate a rule: it is a
 single expression that walks `api`, keeps what matches, and returns a list of
 `occurrence(...)` values.

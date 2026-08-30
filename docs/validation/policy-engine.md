@@ -41,13 +41,13 @@ For each `validate(spec)` call:
 
 ### Matcher languages
 
-Every bundled matcher is written in **Distill** (`Matcher.dsl`) and runs on
-Distill. The engine also carries a Groovy runtime, but Groovy is not used in
-normal operation — see below.
+Matchers are written in **Distill** (`Matcher.dsl`) and run on Distill. The
+engine also carries a Groovy runtime, but Groovy is not used in normal
+operation — see below.
 
 | Language | Source file | Role |
 |---|---|---|
-| `distill` | `Matcher.dsl` | The language every matcher is written in. Sandboxed; see the [Distill reference](distill.md). |
+| `distill` | `Matcher.dsl` | The language matchers are written in. Sandboxed; see the [Distill reference](distill.md). |
 | `groovy` | `Matcher.groovy` | A parallel implementation of some matchers, run only by the build's parity tests. |
 
 Where both sources exist, the validation tests keep them in lock-step.
