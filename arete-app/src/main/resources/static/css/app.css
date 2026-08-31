@@ -140,13 +140,15 @@ a:hover { color: var(--link-hover); }
     margin-bottom: 0.9em;
     display: flex;
     flex-direction: column;
-    gap: 0.4em;
+    gap: 0.45em;
     font-size: 0.85em;
 }
 .namespace-picker-row { display: flex; flex-direction: column; gap: 0.2em; color: var(--muted, var(--fg)); }
+.namespace-picker form { display: flex; gap: 0.3em; }
 .namespace-picker select,
-.namespace-picker input {
-    width: 100%;
+.namespace-picker input[type="text"] {
+    flex: 1 1 auto;
+    min-width: 0;
     padding: 0.35em 0.5em;
     background: var(--bg);
     color: var(--fg);
@@ -155,10 +157,22 @@ a:hover { color: var(--link-hover); }
     font-family: var(--font-body);
     font-size: 0.95em;
 }
+.namespace-picker button {
+    padding: 0.35em 0.6em;
+    background: var(--bg);
+    color: var(--fg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+.namespace-picker button:hover { border-color: var(--link); }
 .namespace-picker select:focus,
 .namespace-picker input:focus { outline: none; border-color: var(--link); }
+.namespace-picker input:invalid { border-color: #c0392b; }
 
 .spec-badge { margin-right: 0.8em; font-size: 0.85em; color: var(--muted, var(--fg)); }
+.namespace-hint { font-size: 0.9em; color: var(--muted, var(--fg)); }
 .spec-list { list-style: none; padding: 0; margin: 0; }
 .spec-list-item { display: flex; justify-content: space-between; align-items: center; padding: 0.4em 0.3em; border-radius: 4px; gap: 0.4em; }
 .spec-list-item:hover { background: var(--surface-alt); }

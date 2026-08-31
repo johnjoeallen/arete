@@ -8,22 +8,32 @@
         <button type="submit">Search</button>
     </form>
     <div class="namespace-picker" th:if="${currentNamespace != null}">
-        <label class="namespace-picker-row">
+        <div class="namespace-picker-row">
             <span>Namespace</span>
-            <select id="namespace-select" onchange="areteSetNamespace(this.value)">
-                <option th:each="ns : ${namespaces}" th:value="${ns}" th:text="${ns}"
-                        th:selected="${ns == currentNamespace}">ns</option>
-                <option th:if="${namespaces == null or !#lists.contains(namespaces, currentNamespace)}"
-                        th:value="${currentNamespace}" th:text="${currentNamespace}" selected>current</option>
-            </select>
-        </label>
-        <input type="text" id="namespace-new" class="namespace-new" placeholder="new namespace…"
-               onkeydown="if(event.key==='Enter'){event.preventDefault();areteSetNamespace(this.value);}">
-        <label class="namespace-picker-row">
+            <form method="post" action="/ui/namespace" class="namespace-select-form">
+                <select name="name" onchange="this.form.submit()" aria-label="Switch namespace">
+                    <option th:each="ns : ${namespaces}" th:value="${ns}" th:text="${ns}"
+                            th:selected="${ns == currentNamespace}">ns</option>
+                    <option th:if="${namespaces == null or !#lists.contains(namespaces, currentNamespace)}"
+                            th:value="${currentNamespace}" th:text="${currentNamespace}" selected>current</option>
+                </select>
+                <noscript><button type="submit">Go</button></noscript>
+            </form>
+        </div>
+        <form method="post" action="/ui/namespace" class="namespace-new-form">
+            <input type="text" name="name" placeholder="new namespace…" pattern="[a-z0-9][a-z0-9._-]{0,62}"
+                   title="lower-case letters, digits, . _ -">
+            <button type="submit" title="Create / switch to this namespace">+</button>
+        </form>
+        <div class="namespace-picker-row">
             <span>Submitting as</span>
-            <input type="text" id="submitter-input" th:value="${currentSubmitter}"
-                   onchange="areteSetSubmitter(this.value)">
-        </label>
+            <form method="post" action="/ui/submitter" class="namespace-submitter-form">
+                <input type="hidden" name="returnTo" th:value="${currentUri}">
+                <input type="text" name="name" th:value="${currentSubmitter}"
+                       pattern="[a-z0-9][a-z0-9._-]{0,62}" aria-label="Submitter label">
+                <button type="submit">set</button>
+            </form>
+        </div>
     </div>
     <ul class="spec-list">
         <li th:each="spec : ${specs}" class="spec-list-item">
@@ -42,6 +52,5 @@
         <button type="button" id="theme-toggle" class="theme-toggle-btn">🌙 Dark mode</button>
     </div>
 </aside>
-<script src="/js/namespace.js" defer></script>
 </body>
 </html>

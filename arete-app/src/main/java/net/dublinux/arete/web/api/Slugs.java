@@ -27,6 +27,26 @@ public final class Slugs {
         return slug != null && SLUG.matcher(slug).matches();
     }
 
+    /**
+     * Best-effort coercion to a valid slug for UI convenience — lower-case,
+     * runs of anything outside {@code [a-z0-9._-]} become a single {@code -},
+     * trimmed of leading/trailing {@code -} / {@code .}, capped at 63 chars.
+     * Returns null if nothing usable is left.
+     */
+    public static String slugify(String raw) {
+        if (raw == null) {
+            return null;
+        }
+        String s = raw.trim().toLowerCase()
+                .replaceAll("[^a-z0-9._-]+", "-")
+                .replaceAll("^[-.]+", "")
+                .replaceAll("[-.]+$", "");
+        if (s.length() > 63) {
+            s = s.substring(0, 63).replaceAll("[-.]+$", "");
+        }
+        return isValid(s) ? s : null;
+    }
+
     /** Normalise and validate, or throw {@link SlugException} (which the API maps to 422). */
     public static String require(String raw, String what) {
         String slug = normalise(raw);

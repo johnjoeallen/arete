@@ -98,6 +98,37 @@ public class SpecController {
         return "result";
     }
 
+    /** Switches the browser's active namespace (a plain label — not auth). Creates it implicitly: a new slug is real once a spec lands in it. */
+    @PostMapping("/ui/namespace")
+    public String setNamespace(@RequestParam String name,
+            jakarta.servlet.http.HttpServletResponse response) {
+        String slug = net.dublinux.arete.web.api.Slugs.slugify(name);
+        if (slug != null) {
+            addUiCookie(response, "arete_namespace", slug);
+        }
+        return "redirect:/";
+    }
+
+    /** Sets the browser's submitter label (a plain label — not auth). */
+    @PostMapping("/ui/submitter")
+    public String setSubmitter(@RequestParam String name,
+            @RequestParam(required = false) String returnTo,
+            jakarta.servlet.http.HttpServletResponse response) {
+        String slug = net.dublinux.arete.web.api.Slugs.slugify(name);
+        addUiCookie(response, "arete_submitter",
+                slug != null ? slug : net.dublinux.arete.service.SpecStorageService.UI_SUBMITTER);
+        return "redirect:" + (returnTo != null && returnTo.startsWith("/") && !returnTo.startsWith("//")
+                ? returnTo : "/");
+    }
+
+    private static void addUiCookie(jakarta.servlet.http.HttpServletResponse response, String name, String value) {
+        jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie(name, value);
+        cookie.setPath("/");
+        cookie.setMaxAge(60 * 60 * 24 * 365);
+        cookie.setAttribute("SameSite", "Lax");
+        response.addCookie(cookie);
+    }
+
     /**
      * Loads a spec directly from the local filesystem, given its full path.
      * The server reads the file itself rather than accepting an upload — a
@@ -364,6 +395,7 @@ public class SpecController {
         model.addAttribute("namespaces", specStorageService.namespaces());
         model.addAttribute("currentNamespace", ctx.namespace());
         model.addAttribute("currentSubmitter", ctx.submitter());
+        model.addAttribute("currentUri", ctx.currentUri());
         model.addAttribute("pluginChoices", pluginChoices(activeId, Map.of()));
     }
 
