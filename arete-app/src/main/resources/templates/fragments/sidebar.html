@@ -7,24 +7,17 @@
         <input type="text" name="q" placeholder="Search specs..." th:value="${q}">
         <button type="submit">Search</button>
     </form>
-    <div class="namespace-picker" th:if="${currentNamespace != null}">
+    <div class="namespace-picker" th:if="${currentNamespaceKey != null}">
         <div class="namespace-picker-row">
             <span>Namespace</span>
             <form method="post" action="/ui/namespace" class="namespace-select-form">
-                <select name="name" onchange="this.form.submit()" aria-label="Switch namespace">
-                    <option th:each="ns : ${namespaces}" th:value="${ns}" th:text="${ns}"
-                            th:selected="${ns == currentNamespace}">ns</option>
-                    <option th:if="${namespaces == null or !#lists.contains(namespaces, currentNamespace)}"
-                            th:value="${currentNamespace}" th:text="${currentNamespace}" selected>current</option>
+                <select name="key" onchange="this.form.submit()" aria-label="Switch namespace">
+                    <option th:each="ns : ${namespaces}" th:value="${ns.key}" th:text="${ns.name}"
+                            th:selected="${ns.key == currentNamespaceKey}">ns</option>
                 </select>
                 <noscript><button type="submit">Go</button></noscript>
             </form>
         </div>
-        <form method="post" action="/ui/namespace" class="namespace-new-form">
-            <input type="text" name="name" placeholder="new namespace…" pattern="[a-z0-9][a-z0-9._-]{0,62}"
-                   title="lower-case letters, digits, . _ -">
-            <button type="submit" title="Create / switch to this namespace">+</button>
-        </form>
         <div class="namespace-picker-row">
             <span>Submitting as</span>
             <form method="post" action="/ui/submitter" class="namespace-submitter-form">
@@ -34,6 +27,7 @@
                 <button type="submit">set</button>
             </form>
         </div>
+        <a href="/settings#namespaces" class="namespace-manage-link">Manage namespaces →</a>
     </div>
     <ul class="spec-list">
         <li th:each="spec : ${specs}" class="spec-list-item">

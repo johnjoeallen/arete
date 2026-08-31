@@ -65,12 +65,14 @@ public class SpecController {
     private final SpecPluginSettingsService specPluginSettingsService;
     private final SpecValidationResultService specValidationResultService;
     private final net.dublinux.arete.web.api.DeploymentMode deploymentMode;
+    private final net.dublinux.arete.service.NamespaceService namespaceService;
 
     public SpecController(SpecParserService specParserService, SpecStorageService specStorageService,
             PluginValidationService pluginValidationService, SpecFileWatcher specFileWatcher,
             PluginRegistry pluginRegistry, PluginSettingsService pluginSettingsService,
             SpecPluginSettingsService specPluginSettingsService, SpecValidationResultService specValidationResultService,
-            net.dublinux.arete.web.api.DeploymentMode deploymentMode) {
+            net.dublinux.arete.web.api.DeploymentMode deploymentMode,
+            net.dublinux.arete.service.NamespaceService namespaceService) {
         this.specParserService = specParserService;
         this.specStorageService = specStorageService;
         this.pluginValidationService = pluginValidationService;
@@ -80,6 +82,7 @@ public class SpecController {
         this.specPluginSettingsService = specPluginSettingsService;
         this.specValidationResultService = specValidationResultService;
         this.deploymentMode = deploymentMode;
+        this.namespaceService = namespaceService;
     }
 
     @GetMapping("/")
@@ -98,14 +101,13 @@ public class SpecController {
         return "result";
     }
 
-    /** Switches the browser's active namespace (a plain label — not auth). Creates it implicitly: a new slug is real once a spec lands in it. */
+    /** Switches the browser's active namespace by key (create/delete live in Settings). */
     @PostMapping("/ui/namespace")
-    public String setNamespace(@RequestParam String name,
+    public String setNamespace(@RequestParam String key,
             jakarta.servlet.http.HttpServletResponse response) {
-        String slug = net.dublinux.arete.web.api.Slugs.slugify(name);
-        if (slug != null) {
-            addUiCookie(response, "arete_namespace", slug);
-        }
+        String slug = net.dublinux.arete.web.api.Slugs.slugify(key);
+        addUiCookie(response, "arete_namespace",
+                slug != null ? slug : net.dublinux.arete.service.NamespaceService.DEFAULT_KEY);
         return "redirect:/";
     }
 
@@ -216,7 +218,9 @@ public class SpecController {
             jakarta.servlet.http.HttpServletRequest request, Model model) {
         SpecEntity entity = specStorageService.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Spec not found"));
-        model.addAttribute("specNamespace", entity.getNamespace());
+        model.addAttribute("specNamespace",
+                namespaceService.findByKey(entity.getNamespace())
+                        .map(net.dublinux.arete.domain.NamespaceEntity::getName).orElse(entity.getNamespace()));
         model.addAttribute("specSubmitter", entity.getSubmitter());
 
         ParsedSpec parsed = specParserService.parse(entity.getRawContent());
@@ -356,8 +360,9 @@ public class SpecController {
             if (parsed.openApi() != null) {
                 String title = parsed.title();
                 if (title != null) {
+                    String nsKey = namespaceService.resolveKey(ctx.namespace()).getNameKey();
                     SpecEntity saved = filePath == null
-                            ? specStorageService.saveOrReplace(ctx.namespace(), ctx.submitter(), title, content)
+                            ? specStorageService.saveOrReplace(nsKey, ctx.submitter(), title, content)
                             : specStorageService.saveOrReplaceFromFile(title, content, filePath);
                     model.addAttribute("parseErrors", parsed.messages());
                     model.addAttribute("specTitle", saved.getTitle());
@@ -384,16 +389,18 @@ public class SpecController {
 
     private void populateSidebar(Model model, String q, Long activeId) {
         populateSidebar(model, q, activeId, new NamespaceContext(
-                net.dublinux.arete.service.SpecStorageService.DEFAULT_NAMESPACE,
+                net.dublinux.arete.service.NamespaceService.DEFAULT_KEY,
                 net.dublinux.arete.service.SpecStorageService.UI_SUBMITTER));
     }
 
     private void populateSidebar(Model model, String q, Long activeId, NamespaceContext ctx) {
-        model.addAttribute("specs", toSummaries(specStorageService.findByNamespace(ctx.namespace()), q));
+        net.dublinux.arete.domain.NamespaceEntity current = namespaceService.resolveKey(ctx.namespace());
+        model.addAttribute("specs", toSummaries(specStorageService.findByNamespace(current.getNameKey()), q));
         model.addAttribute("q", q);
         model.addAttribute("specId", activeId);
-        model.addAttribute("namespaces", specStorageService.namespaces());
-        model.addAttribute("currentNamespace", ctx.namespace());
+        model.addAttribute("namespaces", namespaceService.list());
+        model.addAttribute("currentNamespace", current.getName());
+        model.addAttribute("currentNamespaceKey", current.getNameKey());
         model.addAttribute("currentSubmitter", ctx.submitter());
         model.addAttribute("currentUri", ctx.currentUri());
         model.addAttribute("pluginChoices", pluginChoices(activeId, Map.of()));

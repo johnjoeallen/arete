@@ -21,6 +21,35 @@
     <div class="main-content">
         <h1>Settings</h1>
 
+        <h3 id="namespaces">Namespaces</h3>
+        <p class="muted">
+            A namespace groups specs — for a team, a project, a pipeline. It is a plain label,
+            not a security boundary. The name keeps your casing; <code>Payments</code> and
+            <code>payments</code> are the same namespace.
+        </p>
+        <table class="plugin-settings">
+            <thead>
+                <tr><th>Name</th><th>Key</th><th>Specs</th><th></th></tr>
+            </thead>
+            <tbody>
+                <tr th:each="ns : ${namespaces}">
+                    <td th:text="${ns.name}">Name</td>
+                    <td><code th:text="${ns.key}">key</code></td>
+                    <td th:text="${ns.specCount}">0</td>
+                    <td>
+                        <form th:if="${ns.specCount == 0 and ns.key != 'default'}" method="post"
+                              th:action="@{/settings/namespaces/{key}/delete(key=${ns.key})}">
+                            <button type="submit" class="plugin-toggle-btn is-disabled">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <form method="post" action="/settings/namespaces" class="namespace-create-form">
+            <input type="text" name="name" placeholder="new namespace name…" maxlength="100" required>
+            <button type="submit">Create</button>
+        </form>
+
         <h3>Validator plugins</h3>
         <p th:if="${pluginRows.isEmpty()}" class="muted">
             No validation plugins are loaded. Drop a plugin jar into <code th:text="${installPluginsDir}"></code>

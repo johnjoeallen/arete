@@ -66,6 +66,18 @@ class SpecControllerLoadFileTest {
     @MockitoBean
     private SpecValidationResultService specValidationResultService;
 
+    @MockitoBean
+    private net.dublinux.arete.service.NamespaceService namespaceService;
+
+    @org.junit.jupiter.api.BeforeEach
+    void wireNamespaces() {
+        org.mockito.Mockito.lenient().when(namespaceService.resolveKey(org.mockito.ArgumentMatchers.any()))
+                .thenReturn(new net.dublinux.arete.domain.NamespaceEntity("default", "default"));
+        org.mockito.Mockito.lenient().when(namespaceService.findByKey(org.mockito.ArgumentMatchers.anyString()))
+                .thenReturn(java.util.Optional.of(new net.dublinux.arete.domain.NamespaceEntity("default", "default")));
+        org.mockito.Mockito.lenient().when(namespaceService.list()).thenReturn(java.util.List.of());
+    }
+
     @Test
     void loadingAFileFromAConfirmedAbsolutePathReadsItAndSavesItAsFileSourced(@TempDir Path tempDir) throws Exception {
         Path specFile = tempDir.resolve("spec.yaml");

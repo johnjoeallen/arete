@@ -55,9 +55,16 @@ class AutomationApiControllerTest {
     @MockitoBean SpecValidationResultService results;
     @MockitoBean RemoteSpecFetcher fetcher;
     @MockitoBean DeploymentMode deploymentMode;
+    @MockitoBean net.dublinux.arete.service.NamespaceService namespaceService;
 
     @BeforeEach
     void wire() {
+        lenient().when(namespaceService.resolveOrCreate(anyString())).thenAnswer(inv ->
+                new net.dublinux.arete.domain.NamespaceEntity(inv.getArgument(0), inv.getArgument(0)));
+        lenient().when(namespaceService.findByKey(anyString())).thenAnswer(inv ->
+                Optional.of(new net.dublinux.arete.domain.NamespaceEntity(inv.getArgument(0), inv.getArgument(0))));
+        lenient().when(namespaceService.list()).thenReturn(List.of(
+                new net.dublinux.arete.service.NamespaceService.Namespace("default", "default", 3)));
         OpenAPI openApi = new OpenAPI().info(new Info().title("Widget API").version("1.0.0"));
         lenient().when(parser.parse(anyString())).thenReturn(new ParsedSpec(openApi, List.of()));
 

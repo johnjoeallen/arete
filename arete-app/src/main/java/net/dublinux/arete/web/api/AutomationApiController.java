@@ -58,11 +58,13 @@ public class AutomationApiController {
     private final SpecValidationResultService results;
     private final RemoteSpecFetcher fetcher;
     private final DeploymentMode deploymentMode;
+    private final net.dublinux.arete.service.NamespaceService namespaces;
 
     public AutomationApiController(SpecParserService parser, SpecStorageService storage,
             PluginValidationService validation, PluginRegistry pluginRegistry,
             PluginSettingsService pluginSettings, SpecValidationResultService results,
-            RemoteSpecFetcher fetcher, DeploymentMode deploymentMode) {
+            RemoteSpecFetcher fetcher, DeploymentMode deploymentMode,
+            net.dublinux.arete.service.NamespaceService namespaces) {
         this.parser = parser;
         this.storage = storage;
         this.validation = validation;
@@ -71,6 +73,7 @@ public class AutomationApiController {
         this.results = results;
         this.fetcher = fetcher;
         this.deploymentMode = deploymentMode;
+        this.namespaces = namespaces;
     }
 
     // --- DTOs -----------------------------------------------------------
@@ -93,21 +96,21 @@ public class AutomationApiController {
 
     public record SubmitResponse(SpecResource spec, boolean ok, String verdict, List<CombinationResult> results) { }
 
-    public record NamespaceSummary(String slug, long specCount) { }
+    public record NamespaceSummary(String slug, String name, long specCount) { }
 
     // --- endpoints -----------------------------------------------------
 
     @GetMapping("/namespaces")
     public List<NamespaceSummary> namespaces() {
-        return storage.namespaces().stream()
-                .map(ns -> new NamespaceSummary(ns, storage.countInNamespace(ns)))
+        return namespaces.list().stream()
+                .map(n -> new NamespaceSummary(n.key(), n.name(), n.specCount()))
                 .toList();
     }
 
     @GetMapping("/namespaces/{namespace}/specs")
     public List<SpecResource> listSpecs(@PathVariable String namespace,
             @RequestParam(required = false) String submitter) {
-        String ns = Slugs.require(namespace, "namespace");
+        String ns = namespaceKey(namespace);
         List<SpecEntity> specs = submitter == null
                 ? storage.findByNamespace(ns)
                 : storage.findByNamespaceAndSubmitter(ns, Slugs.require(submitter, "submitter"));
@@ -161,7 +164,7 @@ public class AutomationApiController {
             @RequestParam(name = "httpStatusOnFail", required = false) Integer httpStatusOnFail,
             @RequestBody(required = false) byte[] body) {
 
-        String ns = Slugs.require(namespace, "namespace");
+        String ns = namespaces.resolveOrCreate(namespace).getNameKey();  // creates if new; slugifies the path segment
         String submitter = resolveSubmitter(submitterCookie, submitterHeader);
 
         SubmitBody json = maybeJson(contentType, body);
@@ -327,9 +330,17 @@ public class AutomationApiController {
     }
 
     private SpecEntity require(String namespace, long id) {
-        return storage.findByIdInNamespace(id, Slugs.require(namespace, "namespace"))
+        return storage.findByIdInNamespace(id, namespaceKey(namespace))
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND,
                         "no spec " + id + " in namespace '" + namespace + "'"));
+    }
+
+    /** Path namespace → its lower-cased key, 404 if it does not exist (reads never auto-create). */
+    private String namespaceKey(String namespace) {
+        String key = Slugs.require(namespace, "namespace");
+        return namespaces.findByKey(key)
+                .map(net.dublinux.arete.domain.NamespaceEntity::getNameKey)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "no namespace '" + namespace + "'"));
     }
 
     private SpecValidationPlugin enabledPlugin(String id) {

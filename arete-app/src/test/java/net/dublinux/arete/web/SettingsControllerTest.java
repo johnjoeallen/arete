@@ -39,6 +39,15 @@ class SettingsControllerTest {
     @MockitoBean
     private SpecStorageService specStorageService;
 
+    @MockitoBean
+    private net.dublinux.arete.service.NamespaceService namespaceService;
+
+    @org.junit.jupiter.api.BeforeEach
+    void wireNamespaces() {
+        org.mockito.Mockito.lenient().when(namespaceService.list()).thenReturn(java.util.List.of(
+                new net.dublinux.arete.service.NamespaceService.Namespace("default", "default", 0)));
+    }
+
     @Test
     void listsLoadedPluginsWithTheirPersistedEnabledState() throws Exception {
         when(pluginRegistry.getPlugins()).thenReturn(java.util.List.of(stubPlugin("noop", "Noop Plugin")));

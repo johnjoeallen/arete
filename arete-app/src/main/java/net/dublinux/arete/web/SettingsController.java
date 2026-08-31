@@ -2,6 +2,7 @@ package net.dublinux.arete.web;
 
 import net.dublinux.arete.plugin.PluginRegistry;
 import net.dublinux.arete.plugin.PluginSettingsService;
+import net.dublinux.arete.service.NamespaceService;
 import net.dublinux.arete.service.SpecStorageService;
 import net.dublinux.arete.web.dto.PluginSettingRow;
 import net.dublinux.arete.web.dto.SpecSummary;
@@ -10,6 +11,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Comparator;
 import java.util.List;
@@ -20,12 +22,14 @@ public class SettingsController {
     private final PluginRegistry pluginRegistry;
     private final PluginSettingsService pluginSettingsService;
     private final SpecStorageService specStorageService;
+    private final NamespaceService namespaceService;
 
     public SettingsController(PluginRegistry pluginRegistry, PluginSettingsService pluginSettingsService,
-            SpecStorageService specStorageService) {
+            SpecStorageService specStorageService, NamespaceService namespaceService) {
         this.pluginRegistry = pluginRegistry;
         this.pluginSettingsService = pluginSettingsService;
         this.specStorageService = specStorageService;
+        this.namespaceService = namespaceService;
     }
 
     @GetMapping("/settings")
@@ -37,6 +41,7 @@ public class SettingsController {
         model.addAttribute("q", null);
         model.addAttribute("specId", null);
         model.addAttribute("pluginRows", pluginRows());
+        model.addAttribute("namespaces", namespaceService.list());
         model.addAttribute("installPluginsDir", pluginRegistry.getInstallPluginsDir().toString());
         model.addAttribute("userPluginsDir", pluginRegistry.getUserPluginsDir().toString());
         return "settings";
@@ -46,6 +51,18 @@ public class SettingsController {
     public String togglePlugin(@PathVariable String id) {
         pluginSettingsService.setEnabled(id, !pluginSettingsService.isEnabled(id));
         return "redirect:/settings";
+    }
+
+    @PostMapping("/settings/namespaces")
+    public String createNamespace(@RequestParam String name) {
+        namespaceService.create(name);
+        return "redirect:/settings#namespaces";
+    }
+
+    @PostMapping("/settings/namespaces/{key}/delete")
+    public String deleteNamespace(@PathVariable String key) {
+        namespaceService.deleteIfEmpty(key);
+        return "redirect:/settings#namespaces";
     }
 
     private List<PluginSettingRow> pluginRows() {
