@@ -1172,6 +1172,11 @@ message; those modes were removed from the matchers and their descriptors.
 <code>schema</code> findings that had fallen through to "Property matches the configured
 schema rule" (<code>enum-type</code>, <code>enum-case</code>, <code>extensible</code>) were given messages that
 name the violation.</p>
+<p>String and regex literals then gained <code>{{ expr }}</code> interpolation — a hole is a
+full Distill expression spliced in at evaluation time, with quotes and <code>/</code>
+inside it no longer treated as the enclosing delimiter. Its first use let
+<code>text-style</code>'s <code>non-action-oriented</code> check take an <code>action-prefixes</code> parameter
+and splice the verb list straight into the check's regex.</p>
 <h2 id="runtime-execution-model">Runtime execution model<a class="headerlink" href="#runtime-execution-model" title="Permanent link">&para;</a></h2>
 <p>Distill matcher sources are parsed once when the bundle loads and the compiled
 programs are reused for every validation, rather than reparsed and discarded
