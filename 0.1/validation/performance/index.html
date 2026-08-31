@@ -1165,8 +1165,8 @@ deployed engine would behave (or would have).</p>
 <tbody>
 <tr>
 <td>per-call time, summed over all 38 matchers</td>
-<td style="text-align: right;">~280 µs</td>
-<td style="text-align: right;"><strong>~65 µs</strong></td>
+<td style="text-align: right;">~260 µs</td>
+<td style="text-align: right;"><strong>~55–65 µs</strong></td>
 </tr>
 <tr>
 <td>mean speedup</td>
@@ -1180,9 +1180,10 @@ deployed engine would behave (or would have).</p>
 </tr>
 </tbody>
 </table>
-<p>Across the wider loop, a full-policy pass (109 rules) is ~4.5 ms and an
-end-to-end <code>validate()</code> on a 40-path spec is ~9.7 ms — of which the OpenAPI
-parse (~3 ms) and model adaptation (~1 ms) are the larger share.</p>
+<p>Across the wider loop, a full-policy pass (111 rules) is ~4.9 ms and an
+end-to-end <code>validate()</code> on a 40-path spec is ~9.9 ms — of which the OpenAPI
+parse (~3 ms) and model adaptation (~1 ms) are the larger share. Distill's
+parse cache removes ~1.6 ms of that pass (reparsing every rule costs ~6.6 ms).</p>
 <h3 id="per-matcher">Per-matcher<a class="headerlink" href="#per-matcher" title="Permanent link">&para;</a></h3>
 <p>Microseconds per call, averaged over the matcher's scope × spec combinations.
 Speedup is Groovy ÷ Distill.</p>
@@ -1202,25 +1203,25 @@ Speedup is Groovy ÷ Distill.</p>
 <td><code>api-title</code></td>
 <td style="text-align: right;">5</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">5.5</td>
+<td style="text-align: right;">5.6</td>
 <td style="text-align: right;">1.3</td>
-<td style="text-align: right;">4.3×</td>
+<td style="text-align: right;">4.5×</td>
 </tr>
 <tr>
 <td><code>bulk-operation</code></td>
 <td style="text-align: right;">5</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">7.4</td>
-<td style="text-align: right;">0.4</td>
-<td style="text-align: right;">17.2×</td>
+<td style="text-align: right;">8.4</td>
+<td style="text-align: right;">0.5</td>
+<td style="text-align: right;">18.0×</td>
 </tr>
 <tr>
 <td><code>common-field</code></td>
 <td style="text-align: right;">5</td>
 <td style="text-align: right;">2</td>
-<td style="text-align: right;">3.8</td>
-<td style="text-align: right;">0.6</td>
-<td style="text-align: right;">6.5×</td>
+<td style="text-align: right;">4.0</td>
+<td style="text-align: right;">0.5</td>
+<td style="text-align: right;">8.1×</td>
 </tr>
 <tr>
 <td><code>compatibility</code></td>
@@ -1234,9 +1235,9 @@ Speedup is Groovy ÷ Distill.</p>
 <td><code>date-time-name</code></td>
 <td style="text-align: right;">5</td>
 <td style="text-align: right;">1</td>
-<td style="text-align: right;">3.9</td>
+<td style="text-align: right;">4.1</td>
 <td style="text-align: right;">0.5</td>
-<td style="text-align: right;">7.3×</td>
+<td style="text-align: right;">8.6×</td>
 </tr>
 <tr>
 <td><code>document-lint</code></td>
@@ -1244,55 +1245,55 @@ Speedup is Groovy ÷ Distill.</p>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">1.1</td>
 <td style="text-align: right;">0.2</td>
-<td style="text-align: right;">4.6×</td>
+<td style="text-align: right;">5.2×</td>
 </tr>
 <tr>
 <td><code>documentation-completeness</code></td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">4</td>
-<td style="text-align: right;">7.4</td>
-<td style="text-align: right;">1.3</td>
-<td style="text-align: right;">5.7×</td>
+<td style="text-align: right;">7.3</td>
+<td style="text-align: right;">1.5</td>
+<td style="text-align: right;">4.7×</td>
 </tr>
 <tr>
 <td><code>enum-values</code></td>
 <td style="text-align: right;">5</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">3.7</td>
+<td style="text-align: right;">4.4</td>
 <td style="text-align: right;">0.3</td>
-<td style="text-align: right;">11.9×</td>
+<td style="text-align: right;">13.4×</td>
 </tr>
 <tr>
 <td><code>example-validity</code></td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">2</td>
-<td style="text-align: right;">2.0</td>
-<td style="text-align: right;">0.5</td>
-<td style="text-align: right;">3.8×</td>
+<td style="text-align: right;">2.1</td>
+<td style="text-align: right;">0.9</td>
+<td style="text-align: right;">2.4×</td>
 </tr>
 <tr>
 <td><code>extensions</code></td>
 <td style="text-align: right;">5</td>
 <td style="text-align: right;">2</td>
-<td style="text-align: right;">25.5</td>
-<td style="text-align: right;">1.4</td>
-<td style="text-align: right;">18.1×</td>
+<td style="text-align: right;">24.9</td>
+<td style="text-align: right;">1.3</td>
+<td style="text-align: right;">18.5×</td>
 </tr>
 <tr>
 <td><code>header-schema</code></td>
 <td style="text-align: right;">5</td>
 <td style="text-align: right;">2</td>
-<td style="text-align: right;">8.4</td>
-<td style="text-align: right;">0.5</td>
-<td style="text-align: right;">15.6×</td>
+<td style="text-align: right;">8.6</td>
+<td style="text-align: right;">0.6</td>
+<td style="text-align: right;">14.7×</td>
 </tr>
 <tr>
 <td><code>hostname</code></td>
 <td style="text-align: right;">5</td>
 <td style="text-align: right;">5</td>
-<td style="text-align: right;">2.4</td>
 <td style="text-align: right;">1.7</td>
-<td style="text-align: right;">1.4×</td>
+<td style="text-align: right;">0.7</td>
+<td style="text-align: right;">2.4×</td>
 </tr>
 <tr>
 <td><code>manual</code></td>
@@ -1306,145 +1307,145 @@ Speedup is Groovy ÷ Distill.</p>
 <td><code>media-type</code></td>
 <td style="text-align: right;">5</td>
 <td style="text-align: right;">5</td>
-<td style="text-align: right;">11.6</td>
-<td style="text-align: right;">1.3</td>
-<td style="text-align: right;">9.0×</td>
+<td style="text-align: right;">12.4</td>
+<td style="text-align: right;">1.5</td>
+<td style="text-align: right;">8.0×</td>
 </tr>
 <tr>
 <td><code>metadata</code></td>
 <td style="text-align: right;">5</td>
 <td style="text-align: right;">5</td>
-<td style="text-align: right;">7.7</td>
-<td style="text-align: right;">2.6</td>
-<td style="text-align: right;">3.0×</td>
+<td style="text-align: right;">6.9</td>
+<td style="text-align: right;">1.8</td>
+<td style="text-align: right;">3.9×</td>
 </tr>
 <tr>
 <td><code>naming</code></td>
 <td style="text-align: right;">30</td>
 <td style="text-align: right;">13</td>
-<td style="text-align: right;">6.8</td>
+<td style="text-align: right;">7.3</td>
 <td style="text-align: right;">1.4</td>
-<td style="text-align: right;">5.0×</td>
+<td style="text-align: right;">5.2×</td>
 </tr>
 <tr>
 <td><code>openapi-version</code></td>
 <td style="text-align: right;">5</td>
 <td style="text-align: right;">5</td>
-<td style="text-align: right;">4.3</td>
+<td style="text-align: right;">4.4</td>
 <td style="text-align: right;">2.1</td>
 <td style="text-align: right;">2.1×</td>
 </tr>
 <tr>
 <td><code>operation</code></td>
 <td style="text-align: right;">5</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">12.0</td>
-<td style="text-align: right;">2.7</td>
-<td style="text-align: right;">4.4×</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.1</td>
+<td style="text-align: right;">1.1</td>
+<td style="text-align: right;">~1×</td>
 </tr>
 <tr>
 <td><code>operation-metadata</code></td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">10</td>
-<td style="text-align: right;">9.8</td>
+<td style="text-align: right;">9.0</td>
 <td style="text-align: right;">1.6</td>
-<td style="text-align: right;">6.0×</td>
+<td style="text-align: right;">5.5×</td>
 </tr>
 <tr>
 <td><code>operation-semantics</code></td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">12.1</td>
+<td style="text-align: right;">11.5</td>
 <td style="text-align: right;">0.9</td>
-<td style="text-align: right;">13.8×</td>
+<td style="text-align: right;">13.0×</td>
 </tr>
 <tr>
 <td><code>parameter</code></td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">5.3</td>
-<td style="text-align: right;">1.7</td>
-<td style="text-align: right;">3.1×</td>
+<td style="text-align: right;">5.6</td>
+<td style="text-align: right;">1.2</td>
+<td style="text-align: right;">4.5×</td>
 </tr>
 <tr>
 <td><code>path-count</code></td>
 <td style="text-align: right;">5</td>
 <td style="text-align: right;">2</td>
-<td style="text-align: right;">10.6</td>
-<td style="text-align: right;">4.3</td>
-<td style="text-align: right;">2.5×</td>
+<td style="text-align: right;">9.2</td>
+<td style="text-align: right;">2.8</td>
+<td style="text-align: right;">3.2×</td>
 </tr>
 <tr>
 <td><code>path-set</code></td>
 <td style="text-align: right;">5</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">7.4</td>
-<td style="text-align: right;">10.6</td>
-<td style="text-align: right;">0.7×</td>
+<td style="text-align: right;">7.6</td>
+<td style="text-align: right;">8.1</td>
+<td style="text-align: right;">0.9×</td>
 </tr>
 <tr>
 <td><code>proprietary-header</code></td>
 <td style="text-align: right;">5</td>
 <td style="text-align: right;">2</td>
-<td style="text-align: right;">18.7</td>
+<td style="text-align: right;">19.4</td>
 <td style="text-align: right;">1.6</td>
-<td style="text-align: right;">11.6×</td>
+<td style="text-align: right;">12.5×</td>
 </tr>
 <tr>
 <td><code>query-collection</code></td>
 <td style="text-align: right;">5</td>
 <td style="text-align: right;">1</td>
-<td style="text-align: right;">8.7</td>
+<td style="text-align: right;">8.4</td>
 <td style="text-align: right;">0.7</td>
-<td style="text-align: right;">13.2×</td>
+<td style="text-align: right;">11.5×</td>
 </tr>
 <tr>
 <td><code>request-body</code></td>
 <td style="text-align: right;">5</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">7.0</td>
-<td style="text-align: right;">0.6</td>
-<td style="text-align: right;">11.1×</td>
+<td style="text-align: right;">7.8</td>
+<td style="text-align: right;">0.7</td>
+<td style="text-align: right;">10.9×</td>
 </tr>
 <tr>
 <td><code>resource-path</code></td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">7.9</td>
-<td style="text-align: right;">3.0</td>
-<td style="text-align: right;">2.7×</td>
+<td style="text-align: right;">8.6</td>
+<td style="text-align: right;">2.7</td>
+<td style="text-align: right;">3.2×</td>
 </tr>
 <tr>
 <td><code>response-code</code></td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">7.1</td>
-<td style="text-align: right;">0.9</td>
-<td style="text-align: right;">7.8×</td>
+<td style="text-align: right;">6.8</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;">6.8×</td>
 </tr>
 <tr>
 <td><code>response-example</code></td>
 <td style="text-align: right;">5</td>
 <td style="text-align: right;">1</td>
-<td style="text-align: right;">14.1</td>
-<td style="text-align: right;">1.5</td>
-<td style="text-align: right;">9.2×</td>
+<td style="text-align: right;">16.0</td>
+<td style="text-align: right;">3.7</td>
+<td style="text-align: right;">4.4×</td>
 </tr>
 <tr>
 <td><code>response-header</code></td>
 <td style="text-align: right;">5</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">7.9</td>
-<td style="text-align: right;">0.6</td>
-<td style="text-align: right;">13.8×</td>
+<td style="text-align: right;">7.8</td>
+<td style="text-align: right;">0.9</td>
+<td style="text-align: right;">8.9×</td>
 </tr>
 <tr>
 <td><code>schema</code></td>
 <td style="text-align: right;">5</td>
-<td style="text-align: right;">2</td>
-<td style="text-align: right;">10.4</td>
-<td style="text-align: right;">3.6</td>
-<td style="text-align: right;">2.9×</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2.2</td>
+<td style="text-align: right;">1.9</td>
+<td style="text-align: right;">~1×</td>
 </tr>
 <tr>
 <td><code>schema-composition</code></td>
@@ -1452,66 +1453,70 @@ Speedup is Groovy ÷ Distill.</p>
 <td style="text-align: right;">2</td>
 <td style="text-align: right;">1.6</td>
 <td style="text-align: right;">0.3</td>
-<td style="text-align: right;">6.4×</td>
+<td style="text-align: right;">6.0×</td>
 </tr>
 <tr>
 <td><code>schema-name</code></td>
 <td style="text-align: right;">5</td>
 <td style="text-align: right;">2</td>
-<td style="text-align: right;">3.7</td>
-<td style="text-align: right;">1.1</td>
-<td style="text-align: right;">3.3×</td>
+<td style="text-align: right;">3.8</td>
+<td style="text-align: right;">1.3</td>
+<td style="text-align: right;">2.9×</td>
 </tr>
 <tr>
 <td><code>security</code></td>
 <td style="text-align: right;">5</td>
 <td style="text-align: right;">5</td>
-<td style="text-align: right;">11.3</td>
-<td style="text-align: right;">5.5</td>
-<td style="text-align: right;">2.0×</td>
+<td style="text-align: right;">11.6</td>
+<td style="text-align: right;">3.7</td>
+<td style="text-align: right;">3.1×</td>
 </tr>
 <tr>
 <td><code>server-url</code></td>
 <td style="text-align: right;">5</td>
 <td style="text-align: right;">1</td>
-<td style="text-align: right;">4.0</td>
-<td style="text-align: right;">1.4</td>
-<td style="text-align: right;">2.9×</td>
+<td style="text-align: right;">4.1</td>
+<td style="text-align: right;">1.3</td>
+<td style="text-align: right;">3.2×</td>
 </tr>
 <tr>
 <td><code>status-class</code></td>
 <td style="text-align: right;">5</td>
 <td style="text-align: right;">2</td>
-<td style="text-align: right;">10.2</td>
-<td style="text-align: right;">1.6</td>
-<td style="text-align: right;">6.5×</td>
+<td style="text-align: right;">10.1</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;">9.8×</td>
 </tr>
 <tr>
 <td><code>text-style</code></td>
 <td style="text-align: right;">5</td>
-<td style="text-align: right;">2</td>
-<td style="text-align: right;">9.0</td>
-<td style="text-align: right;">1.6</td>
-<td style="text-align: right;">5.5×</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2.1</td>
+<td style="text-align: right;">1.5</td>
+<td style="text-align: right;">~1×</td>
 </tr>
 <tr>
 <td><code>versioning</code></td>
 <td style="text-align: right;">20</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">1.6</td>
-<td style="text-align: right;">0.4</td>
-<td style="text-align: right;">3.6×</td>
+<td style="text-align: right;">1.7</td>
+<td style="text-align: right;">0.6</td>
+<td style="text-align: right;">3.1×</td>
 </tr>
 </tbody>
 </table>
 <p><strong>Reading the outliers</strong></p>
 <ul>
-<li><strong><code>path-set</code> (0.7×)</strong> is the only matcher where Distill is slower. Its DSL is
+<li><strong><code>path-set</code> (~0.8×)</strong> is the only matcher where Distill is slower. Its DSL is
   <code>O(n²)</code> — a nested <code>api.paths.find { … }</code> inside both <code>filter</code> and <code>map</code>,
   re-tokenising every path — so Groovy's JIT-compiled inner loop edges ahead of
   the interpreted tree-walk. A matcher-authoring cost, not an engine cost:
   both do the same quadratic work.</li>
-<li><strong><code>hostname</code>, <code>security</code>, <code>openapi-version</code> (~1.4–2.1×)</strong> spend most of their
+<li><strong><code>operation</code>, <code>schema</code>, <code>text-style</code> (~1×)</strong> report zero findings here: the
+  sweep supplies only <em>required</em> parameters, and these matchers were changed to
+  emit nothing when handed no check parameter (rather than flag every subject).
+  Both engines now just run the empty-parameter guard, so the ratio is noise.</li>
+<li><strong><code>hostname</code>, <code>openapi-version</code>, <code>security</code> (~2–3×)</strong> spend most of their
   time in RE2/J regex and string operations, shared by both engines, so the
   interpreter overhead is proportionally small.</li>
 <li><strong><code>compatibility</code>, <code>manual</code> (~1×)</strong> are sub-microsecond on both; the ratio is
@@ -1542,47 +1547,47 @@ five runs of 200, averaged over the fixture specs.</p>
 <tr>
 <td><code>hostname</code></td>
 <td style="text-align: right;">5</td>
-<td style="text-align: right;">3.1</td>
-<td style="text-align: right;">1.7</td>
-<td style="text-align: right;">0.26</td>
-<td style="text-align: right;">6.5×</td>
-<td style="text-align: right;">11.7×</td>
+<td style="text-align: right;">2.9</td>
+<td style="text-align: right;">2.0</td>
+<td style="text-align: right;">0.28</td>
+<td style="text-align: right;">7.2×</td>
+<td style="text-align: right;">10.5×</td>
 </tr>
 <tr>
 <td><code>date-time-name</code></td>
 <td style="text-align: right;">3</td>
-<td style="text-align: right;">4.7</td>
-<td style="text-align: right;">1.0</td>
-<td style="text-align: right;">0.15</td>
-<td style="text-align: right;">6.4×</td>
-<td style="text-align: right;">30.9×</td>
+<td style="text-align: right;">4.6</td>
+<td style="text-align: right;">1.3</td>
+<td style="text-align: right;">0.14</td>
+<td style="text-align: right;">8.6×</td>
+<td style="text-align: right;">31.9×</td>
 </tr>
 <tr>
 <td><code>status-class</code></td>
 <td style="text-align: right;">2</td>
-<td style="text-align: right;">8.3</td>
-<td style="text-align: right;">1.2</td>
-<td style="text-align: right;">0.26</td>
-<td style="text-align: right;">4.5×</td>
-<td style="text-align: right;">32.3×</td>
+<td style="text-align: right;">8.8</td>
+<td style="text-align: right;">1.1</td>
+<td style="text-align: right;">0.27</td>
+<td style="text-align: right;">4.1×</td>
+<td style="text-align: right;">32.4×</td>
 </tr>
 <tr>
 <td><code>operation-semantics</code></td>
 <td style="text-align: right;">2</td>
-<td style="text-align: right;">20.7</td>
-<td style="text-align: right;">6.5</td>
-<td style="text-align: right;">1.23</td>
-<td style="text-align: right;">5.2×</td>
-<td style="text-align: right;">16.8×</td>
+<td style="text-align: right;">20.5</td>
+<td style="text-align: right;">6.8</td>
+<td style="text-align: right;">1.28</td>
+<td style="text-align: right;">5.3×</td>
+<td style="text-align: right;">16.0×</td>
 </tr>
 <tr>
 <td><code>path-set</code> (O(n²))</td>
 <td style="text-align: right;">1</td>
-<td style="text-align: right;">10.5</td>
-<td style="text-align: right;">11.0</td>
+<td style="text-align: right;">11.3</td>
+<td style="text-align: right;">11.1</td>
 <td style="text-align: right;">2.10</td>
-<td style="text-align: right;">5.2×</td>
-<td style="text-align: right;">5.0×</td>
+<td style="text-align: right;">5.3×</td>
+<td style="text-align: right;">5.4×</td>
 </tr>
 </tbody>
 </table>
@@ -1591,10 +1596,10 @@ complex matchers alike — the price of a tree-walk over compiled bytecode — a
 <strong>5–32× faster than compiled Groovy</strong>. Even on <code>path-set</code>, where Distill trails
 Groovy, hand Java running the same algorithm beats both by 5×.</p>
 <h2 id="what-the-overhead-actually-costs">What the overhead actually costs<a class="headerlink" href="#what-the-overhead-actually-costs" title="Permanent link">&para;</a></h2>
-<p>At 1–11 µs per matcher call and ~150 evaluations per validation, the entire
-matcher phase is <strong>1–4 ms</strong> — against a ~3 ms OpenAPI parse Areté cannot
-avoid. Distill's interpreter overhead is real and measurable, and it is not
-where a validation spends its time.</p>
+<p>At 1–11 µs per matcher call and 111 evaluations per validation, the entire
+matcher phase is <strong>~5 ms</strong> — alongside a ~3 ms OpenAPI parse Areté cannot
+avoid and ~1 ms of model adaptation. Distill's interpreter overhead is real and
+measurable, and it is not where a validation spends its time.</p>
 <p>That is the trade in full: a few milliseconds per spec to keep every matcher a
 ~5–15-line sandboxed expression that can be edited without a rebuild and run
 from any source — instead of ~40 lines of null-checked Java per matcher, in a
