@@ -883,7 +883,8 @@ listed here is the default when an unknown rule set is requested.</p>
 <p>The default policy: it enables every generally-applicable bundled rule, with a few rule parameters calibrated for a typical enterprise API (allow-listed proprietary headers, expected OAuth2 scopes, standard rate-limit headers).</p>
 <ul>
 <li><strong>109</strong> rules active</li>
-<li>suggested gate: <code>score&lt;90</code> (used by the <a href="../../automation-api/">automation API</a> unless overridden)</li>
+<li>passing score: <strong>90</strong> (the <a href="../../automation-api/">automation API</a> fails below this unless overridden)</li>
+<li>grades: A ≥ 95, B ≥ 90, C ≥ 80, D ≥ 70, else F</li>
 </ul>
 <p>Parameter overrides:</p>
 <table>

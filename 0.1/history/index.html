@@ -1170,8 +1170,10 @@ plain <strong>namespace</strong> slug and attributed to a <strong>submitter</str
 self-asserted, neither checked; uniqueness moved from a global spec title to
 <code>(namespace, title)</code>. Because there is no authentication, the deployment is
 required to sit behind a protected boundary. Each policy can declare a
-suggested pass level (<code>scoring:</code> — <code>blocker</code> / <code>error</code> / <code>score&lt;NN</code>) that the
-verdict honours unless the caller overrides it. A <code>shared</code> deployment mode
+passing score and grade bands (<code>passingScore:</code> / <code>grades:</code>, or a non-numeric
+<code>scoring: blocker | error</code>); the score, grade, and pass/fail against that bar
+are reported on every validation, and the automation-API verdict honours the
+bar unless the caller overrides it. A <code>shared</code> deployment mode
 locks down the local-filesystem features (path loading, the drop folder,
 <code>file:</code> URLs) that only make sense for a single-user install, and the
 server-side URL fetcher is restricted to <code>http</code>/<code>https</code> with a mandatory SSRF

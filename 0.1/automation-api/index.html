@@ -1145,32 +1145,38 @@ is just re-POSTing the spec (upsert by <code>(namespace, title)</code>).</p>
 </code></pre></div>
 <p>Errors are <code>application/problem+json</code> (<code>{ status, title, detail }</code>).</p>
 <h2 id="scoring-level">Scoring level<a class="headerlink" href="#scoring-level" title="Permanent link">&para;</a></h2>
-<p>A policy declares its own suggested gate in a <code>scoring:</code> key in its front
-matter — <code>blocker</code>, <code>error</code>, or <code>score&lt;NN</code>. The bundled policies:</p>
+<p>A policy declares its own pass bar in its front matter — <code>passingScore: NN</code>
+(fail below that score), or a non-numeric <code>scoring: blocker | error</code>. It may
+also define <code>grades:</code> (score → letter). The bundled policies:</p>
 <table>
 <thead>
 <tr>
 <th>policy</th>
-<th>suggested gate</th>
+<th>pass bar</th>
+<th>grades</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>Enterprise Grade</td>
-<td><code>score&lt;90</code></td>
+<td><code>passingScore: 90</code></td>
+<td>A ≥ 95, B ≥ 90, C ≥ 80, D ≥ 70, else F</td>
 </tr>
 <tr>
 <td>Zalando, Zalando Extended</td>
-<td><code>error</code></td>
+<td><code>scoring: error</code></td>
+<td>—</td>
 </tr>
 </tbody>
 </table>
-<p>With the default <code>?failOn=policy</code>, each combination is judged against its own
-policy's gate (<code>level.source</code> = <code>"policy"</code>). A policy with no <code>scoring:</code> key
-falls back to <code>blocker</code>. An explicit <code>?failOn=error</code> etc. overrides every
-combination (<code>level.source</code> = <code>"request"</code>).</p>
-<p>Plugins other than the policy engine can expose a suggestion too, via the SPI
-method <code>getSuggestedScoreLevel(ruleSet)</code>.</p>
+<p>Each combination's result carries <code>score</code>, <code>grade</code> (null if the policy defines
+no bands), and <code>passingScore</code> (null if none). With the default <code>?failOn=policy</code>
+the combination is judged against its own policy's bar (<code>level.source</code> =
+<code>"policy"</code>); a policy with no bar falls back to <code>blocker</code>. An explicit
+<code>?failOn=error</code> / <code>score&lt;NN</code> etc. overrides every combination
+(<code>level.source</code> = <code>"request"</code>).</p>
+<p>Plugins other than the policy engine can expose a bar via the SPI methods
+<code>getPassingScore(ruleSet)</code> and <code>getSuggestedScoreLevel(ruleSet)</code>.</p>
 <h2 id="remote-fetch">Remote fetch<a class="headerlink" href="#remote-fetch" title="Permanent link">&para;</a></h2>
 <p><code>{ "url": … }</code> is fetched server-side with these constraints:</p>
 <ul>
