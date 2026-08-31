@@ -34,6 +34,29 @@ matcher scripts are retained as an implementation comparison for the Distill
 scripts, and the build includes parity tests to detect differences between
 the two implementations.
 
+Groovy was then withdrawn from the runtime entirely. A deployed Areté loads
+only `Matcher.dsl` sources; where a `Matcher.groovy` still exists it is
+exercised solely by the build-time parity check, never against a submitted
+spec. The opt-in mode that ran each rule in a disposable child JVM was
+removed with it — that isolation existed only to contain unsandboxed Groovy
+running in-process, and Distill needs no such containment. Parity coverage
+was broadened at the same time to a full sweep of every dual-implemented
+matcher across each scope and fixture spec, alongside the curated cases.
+
+Distill matcher sources are parsed once when the bundle loads and the
+compiled programs are reused for every validation, rather than reparsed and
+discarded per rule. The interpreter was subsequently reworked to remove
+avoidable work in the evaluation loop: compiled regular expressions are
+cached rather than recompiled per match, closure parameters are bound
+through a layered scope instead of copying the environment for every
+iterated element, and sequence operations iterate their input directly
+instead of materialising it and opening a stream. The Groovy parity tests
+gated each step.
+
+Large documents are handled explicitly: the OpenAPI parser and the bundle's
+YAML loader both accept configurable size limits so that legitimately large
+specifications are not rejected as though malformed.
+
 The `Zalando Extended` policy was a placeholder identical to `Zalando` while
 its extra checks were unimplemented. Those checks — drawn from Zalando's
 supplementary linter rule pack — were added as Areté rules under Areté's own
