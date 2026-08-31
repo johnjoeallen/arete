@@ -1,0 +1,1933 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Local-first API explorer for OpenAPI/Swagger specs with pluggable, policy-driven validation.">
+      
+      
+      
+        <link rel="canonical" href="https://johnjoeallen.github.io/arete/0.99/validation/distill/">
+      
+      
+        <link rel="prev" href="../performance/">
+      
+      
+        <link rel="next" href="../rules/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Distill reference - Areté</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#distill-reference" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Areté" class="md-header__button md-logo" aria-label="Areté" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Areté
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Distill reference
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/johnjoeallen/arete" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    johnjoeallen/arete
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Areté" class="md-nav__button md-logo" aria-label="Areté" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    Areté
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/johnjoeallen/arete" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    johnjoeallen/arete
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Automation API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../history/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    History
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Validation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../policy-engine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Areté Policy Engine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../performance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The case for Distill
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Distill reference
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Distill reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-entry-point" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The entry point
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#values-and-literals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Values and literals
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Values and literals">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#interpolation-expr" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interpolation — {{ expr }}
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#truthiness" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Truthiness
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#operators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Operators
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#member-access-and-indexing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Member access and indexing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Methods
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#string-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        String methods
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sequence-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sequence methods
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#repeatable-filtermap-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Repeatable filter/map: checks
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#builtin-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Builtin functions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#regular-expressions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regular expressions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#worked-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Worked examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#expressions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Expressions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#matchers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Matchers
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#idioms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Idioms
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#coverage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Coverage
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rule Catalogue
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../policies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Policies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../writing-a-plugin/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Writing a Plugin
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../releasing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Releasing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../publishing-spi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Publishing the SPI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-entry-point" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The entry point
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#values-and-literals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Values and literals
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Values and literals">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#interpolation-expr" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Interpolation — {{ expr }}
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#truthiness" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Truthiness
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#operators" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Operators
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#member-access-and-indexing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Member access and indexing
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Methods
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#string-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        String methods
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sequence-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sequence methods
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#repeatable-filtermap-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Repeatable filter/map: checks
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#builtin-functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Builtin functions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#regular-expressions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Regular expressions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#worked-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Worked examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Worked examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#expressions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Expressions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#matchers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Matchers
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#idioms" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Idioms
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#coverage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Coverage
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/johnjoeallen/arete/edit/main/docs/validation/distill.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="distill-reference">Distill reference<a class="headerlink" href="#distill-reference" title="Permanent link">&para;</a></h1>
+<p>Matchers are written in Distill (<code>Matcher.dsl</code>). A Distill script
+<em>distills</em> the API model down to the occurrences that violate a rule: it is a
+single expression that walks <code>api</code>, keeps what matches, and returns a list of
+<code>occurrence(...)</code> values.</p>
+<p>It is deliberately small — one expression, no statements, no local variables,
+no user-defined functions — and safe by construction: the interpreter exposes
+only the immutable <code>api</code> and <code>rule</code> values, a fixed set of builtins, and
+<a href="https://github.com/google/re2j">RE2/J</a> regular expressions. There is no I/O,
+reflection, recursion, or unbounded iteration.</p>
+<p>The build also runs a matching <code>Matcher.groovy</code> for some matchers as a parity
+check; Groovy is not part of the deployed runtime. A deployed Areté always
+evaluates matchers with Distill.</p>
+<h2 id="the-entry-point">The entry point<a class="headerlink" href="#the-entry-point" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">distill</span><span class="p">(</span><span class="n">api</span><span class="p">,</span><span class="w"> </span><span class="n">rule</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="o">&lt;</span><span class="n">expression</span><span class="o">&gt;</span><span class="p">;</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="p">}</span>
+</code></pre></div>
+<p>That is the whole grammar at the top level: the keyword <code>distill</code>, two parameter
+names (<code>api</code> and <code>rule</code> by convention), then <code>return</code> <strong>one</strong> expression
+terminated by <code>;</code>. The expression must evaluate to a list of occurrences
+(often built with <code>.map { … -&gt; occurrence(...) }</code>); returning more than 1000
+occurrences is a matcher error.</p>
+<p>A matcher that applies several independent checks to one collection is written
+with <a href="#repeatable-filtermap-checks"><code>checks(source) { … }</code></a> — a block of bare
+<code>filter { } .map { }</code> stanzas, one per check — rather than one deeply nested
+<code>filter</code>/<code>map</code>.</p>
+<p><strong>An occurrence is a violation.</strong> Emit one only for a subject that breaks the
+rule; a compliant subject yields nothing. Every <code>filter</code> keeps the <em>offending</em>
+items — <code>filter { it.summary.trim().endsWith(".") }</code> for "summary must not end
+with a period", never the inverse — and no matcher emits a "matches the rule"
+message.</p>
+<ul>
+<li><code>api</code> is the deep-immutable API model. Its shape (<code>api.paths</code>,
+  <code>path.operationDetails</code>, <code>api.schemas</code>,
+  <code>schema.properties</code>, <code>api.info</code>, <code>api.security</code>, <code>api.tags</code>,
+  <code>api.components</code>, <code>api.descriptions</code>, <code>api.lint.refs</code>, …) is documented under
+  <a href="../policy-engine/#the-api-model">The <code>api</code> model</a>.</li>
+<li><code>rule</code> is <code>{ id, scope, parameters }</code>. Rule configuration is
+  <code>rule.parameters</code> — e.g. <code>rule.parameters["max-items"]</code> or, for a key that
+  is a plain identifier, <code>rule.parameters.suffix</code>. A <code>list</code>-typed parameter
+  arrives as a <code>List&lt;String&gt;</code> (use <code>.any { }</code> / <code>startsWithAny</code>), everything
+  else as a string, number, or boolean.</li>
+</ul>
+<p>There are no comments.</p>
+<h2 id="values-and-literals">Values and literals<a class="headerlink" href="#values-and-literals" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Literal</th>
+<th>Example</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>String</td>
+<td><code>"query"</code></td>
+<td><code>\"</code>, <code>\\</code>, <code>\n</code> … escapes; double-quoted only</td>
+</tr>
+<tr>
+<td>Integer</td>
+<td><code>429</code></td>
+<td>whole numbers only; no decimal literal</td>
+</tr>
+<tr>
+<td>Boolean</td>
+<td><code>true</code> <code>false</code></td>
+<td></td>
+</tr>
+<tr>
+<td>Regex</td>
+<td><code>/[A-Z][a-z]+/</code></td>
+<td>slashy literal — see <a href="#regular-expressions">Regular expressions</a></td>
+</tr>
+<tr>
+<td>List</td>
+<td><code>["form", "spaceDelimited"]</code></td>
+<td>elements are any expression</td>
+</tr>
+</tbody>
+</table>
+<p>There is no map literal. <code>null</code> is not a keyword — it arrives from the model
+(a missing field) and is produced by builtins such as <code>find</code>.</p>
+<h3 id="interpolation-expr">Interpolation — <code>{{ expr }}</code><a class="headerlink" href="#interpolation-expr" title="Permanent link">&para;</a></h3>
+<p>A string <strong>or</strong> regex literal may contain <code>{{ … }}</code> holes. Each hole is a full
+Distill expression, evaluated when the literal is evaluated and spliced in as a
+string (<code>null</code> becomes <code>""</code>). Quotes and <code>/</code> inside a hole are not the
+enclosing delimiter, so a hole can itself contain string literals.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">occurrence</span><span class="p">(</span><span class="s">"/info/title"</span><span class="p">,</span><span class="w"> </span><span class="n">api</span><span class="p">.</span><span class="na">info</span><span class="p">.</span><span class="na">title</span><span class="p">,</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">    </span><span class="s">"Title should end with '{{rule.parameters.suffix}}'"</span><span class="p">)</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1">// splice a rule-supplied fragment into a pattern</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="n">schema</span><span class="p">.</span><span class="na">name</span><span class="w"> </span><span class="o">==~</span><span class="w"> </span><span class="o">/</span><span class="p">{{</span><span class="n">rule</span><span class="p">.</span><span class="na">parameters</span><span class="o">[</span><span class="s">"prefix"</span><span class="o">]</span><span class="p">}}</span><span class="o">[</span><span class="n">A</span><span class="o">-</span><span class="n">Z</span><span class="o">][</span><span class="n">A</span><span class="o">-</span><span class="n">Za</span><span class="o">-</span><span class="n">z0</span><span class="o">-</span><span class="mi">9</span><span class="o">]*/</span>
+</code></pre></div>
+<p>A literal with no <code>{{</code> is an ordinary constant with no added cost. A hole is
+compiled and validated at bundle load like any other expression.</p>
+<h3 id="truthiness">Truthiness<a class="headerlink" href="#truthiness" title="Permanent link">&para;</a></h3>
+<p><code>false</code> and <code>null</code> are falsy. <strong>Everything else is truthy</strong>, including <code>""</code>,
+<code>0</code>, and <code>[]</code>. Use explicit checks (<code>text != ""</code>, <code>count(list) &gt; 0</code>) rather than
+relying on emptiness, and use <code>truthy(x)</code> when you need the boolean itself.</p>
+<h2 id="operators">Operators<a class="headerlink" href="#operators" title="Permanent link">&para;</a></h2>
+<p>Highest precedence first:</p>
+<table>
+<thead>
+<tr>
+<th>Operator</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>a.b</code>  <code>a.b(...)</code>  <code>a.b { x -&gt; ... }</code>  <code>a.b { ... }</code>  <code>a[k]</code></td>
+<td>member / method / trailing-closure / index</td>
+</tr>
+<tr>
+<td><code>!a</code>  <code>-a</code></td>
+<td>logical not, numeric negation</td>
+</tr>
+<tr>
+<td><code>a + b</code></td>
+<td>numeric <strong>integer</strong> add if both are numbers; list concat if both are lists; otherwise string concatenation (<code>null</code> renders as <code>"null"</code>)</td>
+</tr>
+<tr>
+<td><code>a &lt; b</code> <code>a &lt;= b</code> <code>a &gt; b</code> <code>a &gt;= b</code></td>
+<td>numeric by value; otherwise lexicographic on strings</td>
+</tr>
+<tr>
+<td><code>a == b</code> <code>a != b</code></td>
+<td>value equality — numbers compare by numeric value, so <code>8 == 8</code> across int/long/double</td>
+</tr>
+<tr>
+<td><code>a ==~ r</code> <code>a =~ r</code></td>
+<td>regex full-match / regex search (right side is a regex literal or a pattern string)</td>
+</tr>
+<tr>
+<td><code>a &amp;&amp; b</code> &nbsp;&nbsp; <code>a</code> <code>\|\|</code> <code>b</code></td>
+<td>short-circuit boolean</td>
+</tr>
+<tr>
+<td><code>c ? t : f</code></td>
+<td>conditional</td>
+</tr>
+</tbody>
+</table>
+<p>Notes:</p>
+<ul>
+<li><code>+</code> is the <strong>only</strong> arithmetic operator — there is no <code>-</code>, <code>*</code>, <code>/</code> or <code>%</code>
+  binary operator (<code>-a</code> is unary negation only). Matchers compare and count;
+  they do not do arithmetic.</li>
+<li><code>+</code> on two numbers is <strong>integer</strong> addition. To build a message string from a
+  number write <code>"" + n</code>, which takes the string-concatenation branch.</li>
+<li>A string or regex literal is never mistaken for an operator: <code>"-"</code>, <code>"."</code>
+  and <code>"=="</code> are ordinary strings.</li>
+<li><code>==</code> / <code>!=</code> are value equality. <code>parseInt(resp.status, -1) == 404</code> works even
+  though the parsed value is a <code>long</code> and the literal an <code>int</code>.</li>
+<li><code>&amp;&amp;</code> and <code>||</code> short-circuit, so <code>x != null &amp;&amp; x.lower() == "y"</code> is safe.</li>
+</ul>
+<h2 id="member-access-and-indexing">Member access and indexing<a class="headerlink" href="#member-access-and-indexing" title="Permanent link">&para;</a></h2>
+<p><code>value.name</code></p>
+<ul>
+<li>on a <strong>map</strong>: the entry <code>name</code>. If there is no such entry, <code>.keys</code> and
+  <code>.values</code> yield the map's keys / values as lists; any other missing name
+  yields <code>null</code>.</li>
+<li>on a <strong>string</strong>: <code>.length</code> (an integer). String <em>operations</em> are method
+  calls — see below.</li>
+<li>otherwise: <code>null</code>.</li>
+</ul>
+<p><code>value[key]</code></p>
+<ul>
+<li><strong>map</strong> <code>[string]</code> → that entry (<code>m["max-items"]</code> for keys that are not
+  identifiers).</li>
+<li><strong>list</strong> <code>[int]</code> → that element; negative indexes count from the end;
+  out-of-range yields <code>null</code>.</li>
+<li><strong>string</strong> <code>[key]</code> → same as <code>value.name</code>, so only <code>s["length"]</code> is
+  meaningful; strings are <strong>not</strong> indexable by character position (<code>s[0]</code> is
+  <code>null</code>). Use <code>s.startsWith(...)</code> / regex instead.</li>
+</ul>
+<h2 id="methods">Methods<a class="headerlink" href="#methods" title="Permanent link">&para;</a></h2>
+<h3 id="string-methods">String methods<a class="headerlink" href="#string-methods" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Call</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>s.lower()</code></td>
+<td>lower-cased copy</td>
+</tr>
+<tr>
+<td><code>s.trim()</code></td>
+<td>whitespace-trimmed copy</td>
+</tr>
+<tr>
+<td><code>s.contains(t)</code></td>
+<td>boolean</td>
+</tr>
+<tr>
+<td><code>s.startsWith(t)</code></td>
+<td>boolean</td>
+</tr>
+<tr>
+<td><code>s.endsWith(t)</code></td>
+<td>boolean</td>
+</tr>
+<tr>
+<td><code>s.length</code></td>
+<td>length (a member, not a call)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="sequence-methods">Sequence methods<a class="headerlink" href="#sequence-methods" title="Permanent link">&para;</a></h3>
+<p>Each takes a <strong>trailing closure</strong> <code>{ item -&gt; expression }</code> (except <code>toList</code>).
+Closures have one expression body and may only appear in trailing position. The
+parameter name is optional: <code>{ x -&gt; x.type }</code> and <code>{ it.type }</code> are equivalent —
+omit the <code>x -&gt;</code> and the item is <code>it</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Call</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>xs.map { x -&gt; ... }</code></td>
+<td>list of the closure results</td>
+</tr>
+<tr>
+<td><code>xs.filter { x -&gt; ... }</code></td>
+<td>items for which the closure is truthy (<code>match</code> is an alias)</td>
+</tr>
+<tr>
+<td><code>xs.expand { x -&gt; ... }</code></td>
+<td>closure returns a list per item; results are flattened one level</td>
+</tr>
+<tr>
+<td><code>xs.any { x -&gt; ... }</code></td>
+<td><code>true</code> if the closure is truthy for some item</td>
+</tr>
+<tr>
+<td><code>xs.all { x -&gt; ... }</code></td>
+<td><code>true</code> if the closure is truthy for every item</td>
+</tr>
+<tr>
+<td><code>xs.find { x -&gt; ... }</code></td>
+<td>first matching item, or <code>null</code></td>
+</tr>
+<tr>
+<td><code>xs.count { x -&gt; ... }</code></td>
+<td>number of matching items</td>
+</tr>
+<tr>
+<td><code>xs.group { x -&gt; key }</code></td>
+<td>a map of key → list of items with that key, in first-seen key order (keys compared by string value); iterate it with <code>.values</code></td>
+</tr>
+<tr>
+<td><code>xs.toList()</code></td>
+<td>shallow copy</td>
+</tr>
+</tbody>
+</table>
+<p><code>expand</code> is the Distill form of a nested loop:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">api</span><span class="p">.</span><span class="na">paths</span><span class="p">.</span><span class="na">expand</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">path</span><span class="p">.</span><span class="na">operationDetails</span><span class="p">.</span><span class="na">map</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">operation</span><span class="w"> </span><span class="o">-&gt;</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">    </span><span class="n">occurrence</span><span class="p">(</span><span class="n">operation</span><span class="p">.</span><span class="na">pointer</span><span class="p">,</span><span class="w"> </span><span class="n">operation</span><span class="p">.</span><span class="na">method</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">" "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">path</span><span class="p">.</span><span class="na">path</span><span class="p">,</span><span class="w"> </span><span class="s">"…"</span><span class="p">)</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<h3 id="repeatable-filtermap-checks">Repeatable filter/map: <code>checks</code><a class="headerlink" href="#repeatable-filtermap-checks" title="Permanent link">&para;</a></h3>
+<p>When a matcher runs several <strong>independent</strong> checks over the same collection,
+one nested <code>filter</code>/<code>map</code> forces the conditions into an inverted
+<code>!(passA || passB || …)</code> predicate and the messages into a parallel <code>? :</code>
+cascade — the condition that triggers an occurrence and the message that
+describes it end up far apart. <code>checks</code> keeps them together:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">checks</span><span class="p">(</span><span class="o">&lt;</span><span class="n">source</span><span class="o">&gt;</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">    </span><span class="n">filter</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="o">&lt;</span><span class="n">condition</span><span class="w"> </span><span class="n">A</span><span class="o">&gt;</span><span class="w"> </span><span class="p">}.</span><span class="na">map</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">occurrence</span><span class="p">(</span><span class="o">&lt;</span><span class="n">pointer</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="o">&lt;</span><span class="n">path</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="s">"&lt;message A&gt;"</span><span class="p">)</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="n">filter</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="o">&lt;</span><span class="n">condition</span><span class="w"> </span><span class="n">B</span><span class="o">&gt;</span><span class="w"> </span><span class="p">}.</span><span class="na">map</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">occurrence</span><span class="p">(</span><span class="o">&lt;</span><span class="n">pointer</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="o">&lt;</span><span class="n">path</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="s">"&lt;message B&gt;"</span><span class="p">)</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="p">}</span>
+</code></pre></div>
+<ul>
+<li><code>&lt;source&gt;</code> is evaluated <strong>once</strong> and bound for the whole block. Apply any
+  shared guard here: <code>checks(api.operations.filter { !(it.summary is blank) }) { … }</code>.</li>
+<li>Each comma-separated <strong>stanza</strong> is a bare <code>filter { … }.map { … }</code> chain
+  rooted at the source — no receiver token; <code>filter</code> with nothing before it
+  means "the block's source". The closures use the implicit <code>it</code>.</li>
+<li>The block's result is every stanza's occurrences <strong>concatenated</strong>. A subject
+  that matches two stanzas produces two occurrences.</li>
+<li><code>api.operations</code> and <code>api.schemaProperties</code> are flat views — every operation
+  / every schema property in one list, each element carrying its own <code>path</code>,
+  <code>pointer</code>, <code>name</code>, … — so a stanza rarely needs an outer <code>expand</code> to reach
+  its subject.</li>
+</ul>
+<p><code>checks</code> adds no statements: it is one expression, the stanzas are ordinary
+<code>filter</code>/<code>map</code> chains, and a per-rule parameter guard is just the first term of
+a stanza's <code>filter</code> (<code>rule.parameters["trailing-period"] == "present" &amp;&amp; …</code>).</p>
+<h2 id="builtin-functions">Builtin functions<a class="headerlink" href="#builtin-functions" title="Permanent link">&para;</a></h2>
+<p>This is the complete set — a closed boundary, not a starter kit. A matcher can
+call these and nothing else.</p>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>occurrence(pointer, path, message)</code></td>
+<td>an occurrence; <code>pointer</code> and <code>path</code> may be <code>null</code>, <code>message</code> must be non-blank. Non-string arguments are stringified.</td>
+</tr>
+<tr>
+<td><code>regexFullMatch(pattern, text)</code></td>
+<td>whole-string match; <code>pattern</code> is a regex literal or a string</td>
+</tr>
+<tr>
+<td><code>regexSearch(pattern, text)</code></td>
+<td>match anywhere in <code>text</code></td>
+</tr>
+<tr>
+<td><code>tokenize(delim, text)</code></td>
+<td>split <code>text</code> on the <strong>literal string</strong> <code>delim</code>; empty tokens are kept (pair with <code>.filter { t -&gt; t != "" }</code>)</td>
+</tr>
+<tr>
+<td><code>words(text)</code></td>
+<td>substantive words of <code>text</code>: whitespace-separated tokens, leading/trailing punctuation stripped, keeping only those that still contain a letter. Count is <code>count(words(text))</code>; per-word length is <code>w.length</code> inside <code>.any</code> / <code>.all</code> / <code>.filter</code></td>
+</tr>
+<tr>
+<td><code>startsWithAny(text, prefixes)</code></td>
+<td><code>text</code> (trimmed) begins with one of <code>prefixes</code> as a whole first word — it equals the prefix or the prefix is followed by a space. <code>prefixes</code> is a list or a comma-separated string</td>
+</tr>
+<tr>
+<td><code>count(list)</code></td>
+<td>element count (an integer). For a filtered count use the sequence form <code>list.count { x -&gt; ... }</code>.</td>
+</tr>
+<tr>
+<td><code>distinct(list)</code></td>
+<td>de-duplicated list — drops <code>null</code>, keeps first-seen order, compares by string value</td>
+</tr>
+<tr>
+<td><code>parseInt(text)</code> / <code>parseInt(text, fallback)</code></td>
+<td>base-10 integer after trimming; <code>fallback</code> (default <code>-1</code>) on failure</td>
+</tr>
+<tr>
+<td><code>join(sep, list)</code></td>
+<td>elements joined with <code>sep</code></td>
+</tr>
+<tr>
+<td><code>urlHost(url)</code></td>
+<td>host component of <code>url</code>, or <code>null</code></td>
+</tr>
+<tr>
+<td><code>strip(text)</code> / <code>strip(text, chars)</code></td>
+<td>one arg trims whitespace; two args strip any character in <code>chars</code> from both ends</td>
+</tr>
+<tr>
+<td><code>last(list)</code></td>
+<td>last element, or <code>""</code> when empty</td>
+</tr>
+<tr>
+<td><code>type(value)</code></td>
+<td><code>"string"</code>, <code>"int"</code>, <code>"float"</code>, <code>"bool"</code>, <code>"dict"</code>, <code>"list"</code>, <code>"NoneType"</code>, or <code>"object"</code></td>
+</tr>
+<tr>
+<td><code>truthy(value)</code></td>
+<td>the boolean truth value (<code>false</code>/<code>null</code> → <code>false</code>, everything else → <code>true</code>)</td>
+</tr>
+<tr>
+<td><code>enumerate(list)</code></td>
+<td>list of <code>[index, value]</code> pairs; <code>index</code> is an integer</td>
+</tr>
+<tr>
+<td><code>pathSegments(path)</code></td>
+<td>the <code>/</code>-separated segments of <code>path</code>, dropping empty segments and <code>{templated}</code> ones</td>
+</tr>
+</tbody>
+</table>
+<p>Adding to this list means a reviewed change to the interpreter itself. A
+matcher cannot define its own functions, import anything, or otherwise reach
+past the set.</p>
+<h2 id="regular-expressions">Regular expressions<a class="headerlink" href="#regular-expressions" title="Permanent link">&para;</a></h2>
+<p>Distill supports a slashy regex literal. <code>/pattern/</code> is a regex <strong>wherever an
+operand is expected</strong> — after <code>==~</code>, <code>=~</code>, <code>(</code>, <code>,</code>, <code>&amp;&amp;</code>, <code>||</code>, <code>return</code>, and
+so on. The explicit <code>~/pattern/</code> form is a regex anywhere. Inside the literal,
+backslashes are taken literally — write <code>\b</code>, <code>\d</code>, <code>\.</code> — and only <code>\/</code> is an
+escaped slash.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="n">name</span><span class="w"> </span><span class="o">==~</span><span class="w"> </span><span class="o">/[</span><span class="n">a</span><span class="o">-</span><span class="n">z</span><span class="o">][</span><span class="n">a</span><span class="o">-</span><span class="n">zA</span><span class="o">-</span><span class="n">Z0</span><span class="o">-</span><span class="mi">9</span><span class="o">]*/</span><span class="w">            </span><span class="c1">// whole-string match</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="n">path</span><span class="p">.</span><span class="na">path</span><span class="w"> </span><span class="o">=~</span><span class="w"> </span><span class="o">/</span><span class="p">(</span><span class="o">?</span><span class="n">i</span><span class="p">)</span><span class="err">\</span><span class="o">/</span><span class="n">v</span><span class="o">[</span><span class="mi">0</span><span class="o">-</span><span class="mi">9</span><span class="o">]+</span><span class="err">\</span><span class="c1">//          // search</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="n">regexFullMatch</span><span class="p">(</span><span class="s">"(?i).*\\berror\\b.*"</span><span class="p">,</span><span class="w"> </span><span class="n">text</span><span class="p">)</span><span class="w">   </span><span class="c1">// string pattern: normal Java escaping</span>
+</code></pre></div>
+<p><code>a ==~ r</code> is a whole-string match, <code>a =~ r</code> is a search. The engine is RE2/J:
+linear-time, no backreferences, no catastrophic backtracking.</p>
+<p>A regex literal may contain <a href="#interpolation--expr"><code>{{ expr }}</code> holes</a> to build
+part of the pattern from a rule parameter at evaluation time. The resolved
+pattern is compiled once and cached, so a hole whose value is constant for the
+run costs nothing after the first call.</p>
+<h2 id="worked-examples">Worked examples<a class="headerlink" href="#worked-examples" title="Permanent link">&para;</a></h2>
+<h3 id="expressions">Expressions<a class="headerlink" href="#expressions" title="Permanent link">&para;</a></h3>
+<p>Each row is a complete expression and the value it produces.</p>
+<table>
+<thead>
+<tr>
+<th>Expression</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>2 + 3</code></td>
+<td><code>5</code></td>
+</tr>
+<tr>
+<td><code>"" + 2 + 3</code></td>
+<td><code>"23"</code> — left to right: <code>("" + 2)</code> is <code>"2"</code>, then <code>+ 3</code></td>
+</tr>
+<tr>
+<td><code>["x", "y"] + ["z"]</code></td>
+<td><code>["x", "y", "z"]</code></td>
+</tr>
+<tr>
+<td><code>[10, 20, 30][-1]</code></td>
+<td><code>30</code> — negative index counts from the end</td>
+</tr>
+<tr>
+<td><code>[10, 20, 30][5]</code></td>
+<td><code>null</code> — out of range</td>
+</tr>
+<tr>
+<td><code>type(3)</code> &nbsp; <code>type("s")</code> &nbsp; <code>type([1])</code></td>
+<td><code>"int"</code> &nbsp; <code>"string"</code> &nbsp; <code>"list"</code></td>
+</tr>
+<tr>
+<td><code>truthy("")</code> &nbsp; <code>truthy([])</code> &nbsp; <code>truthy(0)</code></td>
+<td><code>true</code> &nbsp; <code>true</code> &nbsp; <code>true</code></td>
+</tr>
+<tr>
+<td><code>tokenize(",", "a,,b")</code></td>
+<td><code>["a", "", "b"]</code> — empty token kept</td>
+</tr>
+<tr>
+<td><code>count(tokenize(",", "a,,b"))</code></td>
+<td><code>3</code></td>
+</tr>
+<tr>
+<td><code>join("|", tokenize(",", "a,,b"))</code></td>
+<td><code>"a\|\|b"</code></td>
+</tr>
+<tr>
+<td><code>distinct(["b", "a", "b", null, "a"])</code></td>
+<td><code>["b", "a"]</code> — <code>null</code> dropped, first-seen order</td>
+</tr>
+<tr>
+<td><code>pathSegments("/v1/orders/{id}/items")</code></td>
+<td><code>["v1", "orders", "items"]</code> — empty and <code>{…}</code> segments dropped</td>
+</tr>
+<tr>
+<td><code>words("Get  the widget — v2!")</code></td>
+<td><code>["Get", "the", "widget", "v2"]</code> — whitespace runs collapsed, <code>—</code> and <code>!</code> dropped</td>
+</tr>
+<tr>
+<td><code>words("List").size()</code> &nbsp; <code>count(words("List all customers"))</code></td>
+<td><code>1</code> &nbsp; <code>3</code></td>
+</tr>
+<tr>
+<td><code>parseInt("  42 ")</code> &nbsp; <code>parseInt("x", 0)</code></td>
+<td><code>42</code> &nbsp; <code>0</code></td>
+</tr>
+<tr>
+<td><code>strip("--hi--", "-")</code> &nbsp; <code>strip("  hi  ")</code></td>
+<td><code>"hi"</code> &nbsp; <code>"hi"</code></td>
+</tr>
+<tr>
+<td><code>last(["a", "b"])</code> &nbsp; <code>last([])</code></td>
+<td><code>"b"</code> &nbsp; <code>""</code></td>
+</tr>
+<tr>
+<td><code>"Order-1" ==~ /[A-Za-z]+-[0-9]+/</code></td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>enumerate(["a", "b"]).map { p -&gt; p[0] + "=" + p[1] }</code></td>
+<td><code>["0=a", "1=b"]</code></td>
+</tr>
+<tr>
+<td><code>["ax", "ay", "bz"].group { s -&gt; s.startsWith("a") }.values</code></td>
+<td><code>[["ax", "ay"], ["bz"]]</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="matchers">Matchers<a class="headerlink" href="#matchers" title="Permanent link">&para;</a></h3>
+<p>Each example is a full <code>Matcher.dsl</code> run against the spec beside it; the
+output is the list of occurrences (<code>pointer</code> &nbsp;|&nbsp; <code>path</code> &nbsp;|&nbsp; <code>message</code>).</p>
+<p><strong>Operations with no <code>summary</code>.</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">distill</span><span class="p">(</span><span class="n">api</span><span class="p">,</span><span class="w"> </span><span class="n">rule</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">api</span><span class="p">.</span><span class="na">paths</span><span class="p">.</span><span class="na">expand</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">path</span><span class="p">.</span><span class="na">operationDetails</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">        </span><span class="p">.</span><span class="na">filter</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">op</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">op</span><span class="p">.</span><span class="na">summary</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">op</span><span class="p">.</span><span class="na">summary</span><span class="p">.</span><span class="na">trim</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">""</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">        </span><span class="p">.</span><span class="na">map</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">op</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">occurrence</span><span class="p">(</span><span class="n">op</span><span class="p">.</span><span class="na">pointer</span><span class="p">,</span><span class="w"> </span><span class="n">op</span><span class="p">.</span><span class="na">method</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">" "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">path</span><span class="p">.</span><span class="na">path</span><span class="p">,</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">            </span><span class="s">"Operation has no summary"</span><span class="p">)</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">};</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nt">paths</span><span class="p">:</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">  </span><span class="nt">/orders</span><span class="p">:</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">    </span><span class="nt">get</span><span class="p">:</span><span class="w">  </span><span class="p p-Indicator">{</span><span class="nt"> summary</span><span class="p">:</span><span class="w"> </span><span class="nv">List orders</span><span class="p p-Indicator">,</span><span class="nt"> responses</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="w"> </span><span class="s">'200'</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> description</span><span class="p">:</span><span class="w"> </span><span class="nv">ok</span><span class="w"> </span><span class="p p-Indicator">}</span><span class="w"> </span><span class="p p-Indicator">}</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">    </span><span class="nt">post</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> responses</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="w"> </span><span class="s">'201'</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> description</span><span class="p">:</span><span class="w"> </span><span class="nv">created</span><span class="w"> </span><span class="p p-Indicator">}</span><span class="w"> </span><span class="p p-Indicator">}</span><span class="w"> </span><span class="p p-Indicator">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>/paths/~1orders/post  |  POST /orders  |  Operation has no summary
+</code></pre></div>
+<p><strong>Property names must be camelCase.</strong></p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="n">distill</span><span class="p">(</span><span class="n">api</span><span class="p">,</span><span class="w"> </span><span class="n">rule</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">api</span><span class="p">.</span><span class="na">schemas</span><span class="p">.</span><span class="na">expand</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">schema</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">schema</span><span class="p">.</span><span class="na">properties</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">        </span><span class="p">.</span><span class="na">filter</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">prop</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="o">!</span><span class="p">(</span><span class="n">prop</span><span class="p">.</span><span class="na">name</span><span class="w"> </span><span class="o">==~</span><span class="w"> </span><span class="o">/[</span><span class="n">a</span><span class="o">-</span><span class="n">z</span><span class="o">][</span><span class="n">a</span><span class="o">-</span><span class="n">zA</span><span class="o">-</span><span class="n">Z0</span><span class="o">-</span><span class="mi">9</span><span class="o">]*/</span><span class="p">)</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">        </span><span class="p">.</span><span class="na">map</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">prop</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">occurrence</span><span class="p">(</span><span class="n">prop</span><span class="p">.</span><span class="na">pointer</span><span class="p">,</span><span class="w"> </span><span class="n">schema</span><span class="p">.</span><span class="na">name</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">"."</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">prop</span><span class="p">.</span><span class="na">name</span><span class="p">,</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">            </span><span class="s">"Property '"</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">prop</span><span class="p">.</span><span class="na">name</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">"' is not camelCase"</span><span class="p">)</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">};</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nt">components</span><span class="p">:</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">  </span><span class="nt">schemas</span><span class="p">:</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">    </span><span class="nt">Order</span><span class="p">:</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">      </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">object</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">      </span><span class="nt">properties</span><span class="p">:</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">        </span><span class="nt">orderId</span><span class="p">:</span><span class="w">    </span><span class="p p-Indicator">{</span><span class="nt"> type</span><span class="p">:</span><span class="w"> </span><span class="nv">string</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">        </span><span class="nt">created_at</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> type</span><span class="p">:</span><span class="w"> </span><span class="nv">string</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">        </span><span class="nt">Total</span><span class="p">:</span><span class="w">      </span><span class="p p-Indicator">{</span><span class="nt"> type</span><span class="p">:</span><span class="w"> </span><span class="nv">number</span><span class="w"> </span><span class="p p-Indicator">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>/components/schemas/Order/properties/created_at  |  Order.created_at  |  Property 'created_at' is not camelCase
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>/components/schemas/Order/properties/Total       |  Order.Total       |  Property 'Total' is not camelCase
+</code></pre></div>
+<p><strong>One occurrence for the whole API</strong> — the title must end with a configured
+suffix. <code>rule.parameters</code> is <code>{ "suffix": "API" }</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="n">distill</span><span class="p">(</span><span class="n">api</span><span class="p">,</span><span class="w"> </span><span class="n">rule</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">api</span><span class="p">.</span><span class="na">info</span><span class="p">.</span><span class="na">title</span><span class="p">.</span><span class="na">endsWith</span><span class="p">(</span><span class="n">rule</span><span class="p">.</span><span class="na">parameters</span><span class="o">[</span><span class="s">"suffix"</span><span class="o">]</span><span class="p">)</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">        </span><span class="o">?</span><span class="w"> </span><span class="o">[]</span>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">        </span><span class="p">:</span><span class="w"> </span><span class="o">[</span><span class="n">occurrence</span><span class="p">(</span><span class="s">"/info/title"</span><span class="p">,</span><span class="w"> </span><span class="n">api</span><span class="p">.</span><span class="na">info</span><span class="p">.</span><span class="na">title</span><span class="p">,</span>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="w">            </span><span class="s">"Title should end with '"</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">rule</span><span class="p">.</span><span class="na">parameters</span><span class="o">[</span><span class="s">"suffix"</span><span class="o">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">"'"</span><span class="p">)</span><span class="o">]</span><span class="p">;</span>
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nt">info</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> title</span><span class="p">:</span><span class="w"> </span><span class="nv">Payments</span><span class="p p-Indicator">,</span><span class="nt"> version</span><span class="p">:</span><span class="w"> </span><span class="nv">1.0.0</span><span class="w"> </span><span class="p p-Indicator">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>/info/title  |  Payments  |  Title should end with 'API'
+</code></pre></div>
+<p><strong>Duplicate <code>operationId</code></strong> — group by id, then report every operation after
+the first in a group. This is the <code>operation-metadata</code> matcher's real
+<code>unique-operation-id</code> shape (blank-id handling elided). <code>group</code> is a list of
+<code>[pointer, location, operationId]</code> entries; <code>enumerate</code> supplies the index so
+the first entry can be skipped.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="n">distill</span><span class="p">(</span><span class="n">api</span><span class="p">,</span><span class="w"> </span><span class="n">rule</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">api</span><span class="p">.</span><span class="na">paths</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="w">        </span><span class="p">.</span><span class="na">expand</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">path</span><span class="p">.</span><span class="na">operationDetails</span><span class="p">.</span><span class="na">map</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">op</span><span class="w"> </span><span class="o">-&gt;</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="w">            </span><span class="o">[</span><span class="n">op</span><span class="p">.</span><span class="na">pointer</span><span class="p">,</span><span class="w"> </span><span class="n">op</span><span class="p">.</span><span class="na">method</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">" "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">path</span><span class="p">.</span><span class="na">path</span><span class="p">,</span><span class="w"> </span><span class="n">op</span><span class="p">.</span><span class="na">operationId</span><span class="o">]</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="w">        </span><span class="p">.</span><span class="na">group</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">entry</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="s">""</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">entry</span><span class="o">[</span><span class="mi">2</span><span class="o">]</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="w">        </span><span class="p">.</span><span class="na">values</span>
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="w">        </span><span class="p">.</span><span class="na">filter</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">group</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">count</span><span class="p">(</span><span class="n">group</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a><span class="w">        </span><span class="p">.</span><span class="na">expand</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">group</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">enumerate</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
+<a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a><span class="w">            </span><span class="p">.</span><span class="na">filter</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">indexed</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">indexed</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a><span class="w">            </span><span class="p">.</span><span class="na">map</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">indexed</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">occurrence</span><span class="p">(</span><span class="n">indexed</span><span class="o">[</span><span class="mi">1</span><span class="o">][</span><span class="mi">0</span><span class="o">]</span><span class="p">,</span><span class="w"> </span><span class="n">indexed</span><span class="o">[</span><span class="mi">1</span><span class="o">][</span><span class="mi">1</span><span class="o">]</span><span class="p">,</span>
+<a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a><span class="w">                </span><span class="s">"operationId '"</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">group</span><span class="o">[</span><span class="mi">0</span><span class="o">][</span><span class="mi">2</span><span class="o">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">"' is also used by "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">group</span><span class="o">[</span><span class="mi">0</span><span class="o">][</span><span class="mi">1</span><span class="o">]</span><span class="p">)</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">};</span>
+<a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a><span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="nt">paths</span><span class="p">:</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">/orders/{id}</span><span class="p p-Indicator">:</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="w">    </span><span class="nt">get</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> operationId</span><span class="p">:</span><span class="w"> </span><span class="nv">getOrder</span><span class="p p-Indicator">,</span><span class="nt"> responses</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="w"> </span><span class="s">'200'</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> description</span><span class="p">:</span><span class="w"> </span><span class="nv">ok</span><span class="w"> </span><span class="p p-Indicator">}</span><span class="w"> </span><span class="p p-Indicator">}</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="w">    </span><span class="nt">put</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> operationId</span><span class="p">:</span><span class="w"> </span><span class="nv">getOrder</span><span class="p p-Indicator">,</span><span class="nt"> responses</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="w"> </span><span class="s">'200'</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> description</span><span class="p">:</span><span class="w"> </span><span class="nv">ok</span><span class="w"> </span><span class="p p-Indicator">}</span><span class="w"> </span><span class="p p-Indicator">}</span><span class="w"> </span><span class="p p-Indicator">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>/paths/~1orders~1{id}/put  |  PUT /orders/{id}  |  operationId 'getOrder' is also used by GET /orders/{id}
+</code></pre></div>
+<p><strong>Several checks over one collection — nested <code>filter</code>/<code>map</code> vs <code>checks</code>.</strong>
+The <code>text-style</code> matcher inspects an operation summary against a handful of
+mechanical style checks, one selected per rule via <code>rule.parameters</code>. Written
+as one nested pipeline the selecting conditions invert into a single
+<code>!(… || … || …)</code> predicate and the messages sit in a separate parallel
+cascade:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="c1">// before — condition and message never adjacent</span>
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="n">distill</span><span class="p">(</span><span class="n">api</span><span class="p">,</span><span class="w"> </span><span class="n">rule</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">api</span><span class="p">.</span><span class="na">paths</span><span class="p">.</span><span class="na">expand</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">path</span><span class="p">.</span><span class="na">operationDetails</span>
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="w">        </span><span class="p">.</span><span class="na">filter</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">op</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">op</span><span class="p">.</span><span class="na">summary</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">op</span><span class="p">.</span><span class="na">summary</span><span class="p">.</span><span class="na">trim</span><span class="p">()</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="s">""</span>
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a><span class="w">            </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="p">(</span>
+<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a><span class="w">                </span><span class="p">(</span><span class="n">rule</span><span class="p">.</span><span class="na">parameters</span><span class="o">[</span><span class="s">"trailing-period"</span><span class="o">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">"present"</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="o">!</span><span class="n">op</span><span class="p">.</span><span class="na">summary</span><span class="p">.</span><span class="na">trim</span><span class="p">().</span><span class="na">endsWith</span><span class="p">(</span><span class="s">"."</span><span class="p">))</span>
+<a id="__codelineno-17-7" name="__codelineno-17-7" href="#__codelineno-17-7"></a><span class="w">                </span><span class="o">||</span><span class="w"> </span><span class="p">(</span><span class="n">rule</span><span class="p">.</span><span class="na">parameters</span><span class="o">[</span><span class="s">"trailing-period"</span><span class="o">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">"absent"</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">op</span><span class="p">.</span><span class="na">summary</span><span class="p">.</span><span class="na">trim</span><span class="p">().</span><span class="na">endsWith</span><span class="p">(</span><span class="s">"."</span><span class="p">))</span>
+<a id="__codelineno-17-8" name="__codelineno-17-8" href="#__codelineno-17-8"></a><span class="w">                </span><span class="o">||</span><span class="w"> </span><span class="p">(</span><span class="n">rule</span><span class="p">.</span><span class="na">parameters</span><span class="o">[</span><span class="s">"minimum-words"</span><span class="o">]</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span>
+<a id="__codelineno-17-9" name="__codelineno-17-9" href="#__codelineno-17-9"></a><span class="w">                    </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">count</span><span class="p">(</span><span class="n">words</span><span class="p">(</span><span class="n">op</span><span class="p">.</span><span class="na">summary</span><span class="p">))</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="n">rule</span><span class="p">.</span><span class="na">parameters</span><span class="o">[</span><span class="s">"minimum-words"</span><span class="o">]</span><span class="p">)</span>
+<a id="__codelineno-17-10" name="__codelineno-17-10" href="#__codelineno-17-10"></a><span class="w">                </span><span class="cm">/* …four more branches… */</span><span class="p">)</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-17-11" name="__codelineno-17-11" href="#__codelineno-17-11"></a><span class="w">        </span><span class="p">.</span><span class="na">map</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">op</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">occurrence</span><span class="p">(</span><span class="n">op</span><span class="p">.</span><span class="na">pointer</span><span class="p">,</span><span class="w"> </span><span class="n">op</span><span class="p">.</span><span class="na">method</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">" "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">path</span><span class="p">.</span><span class="na">path</span><span class="p">,</span>
+<a id="__codelineno-17-12" name="__codelineno-17-12" href="#__codelineno-17-12"></a><span class="w">            </span><span class="n">rule</span><span class="p">.</span><span class="na">parameters</span><span class="o">[</span><span class="s">"trailing-period"</span><span class="o">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">"present"</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s">"Operation summary ends with a period"</span>
+<a id="__codelineno-17-13" name="__codelineno-17-13" href="#__codelineno-17-13"></a><span class="w">                </span><span class="p">:</span><span class="w"> </span><span class="n">rule</span><span class="p">.</span><span class="na">parameters</span><span class="o">[</span><span class="s">"minimum-words"</span><span class="o">]</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s">"Operation summary has too few words to be meaningful"</span>
+<a id="__codelineno-17-14" name="__codelineno-17-14" href="#__codelineno-17-14"></a><span class="w">                </span><span class="cm">/* …four more branches, kept in the same order as above… */</span>
+<a id="__codelineno-17-15" name="__codelineno-17-15" href="#__codelineno-17-15"></a><span class="w">                </span><span class="p">:</span><span class="w"> </span><span class="s">"Operation summary matches the configured style rule"</span><span class="p">)</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">};</span>
+<a id="__codelineno-17-16" name="__codelineno-17-16" href="#__codelineno-17-16"></a><span class="p">}</span>
+</code></pre></div>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="c1">// after — one stanza per check, condition directly above its message</span>
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="n">distill</span><span class="p">(</span><span class="n">api</span><span class="p">,</span><span class="w"> </span><span class="n">rule</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-18-3" name="__codelineno-18-3" href="#__codelineno-18-3"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">checks</span><span class="p">(</span><span class="n">api</span><span class="p">.</span><span class="na">operations</span><span class="p">.</span><span class="na">filter</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="o">!</span><span class="p">(</span><span class="n">it</span><span class="p">.</span><span class="na">summary</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">blank</span><span class="p">)</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-18-4" name="__codelineno-18-4" href="#__codelineno-18-4"></a>
+<a id="__codelineno-18-5" name="__codelineno-18-5" href="#__codelineno-18-5"></a><span class="w">        </span><span class="n">filter</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">rule</span><span class="p">.</span><span class="na">parameters</span><span class="o">[</span><span class="s">"trailing-period"</span><span class="o">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s">"present"</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">it</span><span class="p">.</span><span class="na">summary</span><span class="p">.</span><span class="na">trim</span><span class="p">().</span><span class="na">endsWith</span><span class="p">(</span><span class="s">"."</span><span class="p">)</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-18-6" name="__codelineno-18-6" href="#__codelineno-18-6"></a><span class="w">          </span><span class="p">.</span><span class="na">map</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">occurrence</span><span class="p">(</span><span class="n">it</span><span class="p">.</span><span class="na">pointer</span><span class="p">,</span><span class="w"> </span><span class="n">it</span><span class="p">.</span><span class="na">method</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">" "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">it</span><span class="p">.</span><span class="na">path</span><span class="p">,</span>
+<a id="__codelineno-18-7" name="__codelineno-18-7" href="#__codelineno-18-7"></a><span class="w">                            </span><span class="s">"Operation summary ends with a period"</span><span class="p">)</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-18-8" name="__codelineno-18-8" href="#__codelineno-18-8"></a>
+<a id="__codelineno-18-9" name="__codelineno-18-9" href="#__codelineno-18-9"></a><span class="w">        </span><span class="n">filter</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">rule</span><span class="p">.</span><span class="na">parameters</span><span class="o">[</span><span class="s">"minimum-words"</span><span class="o">]</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span>
+<a id="__codelineno-18-10" name="__codelineno-18-10" href="#__codelineno-18-10"></a><span class="w">                 </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">count</span><span class="p">(</span><span class="n">words</span><span class="p">(</span><span class="n">it</span><span class="p">.</span><span class="na">summary</span><span class="p">))</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">rule</span><span class="p">.</span><span class="na">parameters</span><span class="o">[</span><span class="s">"minimum-words"</span><span class="o">]</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-18-11" name="__codelineno-18-11" href="#__codelineno-18-11"></a><span class="w">          </span><span class="p">.</span><span class="na">map</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">occurrence</span><span class="p">(</span><span class="n">it</span><span class="p">.</span><span class="na">pointer</span><span class="p">,</span><span class="w"> </span><span class="n">it</span><span class="p">.</span><span class="na">method</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">" "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">it</span><span class="p">.</span><span class="na">path</span><span class="p">,</span>
+<a id="__codelineno-18-12" name="__codelineno-18-12" href="#__codelineno-18-12"></a><span class="w">                            </span><span class="s">"Operation summary has too few words to be meaningful"</span><span class="p">)</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-18-13" name="__codelineno-18-13" href="#__codelineno-18-13"></a>
+<a id="__codelineno-18-14" name="__codelineno-18-14" href="#__codelineno-18-14"></a><span class="w">        </span><span class="n">filter</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">rule</span><span class="p">.</span><span class="na">parameters</span><span class="o">[</span><span class="s">"maximum-word-length"</span><span class="o">]</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span>
+<a id="__codelineno-18-15" name="__codelineno-18-15" href="#__codelineno-18-15"></a><span class="w">                 </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">words</span><span class="p">(</span><span class="n">it</span><span class="p">.</span><span class="na">summary</span><span class="p">).</span><span class="na">any</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">w</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">w</span><span class="p">.</span><span class="na">length</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">rule</span><span class="p">.</span><span class="na">parameters</span><span class="o">[</span><span class="s">"maximum-word-length"</span><span class="o">]</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-18-16" name="__codelineno-18-16" href="#__codelineno-18-16"></a><span class="w">          </span><span class="p">.</span><span class="na">map</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">occurrence</span><span class="p">(</span><span class="n">it</span><span class="p">.</span><span class="na">pointer</span><span class="p">,</span><span class="w"> </span><span class="n">it</span><span class="p">.</span><span class="na">method</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s">" "</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">it</span><span class="p">.</span><span class="na">path</span><span class="p">,</span>
+<a id="__codelineno-18-17" name="__codelineno-18-17" href="#__codelineno-18-17"></a><span class="w">                            </span><span class="s">"Operation summary contains an unusually long word"</span><span class="p">)</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-18-18" name="__codelineno-18-18" href="#__codelineno-18-18"></a><span class="w">        </span><span class="cm">/* …the remaining checks, each its own stanza… */</span>
+<a id="__codelineno-18-19" name="__codelineno-18-19" href="#__codelineno-18-19"></a><span class="w">    </span><span class="p">};</span>
+<a id="__codelineno-18-20" name="__codelineno-18-20" href="#__codelineno-18-20"></a><span class="p">}</span>
+</code></pre></div>
+<h2 id="idioms">Idioms<a class="headerlink" href="#idioms" title="Permanent link">&para;</a></h2>
+<p>Because Distill has no local variables, a few patterns recur.</p>
+<p><strong>Repeat, don't bind.</strong> A value used several times is written out each time.
+Keep sub-expressions small and let <code>filter</code> / <code>map</code> carry the structure. The
+one exception is <a href="#repeatable-filtermap-checks"><code>checks(source) { … }</code></a>, which
+binds its source collection once for a block of <code>filter</code>/<code>map</code> stanzas.</p>
+<p><strong>Optional single occurrence.</strong> Use a list literal for the "emit one" and "emit
+nothing" branches, then let the surrounding <code>expand</code> flatten it:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="n">api</span><span class="p">.</span><span class="na">paths</span><span class="p">.</span><span class="na">expand</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="o">-&gt;</span>
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="w">    </span><span class="n">count</span><span class="p">(</span><span class="n">pathSegments</span><span class="p">(</span><span class="n">path</span><span class="p">.</span><span class="na">path</span><span class="p">))</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">rule</span><span class="p">.</span><span class="na">parameters</span><span class="o">[</span><span class="s">"maximum-depth"</span><span class="o">]</span>
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="w">        </span><span class="o">?</span><span class="w"> </span><span class="o">[</span><span class="n">occurrence</span><span class="p">(</span><span class="n">path</span><span class="p">.</span><span class="na">pointer</span><span class="p">,</span><span class="w"> </span><span class="n">path</span><span class="p">.</span><span class="na">path</span><span class="p">,</span><span class="w"> </span><span class="s">"Path nests too deeply"</span><span class="p">)</span><span class="o">]</span>
+<a id="__codelineno-19-4" name="__codelineno-19-4" href="#__codelineno-19-4"></a><span class="w">        </span><span class="p">:</span><span class="w"> </span><span class="o">[]</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<p><strong>Whole-API single occurrence.</strong> Same idea at the top level:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="n">distill</span><span class="p">(</span><span class="n">api</span><span class="p">,</span><span class="w"> </span><span class="n">rule</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">count</span><span class="p">(</span><span class="n">distinct</span><span class="p">(</span><span class="n">api</span><span class="p">.</span><span class="na">paths</span><span class="p">.</span><span class="na">map</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">pathSegments</span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="na">path</span><span class="p">)</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span><span class="w"> </span><span class="p">}))</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">rule</span><span class="p">.</span><span class="na">parameters</span><span class="o">[</span><span class="s">"maximum"</span><span class="o">]</span>
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="w">        </span><span class="o">?</span><span class="w"> </span><span class="o">[</span><span class="n">occurrence</span><span class="p">(</span><span class="s">"/paths"</span><span class="p">,</span><span class="w"> </span><span class="s">"API"</span><span class="p">,</span><span class="w"> </span><span class="s">"Too many top-level resources"</span><span class="p">)</span><span class="o">]</span>
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a><span class="w">        </span><span class="p">:</span><span class="w"> </span><span class="o">[]</span><span class="p">;</span>
+<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a><span class="p">}</span>
+</code></pre></div>
+<p><strong>"Seen already?" — group, don't accumulate.</strong> <code>group</code> replaces a mutable
+<code>seen</code> map: group the entries by their key, keep the groups with more than one
+member, and report all but the first (see the duplicate-<code>operationId</code> example
+above). <code>enumerate</code> then supplies the positional "all but the first" filter,
+<code>indexed[0] &gt; 0</code>. This is O(n) and needs no repetition.</p>
+<p><strong>List building.</strong> Concatenate independent checks with <code>+</code> when they run over
+<em>different</em> sources:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a><span class="n">info</span><span class="p">.</span><span class="na">extensionKeys</span><span class="p">.</span><span class="na">filter</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}.</span><span class="na">map</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">occurrence</span><span class="p">(...)</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="w">  </span><span class="o">+</span><span class="w"> </span><span class="n">api</span><span class="p">.</span><span class="na">paths</span><span class="p">.</span><span class="na">expand</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span>
+</code></pre></div>
+<p>When the checks share one source, use
+<a href="#repeatable-filtermap-checks"><code>checks(source) { … }</code></a> instead — it binds the
+source once and drops the repeated selector.</p>
+<h2 id="coverage">Coverage<a class="headerlink" href="#coverage" title="Permanent link">&para;</a></h2>
+<p>All 52 bundled matchers ship a <code>Matcher.dsl</code>, and all 155 bundled rules are
+built on those matchers. The <code>operation-metadata</code> matcher handles duplicate
+<code>operationId</code> values and the <code>response-example</code> matcher handles duplicate error
+payloads; both use <code>group</code> as shown above. <code>path-count</code> uses <code>pathSegments(...)</code>
+to stay within the grammar.</p>
+<p>This demonstrates the flexibility of the multi-level matcher/rule model: a
+single matcher can support several named rules, while policies decide which
+rules are active and can override their parameters for a particular policy.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Apache License 2.0
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.top", "content.code.copy", "content.action.edit", "search.suggest", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

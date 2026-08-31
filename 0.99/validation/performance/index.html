@@ -1,0 +1,1683 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Local-first API explorer for OpenAPI/Swagger specs with pluggable, policy-driven validation.">
+      
+      
+      
+        <link rel="canonical" href="https://johnjoeallen.github.io/arete/0.99/validation/performance/">
+      
+      
+        <link rel="prev" href="../policy-engine/">
+      
+      
+        <link rel="next" href="../distill/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>The case for Distill - Areté</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#the-case-for-distill" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Areté" class="md-header__button md-logo" aria-label="Areté" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Areté
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              The case for Distill
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/johnjoeallen/arete" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    johnjoeallen/arete
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Areté" class="md-nav__button md-logo" aria-label="Areté" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    Areté
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/johnjoeallen/arete" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    johnjoeallen/arete
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Automation API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../history/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    History
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Validation
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Validation
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../policy-engine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Areté Policy Engine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The case for Distill
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    The case for Distill
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#why-not-groovy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why not Groovy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-not-hand-written-java" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why not hand-written Java
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-distill-gives-up-and-what-it-keeps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Distill gives up, and what it keeps
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#plugins-are-a-separate-trust-tier" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Plugins are a separate trust tier
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#measurements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Measurements
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Measurements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#method" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Method
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#headline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Headline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#per-matcher" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per-matcher
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-hand-written-java-baseline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The hand-written Java baseline
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-the-overhead-actually-costs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the overhead actually costs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reproducing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reproducing
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../distill/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Distill reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../rules/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Rule Catalogue
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../policies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Policies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../writing-a-plugin/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Writing a Plugin
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../releasing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Releasing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../publishing-spi/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Publishing the SPI
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#why-not-groovy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why not Groovy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-not-hand-written-java" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why not hand-written Java
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-distill-gives-up-and-what-it-keeps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Distill gives up, and what it keeps
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#plugins-are-a-separate-trust-tier" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Plugins are a separate trust tier
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#measurements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Measurements
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Measurements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#method" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Method
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#headline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Headline
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#per-matcher" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per-matcher
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#the-hand-written-java-baseline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The hand-written Java baseline
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-the-overhead-actually-costs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What the overhead actually costs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reproducing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reproducing
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+    <a href="https://github.com/johnjoeallen/arete/edit/main/docs/validation/performance.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
+    </a>
+  
+  
+
+
+<h1 id="the-case-for-distill">The case for Distill<a class="headerlink" href="#the-case-for-distill" title="Permanent link">&para;</a></h1>
+<p>Areté evaluates every matcher with <a href="../distill/">Distill</a>. The policy engine
+exists so that adding a rule means writing a matcher, not writing a plugin;
+Distill is the language those matchers are written in. This page makes the
+argument for that design and shows the measurements behind it.</p>
+<p>A matcher has to be three things at once:</p>
+<ul>
+<li><strong>Safe to run from any source.</strong> Matchers are meant to be shared — bundled,
+  dropped into <code>~/.arete/policies/</code>, and in future pulled from a remote
+  source. Running one must not require trusting its author with the host JVM.</li>
+<li><strong>Changeable without a release.</strong> A new or adjusted rule should be an edit
+  to a text file, not a recompile-and-redeploy.</li>
+<li><strong>Cheap enough to ignore.</strong> A validation runs ~150 matcher evaluations;
+  their combined cost must stay small next to the unavoidable OpenAPI parse.</li>
+</ul>
+<p>Distill is the design that delivers all three. The two obvious alternatives
+each give one of them up, and the numbers below show what that buys — or
+doesn't.</p>
+<h2 id="why-not-groovy">Why not Groovy<a class="headerlink" href="#why-not-groovy" title="Permanent link">&para;</a></h2>
+<p>Matchers were originally Groovy closures run in-process. Groovy executes
+arbitrary code with full JVM access, so it fails the first requirement
+outright: a Groovy matcher from an untrusted source can do anything the
+application can. It is retained now only as a build-time parity reference —
+<code>Matcher.groovy</code> files are run against <code>Matcher.dsl</code> on every build to catch
+any semantic drift, never against a submitted spec.</p>
+<p>Groovy is not even the fast option. Compiled once and reused, it is <strong>~4–5×
+slower than Distill</strong> across the matcher set (measured below); as it was
+actually wired — recompiling the script with a fresh <code>GroovyShell</code> on every
+call — it was roughly 50× slower again. It offered neither safety nor speed.</p>
+<h2 id="why-not-hand-written-java">Why not hand-written Java<a class="headerlink" href="#why-not-hand-written-java" title="Permanent link">&para;</a></h2>
+<p>The other alternative is <a href="https://github.com/zalando/zally">Zally</a>'s model:
+every rule is a compiled Java class. That is genuinely fast — hand-written
+Java is <strong>~5–6× faster than Distill</strong> (measured below). But as the unit in
+which <em>rules</em> are written, it fails the other two requirements:</p>
+<ul>
+<li>A rule whose logic isn't covered by an existing matcher needs a <strong>new Java
+  class, a new release, and a redeploy</strong> before anyone can use it.</li>
+<li>Matchers can only ever ship <strong>inside the application jar</strong>. There is no safe
+  way to load one from <code>~/.arete/policies/</code>, an internal artifact repository
+  (Nexus, Artifactory), a Git repository or release asset (GitHub, GitLab, an
+  internal host), an HTTPS URL or object store (S3, GCS), an OCI registry, or
+  a shared policy service — because a Java class <em>is</em> code with full access.</li>
+</ul>
+<h2 id="what-distill-gives-up-and-what-it-keeps">What Distill gives up, and what it keeps<a class="headerlink" href="#what-distill-gives-up-and-what-it-keeps" title="Permanent link">&para;</a></h2>
+<p>Distill is code too — but it is not a general-purpose language. A matcher is a
+<strong>single expression</strong> that consumes <code>api</code> and <code>rule</code> and returns
+<code>occurrence(...)</code> values. The grammar has no statements, no local variables,
+no user-defined functions, and no other result type; the interpreter grants
+no I/O, reflection, recursion, or unbounded iteration. It is a narrow
+data-pipeline processor — <code>.map</code> / <code>.filter</code> / <code>.expand</code>, slashy regex
+literals, a fixed builtin set — and can be nothing else.</p>
+<p>That narrowness is what makes a matcher <strong>data rather than a program to be
+trusted</strong>: it can be loaded from anywhere and run without vetting its author,
+because the worst it can do is inspect the spec and hand back a list. The cost
+is interpreter overhead — a tree-walk instead of compiled bytecode — which the
+rest of this page quantifies.</p>
+<h2 id="plugins-are-a-separate-trust-tier">Plugins are a separate trust tier<a class="headerlink" href="#plugins-are-a-separate-trust-tier" title="Permanent link">&para;</a></h2>
+<p>None of this replaces Areté's plugin facility. A validation plugin is
+arbitrary compiled Java loaded through the SPI and a child-first classloader;
+<code>policy-based-validation-plugin</code> is itself one. A plugin runs with full
+application privileges, so <strong>installing one is a trust decision</strong> — and
+building it from source does not remove that boundary, it only moves the
+audit to you: the plugin's own code, its transitive dependencies, and its
+build. That trust is appropriate for a plugin, which is deliberately chosen,
+versioned, and deployed like any other dependency.</p>
+<p>The policy engine was built precisely so that this is the <strong>last plugin most
+deployments ever need</strong>. It cannot cover every conceivable check — a rule that
+needs data the model does not expose, or logic the pipeline cannot phrase,
+still calls for a plugin — but in practice virtually every API-style rule is
+expressible as a matcher. The intended path for a new rule is: write a
+<code>Matcher.dsl</code>, not a Java class; reserve a new plugin for the rare case that
+genuinely needs one.</p>
+<p>So trust is spent <strong>once, at the plugin boundary</strong>, and not again for every
+rule inside it. The policy plugin is vetted and installed; after that its
+matchers — bundled, local, or remote — carry no further risk, because a
+matcher cannot do what the plugin can. Coded plugins and sandboxed matchers
+are complementary: the plugin is where trusted, complex, compiled logic
+belongs; the matcher is where a shareable rule belongs — and the second is
+where nearly all the work happens.</p>
+<h2 id="measurements">Measurements<a class="headerlink" href="#measurements" title="Permanent link">&para;</a></h2>
+<div class="admonition note">
+<p class="admonition-title">These are ratios, not a benchmark suite</p>
+<p>Figures come from a single developer-machine run and vary with hardware
+and JIT state. The <em>shape</em> — Distill several times faster than Groovy on
+almost every matcher, several times slower than hand Java — is stable
+across runs; the exact microseconds are not.</p>
+</div>
+<h3 id="method">Method<a class="headerlink" href="#method" title="Permanent link">&para;</a></h3>
+<p><code>DistillGroovyParityTest.fullSweepParityAndPerformance</code> runs every
+dual-implemented matcher (38 of them) against <strong>five fixture specs</strong>, for
+<strong>every scope the matcher declares</strong>, supplying a loader-valid value for each
+required parameter — 300 matcher × scope × spec combinations. For each it
+asserts Groovy and Distill produce <strong>identical diagnostics</strong>, then times both:
+best of five runs of 100 calls, after 50 warm-up calls. Groovy is compiled
+once and the closure reused; Distill uses its parse cache — both as the
+deployed engine would behave (or would have).</p>
+<h3 id="headline">Headline<a class="headerlink" href="#headline" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th style="text-align: right;">Groovy (compiled once)</th>
+<th style="text-align: right;">Distill (cached parse)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>per-call time, summed over all 38 matchers</td>
+<td style="text-align: right;">~260 µs</td>
+<td style="text-align: right;"><strong>~55–65 µs</strong></td>
+</tr>
+<tr>
+<td>mean speedup</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;"><strong>~4–5× faster</strong></td>
+</tr>
+<tr>
+<td>full sweep, 300 combos</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">300 identical, 0 divergent</td>
+</tr>
+</tbody>
+</table>
+<p>Across the wider loop, a full-policy pass (111 rules) is ~4.9 ms and an
+end-to-end <code>validate()</code> on a 40-path spec is ~9.9 ms — of which the OpenAPI
+parse (~3 ms) and model adaptation (~1 ms) are the larger share. Distill's
+parse cache removes ~1.6 ms of that pass (reparsing every rule costs ~6.6 ms).</p>
+<h3 id="per-matcher">Per-matcher<a class="headerlink" href="#per-matcher" title="Permanent link">&para;</a></h3>
+<p>Microseconds per call, averaged over the matcher's scope × spec combinations.
+Speedup is Groovy ÷ Distill.</p>
+<table>
+<thead>
+<tr>
+<th>Matcher</th>
+<th style="text-align: right;">Combos</th>
+<th style="text-align: right;">Findings</th>
+<th style="text-align: right;">Groovy µs/call</th>
+<th style="text-align: right;">Distill µs/call</th>
+<th style="text-align: right;">Speedup</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>api-title</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">5.6</td>
+<td style="text-align: right;">1.3</td>
+<td style="text-align: right;">4.5×</td>
+</tr>
+<tr>
+<td><code>bulk-operation</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">8.4</td>
+<td style="text-align: right;">0.5</td>
+<td style="text-align: right;">18.0×</td>
+</tr>
+<tr>
+<td><code>common-field</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">4.0</td>
+<td style="text-align: right;">0.5</td>
+<td style="text-align: right;">8.1×</td>
+</tr>
+<tr>
+<td><code>compatibility</code></td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">&lt;0.1</td>
+<td style="text-align: right;">0.1</td>
+<td style="text-align: right;">~1×</td>
+</tr>
+<tr>
+<td><code>date-time-name</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">4.1</td>
+<td style="text-align: right;">0.5</td>
+<td style="text-align: right;">8.6×</td>
+</tr>
+<tr>
+<td><code>document-lint</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.1</td>
+<td style="text-align: right;">0.2</td>
+<td style="text-align: right;">5.2×</td>
+</tr>
+<tr>
+<td><code>documentation-completeness</code></td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">7.3</td>
+<td style="text-align: right;">1.5</td>
+<td style="text-align: right;">4.7×</td>
+</tr>
+<tr>
+<td><code>enum-values</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">4.4</td>
+<td style="text-align: right;">0.3</td>
+<td style="text-align: right;">13.4×</td>
+</tr>
+<tr>
+<td><code>example-validity</code></td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">2.1</td>
+<td style="text-align: right;">0.9</td>
+<td style="text-align: right;">2.4×</td>
+</tr>
+<tr>
+<td><code>extensions</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">24.9</td>
+<td style="text-align: right;">1.3</td>
+<td style="text-align: right;">18.5×</td>
+</tr>
+<tr>
+<td><code>header-schema</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">8.6</td>
+<td style="text-align: right;">0.6</td>
+<td style="text-align: right;">14.7×</td>
+</tr>
+<tr>
+<td><code>hostname</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">1.7</td>
+<td style="text-align: right;">0.7</td>
+<td style="text-align: right;">2.4×</td>
+</tr>
+<tr>
+<td><code>manual</code></td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">&lt;0.1</td>
+<td style="text-align: right;">0.1</td>
+<td style="text-align: right;">~1×</td>
+</tr>
+<tr>
+<td><code>media-type</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">12.4</td>
+<td style="text-align: right;">1.5</td>
+<td style="text-align: right;">8.0×</td>
+</tr>
+<tr>
+<td><code>metadata</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">6.9</td>
+<td style="text-align: right;">1.8</td>
+<td style="text-align: right;">3.9×</td>
+</tr>
+<tr>
+<td><code>naming</code></td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">7.3</td>
+<td style="text-align: right;">1.4</td>
+<td style="text-align: right;">5.2×</td>
+</tr>
+<tr>
+<td><code>openapi-version</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">4.4</td>
+<td style="text-align: right;">2.1</td>
+<td style="text-align: right;">2.1×</td>
+</tr>
+<tr>
+<td><code>operation</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.1</td>
+<td style="text-align: right;">1.1</td>
+<td style="text-align: right;">~1×</td>
+</tr>
+<tr>
+<td><code>operation-metadata</code></td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">9.0</td>
+<td style="text-align: right;">1.6</td>
+<td style="text-align: right;">5.5×</td>
+</tr>
+<tr>
+<td><code>operation-semantics</code></td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">11.5</td>
+<td style="text-align: right;">0.9</td>
+<td style="text-align: right;">13.0×</td>
+</tr>
+<tr>
+<td><code>parameter</code></td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">5.6</td>
+<td style="text-align: right;">1.2</td>
+<td style="text-align: right;">4.5×</td>
+</tr>
+<tr>
+<td><code>path-count</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">9.2</td>
+<td style="text-align: right;">2.8</td>
+<td style="text-align: right;">3.2×</td>
+</tr>
+<tr>
+<td><code>path-set</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">7.6</td>
+<td style="text-align: right;">8.1</td>
+<td style="text-align: right;">0.9×</td>
+</tr>
+<tr>
+<td><code>proprietary-header</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">19.4</td>
+<td style="text-align: right;">1.6</td>
+<td style="text-align: right;">12.5×</td>
+</tr>
+<tr>
+<td><code>query-collection</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">8.4</td>
+<td style="text-align: right;">0.7</td>
+<td style="text-align: right;">11.5×</td>
+</tr>
+<tr>
+<td><code>request-body</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">7.8</td>
+<td style="text-align: right;">0.7</td>
+<td style="text-align: right;">10.9×</td>
+</tr>
+<tr>
+<td><code>resource-path</code></td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">8.6</td>
+<td style="text-align: right;">2.7</td>
+<td style="text-align: right;">3.2×</td>
+</tr>
+<tr>
+<td><code>response-code</code></td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">6.8</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;">6.8×</td>
+</tr>
+<tr>
+<td><code>response-example</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">16.0</td>
+<td style="text-align: right;">3.7</td>
+<td style="text-align: right;">4.4×</td>
+</tr>
+<tr>
+<td><code>response-header</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">7.8</td>
+<td style="text-align: right;">0.9</td>
+<td style="text-align: right;">8.9×</td>
+</tr>
+<tr>
+<td><code>schema</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2.2</td>
+<td style="text-align: right;">1.9</td>
+<td style="text-align: right;">~1×</td>
+</tr>
+<tr>
+<td><code>schema-composition</code></td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">1.6</td>
+<td style="text-align: right;">0.3</td>
+<td style="text-align: right;">6.0×</td>
+</tr>
+<tr>
+<td><code>schema-name</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">3.8</td>
+<td style="text-align: right;">1.3</td>
+<td style="text-align: right;">2.9×</td>
+</tr>
+<tr>
+<td><code>security</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">11.6</td>
+<td style="text-align: right;">3.7</td>
+<td style="text-align: right;">3.1×</td>
+</tr>
+<tr>
+<td><code>server-url</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">4.1</td>
+<td style="text-align: right;">1.3</td>
+<td style="text-align: right;">3.2×</td>
+</tr>
+<tr>
+<td><code>status-class</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">10.1</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;">9.8×</td>
+</tr>
+<tr>
+<td><code>text-style</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2.1</td>
+<td style="text-align: right;">1.5</td>
+<td style="text-align: right;">~1×</td>
+</tr>
+<tr>
+<td><code>versioning</code></td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.7</td>
+<td style="text-align: right;">0.6</td>
+<td style="text-align: right;">3.1×</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Reading the outliers</strong></p>
+<ul>
+<li><strong><code>path-set</code> (~0.8×)</strong> is the only matcher where Distill is slower. Its DSL is
+  <code>O(n²)</code> — a nested <code>api.paths.find { … }</code> inside both <code>filter</code> and <code>map</code>,
+  re-tokenising every path — so Groovy's JIT-compiled inner loop edges ahead of
+  the interpreted tree-walk. A matcher-authoring cost, not an engine cost:
+  both do the same quadratic work.</li>
+<li><strong><code>operation</code>, <code>schema</code>, <code>text-style</code> (~1×)</strong> report zero findings here: the
+  sweep supplies only <em>required</em> parameters, and these matchers were changed to
+  emit nothing when handed no check parameter (rather than flag every subject).
+  Both engines now just run the empty-parameter guard, so the ratio is noise.</li>
+<li><strong><code>hostname</code>, <code>openapi-version</code>, <code>security</code> (~2–3×)</strong> spend most of their
+  time in RE2/J regex and string operations, shared by both engines, so the
+  interpreter overhead is proportionally small.</li>
+<li><strong><code>compatibility</code>, <code>manual</code> (~1×)</strong> are sub-microsecond on both; the ratio is
+  noise.</li>
+<li><strong><code>extensions</code>, <code>proprietary-header</code>, <code>bulk-operation</code>, <code>header-schema</code>
+  (12–18×)</strong> spend their time in Groovy's dynamic dispatch and closure
+  machinery over small collections — exactly what Distill's fixed builtin set
+  and direct iteration avoid.</li>
+</ul>
+<h3 id="the-hand-written-java-baseline">The hand-written Java baseline<a class="headerlink" href="#the-hand-written-java-baseline" title="Permanent link">&para;</a></h3>
+<p>Five matchers spanning the cost spectrum were re-implemented as plain Java
+(<code>JavaMatchers</code>, test scope only) against the same <code>(api, rule)</code> map contract.
+All three implementations produce identical diagnostics; times are best of
+five runs of 200, averaged over the fixture specs.</p>
+<table>
+<thead>
+<tr>
+<th>Matcher</th>
+<th style="text-align: right;">Findings</th>
+<th style="text-align: right;">Groovy µs</th>
+<th style="text-align: right;">Distill µs</th>
+<th style="text-align: right;">Java µs</th>
+<th style="text-align: right;">Distill ÷ Java</th>
+<th style="text-align: right;">Groovy ÷ Java</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>hostname</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">2.9</td>
+<td style="text-align: right;">2.0</td>
+<td style="text-align: right;">0.28</td>
+<td style="text-align: right;">7.2×</td>
+<td style="text-align: right;">10.5×</td>
+</tr>
+<tr>
+<td><code>date-time-name</code></td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">4.6</td>
+<td style="text-align: right;">1.3</td>
+<td style="text-align: right;">0.14</td>
+<td style="text-align: right;">8.6×</td>
+<td style="text-align: right;">31.9×</td>
+</tr>
+<tr>
+<td><code>status-class</code></td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">8.8</td>
+<td style="text-align: right;">1.1</td>
+<td style="text-align: right;">0.27</td>
+<td style="text-align: right;">4.1×</td>
+<td style="text-align: right;">32.4×</td>
+</tr>
+<tr>
+<td><code>operation-semantics</code></td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">20.5</td>
+<td style="text-align: right;">6.8</td>
+<td style="text-align: right;">1.28</td>
+<td style="text-align: right;">5.3×</td>
+<td style="text-align: right;">16.0×</td>
+</tr>
+<tr>
+<td><code>path-set</code> (O(n²))</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">11.3</td>
+<td style="text-align: right;">11.1</td>
+<td style="text-align: right;">2.10</td>
+<td style="text-align: right;">5.3×</td>
+<td style="text-align: right;">5.4×</td>
+</tr>
+</tbody>
+</table>
+<p>Hand-written Java is a stable <strong>~5–6× faster than Distill</strong> across trivial and
+complex matchers alike — the price of a tree-walk over compiled bytecode — and
+<strong>5–32× faster than compiled Groovy</strong>. Even on <code>path-set</code>, where Distill trails
+Groovy, hand Java running the same algorithm beats both by 5×.</p>
+<h2 id="what-the-overhead-actually-costs">What the overhead actually costs<a class="headerlink" href="#what-the-overhead-actually-costs" title="Permanent link">&para;</a></h2>
+<p>At 1–11 µs per matcher call and 111 evaluations per validation, the entire
+matcher phase is <strong>~5 ms</strong> — alongside a ~3 ms OpenAPI parse Areté cannot
+avoid and ~1 ms of model adaptation. Distill's interpreter overhead is real and
+measurable, and it is not where a validation spends its time.</p>
+<p>That is the trade in full: a few milliseconds per spec to keep every matcher a
+~5–15-line sandboxed expression that can be edited without a rebuild and run
+from any source — instead of ~40 lines of null-checked Java per matcher, in a
+language where a rule change means a release and a matcher can never leave the
+jar.</p>
+<h2 id="reproducing">Reproducing<a class="headerlink" href="#reproducing" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>mvn<span class="w"> </span>-pl<span class="w"> </span>policy-based-validation-plugin<span class="w"> </span><span class="nb">test</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span>-Dtest<span class="o">=</span><span class="s1">'DistillGroovyParityTest#fullSweepParityAndPerformance+javaBaselineComparison'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span>-Darete.benchmark<span class="o">=</span><span class="nb">true</span>
+</code></pre></div>
+<p>The parity assertions run unconditionally in the normal build; the
+<code>-Darete.benchmark=true</code> flag adds the timing tables.
+<code>PerformanceGainBenchmarkTest</code> (same flag) covers the end-to-end and
+allocation figures.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Apache License 2.0
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.top", "content.code.copy", "content.action.edit", "search.suggest", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
