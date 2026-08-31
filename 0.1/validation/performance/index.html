@@ -1414,15 +1414,18 @@ built to avoid</strong>, and the speed advantage above does not change that.</p>
 <p>A rule whose logic isn't expressible with an existing matcher would need a
 <strong>new Java class, a new release, and a redeploy</strong> before anyone could use
 it. Matchers could only ever ship inside the application jar.</p>
-<p>Areté's matchers are code too — Distill programs — but the interpreter can
-only feed one the spec and collect the occurrences it returns; it grants no
-I/O, reflection, recursion, or unbounded iteration. That is why a new
-matcher needs no new release, why user <a href="../../configuration/">policy files</a>
-can already load from outside the jar, and why a matcher <strong>delivered from a
-remote source over the internet</strong> could be run without trusting its author
-with the host JVM. Hand-written Java forecloses that entirely. A few
-milliseconds of interpreter overhead per spec is the price of keeping it
-open, and it is one worth paying.</p>
+<p>Areté's matchers are code too — but Distill is not a general-purpose
+language. A matcher is a single expression that consumes <code>api</code> and <code>rule</code>
+and returns occurrences; the grammar has no statements, no user functions,
+no other result type, and the interpreter grants no I/O, reflection,
+recursion, or unbounded iteration. It is a narrow data-pipeline processor
+and can be nothing else. That is why a new matcher needs no new release,
+why user <a href="../../configuration/">policy files</a> can already load from outside
+the jar, and why a matcher <strong>delivered from a remote source over the
+internet</strong> could be run without trusting its author with the host JVM.
+Hand-written Java forecloses that entirely. A few milliseconds of
+interpreter overhead per spec is the price of keeping it open, and it is
+one worth paying.</p>
 </div>
 <h2 id="reproducing">Reproducing<a class="headerlink" href="#reproducing" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>mvn<span class="w"> </span>-pl<span class="w"> </span>policy-based-validation-plugin<span class="w"> </span><span class="nb">test</span><span class="w"> </span><span class="se">\</span>

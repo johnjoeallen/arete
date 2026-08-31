@@ -1055,17 +1055,22 @@ defaulted to it; Groovy was reframed over several iterations from "deprecated"
 to "disabled pending sandbox" to an explicit opt-in, with a configurable
 language-precedence list. An optional mode that ran each rule in a disposable
 child JVM was added as a second containment option.</p>
-<p>Starlark was then itself replaced by <strong>Distill</strong>, a small fluent expression
-language shaped for rule pipelines and closer to the Java the rest of the
-codebase is written in. It was prototyped as "DetectorScript", renamed
-<strong>Sift</strong> (<code>.sift</code>), and finally <strong>Distill</strong> (<code>Matcher.dsl</code>). It grew in
-phases — Groovy-style <code>~/regex/</code> literals with <code>==~</code> / <code>=~</code>, bare <code>/regex/</code>
-in operand position, <code>[key]</code> indexing, numeric operators, short-circuit
-<code>&amp;&amp;</code> / <code>||</code>, value-based numeric equality, and <code>distinct</code> / <code>urlHost</code> /
-<code>join</code> / <code>group</code> / <code>type</code> / <code>blank</code> builtins — with every detector ported
-under a Groovy parity test at each step. Its result model uses
-<code>occurrence(...)</code> rather than a separate diagnostic abstraction, reflecting
-that a matcher reports observed rule occurrences.</p>
+<p>Starlark was then itself replaced by <strong>Distill</strong>. Distill is not a
+general-purpose language — even Starlark, for all its restrictions, was more
+than the job needed. A Distill matcher is a <strong>single expression</strong> in a fixed
+frame: given <code>api</code> and <code>rule</code>, walk the model, keep what matches, and return a
+list of <code>occurrence(...)</code> values. There are no statements, no local variables,
+no user-defined functions, and no way to produce any other kind of result.
+It is a focused data-pipeline processor — <code>.map</code> / <code>.filter</code> / <code>.expand</code>,
+slashy regex literals, a fixed builtin set — and nothing else.</p>
+<p>It was prototyped as "DetectorScript", renamed <strong>Sift</strong> (<code>.sift</code>), and finally
+<strong>Distill</strong> (<code>Matcher.dsl</code>). It grew in phases — Groovy-style <code>~/regex/</code>
+literals with <code>==~</code> / <code>=~</code>, bare <code>/regex/</code> in operand position, <code>[key]</code>
+indexing, numeric operators, short-circuit <code>&amp;&amp;</code> / <code>||</code>, value-based numeric
+equality, and <code>distinct</code> / <code>urlHost</code> / <code>join</code> / <code>group</code> / <code>type</code> / <code>blank</code>
+builtins — with every detector ported under a Groovy parity test at each step.
+Its result model uses <code>occurrence(...)</code> rather than a separate diagnostic
+abstraction, reflecting that a matcher reports observed rule occurrences.</p>
 <p>Once Distill reached parity it became the primary language, and <strong>Starlark
 was removed entirely</strong>. Groovy was then withdrawn from the runtime as well: a
 deployed Areté loads only <code>Matcher.dsl</code> sources, and where a <code>Matcher.groovy</code>
@@ -1076,10 +1081,11 @@ none. Parity coverage was broadened to a full sweep of every dual-implemented
 matcher across each scope and fixture spec, alongside the curated cases, and a
 hand-written Java baseline was added to the comparison to quantify the
 interpreter's cost.</p>
-<p>A matcher is still code — a Distill program, with expressions and closures —
-but the interpreter confines it to reading the immutable <code>api</code> and <code>rule</code>
-inputs and returning occurrences: no I/O, reflection, recursion, or unbounded
-loops. That confinement, rather than compiled Java in the mould of Zally, is
+<p>A matcher is still code — a Distill program — but it is code with only one
+shape available to it: consume the immutable <code>api</code> and <code>rule</code> inputs, and
+return occurrences. The interpreter offers no I/O, reflection, recursion, or
+unbounded loops, and the grammar offers no way to express anything but the
+pipeline. That narrowness, rather than compiled Java in the mould of Zally, is
 the deliberate choice. It means a new matcher needs no new release and can
 load from outside the application jar — today from the <code>~/.arete/policies/</code>
 directory, and in future from a remote source pulled and run without trusting
