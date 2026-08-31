@@ -82,6 +82,21 @@ class DistillMatcherEvaluatorTest {
     }
 
     @Test
+    void startsWithAnyMatchesWholeFirstWordFromAListOrCommaString() {
+        // trimmed text equals a prefix, or is followed by a space; "Getty" is not "Get".
+        String dsl = "distill(api, rule) { return api.values"
+                + ".filter { v -> startsWithAny(v, rule.parameters[\"p\"]) }"
+                + ".map { v -> occurrence(\"/\", v, \"hit\") }; }";
+        List<String> values = List.of("  Get a widget", "Getty Museum", "Delete", "List all");
+        // comma string
+        assertEquals(List.of(new Diagnostic("/", "  Get a widget", "hit"), new Diagnostic("/", "Delete", "hit")),
+                runtime.execute(dsl, Map.of("values", values), Map.of("parameters", Map.of("p", "Get, Delete"))));
+        // list
+        assertEquals(List.of(new Diagnostic("/", "  Get a widget", "hit"), new Diagnostic("/", "Delete", "hit")),
+                runtime.execute(dsl, Map.of("values", values), Map.of("parameters", Map.of("p", List.of("Get", "Delete")))));
+    }
+
+    @Test
     void checksConcatenatesRepeatableFilterMapStanzasOverOneBoundSource() {
         // The source (api.values, blank-filtered) is bound once; each comma-separated
         // stanza is a bare filter{}.map{} rooted at it and using the implicit `it`;

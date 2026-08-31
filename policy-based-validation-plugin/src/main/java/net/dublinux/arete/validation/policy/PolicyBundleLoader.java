@@ -115,7 +115,10 @@ final class PolicyBundleLoader {
             // A catalogue can document rules before their reusable rule
             // ships. Keep those rules loadable, but only validate parameters
             // for rule capabilities that are currently available.
-            if (matcher != null) validateRule(path, rule, matcher);
+            if (matcher != null) {
+                validateRule(path, rule, matcher);
+                rule = coerceListParameters(rule, matcher);
+            }
             rules.put(rule.id(), rule);
         }
 
@@ -154,10 +157,10 @@ final class PolicyBundleLoader {
             if ("enum".equals(type) && values.isEmpty()) {
                 throw new BundleValidationException(path + ": enum parameter '" + entry.getKey() + "' requires non-empty values");
             }
-            if (("string".equals(type) || "integer".equals(type) || "boolean".equals(type)) && !values.isEmpty()) {
+            if (("string".equals(type) || "integer".equals(type) || "boolean".equals(type) || "list".equals(type)) && !values.isEmpty()) {
                 throw new BundleValidationException(path + ": " + type + " parameter '" + entry.getKey() + "' must not declare values");
             }
-            if (!Set.of("enum", "string", "integer", "boolean").contains(type)) {
+            if (!Set.of("enum", "string", "integer", "boolean", "list").contains(type)) {
                 throw new BundleValidationException(path + ": unsupported parameter type '" + type + "'");
             }
             parameters.put(entry.getKey(), new ParameterDefinition(type, required, values));
@@ -195,7 +198,10 @@ final class PolicyBundleLoader {
                         : Map.of();
                 PolicyRule rule = rules.get(entry.getKey());
                 Matcher matcher = rule == null ? null : matchers.get(rule.matcherId());
-                if (matcher != null) validateParameterOverrides(path, entry.getKey(), overrides, matcher);
+                if (matcher != null) {
+                    validateParameterOverrides(path, entry.getKey(), overrides, matcher);
+                    overrides = coerceListValues(overrides, matcher);
+                }
                 if ("PROHIBITED".equals(points)) dispositions.put(entry.getKey(), new Prohibited(overrides));
                 else if (points instanceof Number number && validPoints(number)) dispositions.put(entry.getKey(), new Deduction(number.doubleValue(), overrides));
                 else throw new BundleValidationException(path + ": " + entry.getKey() + ".points must be a number from 0 to 100 or PROHIBITED");
@@ -288,8 +294,40 @@ final class PolicyBundleLoader {
             case "string" -> value instanceof String text && !text.isBlank();
             case "boolean" -> value instanceof Boolean;
             case "integer" -> value instanceof Number number && number.doubleValue() == Math.rint(number.doubleValue());
+            // A YAML list, or a comma-separated string the loader splits (see coerceListParameters).
+            case "list" -> value instanceof List<?> || (value instanceof String text && !text.isBlank());
             default -> false; // parseRule rejects unknown types; retain defensive behaviour here.
         };
+    }
+
+    private static PolicyRule coerceListParameters(PolicyRule rule, Matcher matcher) {
+        Map<String, Object> coerced = coerceListValues(rule.parameters(), matcher);
+        return coerced == rule.parameters() ? rule
+                : new PolicyRule(rule.id(), rule.title(), rule.category(), rule.matcherId(), rule.scope(),
+                        Map.copyOf(coerced), rule.documentationMarkdown());
+    }
+
+    /**
+     * Replaces any {@code list}-typed parameter given as a comma-separated
+     * string with a trimmed, empty-dropped {@code List<String>}, so a matcher
+     * always sees a list for that parameter. Returns the input map unchanged
+     * when there is nothing to coerce.
+     */
+    static Map<String, Object> coerceListValues(Map<String, Object> parameters, Matcher matcher) {
+        Map<String, Object> coerced = null;
+        for (Map.Entry<String, Object> parameter : parameters.entrySet()) {
+            ParameterDefinition definition = matcher.parameters().get(parameter.getKey());
+            if (definition != null && "list".equals(definition.type()) && parameter.getValue() instanceof String csv) {
+                if (coerced == null) coerced = new LinkedHashMap<>(parameters);
+                List<String> items = new ArrayList<>();
+                for (String part : csv.split(",")) {
+                    String trimmed = part.trim();
+                    if (!trimmed.isEmpty()) items.add(trimmed);
+                }
+                coerced.put(parameter.getKey(), List.copyOf(items));
+            }
+        }
+        return coerced == null ? parameters : coerced;
     }
 
     private Map<String, Object> frontMatter(String path, String content) {

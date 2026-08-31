@@ -33,7 +33,7 @@ parameters:
     values:
       - non-action-oriented
   action-prefixes:
-    type: string
+    type: list
     required: false
 ---
 
@@ -47,11 +47,12 @@ supplies several parameters reports each satisfied check independently rather
 than only summaries that satisfy all of them. No bundled rule supplies more
 than one. A rule that supplies none of the check parameters produces nothing.
 
-With `match: non-action-oriented`, `action-prefixes` overrides the recognised
-verb list — a comma-separated string (default
-`Get,List,Create,Update,Delete,Replace,Search,Find,Cancel,Activate,Deactivate`).
-The list is spliced into the check's regex with a `{{ ... }}` interpolation
-hole.
+`match: non-action-oriented` also needs `action-prefixes` — a `list` of the
+verbs a summary may start with (`DOC009` supplies
+`Get,List,Create,…`), written as a YAML list or a comma-separated string. The
+check is `startsWithAny(summary, action-prefixes)` — the trimmed summary equals
+one of the prefixes or begins with `prefix + " "`. The matcher carries no
+built-in default.
 
 The rule ignores operations without a summary. `DOC001` owns the distinct
 condition that a summary is missing.

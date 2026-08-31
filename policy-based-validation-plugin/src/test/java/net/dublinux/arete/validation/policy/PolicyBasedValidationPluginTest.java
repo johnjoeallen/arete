@@ -172,6 +172,15 @@ class PolicyBasedValidationPluginTest {
     }
 
     @Test
+    void coercesAListParameterGivenAsACommaStringWhenLoadingTheBundle() {
+        // DOC009 declares action-prefixes as `type: list` and supplies a comma string.
+        PolicyBundle bundle = distillBundle();
+        Object prefixes = bundle.rules().get("DOC009").parameters().get("action-prefixes");
+        assertTrue(prefixes instanceof java.util.List<?>, "expected a coerced List, got " + prefixes);
+        assertTrue(((java.util.List<?>) prefixes).contains("Get"));
+    }
+
+    @Test
     void acceptsCatalogueRulesWhoseRuleIsNotYetBundled() {
         Map<String, String> resources = bundledResources();
         resources.put("PolicyBundle.yaml", resources.get("PolicyBundle.yaml")

@@ -202,9 +202,16 @@ name the violation.
 
 String and regex literals then gained `{{ expr }}` interpolation — a hole is a
 full Distill expression spliced in at evaluation time, with quotes and `/`
-inside it no longer treated as the enclosing delimiter. Its first use let
-`text-style`'s `non-action-oriented` check take an `action-prefixes` parameter
-and splice the verb list straight into the check's regex.
+inside it no longer treated as the enclosing delimiter — for the cases that
+genuinely build part of a pattern or message from a rule parameter.
+
+For the common "is this one of a configured set" case a `list` parameter type
+and a `startsWithAny(text, prefixes)` builtin were added instead: the loader
+splits a comma string into a trimmed `List<String>` once, and the matcher asks
+the question directly. `text-style`'s `non-action-oriented` check moved from a
+hardcoded verb regex to `startsWithAny(summary, action-prefixes)`, with
+`DOC009` supplying the list — the first of several matchers whose baked-in
+policy vocabulary should become rule parameters (issues #144–#153).
 
 ## Runtime execution model
 

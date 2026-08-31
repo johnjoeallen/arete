@@ -106,7 +106,7 @@ scopes:                          # the scope values a matcher may request
   - query-parameter
 parameters:
   convention:
-    type: enum                   # enum | string | integer | boolean
+    type: enum                   # enum | string | integer | boolean | list
     required: false
     values: [camelCase, snake_case, kebab-case, hyphenated]  # enum only, non-empty
   suffix:
@@ -124,6 +124,7 @@ scripts can trust their inputs):
 | `string`  | a non-blank string                                |
 | `integer` | a whole number                                    |
 | `boolean` | `true` / `false`                                  |
+| `list`    | a YAML list, or a comma-separated string the loader splits (trimmed, empties dropped) — the matcher always sees a `List<String>` |
 
 ### The `api` model
 

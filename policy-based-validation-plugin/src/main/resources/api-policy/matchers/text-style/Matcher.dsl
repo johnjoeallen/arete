@@ -32,7 +32,7 @@ distill(api, rule) {
                             "Operation summary contains an unusually long word") },
 
         filter { rule.parameters["match"] == "non-action-oriented"
-                 && !(it.summary.trim() ==~ /({{join("|", tokenize(",", rule.parameters["action-prefixes"] != null ? rule.parameters["action-prefixes"] : "Get,List,Create,Update,Delete,Replace,Search,Find,Cancel,Activate,Deactivate").map { t -> t.trim() }.filter { t -> t != "" })}})( .*)?/) }
+                 && !startsWithAny(it.summary, rule.parameters["action-prefixes"]) }
           .map { occurrence(it.pointer, it.method + " " + it.path,
                             "Operation summary is not action-oriented") }
     };

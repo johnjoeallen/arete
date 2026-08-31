@@ -47,7 +47,9 @@ message.
   [The `api` model](policy-engine.md#the-api-model).
 - `rule` is `{ id, scope, parameters }`. Rule configuration is
   `rule.parameters` — e.g. `rule.parameters["max-items"]` or, for a key that
-  is a plain identifier, `rule.parameters.suffix`.
+  is a plain identifier, `rule.parameters.suffix`. A `list`-typed parameter
+  arrives as a `List<String>` (use `.any { }` / `startsWithAny`), everything
+  else as a string, number, or boolean.
 
 There are no comments.
 
@@ -75,8 +77,8 @@ enclosing delimiter, so a hole can itself contain string literals.
 occurrence("/info/title", api.info.title,
     "Title should end with '{{rule.parameters.suffix}}'")
 
-// build a pattern from a configurable list
-op.summary ==~ /({{join("|", tokenize(",", rule.parameters["action-prefixes"]))}}) .*/
+// splice a rule-supplied fragment into a pattern
+schema.name ==~ /{{rule.parameters["prefix"]}}[A-Z][A-Za-z0-9]*/
 ```
 
 A literal with no `{{` is an ordinary constant with no added cost. A hole is
@@ -216,6 +218,7 @@ a stanza's `filter` (`rule.parameters["trailing-period"] == "present" && …`).
 | `regexSearch(pattern, text)` | match anywhere in `text` |
 | `tokenize(delim, text)` | split `text` on the **literal string** `delim`; empty tokens are kept (pair with `.filter { t -> t != "" }`) |
 | `words(text)` | substantive words of `text`: whitespace-separated tokens, leading/trailing punctuation stripped, keeping only those that still contain a letter. Count is `count(words(text))`; per-word length is `w.length` inside `.any` / `.all` / `.filter` |
+| `startsWithAny(text, prefixes)` | `text` (trimmed) begins with one of `prefixes` as a whole first word — it equals the prefix or the prefix is followed by a space. `prefixes` is a list or a comma-separated string |
 | `count(list)` | element count (an integer). For a filtered count use the sequence form `list.count { x -> ... }`. |
 | `distinct(list)` | de-duplicated list — drops `null`, keeps first-seen order, compares by string value |
 | `parseInt(text)` / `parseInt(text, fallback)` | base-10 integer after trimming; `fallback` (default `-1`) on failure |
