@@ -39,6 +39,10 @@
         <p th:if="${specFilePath != null}" class="spec-source-line">
             <strong>Loaded from:</strong> <code th:text="${specFilePath}"></code>
         </p>
+        <p th:if="${specNamespace != null}" class="spec-source-line">
+            <span class="spec-badge">namespace: <code th:text="${specNamespace}"></code></span>
+            <span class="spec-badge">submitted by: <code th:text="${specSubmitter}"></code></span>
+        </p>
         <div th:if="${openApi.info != null and openApi.info.description != null}" th:with="renderedDescription=${@markdownRenderer.render(openApi.info.description)}" class="markdown-body" th:utext="${renderedDescription}"></div>
 
         <div class="tabset top-level-tabset explore-score-tabset">

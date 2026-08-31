@@ -83,15 +83,18 @@ public class SpecController {
     }
 
     @GetMapping("/")
-    public String index(@RequestParam(required = false) String q, Model model) {
+    public String index(@RequestParam(required = false) String q,
+            jakarta.servlet.http.HttpServletRequest request, Model model) {
         model.addAttribute("specsDir", specFileWatcher.getSpecsHome().toString());
-        populateSidebar(model, q, null);
+        model.addAttribute("sharedDeployment", deploymentMode.isShared());
+        populateSidebar(model, q, null, NamespaceContext.from(request));
         return "index";
     }
 
     @PostMapping("/api/paste")
-    public String paste(@RequestParam String specText, Model model) {
-        parseAndSave(specText, null, model);
+    public String paste(@RequestParam String specText,
+            jakarta.servlet.http.HttpServletRequest request, Model model) {
+        parseAndSave(specText, null, NamespaceContext.from(request), model);
         return "result";
     }
 
@@ -105,7 +108,9 @@ public class SpecController {
      * disagree. Reading the path directly keeps there being exactly one.
      */
     @PostMapping("/api/load-file")
-    public String loadFile(@RequestParam String filePath, Model model) {
+    public String loadFile(@RequestParam String filePath,
+            jakarta.servlet.http.HttpServletRequest request, Model model) {
+        NamespaceContext ctx = NamespaceContext.from(request);
         if (deploymentMode.isShared()) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,
                     "Loading specs from a local path is disabled in shared deployment mode.");
@@ -146,7 +151,7 @@ public class SpecController {
             return "result";
         }
 
-        SpecEntity saved = parseAndSave(content, trimmedPath, model);
+        SpecEntity saved = parseAndSave(content, trimmedPath, ctx, model);
         if (saved != null) {
             specFileWatcher.watch(path);
         }
@@ -176,9 +181,12 @@ public class SpecController {
     @GetMapping("/spec/{id}")
     public String open(@PathVariable Long id, @RequestParam(required = false) String q,
             @RequestParam(required = false) String ran, @RequestParam(required = false) List<String> plugin,
-            @RequestParam Map<String, String> allParams, Model model) {
+            @RequestParam Map<String, String> allParams,
+            jakarta.servlet.http.HttpServletRequest request, Model model) {
         SpecEntity entity = specStorageService.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Spec not found"));
+        model.addAttribute("specNamespace", entity.getNamespace());
+        model.addAttribute("specSubmitter", entity.getSubmitter());
 
         ParsedSpec parsed = specParserService.parse(entity.getRawContent());
         model.addAttribute("openApi", parsed.openApi());
@@ -222,7 +230,7 @@ public class SpecController {
             populateCachedValidation(model, id);
         }
 
-        populateSidebar(model, q, entity.getId());
+        populateSidebar(model, q, entity.getId(), NamespaceContext.from(request));
         model.addAttribute("pluginChoices", pluginChoices(id, allParams));
         return "result";
     }
@@ -290,8 +298,9 @@ public class SpecController {
     /** Polled by the sidebar's client-side refresh so newly-watched/dropped specs appear without a manual reload. */
     @GetMapping("/api/specs")
     @ResponseBody
-    public List<SpecSummary> listSpecs(@RequestParam(required = false) String q) {
-        return toSummaries(specStorageService.findAll(), q);
+    public List<SpecSummary> listSpecs(@RequestParam(required = false) String q,
+            jakarta.servlet.http.HttpServletRequest request) {
+        return toSummaries(specStorageService.findByNamespace(NamespaceContext.from(request).namespace()), q);
     }
 
     /**
@@ -302,7 +311,7 @@ public class SpecController {
      * runs validation itself — that's only ever triggered from the spec
      * view page's Refresh control (see {@link #open}).
      */
-    private SpecEntity parseAndSave(String content, String filePath, Model model) {
+    private SpecEntity parseAndSave(String content, String filePath, NamespaceContext ctx, Model model) {
         model.addAttribute("activateScore", false);
         model.addAttribute("hasBeenScored", false);
         try {
@@ -317,35 +326,44 @@ public class SpecController {
                 String title = parsed.title();
                 if (title != null) {
                     SpecEntity saved = filePath == null
-                            ? specStorageService.saveOrReplace(title, content)
+                            ? specStorageService.saveOrReplace(ctx.namespace(), ctx.submitter(), title, content)
                             : specStorageService.saveOrReplaceFromFile(title, content, filePath);
                     model.addAttribute("parseErrors", parsed.messages());
                     model.addAttribute("specTitle", saved.getTitle());
                     model.addAttribute("specFilePath", saved.getFilePath());
                     populateCachedValidation(model, saved.getId());
-                    populateSidebar(model, null, saved.getId());
+                    populateSidebar(model, null, saved.getId(), ctx);
                     return saved;
                 } else {
                     model.addAttribute("parseErrors", withWarning(parsed.messages(),
                             "Spec has no 'title' in its info block; it was not saved."));
-                    populateSidebar(model, null, null);
+                    populateSidebar(model, null, null, ctx);
                 }
             } else {
                 model.addAttribute("parseErrors", parsed.messages());
-                populateSidebar(model, null, null);
+                populateSidebar(model, null, null, ctx);
             }
         } catch (Exception e) {
             model.addAttribute("openApi", null);
             model.addAttribute("parseErrors", List.of("Failed to parse spec: " + e.getMessage()));
-            populateSidebar(model, null, null);
+            populateSidebar(model, null, null, ctx);
         }
         return null;
     }
 
     private void populateSidebar(Model model, String q, Long activeId) {
-        model.addAttribute("specs", toSummaries(specStorageService.findAll(), q));
+        populateSidebar(model, q, activeId, new NamespaceContext(
+                net.dublinux.arete.service.SpecStorageService.DEFAULT_NAMESPACE,
+                net.dublinux.arete.service.SpecStorageService.UI_SUBMITTER));
+    }
+
+    private void populateSidebar(Model model, String q, Long activeId, NamespaceContext ctx) {
+        model.addAttribute("specs", toSummaries(specStorageService.findByNamespace(ctx.namespace()), q));
         model.addAttribute("q", q);
         model.addAttribute("specId", activeId);
+        model.addAttribute("namespaces", specStorageService.namespaces());
+        model.addAttribute("currentNamespace", ctx.namespace());
+        model.addAttribute("currentSubmitter", ctx.submitter());
         model.addAttribute("pluginChoices", pluginChoices(activeId, Map.of()));
     }
 

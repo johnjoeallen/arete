@@ -7,6 +7,24 @@
         <input type="text" name="q" placeholder="Search specs..." th:value="${q}">
         <button type="submit">Search</button>
     </form>
+    <div class="namespace-picker" th:if="${currentNamespace != null}">
+        <label class="namespace-picker-row">
+            <span>Namespace</span>
+            <select id="namespace-select" onchange="areteSetNamespace(this.value)">
+                <option th:each="ns : ${namespaces}" th:value="${ns}" th:text="${ns}"
+                        th:selected="${ns == currentNamespace}">ns</option>
+                <option th:if="${namespaces == null or !#lists.contains(namespaces, currentNamespace)}"
+                        th:value="${currentNamespace}" th:text="${currentNamespace}" selected>current</option>
+            </select>
+        </label>
+        <input type="text" id="namespace-new" class="namespace-new" placeholder="new namespace…"
+               onkeydown="if(event.key==='Enter'){event.preventDefault();areteSetNamespace(this.value);}">
+        <label class="namespace-picker-row">
+            <span>Submitting as</span>
+            <input type="text" id="submitter-input" th:value="${currentSubmitter}"
+                   onchange="areteSetSubmitter(this.value)">
+        </label>
+    </div>
     <ul class="spec-list">
         <li th:each="spec : ${specs}" class="spec-list-item">
             <a th:href="@{/spec/{id}(id=${spec.id})}"
@@ -24,5 +42,6 @@
         <button type="button" id="theme-toggle" class="theme-toggle-btn">🌙 Dark mode</button>
     </div>
 </aside>
+<script src="/js/namespace.js" defer></script>
 </body>
 </html>

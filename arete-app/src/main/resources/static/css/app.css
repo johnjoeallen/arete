@@ -135,6 +135,30 @@ a:hover { color: var(--link-hover); }
 }
 .sidebar-search input:focus { outline: none; border-color: var(--link); }
 .sidebar-search button { display: none; }
+
+.namespace-picker {
+    margin-bottom: 0.9em;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4em;
+    font-size: 0.85em;
+}
+.namespace-picker-row { display: flex; flex-direction: column; gap: 0.2em; color: var(--muted, var(--fg)); }
+.namespace-picker select,
+.namespace-picker input {
+    width: 100%;
+    padding: 0.35em 0.5em;
+    background: var(--bg);
+    color: var(--fg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-family: var(--font-body);
+    font-size: 0.95em;
+}
+.namespace-picker select:focus,
+.namespace-picker input:focus { outline: none; border-color: var(--link); }
+
+.spec-badge { margin-right: 0.8em; font-size: 0.85em; color: var(--muted, var(--fg)); }
 .spec-list { list-style: none; padding: 0; margin: 0; }
 .spec-list-item { display: flex; justify-content: space-between; align-items: center; padding: 0.4em 0.3em; border-radius: 4px; gap: 0.4em; }
 .spec-list-item:hover { background: var(--surface-alt); }
