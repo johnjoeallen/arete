@@ -1,5 +1,11 @@
 # Automation API — design plan
 
+> **Implemented** in v0.99.78–v0.99.81. The `run` selection and submitter are
+> resolved directly in `AutomationApiController` rather than via a
+> `HandlerMethodArgumentResolver`; `?httpStatusOnFail=422` is opt-in (the
+> default is HTTP 200/201 with the verdict in the body). See
+> [`docs/automation-api.md`](../docs/automation-api.md) for the shipped API.
+
 ## Goal
 
 Let CI pipelines and scripts submit an OpenAPI spec (inline or by URL), name
