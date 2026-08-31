@@ -12,13 +12,18 @@ import java.util.List;
 
 /**
  * One-off schema fixups that {@code hibernate.ddl-auto=update} cannot do on
- * its own. Runs after the context is up (so Hibernate has already added the
- * new columns) and is idempotent — safe to run on every startup.
+ * its own. Runs after the context is up (so Hibernate has already touched the
+ * schema) and is idempotent — safe on every startup.
  *
- * <p>The job: uniqueness moved from {@code title} alone to
- * {@code (namespace, title)}. Hibernate's update never drops the old
- * title-only unique index, so this drops any single-column unique constraint
- * on {@code SPECS(TITLE)} and adds the composite if it is missing.
+ * <ol>
+ *   <li>Ensure {@code SPECS.NAMESPACE} / {@code SPECS.SUBMITTER} exist, are
+ *       backfilled, defaulted, and {@code NOT NULL} — Hibernate cannot add a
+ *       {@code NOT NULL} column to a non-empty table without a default, and
+ *       older builds may have left the column half-configured.</li>
+ *   <li>Move uniqueness from {@code title} alone to {@code (namespace, title)}:
+ *       drop any single-column unique constraint on {@code SPECS(TITLE)} and
+ *       add the composite if it is missing.</li>
+ * </ol>
  */
 @Component
 @Order(0)
@@ -35,8 +40,27 @@ class SpecSchemaMigration implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
+        ensureLabelColumn("NAMESPACE", "default");
+        ensureLabelColumn("SUBMITTER", "anonymous");
         dropTitleOnlyUnique();
         addCompositeUnique();
+    }
+
+    private void ensureLabelColumn(String column, String defaultValue) {
+        boolean exists = jdbc.queryForObject("""
+                select count(*) from information_schema.columns
+                 where table_name = 'SPECS' and column_name = ?
+                """, Integer.class, column) > 0;
+        if (!exists) {
+            jdbc.execute("alter table SPECS add column " + column
+                    + " varchar(64) default '" + defaultValue + "' not null");
+            log.info("Added SPECS.{} column", column);
+            return;
+        }
+        // Existing column: normalise it, tolerating any prior state.
+        run("update SPECS set " + column + " = '" + defaultValue + "' where " + column + " is null");
+        run("alter table SPECS alter column " + column + " set default '" + defaultValue + "'");
+        run("alter table SPECS alter column " + column + " set not null");
     }
 
     /** Drops every UNIQUE constraint on SPECS whose column set is exactly {TITLE}. */
@@ -53,7 +77,7 @@ class SpecSchemaMigration implements ApplicationRunner {
             if (COMPOSITE.equalsIgnoreCase(name)) {
                 continue;
             }
-            jdbc.execute("alter table SPECS drop constraint if exists \"" + name + "\"");
+            run("alter table SPECS drop constraint if exists \"" + name + "\"");
             log.info("Dropped legacy title-only unique constraint {} on SPECS", name);
         }
     }
@@ -70,7 +94,16 @@ class SpecSchemaMigration implements ApplicationRunner {
         if (existing != null && existing > 0) {
             return;
         }
-        jdbc.execute("alter table SPECS add constraint " + COMPOSITE + " unique (NAMESPACE, TITLE)");
+        run("alter table SPECS add constraint " + COMPOSITE + " unique (NAMESPACE, TITLE)");
         log.info("Added composite unique constraint {} on SPECS(NAMESPACE, TITLE)", COMPOSITE);
+    }
+
+    /** Executes {@code sql}, logging and swallowing a failure so a partial prior state can't wedge startup. */
+    private void run(String sql) {
+        try {
+            jdbc.execute(sql);
+        } catch (RuntimeException e) {
+            log.debug("Schema fixup skipped ({}): {}", sql, e.getMessage());
+        }
     }
 }

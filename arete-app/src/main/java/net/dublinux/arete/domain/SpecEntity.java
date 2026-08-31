@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
 
@@ -26,11 +27,13 @@ public class SpecEntity {
      * {@code SpecSchemaMigration} rather than a {@code @UniqueConstraint} so
      * the migration owns dropping the old title-only index.
      */
-    @Column(nullable = false, columnDefinition = "varchar(64) default 'default'")
+    @Column(nullable = false, length = 64)
+    @ColumnDefault("'default'")
     private String namespace = "default";
 
     /** The self-declared submitter — a slug, never authenticated. */
-    @Column(nullable = false, columnDefinition = "varchar(64) default 'anonymous'")
+    @Column(nullable = false, length = 64)
+    @ColumnDefault("'anonymous'")
     private String submitter = "anonymous";
 
     @Column(nullable = false)
