@@ -172,12 +172,24 @@ class PolicyBasedValidationPluginTest {
     }
 
     @Test
-    void coercesAListParameterGivenAsACommaStringWhenLoadingTheBundle() {
-        // DOC009 declares action-prefixes as `type: list` and supplies a comma string.
+    void aListParameterReachesTheMatcherAsAList() {
+        // DOC009 declares action-prefixes as `type: list` and supplies a YAML list.
         PolicyBundle bundle = distillBundle();
         Object prefixes = bundle.rules().get("DOC009").parameters().get("action-prefixes");
-        assertTrue(prefixes instanceof java.util.List<?>, "expected a coerced List, got " + prefixes);
+        assertTrue(prefixes instanceof java.util.List<?>, "expected a List, got " + prefixes);
         assertTrue(((java.util.List<?>) prefixes).contains("Get"));
+    }
+
+    @Test
+    void aListParameterGivenAsACommaStringIsSplitWhenLoadingTheBundle() {
+        Map<String, String> resources = bundledResources();
+        resources.put("rules/DOC009.md", resources.get("rules/DOC009.md").replaceFirst(
+                "(?m)^  action-prefixes: .*$", "  action-prefixes: Get, List , ,Create"));
+
+        PolicyBundle bundle = new PolicyBundleLoader().load(resources::get);
+        Object prefixes = bundle.rules().get("DOC009").parameters().get("action-prefixes");
+
+        assertEquals(java.util.List.of("Get", "List", "Create"), prefixes);
     }
 
     @Test
