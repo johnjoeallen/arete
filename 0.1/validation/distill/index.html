@@ -1510,6 +1510,8 @@ describes it end up far apart. <code>checks</code> keeps them together:</p>
 <code>filter</code>/<code>map</code> chains, and a per-rule parameter guard is just the first term of
 a stanza's <code>filter</code> (<code>rule.parameters["trailing-period"] == "present" &amp;&amp; …</code>).</p>
 <h2 id="builtin-functions">Builtin functions<a class="headerlink" href="#builtin-functions" title="Permanent link">&para;</a></h2>
+<p>This is the complete set — a closed boundary, not a starter kit. A matcher can
+call these and nothing else.</p>
 <table>
 <thead>
 <tr>
@@ -1588,8 +1590,9 @@ a stanza's <code>filter</code> (<code>rule.parameters["trailing-period"] == "pre
 </tr>
 </tbody>
 </table>
-<p>Anything outside this list is a deliberate, reviewed addition to the runtime —
-not something a script can reach around.</p>
+<p>Adding to this list means a reviewed change to the interpreter itself. A
+matcher cannot define its own functions, import anything, or otherwise reach
+past the set.</p>
 <h2 id="regular-expressions">Regular expressions<a class="headerlink" href="#regular-expressions" title="Permanent link">&para;</a></h2>
 <p>Distill supports a slashy regex literal. <code>/pattern/</code> is a regex <strong>wherever an
 operand is expected</strong> — after <code>==~</code>, <code>=~</code>, <code>(</code>, <code>,</code>, <code>&amp;&amp;</code>, <code>||</code>, <code>return</code>, and
