@@ -1253,7 +1253,9 @@ message.</p>
   <a href="../policy-engine/#the-api-model">The <code>api</code> model</a>.</li>
 <li><code>rule</code> is <code>{ id, scope, parameters }</code>. Rule configuration is
   <code>rule.parameters</code> — e.g. <code>rule.parameters["max-items"]</code> or, for a key that
-  is a plain identifier, <code>rule.parameters.suffix</code>.</li>
+  is a plain identifier, <code>rule.parameters.suffix</code>. A <code>list</code>-typed parameter
+  arrives as a <code>List&lt;String&gt;</code> (use <code>.any { }</code> / <code>startsWithAny</code>), everything
+  else as a string, number, or boolean.</li>
 </ul>
 <p>There are no comments.</p>
 <h2 id="values-and-literals">Values and literals<a class="headerlink" href="#values-and-literals" title="Permanent link">&para;</a></h2>
@@ -1303,8 +1305,8 @@ enclosing delimiter, so a hole can itself contain string literals.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">occurrence</span><span class="p">(</span><span class="s">"/info/title"</span><span class="p">,</span><span class="w"> </span><span class="n">api</span><span class="p">.</span><span class="na">info</span><span class="p">.</span><span class="na">title</span><span class="p">,</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">    </span><span class="s">"Title should end with '{{rule.parameters.suffix}}'"</span><span class="p">)</span>
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1">// build a pattern from a configurable list</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="n">op</span><span class="p">.</span><span class="na">summary</span><span class="w"> </span><span class="o">==~</span><span class="w"> </span><span class="o">/</span><span class="p">({{</span><span class="n">join</span><span class="p">(</span><span class="s">"|"</span><span class="p">,</span><span class="w"> </span><span class="n">tokenize</span><span class="p">(</span><span class="s">","</span><span class="p">,</span><span class="w"> </span><span class="n">rule</span><span class="p">.</span><span class="na">parameters</span><span class="o">[</span><span class="s">"action-prefixes"</span><span class="o">]</span><span class="p">))}})</span><span class="w"> </span><span class="p">.</span><span class="o">*/</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1">// splice a rule-supplied fragment into a pattern</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="n">schema</span><span class="p">.</span><span class="na">name</span><span class="w"> </span><span class="o">==~</span><span class="w"> </span><span class="o">/</span><span class="p">{{</span><span class="n">rule</span><span class="p">.</span><span class="na">parameters</span><span class="o">[</span><span class="s">"prefix"</span><span class="o">]</span><span class="p">}}</span><span class="o">[</span><span class="n">A</span><span class="o">-</span><span class="n">Z</span><span class="o">][</span><span class="n">A</span><span class="o">-</span><span class="n">Za</span><span class="o">-</span><span class="n">z0</span><span class="o">-</span><span class="mi">9</span><span class="o">]*/</span>
 </code></pre></div>
 <p>A literal with no <code>{{</code> is an ordinary constant with no added cost. A hole is
 compiled and validated at bundle load like any other expression.</p>
@@ -1535,6 +1537,10 @@ a stanza's <code>filter</code> (<code>rule.parameters["trailing-period"] == "pre
 <tr>
 <td><code>words(text)</code></td>
 <td>substantive words of <code>text</code>: whitespace-separated tokens, leading/trailing punctuation stripped, keeping only those that still contain a letter. Count is <code>count(words(text))</code>; per-word length is <code>w.length</code> inside <code>.any</code> / <code>.all</code> / <code>.filter</code></td>
+</tr>
+<tr>
+<td><code>startsWithAny(text, prefixes)</code></td>
+<td><code>text</code> (trimmed) begins with one of <code>prefixes</code> as a whole first word — it equals the prefix or the prefix is followed by a space. <code>prefixes</code> is a list or a comma-separated string</td>
 </tr>
 <tr>
 <td><code>count(list)</code></td>

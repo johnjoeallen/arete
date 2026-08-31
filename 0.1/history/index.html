@@ -1174,9 +1174,15 @@ schema rule" (<code>enum-type</code>, <code>enum-case</code>, <code>extensible</
 name the violation.</p>
 <p>String and regex literals then gained <code>{{ expr }}</code> interpolation — a hole is a
 full Distill expression spliced in at evaluation time, with quotes and <code>/</code>
-inside it no longer treated as the enclosing delimiter. Its first use let
-<code>text-style</code>'s <code>non-action-oriented</code> check take an <code>action-prefixes</code> parameter
-and splice the verb list straight into the check's regex.</p>
+inside it no longer treated as the enclosing delimiter — for the cases that
+genuinely build part of a pattern or message from a rule parameter.</p>
+<p>For the common "is this one of a configured set" case a <code>list</code> parameter type
+and a <code>startsWithAny(text, prefixes)</code> builtin were added instead: the loader
+splits a comma string into a trimmed <code>List&lt;String&gt;</code> once, and the matcher asks
+the question directly. <code>text-style</code>'s <code>non-action-oriented</code> check moved from a
+hardcoded verb regex to <code>startsWithAny(summary, action-prefixes)</code>, with
+<code>DOC009</code> supplying the list — the first of several matchers whose baked-in
+policy vocabulary should become rule parameters (issues #144–#153).</p>
 <h2 id="runtime-execution-model">Runtime execution model<a class="headerlink" href="#runtime-execution-model" title="Permanent link">&para;</a></h2>
 <p>Distill matcher sources are parsed once when the bundle loads and the compiled
 programs are reused for every validation, rather than reparsed and discarded

@@ -1345,7 +1345,7 @@ observed</strong> by returning occurrences and takes no position on severity or 
 <a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">query-parameter</span>
 <a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="nt">parameters</span><span class="p">:</span>
 <a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">  </span><span class="nt">convention</span><span class="p">:</span>
-<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enum</span><span class="w">                   </span><span class="c1"># enum | string | integer | boolean</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enum</span><span class="w">                   </span><span class="c1"># enum | string | integer | boolean | list</span>
 <a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">    </span><span class="nt">required</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
 <a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">    </span><span class="nt">values</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">camelCase</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">snake_case</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">kebab-case</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">hyphenated</span><span class="p p-Indicator">]</span><span class="w">  </span><span class="c1"># enum only, non-empty</span>
 <a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">  </span><span class="nt">suffix</span><span class="p">:</span>
@@ -1378,6 +1378,10 @@ scripts can trust their inputs):</p>
 <tr>
 <td><code>boolean</code></td>
 <td><code>true</code> / <code>false</code></td>
+</tr>
+<tr>
+<td><code>list</code></td>
+<td>a YAML list, or a comma-separated string the loader splits (trimmed, empties dropped) — the matcher always sees a <code>List&lt;String&gt;</code></td>
 </tr>
 </tbody>
 </table>
