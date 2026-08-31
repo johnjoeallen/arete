@@ -347,6 +347,33 @@
   
   
     <li class="md-nav__item">
+      <a href="../../automation-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Automation API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../history/" class="md-nav__link">
         
   
@@ -389,10 +416,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
         
           
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
             
   
   
@@ -410,8 +437,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_5">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -856,6 +883,7 @@ listed here is the default when an unknown rule set is requested.</p>
 <p>The default policy: it enables every generally-applicable bundled rule, with a few rule parameters calibrated for a typical enterprise API (allow-listed proprietary headers, expected OAuth2 scopes, standard rate-limit headers).</p>
 <ul>
 <li><strong>109</strong> rules active</li>
+<li>suggested gate: <code>score&lt;90</code> (used by the <a href="../../automation-api/">automation API</a> unless overridden)</li>
 </ul>
 <p>Parameter overrides:</p>
 <table>
@@ -1443,6 +1471,7 @@ listed here is the default when an unknown rule set is requested.</p>
 <p>Contains only implemented rules mapped to the supplied Zalando rule catalogue. No generic-only or Enterprise Grade-specific rule is enabled here.</p>
 <ul>
 <li><strong>40</strong> rules active</li>
+<li>suggested gate: <code>error</code> (used by the <a href="../../automation-api/">automation API</a> unless overridden)</li>
 </ul>
 <p>Parameter overrides:</p>
 <table>
@@ -1681,6 +1710,7 @@ listed here is the default when an unknown rule set is requested.</p>
 <p>Everything in the <code>Zalando</code> policy, plus the checks that were previously only in Zalando's supplementary linter rule pack, reworked as Areté rules.</p>
 <ul>
 <li><strong>61</strong> rules active</li>
+<li>suggested gate: <code>error</code> (used by the <a href="../../automation-api/">automation API</a> unless overridden)</li>
 </ul>
 <p>Parameter overrides:</p>
 <table>

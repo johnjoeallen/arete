@@ -13,7 +13,7 @@
         <link rel="canonical" href="https://johnjoeallen.github.io/arete/0.1/history/">
       
       
-        <link rel="prev" href="../configuration/">
+        <link rel="prev" href="../automation-api/">
       
       
         <link rel="next" href="../validation/">
@@ -344,6 +344,33 @@
       
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../automation-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Automation API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
     
   
   
@@ -484,6 +511,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#automation-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Automation API
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#tooling-and-documentation" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -522,10 +560,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
         
           
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
             
   
   
@@ -543,8 +581,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -915,6 +953,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#automation-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Automation API
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#tooling-and-documentation" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1113,6 +1162,20 @@ so a deployment can add or override policies without a rebuild.</p>
 <p>Large documents are handled explicitly: the OpenAPI parser and the bundle's
 YAML loader both accept configurable size limits so that legitimately large
 specifications are not rejected as though malformed.</p>
+<h2 id="automation-api">Automation API<a class="headerlink" href="#automation-api" title="Permanent link">&para;</a></h2>
+<p>An unauthenticated JSON API under <code>/api/v1</code> was added for CI: submit a spec
+inline or by URL, name the validator/policy combinations to run, and get
+findings plus a pass/fail verdict (JSON or SARIF). Specs are grouped by a
+plain <strong>namespace</strong> slug and attributed to a <strong>submitter</strong> — both
+self-asserted, neither checked; uniqueness moved from a global spec title to
+<code>(namespace, title)</code>. Because there is no authentication, the deployment is
+required to sit behind a protected boundary. Each policy can declare a
+suggested pass level (<code>scoring:</code> — <code>blocker</code> / <code>error</code> / <code>score&lt;NN</code>) that the
+verdict honours unless the caller overrides it. A <code>shared</code> deployment mode
+locks down the local-filesystem features (path loading, the drop folder,
+<code>file:</code> URLs) that only make sense for a single-user install, and the
+server-side URL fetcher is restricted to <code>http</code>/<code>https</code> with a mandatory SSRF
+guard.</p>
 <h2 id="tooling-and-documentation">Tooling and documentation<a class="headerlink" href="#tooling-and-documentation" title="Permanent link">&para;</a></h2>
 <p>The documentation moved to a <strong>MkDocs (Material) site</strong> deployed to GitHub
 Pages, with <code>mike</code> for versioned docs, generated rule and policy pages, and

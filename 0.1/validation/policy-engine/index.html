@@ -347,6 +347,33 @@
   
   
     <li class="md-nav__item">
+      <a href="../../automation-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Automation API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../history/" class="md-nav__link">
         
   
@@ -389,10 +416,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
         
           
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
             
   
   
@@ -410,8 +437,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_5">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1523,19 +1550,24 @@ human explanation used for its findings.</p>
 costs.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>---
 <a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>id: Enterprise Grade              # must match the manifest key (quote if it has spaces)
-<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>rules:
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>  REST001: 0.5                    # deduct 0.5 points once if this rule matches
-<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>  CASE001: 0.5
-<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="gu">  SEC001: PROHIBITED              # any match forces the overall score to 0</span>
-<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="gu">---</span>
-<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>
-<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="gh"># Enterprise Grade Policy</span>
-<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>
-<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>Prose describing the policy's intent.
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>scoring: score&lt;90                 # optional: the gate the automation API suggests
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>rules:
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>  REST001: 0.5                    # deduct 0.5 points once if this rule matches
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>  CASE001: 0.5
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="gu">  SEC001: PROHIBITED              # any match forces the overall score to 0</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="gu">---</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="gh"># Enterprise Grade Policy</span>
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>Prose describing the policy's intent.
 </code></pre></div>
 <ul>
-<li>Each value is either a <strong>number <code>0</code>–<code>100</code></strong> (a point deduction) or the
+<li>Each rule value is either a <strong>number <code>0</code>–<code>100</code></strong> (a point deduction) or the
   literal <strong><code>PROHIBITED</code></strong>.</li>
+<li><code>scoring:</code> (optional) is the pass level this policy suggests for automated
+  gating — <code>blocker</code>, <code>error</code>, or <code>score&lt;NN</code>. The
+  <a href="../../automation-api/#scoring-level">Automation API</a> honours it unless a
+  caller overrides it; absent, it defaults to <code>blocker</code>.</li>
 <li>A deduction is applied <strong>once per rule</strong>, no matter how many diagnostics the
   rule reported.</li>
 <li>Every rule id must exist in the bundle.</li>

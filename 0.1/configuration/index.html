@@ -16,7 +16,7 @@
         <link rel="prev" href="../getting-started/">
       
       
-        <link rel="next" href="../history/">
+        <link rel="next" href="../automation-api/">
       
       
         
@@ -399,12 +399,56 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Data locations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#automation-api-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Automation API settings
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
   
 </nav>
       
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../automation-api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Automation API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
     </li>
   
 
@@ -456,10 +500,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
         
           
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
             
   
   
@@ -477,8 +521,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -791,6 +835,23 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Data locations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#automation-api-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Automation API settings
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -874,6 +935,33 @@ you launch from:</p>
 <tr>
 <td><code>~/.arete/policies</code></td>
 <td>Drop extra <code>*.md</code> policy files here to add them to the bundled <a href="../validation/policy-engine/#user-policies">Areté Policy Engine</a>.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="automation-api-settings">Automation API settings<a class="headerlink" href="#automation-api-settings" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Default</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>arete.deployment.mode</code></td>
+<td><code>local</code></td>
+<td><code>shared</code> locks down local-filesystem features — see the <a href="../automation-api/#deployment-mode">Automation API</a>.</td>
+</tr>
+<tr>
+<td><code>arete.api.url-fetch.allow-private</code></td>
+<td><code>false</code></td>
+<td>Allow the URL fetcher to reach private/loopback addresses. Ignored in <code>shared</code> mode.</td>
+</tr>
+<tr>
+<td><code>arete.api.url-fetch.timeout</code></td>
+<td><code>10s</code></td>
+<td>Connect/read timeout for a URL fetch.</td>
 </tr>
 </tbody>
 </table>
