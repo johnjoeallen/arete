@@ -38,7 +38,8 @@ rule pipelines (`.map` / `.filter` / `.expand`, slashy regex literals,
 - See the [Distill reference](distill.md) for the full grammar and builtin catalogue.
 
 The build also runs optional `Matcher.groovy` counterparts as parity checks;
-they are not part of the deployed matcher runtime.
+they are not part of the deployed matcher runtime. See
+[Matcher performance](performance.md) for how the two engines compare.
 
 ---
 

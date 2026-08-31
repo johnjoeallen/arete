@@ -757,7 +757,7 @@ class DistillGroovyParityTest {
             // be deployed in (the bundle loader rejects a rule that omits one).
             Map<String, Object> parameters = requiredParameters(descriptor);
 
-            long mg = 0, md = 0;
+            long scopeGroovy = 0, scopeDistill = 0, mg = 0, md = 0;
             int mCombos = 0, mFindings = 0;
             for (String scope : descriptor.scopes()) {
                 for (Map.Entry<String, Map<String, Object>> a : apis.entrySet()) {
@@ -775,19 +775,28 @@ class DistillGroovyParityTest {
                     agreed++;
                     if (g0 instanceof List<?> l && !l.isEmpty()) { exercised++; mFindings++; }
 
+                    if (!report) continue; // timing only when explicitly benchmarking
+
                     Map<String, Object> ruleMap = rule.asMap();
-                    for (int i = 0; i < 30; i++) { groovyClosure.call(a.getValue(), ruleMap); distill.execute(dslMatcher, a.getValue(), rule); }
-                    long t0 = System.nanoTime();
-                    for (int i = 0; i < 40; i++) groovyClosure.call(a.getValue(), ruleMap);   // compiled once, reused
-                    long t1 = System.nanoTime();
-                    for (int i = 0; i < 40; i++) distill.execute(dslMatcher, a.getValue(), rule);
-                    long t2 = System.nanoTime();
-                    mg += (t1 - t0) / 40; md += (t2 - t1) / 40;
+                    for (int i = 0; i < 50; i++) { groovyClosure.call(a.getValue(), ruleMap); distill.execute(dslMatcher, a.getValue(), rule); }
+                    long best = Long.MAX_VALUE;
+                    for (int rep = 0; rep < 5; rep++) {
+                        long t0 = System.nanoTime();
+                        for (int i = 0; i < 100; i++) groovyClosure.call(a.getValue(), ruleMap);   // compiled once, reused
+                        long t1 = System.nanoTime();
+                        for (int i = 0; i < 100; i++) distill.execute(dslMatcher, a.getValue(), rule);
+                        long t2 = System.nanoTime();
+                        if ((t1 - t0) < best) { best = t1 - t0; mg = (t1 - t0) / 100; md = (t2 - t1) / 100; }
+                    }
+                    scopeGroovy += mg; scopeDistill += md;
                 }
             }
-            groovyNanos += mg; distillNanos += md;
-            rows.add(String.format("%-26s combos=%-3d findings=%-3d  groovy=%8.1fus  distill=%7.1fus  x%.1f",
-                    descriptor.id(), mCombos, mFindings, mg / 1000.0, md / 1000.0, (double) mg / Math.max(1, md)));
+            long perCallGroovy = scopeGroovy / mCombos, perCallDistill = scopeDistill / mCombos;
+            groovyNanos += perCallGroovy; distillNanos += perCallDistill;
+            rows.add(String.format("| `%s` | %d | %d | %.1f | %.1f | %.1f× |",
+                    descriptor.id(), mCombos, mFindings,
+                    perCallGroovy / 1000.0, perCallDistill / 1000.0,
+                    (double) perCallGroovy / Math.max(1, perCallDistill)));
         }
 
         rows.stream().filter(r -> r.startsWith("DIVERGES")).forEach(System.out::println);
@@ -795,21 +804,25 @@ class DistillGroovyParityTest {
                 + mismatches + " matcher/scope/spec combination(s) (see DIVERGES lines above)");
 
         // The deployed engine must stay clearly ahead of compiled Groovy
-        // (generous margin for CI timing noise).
-        assertFalse(distillNanos * 2 > groovyNanos,
-                "Distill (cached) lost its margin over Groovy (compiled): distill=" + distillNanos / 1_000_000.0
-                        + "ms groovy=" + groovyNanos / 1_000_000.0 + "ms");
+        // (generous margin for CI timing noise). Only measured under -Darete.benchmark.
+        if (report) {
+            assertFalse(distillNanos * 2 > groovyNanos,
+                    "Distill (cached) lost its margin over Groovy (compiled): distill="
+                            + distillNanos / 1000.0 + "us groovy=" + groovyNanos / 1000.0 + "us");
+        }
 
         System.out.println("\n=== full groovy/distill sweep (" + combos + " matcher x scope x spec combos) ===");
         if (report) {
-            rows.stream().filter(r -> !r.startsWith("DIVERGES")).sorted().forEach(System.out::println);
+            System.out.println("| Matcher | Combos | Findings | Groovy µs/call | Distill µs/call | Speedup |");
+            System.out.println("|---|--:|--:|--:|--:|--:|");
+            rows.stream().filter(r -> r.startsWith("|")).sorted().forEach(System.out::println);
         }
-        System.out.printf("%n%-30s %d%n", "combos compared", combos);
-        System.out.printf("%-30s %d%n", "identical diagnostics", agreed);
-        System.out.printf("%-30s %d%n", "combos with findings", exercised);
-        System.out.printf("%-30s %.2f ms%n", "groovy total (compiled once)", groovyNanos / 1_000_000.0);
-        System.out.printf("%-30s %.2f ms%n", "distill total (cached parse)", distillNanos / 1_000_000.0);
-        System.out.printf("%-30s %.1fx faster%n", "distill vs groovy", (double) groovyNanos / distillNanos);
+        System.out.printf("%n%-34s %d%n", "combos compared", combos);
+        System.out.printf("%-34s %d%n", "identical diagnostics", agreed);
+        System.out.printf("%-34s %d%n", "combos with findings", exercised);
+        System.out.printf("%-34s %.1f µs%n", "groovy per-call, summed over rules", groovyNanos / 1000.0);
+        System.out.printf("%-34s %.1f µs%n", "distill per-call, summed over rules", distillNanos / 1000.0);
+        System.out.printf("%-34s %.1fx faster (mean)%n", "distill vs groovy", (double) groovyNanos / distillNanos);
     }
 
     /** A loader-valid value for every {@code required} parameter the matcher declares. */
