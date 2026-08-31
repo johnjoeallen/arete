@@ -124,7 +124,7 @@ scripts can trust their inputs):
 | `string`  | a non-blank string                                |
 | `integer` | a whole number                                    |
 | `boolean` | `true` / `false`                                  |
-| `list`    | a YAML list, or a comma-separated string the loader splits (trimmed, empties dropped) — the matcher always sees a `List<String>` |
+| `list`    | a YAML list (passed through as-is), or a comma-separated string the loader splits into a trimmed, empty-dropped `List<String>` — either way the matcher sees a list |
 
 ### The `api` model
 
