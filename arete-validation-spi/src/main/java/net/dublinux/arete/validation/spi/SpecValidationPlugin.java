@@ -149,6 +149,19 @@ public interface SpecValidationPlugin {
     }
 
     /**
+     * The minimum {@link ValidationResult#getOverallScore()} this rule set
+     * considers a pass, or {@link java.util.OptionalDouble#empty()} if it has
+     * no numeric pass mark. When present, {@link #getSuggestedScoreLevel} for
+     * the same rule set should report the matching {@code "score<NN"} so a
+     * generic gating caller needs to consult only one of the two.
+     *
+     * @param ruleSet one of {@link #getRuleSets()}, or {@link #DEFAULT_RULE_SET}
+     */
+    default java.util.OptionalDouble getPassingScore(String ruleSet) {
+        return java.util.OptionalDouble.empty();
+    }
+
+    /**
      * Display text for one of the four generic {@link Severity} levels,
      * e.g. a Zally-based plugin returning {@code "Must"} for {@link
      * Severity#ERROR} to match the MUST/SHOULD/MAY/HINT vocabulary its own

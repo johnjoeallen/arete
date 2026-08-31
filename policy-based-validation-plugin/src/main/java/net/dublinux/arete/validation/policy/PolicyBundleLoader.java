@@ -175,8 +175,10 @@ final class PolicyBundleLoader {
 
     private Policy parsePolicy(String path, String content, Map<String, PolicyRule> rules, Map<String, Matcher> matchers) {
         Map<String, Object> data = frontMatter(path, content);
-        rejectUnknown(path, data, Set.of("id", "rules", "scoring"));
+        rejectUnknown(path, data, Set.of("id", "rules", "scoring", "passingScore", "grades"));
         String scoreLevel = data.containsKey("scoring") ? scoreLevel(path, data.get("scoring")) : null;
+        Double passingScore = data.containsKey("passingScore") ? score(path, "passingScore", data.get("passingScore")) : null;
+        Map<String, Double> grades = data.containsKey("grades") ? grades(path, data.get("grades")) : Map.of();
         Map<String, PolicyDisposition> dispositions = new LinkedHashMap<>();
         for (Map.Entry<String, Object> entry : map(path, "rules", data.get("rules")).entrySet()) {
             Object value = entry.getValue();
@@ -199,7 +201,31 @@ final class PolicyBundleLoader {
                 else throw new BundleValidationException(path + ": " + entry.getKey() + ".points must be a number from 0 to 100 or PROHIBITED");
             } else throw new BundleValidationException(path + ": " + entry.getKey() + " must be a number, PROHIBITED, or a declaration with points and parameters");
         }
-        return new Policy(requiredString(path, "id", data.get("id")), dispositions, scoreLevel);
+        return new Policy(requiredString(path, "id", data.get("id")), dispositions, scoreLevel, passingScore, grades);
+    }
+
+    private static double score(String path, String field, Object value) {
+        if (value instanceof Number number && Double.isFinite(number.doubleValue())
+                && number.doubleValue() >= 0 && number.doubleValue() <= 100) {
+            return number.doubleValue();
+        }
+        throw new BundleValidationException(path + ": " + field + " must be a number from 0 to 100");
+    }
+
+    /** {@code grades:} — an ordered {label -> min score} map, kept in declaration order (highest band first). */
+    private static Map<String, Double> grades(String path, Object value) {
+        Map<String, Double> out = new LinkedHashMap<>();
+        double previous = Double.MAX_VALUE;
+        for (Map.Entry<String, Object> entry : map(path, "grades", value).entrySet()) {
+            double threshold = score(path, "grades." + entry.getKey(), entry.getValue());
+            if (threshold > previous) {
+                throw new BundleValidationException(path + ": grades must be listed from the highest threshold down");
+            }
+            previous = threshold;
+            out.put(entry.getKey(), threshold);
+        }
+        if (out.isEmpty()) throw new BundleValidationException(path + ": grades must not be empty");
+        return out;
     }
 
     /** Validates and normalises a policy's {@code scoring:} value: {@code blocker | error | score<NN}. */

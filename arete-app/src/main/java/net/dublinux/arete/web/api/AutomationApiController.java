@@ -91,8 +91,8 @@ public class AutomationApiController {
             String pointer, List<String> paths, String documentationUrl) { }
 
     public record CombinationResult(String validator, String policy, String status, String errorMessage,
-            Double score, LevelOutcome level, Map<String, Long> counts, int rulesEvaluated,
-            List<Finding> findings) { }
+            Double score, String grade, Double passingScore, LevelOutcome level, Map<String, Long> counts,
+            int rulesEvaluated, List<Finding> findings) { }
 
     public record SubmitResponse(SpecResource spec, boolean ok, String verdict, List<CombinationResult> results) { }
 
@@ -135,11 +135,14 @@ public class AutomationApiController {
         if ("sarif".equalsIgnoreCase(format)) {
             return ResponseEntity.ok(SarifRenderer.render(findings));
         }
-        return ResponseEntity.ok(Map.of(
-                "spec", toResource(spec),
-                "score", box(r.overallScore()),
-                "counts", severityCounts(r),
-                "findings", findings));
+        Map<String, Object> out = new LinkedHashMap<>();
+        out.put("spec", toResource(spec));
+        out.put("score", box(r.overallScore()));
+        out.put("grade", r.grade());
+        out.put("passingScore", box(r.passingScore()));
+        out.put("counts", severityCounts(r));
+        out.put("findings", findings);
+        return ResponseEntity.ok(out);
     }
 
     @DeleteMapping("/namespaces/{namespace}/specs/{id}")
@@ -215,7 +218,7 @@ public class AutomationApiController {
             ok &= !failed;
             comboResults.add(new CombinationResult(
                     plugin.getId(), policy, statusOf(r), errorOf(r),
-                    box(r.overallScore()),
+                    box(r.overallScore()), r.grade(), box(r.passingScore()),
                     new LevelOutcome(level.level().describe(), level.source(), !failed),
                     severityCounts(r), Math.max(0, r.rulesEvaluatedCount()), findings(r)));
         }

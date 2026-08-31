@@ -25,19 +25,36 @@ record PolicyRule(String id, String title, String category, String matcherId, St
 record Matcher(String id, String language, String source, List<String> scopes, Map<String, ParameterDefinition> parameters) { }
 record ParameterDefinition(String type, boolean required, List<String> values) { }
 /**
- * @param scoreLevel the policy's suggested pass level for automated gating, in
- *                   the {@code blocker | error | score<NN} grammar, or null if
- *                   the policy states no opinion.
+ * @param scoreLevel    the policy's suggested pass level for automated gating,
+ *                      in the {@code blocker | error | score<NN} grammar, or
+ *                      null if the policy states no opinion.
+ * @param passingScore  the minimum overall score this policy considers a pass,
+ *                      or null.
+ * @param grades        score → grade label, ordered high threshold to low; a
+ *                      score at or above a threshold earns that grade. Empty
+ *                      if the policy defines no grade bands.
  */
-record Policy(String id, Map<String, PolicyDisposition> dispositions, String scoreLevel) {
+record Policy(String id, Map<String, PolicyDisposition> dispositions, String scoreLevel,
+        Double passingScore, Map<String, Double> grades) {
     Policy {
         // Policy declaration order is report order. Map.copyOf deliberately
         // makes no iteration-order promise, so retain the YAML LinkedHashMap.
         dispositions = Collections.unmodifiableMap(new LinkedHashMap<>(dispositions));
+        grades = grades == null ? Map.of() : Collections.unmodifiableMap(new LinkedHashMap<>(grades));
     }
 
     Policy(String id, Map<String, PolicyDisposition> dispositions) {
-        this(id, dispositions, null);
+        this(id, dispositions, null, null, Map.of());
+    }
+
+    /** The grade label for a numeric score, or null if no band matches / none are defined. */
+    String gradeFor(double score) {
+        for (Map.Entry<String, Double> band : grades.entrySet()) {
+            if (score >= band.getValue()) {
+                return band.getKey();
+            }
+        }
+        return grades.isEmpty() ? null : "F";
     }
 }
 sealed interface PolicyDisposition permits Deduction, Prohibited {

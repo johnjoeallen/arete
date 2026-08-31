@@ -1,6 +1,11 @@
 ---
 id: Enterprise Grade
-scoring: score<90
+passingScore: 90
+grades:
+  A: 95
+  B: 90
+  C: 80
+  D: 70
 rules:
   REST001: 0.5
   DOC001: 0.5

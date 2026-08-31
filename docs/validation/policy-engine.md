@@ -312,7 +312,13 @@ costs.
 ```markdown
 ---
 id: Enterprise Grade              # must match the manifest key (quote if it has spaces)
-scoring: score<90                 # optional: the gate the automation API suggests
+passingScore: 90                  # optional: below this score the policy fails
+grades:                           # optional: numeric score → grade, highest band first
+  A: 95
+  B: 90
+  C: 80
+  D: 70
+scoring: error                    # optional non-numeric gate: blocker | error
 rules:
   REST001: 0.5                    # deduct 0.5 points once if this rule matches
   CASE001: 0.5
@@ -326,10 +332,15 @@ Prose describing the policy's intent.
 
 - Each rule value is either a **number `0`–`100`** (a point deduction) or the
   literal **`PROHIBITED`**.
-- `scoring:` (optional) is the pass level this policy suggests for automated
-  gating — `blocker`, `error`, or `score<NN`. The
-  [Automation API](../automation-api.md#scoring-level) honours it unless a
-  caller overrides it; absent, it defaults to `blocker`.
+- `passingScore:` (optional, `0`–`100`) — the minimum overall score the policy
+  considers a pass. Reported on every validation and used by the
+  [Automation API](../automation-api.md#scoring-level) verdict.
+- `grades:` (optional) — a `label → minimum score` map, listed highest
+  threshold first. A score at or above a threshold earns that label; below the
+  lowest band the grade is `F`. Reported alongside the numeric score.
+- `scoring:` (optional) — a non-numeric gate, `blocker` or `error`, for a
+  policy that gates on findings rather than a score. `passingScore` wins if
+  both are set; with neither, the API gate defaults to `blocker`.
 - A deduction is applied **once per rule**, no matter how many diagnostics the
   rule reported.
 - Every rule id must exist in the bundle.

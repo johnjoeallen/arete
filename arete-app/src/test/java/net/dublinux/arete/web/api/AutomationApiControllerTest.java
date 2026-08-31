@@ -71,6 +71,7 @@ class AutomationApiControllerTest {
         SpecValidationPlugin plugin = org.mockito.Mockito.mock(SpecValidationPlugin.class);
         lenient().when(plugin.getId()).thenReturn("generic-policy");
         lenient().when(plugin.getSuggestedScoreLevel(anyString())).thenReturn(Optional.of("score<90"));
+        lenient().when(plugin.getPassingScore(anyString())).thenReturn(java.util.OptionalDouble.of(90.0));
         lenient().when(pluginRegistry.getPlugins()).thenReturn(List.of(plugin));
         lenient().when(pluginSettings.isEnabled("generic-policy")).thenReturn(true);
 
@@ -98,7 +99,9 @@ class AutomationApiControllerTest {
                 .andExpect(jsonPath("$.results[0].validator").value("generic-policy"))
                 .andExpect(jsonPath("$.results[0].level.criterion").value("score<90"))
                 .andExpect(jsonPath("$.results[0].level.source").value("policy"))
-                .andExpect(jsonPath("$.results[0].level.met").value(false));
+                .andExpect(jsonPath("$.results[0].level.met").value(false))
+                .andExpect(jsonPath("$.results[0].grade").value("F"))
+                .andExpect(jsonPath("$.results[0].passingScore").value(90.0));
     }
 
     @Test
@@ -180,6 +183,6 @@ class AutomationApiControllerTest {
         return new AggregatedValidationResult(
                 List.of(new ValidationSummary("generic-policy", "SUCCESS", 1, null)),
                 List.of(new AttributedDiagnostic("generic-policy", "Areté Policy Engine", d)),
-                155, score, 100.0);
+                155, score, 100.0, score >= 90 ? "B" : "F", 90.0);
     }
 }

@@ -69,7 +69,8 @@ for pid, rel in manifest["policies"].items():
         else:
             disp[k] = (v, {})
     policies[pid] = {"id": fm.get("id", pid), "intent": first_para(body),
-                     "scoring": fm.get("scoring"), "dispositions": disp}
+                     "scoring": fm.get("scoring"), "passingScore": fm.get("passingScore"),
+                     "grades": fm.get("grades"), "dispositions": disp}
 
 policy_ids = list(policies)
 short = {p: p.replace("Enterprise Grade", "Enterprise").replace("Zalando Extended", "Zal. Ext.") for p in policy_ids}
@@ -136,9 +137,15 @@ for pid, pol in policies.items():
     if pol["intent"]:
         lines += [pol["intent"], ""]
     lines.append(f"- **{len(active)}** rules active" + (f", **{len(prohibited)}** prohibited" if prohibited else ""))
-    if pol.get("scoring"):
+    if pol.get("passingScore") is not None:
+        lines.append(f"- passing score: **{pol['passingScore']}** "
+                     "(the [automation API](../automation-api.md) fails below this unless overridden)")
+    elif pol.get("scoring"):
         lines.append(f"- suggested gate: `{pol['scoring']}` "
                      "(used by the [automation API](../automation-api.md) unless overridden)")
+    if pol.get("grades"):
+        bands = ", ".join(f"{k} ≥ {v}" for k, v in pol["grades"].items())
+        lines.append(f"- grades: {bands}, else F")
     lines.append("")
     if overrides:
         lines += ["Parameter overrides:", "", "| Rule | Overrides |", "|---|---|"]

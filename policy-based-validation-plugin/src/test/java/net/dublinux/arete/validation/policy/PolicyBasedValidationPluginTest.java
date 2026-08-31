@@ -124,6 +124,9 @@ class PolicyBasedValidationPluginTest {
         assertEquals(2, result.getDiagnostics().stream().filter(diagnostic -> diagnostic.getRuleId().equals("REST001")).count());
         assertEquals(92.5, result.getOverallScore());
         assertEquals(92.5, result.getOverallScoreWithoutBlockers());
+        assertEquals("B", result.getGrade());                       // 92.5 -> B (bands A:95 B:90 C:80 D:70)
+        assertEquals(90.0, plugin.getPassingScore("Enterprise Grade").orElseThrow());
+        assertEquals("score<90", plugin.getSuggestedScoreLevel("Enterprise Grade").orElseThrow());
         assertEquals(0.5, result.getDiagnostics().get(0).getScoreImprovement());
         assertEquals(0.5, result.getDiagnostics().get(1).getScoreImprovement());
         assertEquals("http://localhost:6809/plugins/generic-policy/rules/REST001",

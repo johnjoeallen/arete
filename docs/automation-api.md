@@ -118,21 +118,24 @@ Errors are `application/problem+json` (`{ status, title, detail }`).
 
 ## Scoring level
 
-A policy declares its own suggested gate in a `scoring:` key in its front
-matter — `blocker`, `error`, or `score<NN`. The bundled policies:
+A policy declares its own pass bar in its front matter — `passingScore: NN`
+(fail below that score), or a non-numeric `scoring: blocker | error`. It may
+also define `grades:` (score → letter). The bundled policies:
 
-| policy | suggested gate |
-|---|---|
-| Enterprise Grade | `score<90` |
-| Zalando, Zalando Extended | `error` |
+| policy | pass bar | grades |
+|---|---|---|
+| Enterprise Grade | `passingScore: 90` | A ≥ 95, B ≥ 90, C ≥ 80, D ≥ 70, else F |
+| Zalando, Zalando Extended | `scoring: error` | — |
 
-With the default `?failOn=policy`, each combination is judged against its own
-policy's gate (`level.source` = `"policy"`). A policy with no `scoring:` key
-falls back to `blocker`. An explicit `?failOn=error` etc. overrides every
-combination (`level.source` = `"request"`).
+Each combination's result carries `score`, `grade` (null if the policy defines
+no bands), and `passingScore` (null if none). With the default `?failOn=policy`
+the combination is judged against its own policy's bar (`level.source` =
+`"policy"`); a policy with no bar falls back to `blocker`. An explicit
+`?failOn=error` / `score<NN` etc. overrides every combination
+(`level.source` = `"request"`).
 
-Plugins other than the policy engine can expose a suggestion too, via the SPI
-method `getSuggestedScoreLevel(ruleSet)`.
+Plugins other than the policy engine can expose a bar via the SPI methods
+`getPassingScore(ruleSet)` and `getSuggestedScoreLevel(ruleSet)`.
 
 ## Remote fetch
 

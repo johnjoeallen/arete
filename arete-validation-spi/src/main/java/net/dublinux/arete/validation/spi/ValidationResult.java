@@ -48,6 +48,7 @@ public final class ValidationResult {
     private final int rulesEvaluatedCount;
     private final double overallScore;
     private final double overallScoreWithoutBlockers;
+    private final String grade;
 
     private ValidationResult(Builder b) {
         this.status = Objects.requireNonNull(b.status, "status must not be null");
@@ -56,6 +57,7 @@ public final class ValidationResult {
         this.rulesEvaluatedCount = b.rulesEvaluatedCount;
         this.overallScore = b.overallScore;
         this.overallScoreWithoutBlockers = b.overallScoreWithoutBlockers;
+        this.grade = b.grade;
     }
 
     public Status getStatus() {
@@ -116,6 +118,17 @@ public final class ValidationResult {
         return overallScoreWithoutBlockers;
     }
 
+    /**
+     * A grade label for {@link #getOverallScore()} — {@code "A"}, {@code "B"},
+     * a band name, whatever the engine's rule set defines — or {@code null} if
+     * the engine has no grading concept for this run. Purely a presentation
+     * label over the numeric score; callers that gate on a threshold should
+     * still use the number.
+     */
+    public String getGrade() {
+        return grade;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -143,6 +156,7 @@ public final class ValidationResult {
         private int rulesEvaluatedCount = -1;
         private double overallScore = Double.NaN;
         private double overallScoreWithoutBlockers = Double.NaN;
+        private String grade;
 
         public Builder status(Status status) {
             this.status = status;
@@ -173,6 +187,12 @@ public final class ValidationResult {
         /** See {@link ValidationResult#getOverallScoreWithoutBlockers()}. Defaults to {@link Double#NaN} ("not computed") if never called. */
         public Builder overallScoreWithoutBlockers(double overallScoreWithoutBlockers) {
             this.overallScoreWithoutBlockers = overallScoreWithoutBlockers;
+            return this;
+        }
+
+        /** See {@link ValidationResult#getGrade()}. Defaults to {@code null} if never called. */
+        public Builder grade(String grade) {
+            this.grade = grade;
             return this;
         }
 

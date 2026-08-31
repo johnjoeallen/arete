@@ -17,5 +17,7 @@ public record PersistedAggregatedValidationResult(
         List<PersistedAttributedDiagnostic> diagnostics,
         int rulesEvaluatedCount,
         Double overallScore,
-        Double overallScoreWithoutBlockers) {
+        Double overallScoreWithoutBlockers,
+        String grade,
+        Double passingScore) {
 }

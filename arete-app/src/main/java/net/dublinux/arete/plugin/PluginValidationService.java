@@ -73,6 +73,8 @@ public class PluginValidationService {
         List<ValidationSummary> summaries = new ArrayList<>();
         List<AttributedDiagnostic> diagnostics = new ArrayList<>();
         List<ValidationResult> successfulResults = new ArrayList<>();
+        String grade = null;
+        double passingScore = Double.NaN;
 
         for (PluginRunRequest request : requests) {
             SpecValidationPlugin plugin = findEnabled(request.pluginId());
@@ -80,11 +82,8 @@ public class PluginValidationService {
                 continue;
             }
             String ruleSet = request.ruleSet();
-            SpecInput input = SpecInput.builder()
-                    .content(rawSpec)
-                    .format(format)
-                    .ruleSet(ruleSet == null || ruleSet.isBlank() ? SpecValidationPlugin.DEFAULT_RULE_SET : ruleSet)
-                    .build();
+            String resolvedRuleSet = ruleSet == null || ruleSet.isBlank() ? SpecValidationPlugin.DEFAULT_RULE_SET : ruleSet;
+            SpecInput input = SpecInput.builder().content(rawSpec).format(format).ruleSet(resolvedRuleSet).build();
             ValidationResult result = runOne(plugin, input);
             summaries.add(toSummary(plugin, result));
             if (result.getStatus() == ValidationResult.Status.SUCCESS) {
@@ -92,6 +91,14 @@ public class PluginValidationService {
                     diagnostics.add(new AttributedDiagnostic(plugin.getId(), plugin.getName(), diagnostic));
                 }
                 successfulResults.add(result);
+                if (requests.size() == 1) {
+                    grade = result.getGrade();
+                    try {
+                        passingScore = plugin.getPassingScore(resolvedRuleSet).orElse(Double.NaN);
+                    } catch (Throwable ignored) {
+                        // a plugin can't be trusted to behave; leave passingScore NaN
+                    }
+                }
             }
         }
 
@@ -100,7 +107,8 @@ public class PluginValidationService {
         double overallScoreWithoutBlockers =
                 successfulResults.size() == 1 ? successfulResults.get(0).getOverallScoreWithoutBlockers() : Double.NaN;
 
-        return new AggregatedValidationResult(summaries, diagnostics, rulesEvaluatedCount, overallScore, overallScoreWithoutBlockers);
+        return new AggregatedValidationResult(summaries, diagnostics, rulesEvaluatedCount,
+                overallScore, overallScoreWithoutBlockers, grade, passingScore);
     }
 
     /** Sums whichever results actually reported a count; {@code -1} ("unknown") if none did. */

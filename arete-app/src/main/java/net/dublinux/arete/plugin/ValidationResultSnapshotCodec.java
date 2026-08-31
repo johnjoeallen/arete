@@ -43,7 +43,9 @@ final class ValidationResultSnapshotCodec {
                         .toList(),
                 result.rulesEvaluatedCount(),
                 nullIfNaN(result.overallScore()),
-                nullIfNaN(result.overallScoreWithoutBlockers()));
+                nullIfNaN(result.overallScoreWithoutBlockers()),
+                result.grade(),
+                nullIfNaN(result.passingScore()));
     }
 
     private static PersistedAttributedDiagnostic toPersisted(AttributedDiagnostic av) {
@@ -63,7 +65,8 @@ final class ValidationResultSnapshotCodec {
                 .toList();
         return new AggregatedValidationResult(
                 summaries, diagnostics, persisted.rulesEvaluatedCount(),
-                nanIfNull(persisted.overallScore()), nanIfNull(persisted.overallScoreWithoutBlockers()));
+                nanIfNull(persisted.overallScore()), nanIfNull(persisted.overallScoreWithoutBlockers()),
+                persisted.grade(), nanIfNull(persisted.passingScore()));
     }
 
     private static AttributedDiagnostic toLive(PersistedAttributedDiagnostic pav) {

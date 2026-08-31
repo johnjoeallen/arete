@@ -27,10 +27,23 @@ public record AggregatedValidationResult(
         List<AttributedDiagnostic> diagnostics,
         int rulesEvaluatedCount,
         double overallScore,
-        double overallScoreWithoutBlockers) {
+        double overallScoreWithoutBlockers,
+        String grade,
+        double passingScore) {
+
+    /** Kept for callers that predate grade/passing-score. */
+    public AggregatedValidationResult(List<ValidationSummary> pluginSummaries, List<AttributedDiagnostic> diagnostics,
+            int rulesEvaluatedCount, double overallScore, double overallScoreWithoutBlockers) {
+        this(pluginSummaries, diagnostics, rulesEvaluatedCount, overallScore, overallScoreWithoutBlockers, null, Double.NaN);
+    }
 
     public boolean isEmpty() {
         return pluginSummaries.isEmpty();
+    }
+
+    /** True when a passing score is defined and the overall score meets it. */
+    public boolean meetsPassingScore() {
+        return !Double.isNaN(passingScore) && !Double.isNaN(overallScore) && overallScore >= passingScore;
     }
 
     /**

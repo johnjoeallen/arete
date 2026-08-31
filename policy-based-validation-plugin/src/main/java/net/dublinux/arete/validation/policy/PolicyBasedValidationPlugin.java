@@ -61,7 +61,22 @@ public final class PolicyBasedValidationPlugin implements SpecValidationPlugin, 
     @Override
     public Optional<String> getSuggestedScoreLevel(String ruleSet) {
         Policy policy = activeBundle().policies().get(ruleSet);
-        return policy == null ? Optional.empty() : Optional.ofNullable(policy.scoreLevel());
+        if (policy == null) {
+            return Optional.empty();
+        }
+        if (policy.passingScore() != null) {
+            double bar = policy.passingScore();
+            return Optional.of("score<" + (bar == Math.rint(bar) ? Long.toString((long) bar) : Double.toString(bar)));
+        }
+        return Optional.ofNullable(policy.scoreLevel());
+    }
+
+    @Override
+    public java.util.OptionalDouble getPassingScore(String ruleSet) {
+        Policy policy = activeBundle().policies().get(ruleSet);
+        return policy == null || policy.passingScore() == null
+                ? java.util.OptionalDouble.empty()
+                : java.util.OptionalDouble.of(policy.passingScore());
     }
 
     @Override
@@ -169,7 +184,8 @@ public final class PolicyBasedValidationPlugin implements SpecValidationPlugin, 
         double effectiveScore = prohibitedMatched ? 0 : qualityScore;
         return ValidationResult.builder().status(ValidationResult.Status.SUCCESS).diagnostics(diagnostics)
                 .rulesEvaluatedCount(rulesEvaluated).overallScore(effectiveScore)
-                .overallScoreWithoutBlockers(qualityScore).build();
+                .overallScoreWithoutBlockers(qualityScore)
+                .grade(policy.gradeFor(effectiveScore)).build();
     }
 
     @Override
