@@ -114,13 +114,14 @@ deployed engine would behave (or would have).
 
 | | Groovy (compiled once) | Distill (cached parse) |
 |---|--:|--:|
-| per-call time, summed over all 38 matchers | ~280 µs | **~65 µs** |
+| per-call time, summed over all 38 matchers | ~260 µs | **~55–65 µs** |
 | mean speedup | — | **~4–5× faster** |
 | full sweep, 300 combos | — | 300 identical, 0 divergent |
 
-Across the wider loop, a full-policy pass (109 rules) is ~4.5 ms and an
-end-to-end `validate()` on a 40-path spec is ~9.7 ms — of which the OpenAPI
-parse (~3 ms) and model adaptation (~1 ms) are the larger share.
+Across the wider loop, a full-policy pass (111 rules) is ~4.9 ms and an
+end-to-end `validate()` on a 40-path spec is ~9.9 ms — of which the OpenAPI
+parse (~3 ms) and model adaptation (~1 ms) are the larger share. Distill's
+parse cache removes ~1.6 ms of that pass (reparsing every rule costs ~6.6 ms).
 
 ### Per-matcher
 
@@ -129,53 +130,57 @@ Speedup is Groovy ÷ Distill.
 
 | Matcher | Combos | Findings | Groovy µs/call | Distill µs/call | Speedup |
 |---|--:|--:|--:|--:|--:|
-| `api-title` | 5 | 0 | 5.5 | 1.3 | 4.3× |
-| `bulk-operation` | 5 | 0 | 7.4 | 0.4 | 17.2× |
-| `common-field` | 5 | 2 | 3.8 | 0.6 | 6.5× |
+| `api-title` | 5 | 0 | 5.6 | 1.3 | 4.5× |
+| `bulk-operation` | 5 | 0 | 8.4 | 0.5 | 18.0× |
+| `common-field` | 5 | 2 | 4.0 | 0.5 | 8.1× |
 | `compatibility` | 20 | 0 | <0.1 | 0.1 | ~1× |
-| `date-time-name` | 5 | 1 | 3.9 | 0.5 | 7.3× |
-| `document-lint` | 5 | 0 | 1.1 | 0.2 | 4.6× |
-| `documentation-completeness` | 10 | 4 | 7.4 | 1.3 | 5.7× |
-| `enum-values` | 5 | 0 | 3.7 | 0.3 | 11.9× |
-| `example-validity` | 10 | 2 | 2.0 | 0.5 | 3.8× |
-| `extensions` | 5 | 2 | 25.5 | 1.4 | 18.1× |
-| `header-schema` | 5 | 2 | 8.4 | 0.5 | 15.6× |
-| `hostname` | 5 | 5 | 2.4 | 1.7 | 1.4× |
+| `date-time-name` | 5 | 1 | 4.1 | 0.5 | 8.6× |
+| `document-lint` | 5 | 0 | 1.1 | 0.2 | 5.2× |
+| `documentation-completeness` | 10 | 4 | 7.3 | 1.5 | 4.7× |
+| `enum-values` | 5 | 0 | 4.4 | 0.3 | 13.4× |
+| `example-validity` | 10 | 2 | 2.1 | 0.9 | 2.4× |
+| `extensions` | 5 | 2 | 24.9 | 1.3 | 18.5× |
+| `header-schema` | 5 | 2 | 8.6 | 0.6 | 14.7× |
+| `hostname` | 5 | 5 | 1.7 | 0.7 | 2.4× |
 | `manual` | 20 | 0 | <0.1 | 0.1 | ~1× |
-| `media-type` | 5 | 5 | 11.6 | 1.3 | 9.0× |
-| `metadata` | 5 | 5 | 7.7 | 2.6 | 3.0× |
-| `naming` | 30 | 13 | 6.8 | 1.4 | 5.0× |
-| `openapi-version` | 5 | 5 | 4.3 | 2.1 | 2.1× |
-| `operation` | 5 | 5 | 12.0 | 2.7 | 4.4× |
-| `operation-metadata` | 10 | 10 | 9.8 | 1.6 | 6.0× |
-| `operation-semantics` | 10 | 0 | 12.1 | 0.9 | 13.8× |
-| `parameter` | 10 | 0 | 5.3 | 1.7 | 3.1× |
-| `path-count` | 5 | 2 | 10.6 | 4.3 | 2.5× |
-| `path-set` | 5 | 0 | 7.4 | 10.6 | 0.7× |
-| `proprietary-header` | 5 | 2 | 18.7 | 1.6 | 11.6× |
-| `query-collection` | 5 | 1 | 8.7 | 0.7 | 13.2× |
-| `request-body` | 5 | 0 | 7.0 | 0.6 | 11.1× |
-| `resource-path` | 10 | 0 | 7.9 | 3.0 | 2.7× |
-| `response-code` | 10 | 0 | 7.1 | 0.9 | 7.8× |
-| `response-example` | 5 | 1 | 14.1 | 1.5 | 9.2× |
-| `response-header` | 5 | 0 | 7.9 | 0.6 | 13.8× |
-| `schema` | 5 | 2 | 10.4 | 3.6 | 2.9× |
-| `schema-composition` | 10 | 2 | 1.6 | 0.3 | 6.4× |
-| `schema-name` | 5 | 2 | 3.7 | 1.1 | 3.3× |
-| `security` | 5 | 5 | 11.3 | 5.5 | 2.0× |
-| `server-url` | 5 | 1 | 4.0 | 1.4 | 2.9× |
-| `status-class` | 5 | 2 | 10.2 | 1.6 | 6.5× |
-| `text-style` | 5 | 2 | 9.0 | 1.6 | 5.5× |
-| `versioning` | 20 | 0 | 1.6 | 0.4 | 3.6× |
+| `media-type` | 5 | 5 | 12.4 | 1.5 | 8.0× |
+| `metadata` | 5 | 5 | 6.9 | 1.8 | 3.9× |
+| `naming` | 30 | 13 | 7.3 | 1.4 | 5.2× |
+| `openapi-version` | 5 | 5 | 4.4 | 2.1 | 2.1× |
+| `operation` | 5 | 0 | 1.1 | 1.1 | ~1× |
+| `operation-metadata` | 10 | 10 | 9.0 | 1.6 | 5.5× |
+| `operation-semantics` | 10 | 0 | 11.5 | 0.9 | 13.0× |
+| `parameter` | 10 | 0 | 5.6 | 1.2 | 4.5× |
+| `path-count` | 5 | 2 | 9.2 | 2.8 | 3.2× |
+| `path-set` | 5 | 0 | 7.6 | 8.1 | 0.9× |
+| `proprietary-header` | 5 | 2 | 19.4 | 1.6 | 12.5× |
+| `query-collection` | 5 | 1 | 8.4 | 0.7 | 11.5× |
+| `request-body` | 5 | 0 | 7.8 | 0.7 | 10.9× |
+| `resource-path` | 10 | 0 | 8.6 | 2.7 | 3.2× |
+| `response-code` | 10 | 0 | 6.8 | 1.0 | 6.8× |
+| `response-example` | 5 | 1 | 16.0 | 3.7 | 4.4× |
+| `response-header` | 5 | 0 | 7.8 | 0.9 | 8.9× |
+| `schema` | 5 | 0 | 2.2 | 1.9 | ~1× |
+| `schema-composition` | 10 | 2 | 1.6 | 0.3 | 6.0× |
+| `schema-name` | 5 | 2 | 3.8 | 1.3 | 2.9× |
+| `security` | 5 | 5 | 11.6 | 3.7 | 3.1× |
+| `server-url` | 5 | 1 | 4.1 | 1.3 | 3.2× |
+| `status-class` | 5 | 2 | 10.1 | 1.0 | 9.8× |
+| `text-style` | 5 | 0 | 2.1 | 1.5 | ~1× |
+| `versioning` | 20 | 0 | 1.7 | 0.6 | 3.1× |
 
 **Reading the outliers**
 
-- **`path-set` (0.7×)** is the only matcher where Distill is slower. Its DSL is
+- **`path-set` (~0.8×)** is the only matcher where Distill is slower. Its DSL is
   `O(n²)` — a nested `api.paths.find { … }` inside both `filter` and `map`,
   re-tokenising every path — so Groovy's JIT-compiled inner loop edges ahead of
   the interpreted tree-walk. A matcher-authoring cost, not an engine cost:
   both do the same quadratic work.
-- **`hostname`, `security`, `openapi-version` (~1.4–2.1×)** spend most of their
+- **`operation`, `schema`, `text-style` (~1×)** report zero findings here: the
+  sweep supplies only *required* parameters, and these matchers were changed to
+  emit nothing when handed no check parameter (rather than flag every subject).
+  Both engines now just run the empty-parameter guard, so the ratio is noise.
+- **`hostname`, `openapi-version`, `security` (~2–3×)** spend most of their
   time in RE2/J regex and string operations, shared by both engines, so the
   interpreter overhead is proportionally small.
 - **`compatibility`, `manual` (~1×)** are sub-microsecond on both; the ratio is
@@ -194,11 +199,11 @@ five runs of 200, averaged over the fixture specs.
 
 | Matcher | Findings | Groovy µs | Distill µs | Java µs | Distill ÷ Java | Groovy ÷ Java |
 |---|--:|--:|--:|--:|--:|--:|
-| `hostname` | 5 | 3.1 | 1.7 | 0.26 | 6.5× | 11.7× |
-| `date-time-name` | 3 | 4.7 | 1.0 | 0.15 | 6.4× | 30.9× |
-| `status-class` | 2 | 8.3 | 1.2 | 0.26 | 4.5× | 32.3× |
-| `operation-semantics` | 2 | 20.7 | 6.5 | 1.23 | 5.2× | 16.8× |
-| `path-set` (O(n²)) | 1 | 10.5 | 11.0 | 2.10 | 5.2× | 5.0× |
+| `hostname` | 5 | 2.9 | 2.0 | 0.28 | 7.2× | 10.5× |
+| `date-time-name` | 3 | 4.6 | 1.3 | 0.14 | 8.6× | 31.9× |
+| `status-class` | 2 | 8.8 | 1.1 | 0.27 | 4.1× | 32.4× |
+| `operation-semantics` | 2 | 20.5 | 6.8 | 1.28 | 5.3× | 16.0× |
+| `path-set` (O(n²)) | 1 | 11.3 | 11.1 | 2.10 | 5.3× | 5.4× |
 
 Hand-written Java is a stable **~5–6× faster than Distill** across trivial and
 complex matchers alike — the price of a tree-walk over compiled bytecode — and
@@ -207,10 +212,10 @@ Groovy, hand Java running the same algorithm beats both by 5×.
 
 ## What the overhead actually costs
 
-At 1–11 µs per matcher call and ~150 evaluations per validation, the entire
-matcher phase is **1–4 ms** — against a ~3 ms OpenAPI parse Areté cannot
-avoid. Distill's interpreter overhead is real and measurable, and it is not
-where a validation spends its time.
+At 1–11 µs per matcher call and 111 evaluations per validation, the entire
+matcher phase is **~5 ms** — alongside a ~3 ms OpenAPI parse Areté cannot
+avoid and ~1 ms of model adaptation. Distill's interpreter overhead is real and
+measurable, and it is not where a validation spends its time.
 
 That is the trade in full: a few milliseconds per spec to keep every matcher a
 ~5–15-line sandboxed expression that can be edited without a rebuild and run
