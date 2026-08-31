@@ -416,6 +416,14 @@ class DistillGroovyParityTest {
         assertParity("text-style", "operation-summary", Map.of("maximum-length", 120), false);
     }
 
+    @Test void textStyleMinimumWords() {
+        assertParity("text-style", "operation-summary", Map.of("minimum-words", 3), false);
+    }
+
+    @Test void textStyleMaximumWordLength() {
+        assertParity("text-style", "operation-summary", Map.of("maximum-word-length", 12), false);
+    }
+
     @Test void textStyleNonActionOriented() {
         assertParity("text-style", "operation-summary", Map.of("match", "non-action-oriented"), true);
     }

@@ -64,11 +64,11 @@ class PolicyBasedValidationPluginTest {
             paths:
               /customers:
                 get:
-                  summary: Get customers
+                  summary: List all customer records
                   responses: { '200': { description: OK } }
               /orders:
                 get:
-                  summary: Get orders
+                  summary: List all order records
                   responses: { '200': { description: OK } }
             """;
 
@@ -118,7 +118,7 @@ class PolicyBasedValidationPluginTest {
         ValidationResult result = plugin.validate(input(ACTION_PATH_SPEC));
 
         assertEquals(ValidationResult.Status.SUCCESS, result.getStatus());
-        assertEquals(109, result.getRulesEvaluatedCount());
+        assertEquals(111, result.getRulesEvaluatedCount());
         assertEquals(32, result.getDiagnostics().size());
         assertEquals("REST001", result.getDiagnostics().get(0).getRuleId());
         assertEquals(2, result.getDiagnostics().stream().filter(diagnostic -> diagnostic.getRuleId().equals("REST001")).count());
@@ -143,7 +143,7 @@ class PolicyBasedValidationPluginTest {
         ValidationResult result = plugin.validate(input(COMPLIANT_STARTER_SPEC));
 
         assertEquals(ValidationResult.Status.SUCCESS, result.getStatus());
-        assertEquals(109, result.getRulesEvaluatedCount());
+        assertEquals(111, result.getRulesEvaluatedCount());
         assertEquals(19, result.getDiagnostics().size());
         assertEquals("DOC006", result.getDiagnostics().get(0).getRuleId());
         assertEquals(94.5, result.getOverallScore());
@@ -903,7 +903,7 @@ class PolicyBasedValidationPluginTest {
 
     private static Map<String, String> bundledResources() {
         Map<String, String> resources = new LinkedHashMap<>();
-        for (String path : new String[] {"PolicyBundle.yaml", "rules/REST001.md", "rules/REST002.md", "rules/REST003.md", "rules/REST004.md", "rules/REST005.md", "rules/REST006.md", "rules/HTTP001.md", "rules/HTTP002.md", "rules/HTTP003.md", "rules/HTTP004.md", "rules/HTTP005.md", "rules/HTTP006.md", "rules/HTTP008.md", "rules/UPDATE001.md", "rules/UPDATE002.md", "rules/UPDATE003.md", "rules/BULK001.md", "rules/BULK002.md", "rules/BULK003.md", "rules/VERSION001.md", "rules/VERSION002.md", "rules/VERSION003.md", "rules/VERSION004.md", "rules/COMPAT001.md", "rules/COMPAT002.md", "rules/COMPAT003.md", "rules/COMPAT004.md", "rules/COMPAT005.md", "rules/COMPAT006.md", "rules/STATUS001.md", "rules/STATUS002.md", "rules/STATUS003.md", "rules/STATUS004.md", "rules/STATUS005.md", "rules/STATUS006.md", "rules/STATUS007.md", "rules/DOC001.md", "rules/DOC002.md", "rules/DOC003.md", "rules/DOC004.md", "rules/DOC005.md", "rules/DOC006.md", "rules/DOC009.md", "rules/CASE001.md", "rules/CASE002.md", "rules/CASE003.md", "rules/CASE004.md", "rules/CASE005.md", "rules/JSON003.md", "rules/JSON004.md", "rules/JSON006.md", "rules/JSON007.md", "rules/JSON009.md", "rules/STANDARD008.md", "rules/STANDARD009.md", "rules/SECURITY001.md", "rules/SECURITY002.md", "rules/ERROR001.md", "rules/ERROR002.md", "rules/ERROR003.md", "rules/ERROR004.md", "rules/ERROR005.md", "rules/ERROR006.md", "rules/ERROR007.md", "policies/EnterpriseGrade.md", "matchers/resource-path/Matcher.md", "matchers/resource-path/Matcher.groovy", "matchers/operation/Matcher.md", "matchers/operation/Matcher.groovy", "matchers/text-style/Matcher.md", "matchers/text-style/Matcher.groovy", "matchers/naming/Matcher.md", "matchers/naming/Matcher.groovy", "matchers/schema/Matcher.md", "matchers/schema/Matcher.groovy", "matchers/operation-semantics/Matcher.md", "matchers/operation-semantics/Matcher.groovy", "matchers/response-code/Matcher.md", "matchers/response-code/Matcher.groovy", "matchers/response-header/Matcher.md", "matchers/response-header/Matcher.groovy", "matchers/proprietary-header/Matcher.md", "matchers/proprietary-header/Matcher.groovy", "matchers/query-collection/Matcher.md", "matchers/query-collection/Matcher.groovy", "matchers/security/Matcher.md", "matchers/security/Matcher.groovy", "matchers/manual/Matcher.md", "matchers/manual/Matcher.groovy", "matchers/bulk-operation/Matcher.md", "matchers/bulk-operation/Matcher.groovy", "matchers/versioning/Matcher.md", "matchers/versioning/Matcher.groovy", "matchers/compatibility/Matcher.md", "matchers/compatibility/Matcher.groovy", "matchers/metadata/Matcher.md", "matchers/metadata/Matcher.groovy", "matchers/error-response/Matcher.md", "matchers/error-response/Matcher.groovy"}) {
+        for (String path : new String[] {"PolicyBundle.yaml", "rules/REST001.md", "rules/REST002.md", "rules/REST003.md", "rules/REST004.md", "rules/REST005.md", "rules/REST006.md", "rules/HTTP001.md", "rules/HTTP002.md", "rules/HTTP003.md", "rules/HTTP004.md", "rules/HTTP005.md", "rules/HTTP006.md", "rules/HTTP008.md", "rules/UPDATE001.md", "rules/UPDATE002.md", "rules/UPDATE003.md", "rules/BULK001.md", "rules/BULK002.md", "rules/BULK003.md", "rules/VERSION001.md", "rules/VERSION002.md", "rules/VERSION003.md", "rules/VERSION004.md", "rules/COMPAT001.md", "rules/COMPAT002.md", "rules/COMPAT003.md", "rules/COMPAT004.md", "rules/COMPAT005.md", "rules/COMPAT006.md", "rules/STATUS001.md", "rules/STATUS002.md", "rules/STATUS003.md", "rules/STATUS004.md", "rules/STATUS005.md", "rules/STATUS006.md", "rules/STATUS007.md", "rules/DOC001.md", "rules/DOC002.md", "rules/DOC003.md", "rules/DOC004.md", "rules/DOC005.md", "rules/DOC006.md", "rules/DOC009.md", "rules/DOC021.md", "rules/DOC022.md", "rules/CASE001.md", "rules/CASE002.md", "rules/CASE003.md", "rules/CASE004.md", "rules/CASE005.md", "rules/JSON003.md", "rules/JSON004.md", "rules/JSON006.md", "rules/JSON007.md", "rules/JSON009.md", "rules/STANDARD008.md", "rules/STANDARD009.md", "rules/SECURITY001.md", "rules/SECURITY002.md", "rules/ERROR001.md", "rules/ERROR002.md", "rules/ERROR003.md", "rules/ERROR004.md", "rules/ERROR005.md", "rules/ERROR006.md", "rules/ERROR007.md", "policies/EnterpriseGrade.md", "matchers/resource-path/Matcher.md", "matchers/resource-path/Matcher.groovy", "matchers/operation/Matcher.md", "matchers/operation/Matcher.groovy", "matchers/text-style/Matcher.md", "matchers/text-style/Matcher.groovy", "matchers/naming/Matcher.md", "matchers/naming/Matcher.groovy", "matchers/schema/Matcher.md", "matchers/schema/Matcher.groovy", "matchers/operation-semantics/Matcher.md", "matchers/operation-semantics/Matcher.groovy", "matchers/response-code/Matcher.md", "matchers/response-code/Matcher.groovy", "matchers/response-header/Matcher.md", "matchers/response-header/Matcher.groovy", "matchers/proprietary-header/Matcher.md", "matchers/proprietary-header/Matcher.groovy", "matchers/query-collection/Matcher.md", "matchers/query-collection/Matcher.groovy", "matchers/security/Matcher.md", "matchers/security/Matcher.groovy", "matchers/manual/Matcher.md", "matchers/manual/Matcher.groovy", "matchers/bulk-operation/Matcher.md", "matchers/bulk-operation/Matcher.groovy", "matchers/versioning/Matcher.md", "matchers/versioning/Matcher.groovy", "matchers/compatibility/Matcher.md", "matchers/compatibility/Matcher.groovy", "matchers/metadata/Matcher.md", "matchers/metadata/Matcher.groovy", "matchers/error-response/Matcher.md", "matchers/error-response/Matcher.groovy"}) {
             if (path.endsWith("Matcher.groovy")) continue;
             resources.put(path, readResource("api-policy/" + path));
             if (path.endsWith("Matcher.md")) {

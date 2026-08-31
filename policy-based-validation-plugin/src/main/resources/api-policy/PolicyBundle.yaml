@@ -158,6 +158,8 @@ rules:
   STANDARD028: rules/STANDARD028.md
   DOC019: rules/DOC019.md
   DOC020: rules/DOC020.md
+  DOC021: rules/DOC021.md
+  DOC022: rules/DOC022.md
 
 policies:
   "Enterprise Grade": policies/EnterpriseGrade.md

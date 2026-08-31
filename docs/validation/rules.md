@@ -87,6 +87,8 @@ There are **155 rules** across **20 categories**, built on
 | `DOC018` | Operation uses an undeclared tag | `tag` |  |  | 0.5 |
 | `DOC019` | Tag is declared more than once | `tag` | 0.5 |  | 0.5 |
 | `DOC020` | API does not declare a license | `metadata` | 0.5 |  | 0.5 |
+| `DOC021` | Operation summary has too few words | `text-style` | 0.5 |  |  |
+| `DOC022` | Operation summary contains an unusually long word | `text-style` | 0.5 |  |  |
 
 ## Error responses
 

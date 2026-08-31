@@ -154,6 +154,7 @@ api.paths.expand { path -> path.operationDetails.map { operation ->
 | `regexFullMatch(pattern, text)` | whole-string match; `pattern` is a regex literal or a string |
 | `regexSearch(pattern, text)` | match anywhere in `text` |
 | `tokenize(delim, text)` | split `text` on the **literal string** `delim`; empty tokens are kept (pair with `.filter { t -> t != "" }`) |
+| `words(text)` | substantive words of `text`: whitespace-separated tokens, leading/trailing punctuation stripped, keeping only those that still contain a letter. Count is `size(words(text))`; per-word length is `w.length` inside `.any` / `.all` / `.filter` |
 | `size(list)` | element count (an integer) |
 | `distinct(list)` | de-duplicated list — drops `null`, keeps first-seen order, compares by string value |
 | `parseInt(text)` / `parseInt(text, fallback)` | base-10 integer after trimming; `fallback` (default `-1`) on failure |
@@ -206,6 +207,8 @@ Each row is a complete expression and the value it produces.
 | `join("|", tokenize(",", "a,,b"))` | `"a\|\|b"` |
 | `distinct(["b", "a", "b", null, "a"])` | `["b", "a"]` — `null` dropped, first-seen order |
 | `pathSegments("/v1/orders/{id}/items")` | `["v1", "orders", "items"]` — empty and `{…}` segments dropped |
+| `words("Get  the widget — v2!")` | `["Get", "the", "widget", "v2"]` — whitespace runs collapsed, `—` and `!` dropped |
+| `words("List").size()` &nbsp; `size(words("List all customers"))` | `1` &nbsp; `3` |
 | `parseInt("  42 ")` &nbsp; `parseInt("x", 0)` | `42` &nbsp; `0` |
 | `strip("--hi--", "-")` &nbsp; `strip("  hi  ")` | `"hi"` &nbsp; `"hi"` |
 | `last(["a", "b"])` &nbsp; `last([])` | `"b"` &nbsp; `""` |

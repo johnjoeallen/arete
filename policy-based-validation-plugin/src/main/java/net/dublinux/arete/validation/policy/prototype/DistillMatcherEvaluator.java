@@ -209,11 +209,31 @@ public final class DistillMatcherEvaluator {
 
     private static boolean regexFullMatch(Object pattern, Object text) { return pattern(pattern).matches(String.valueOf(text)); }
 
+    /**
+     * Splits prose into substantive words: whitespace-separated tokens with
+     * leading/trailing non-alphanumerics stripped, keeping only those left
+     * holding at least one letter. {@code "Get  the widget — v2!"} →
+     * {@code ["Get", "the", "widget", "v2"]}. Per-word length is then
+     * {@code w.length}; the count is {@code size(words(...))}.
+     */
+    private static List<Object> words(Object text) {
+        List<Object> out = new ArrayList<>();
+        if (text == null) return out;
+        for (String token : String.valueOf(text).trim().split("\\s+")) {
+            String trimmed = token.replaceAll("^[^\\p{L}\\p{N}]+", "").replaceAll("[^\\p{L}\\p{N}]+$", "");
+            if (trimmed.codePoints().anyMatch(Character::isLetter)) {
+                out.add(trimmed);
+            }
+        }
+        return out;
+    }
+
     private static Object function(String name, List<Object> args) {
         return switch (name) {
             case "regexSearch" -> regexSearch(args.get(0), args.get(1));
             case "regexFullMatch" -> regexFullMatch(args.get(0), args.get(1));
             case "tokenize" -> List.of(String.valueOf(args.get(1)).split(java.util.regex.Pattern.quote(String.valueOf(args.get(0)))));
+            case "words" -> words(args.get(0));
             case "last" -> { List<Object> values = iterableOf(args.get(0)); yield values.isEmpty() ? "" : values.get(values.size() - 1); }
             case "size" -> (long) iterableOf(args.get(0)).size();
             case "distinct" -> {
@@ -469,7 +489,7 @@ public final class DistillMatcherEvaluator {
     }
 
     private static final Set<String> KNOWN_FUNCTIONS = Set.of(
-            "regexSearch", "regexFullMatch", "tokenize", "last", "size", "distinct", "join", "strip",
+            "regexSearch", "regexFullMatch", "tokenize", "words", "last", "size", "distinct", "join", "strip",
             "urlHost", "parseInt", "truthy", "pathSegments", "enumerate", "type", "occurrence",
             "operationMessage");
 

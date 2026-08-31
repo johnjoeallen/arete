@@ -55,6 +55,26 @@ class DistillMatcherEvaluatorTest {
     }
 
     @Test
+    void wordsSplitsProseIntoSubstantiveTokens() {
+        // "Get  the widget — v2!" -> [Get, the, widget, v2] : whitespace runs collapse,
+        // the em dash drops (no letter), trailing "!" is stripped. "-" alone has no word.
+        assertEquals(1, runtime.execute(
+                "distill(api, rule) { return api.values.filter { v -> size(words(v)) == 4 }.map { v -> occurrence(\"/\", \"v\", \"4\") }; }",
+                Map.of("values", java.util.List.of("Get  the widget — v2!", "one two")),
+                Map.of("parameters", Map.of())).size());
+        // too few words
+        assertEquals(1, runtime.execute(
+                "distill(api, rule) { return api.values.filter { v -> size(words(v)) < 3 }.map { v -> occurrence(\"/\", \"v\", \"few\") }; }",
+                Map.of("values", java.util.List.of("List", "List all customers")),
+                Map.of("parameters", Map.of())).size());
+        // per-word length
+        assertEquals(1, runtime.execute(
+                "distill(api, rule) { return api.values.filter { v -> words(v).any { w -> w.length > 10 } }.map { v -> occurrence(\"/\", \"v\", \"long\") }; }",
+                Map.of("values", java.util.List.of("Returns TheFullyExpandedAggregate here", "Returns the aggregate")),
+                Map.of("parameters", Map.of())).size());
+    }
+
+    @Test
     void isBlankMatchesNullEmptyAndWhitespaceOnlyStrings() {
         assertEquals(3, runtime.execute(
                 "distill(api, rule) { return api.values.filter { value -> value is blank }.map { value -> occurrence(\"/\", \"value\", \"blank\") }; }",

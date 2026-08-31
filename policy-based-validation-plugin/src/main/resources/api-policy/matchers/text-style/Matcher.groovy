@@ -53,6 +53,13 @@
     def parameters = rule.parameters ?: [:]
     def actionVerbs = ['Get', 'List', 'Create', 'Update', 'Delete', 'Replace', 'Search', 'Find', 'Cancel', 'Activate', 'Deactivate']
 
+    // Substantive words: whitespace-split, edge punctuation stripped, must hold a letter.
+    def words = { text ->
+        (text ?: '').trim().split(/\s+/)
+            .collect { it.replaceAll(/^[^\p{L}\p{N}]+/, '').replaceAll(/[^\p{L}\p{N}]+$/, '') }
+            .findAll { it =~ /\p{L}/ }
+    }
+
     def matches = { operation ->
         def summary = operation.summary?.trim()
         if (!summary) return false // DOC001, not this rule, reports missing documentation.
@@ -69,6 +76,9 @@
         if (parameters['trailing-period'] == 'present' && !summary.endsWith('.')) return false
         if (parameters['trailing-period'] == 'absent' && summary.endsWith('.')) return false
         if (parameters.containsKey('maximum-length') && summary.length() <= parameters['maximum-length']) return false
+        if (parameters.containsKey('minimum-words') && words(summary).size() >= parameters['minimum-words']) return false
+        if (parameters.containsKey('maximum-word-length')
+            && words(summary).every { it.length() <= parameters['maximum-word-length'] }) return false
         if (parameters.match == 'non-action-oriented' && actionVerbs.any { verb -> summary == verb || summary.startsWith(verb + ' ') }) return false
         true
     }
@@ -81,9 +91,13 @@
                 ? 'Operation summary ends with a period'
                 : parameters.containsKey('maximum-length')
                     ? 'Operation summary exceeds the configured maximum length'
-                    : parameters.match == 'non-action-oriented'
-                        ? 'Operation summary is not action-oriented'
-                        : 'Operation summary matches the configured style rule'
+                    : parameters.containsKey('minimum-words')
+                        ? 'Operation summary has too few words to be meaningful'
+                        : parameters.containsKey('maximum-word-length')
+                            ? 'Operation summary contains an unusually long word'
+                            : parameters.match == 'non-action-oriented'
+                                ? 'Operation summary is not action-oriented'
+                                : 'Operation summary matches the configured style rule'
 
     api.paths.collectMany { path ->
         path.operationDetails.findAll(matches).collect { operation ->

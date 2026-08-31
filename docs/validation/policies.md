@@ -16,7 +16,7 @@ effectiveScore = 0 if any PROHIBITED rule matched, else qualityScore
 
 The default policy: it enables every generally-applicable bundled rule, with a few rule parameters calibrated for a typical enterprise API (allow-listed proprietary headers, expected OAuth2 scopes, standard rate-limit headers).
 
-- **109** rules active
+- **111** rules active
 - passing score: **90** (the [automation API](../automation-api.md) fails below this unless overridden)
 - grades: A ≥ 95, B ≥ 90, C ≥ 80, D ≥ 70, else F
 
@@ -28,7 +28,7 @@ Parameter overrides:
 | `STANDARD008` | `allowed` = `X-Request-Id,X-Correlation-Id,X-Trace-Id` |
 | `STATUS007` | `headers` = `RateLimit-Limit,RateLimit-Remaining` |
 
-??? example "All 109 rules in Enterprise Grade"
+??? example "All 111 rules in Enterprise Grade"
 
     | Rule | Disposition | Title |
     |---|---|---|
@@ -141,6 +141,8 @@ Parameter overrides:
     | `STANDARD027` | −0.5 | Server URL has a trailing slash |
     | `DOC019` | −0.5 | Tag is declared more than once |
     | `DOC020` | −0.5 | API does not declare a license |
+    | `DOC021` | −0.5 | Operation summary has too few words |
+    | `DOC022` | −0.5 | Operation summary contains an unusually long word |
 
 ## Zalando
 

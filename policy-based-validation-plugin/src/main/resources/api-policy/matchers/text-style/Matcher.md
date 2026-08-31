@@ -22,6 +22,12 @@ parameters:
   maximum-length:
     type: integer
     required: false
+  minimum-words:
+    type: integer
+    required: false
+  maximum-word-length:
+    type: integer
+    required: false
   match:
     type: enum
     required: false

@@ -125,6 +125,8 @@ rules:
   STANDARD027: 0.5
   DOC019: 0.5
   DOC020: 0.5
+  DOC021: 0.5
+  DOC022: 0.5
 ---
 
 # Enterprise Grade Policy
