@@ -192,6 +192,22 @@ Large documents are handled explicitly: the OpenAPI parser and the bundle's
 YAML loader both accept configurable size limits so that legitimately large
 specifications are not rejected as though malformed.
 
+## Automation API
+
+An unauthenticated JSON API under `/api/v1` was added for CI: submit a spec
+inline or by URL, name the validator/policy combinations to run, and get
+findings plus a pass/fail verdict (JSON or SARIF). Specs are grouped by a
+plain **namespace** slug and attributed to a **submitter** — both
+self-asserted, neither checked; uniqueness moved from a global spec title to
+`(namespace, title)`. Because there is no authentication, the deployment is
+required to sit behind a protected boundary. Each policy can declare a
+suggested pass level (`scoring:` — `blocker` / `error` / `score<NN`) that the
+verdict honours unless the caller overrides it. A `shared` deployment mode
+locks down the local-filesystem features (path loading, the drop folder,
+`file:` URLs) that only make sense for a single-user install, and the
+server-side URL fetcher is restricted to `http`/`https` with a mandatory SSRF
+guard.
+
 ## Tooling and documentation
 
 The documentation moved to a **MkDocs (Material) site** deployed to GitHub

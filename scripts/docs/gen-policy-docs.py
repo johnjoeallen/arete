@@ -68,7 +68,8 @@ for pid, rel in manifest["policies"].items():
             disp[k] = ("PROHIBITED", {})
         else:
             disp[k] = (v, {})
-    policies[pid] = {"id": fm.get("id", pid), "intent": first_para(body), "dispositions": disp}
+    policies[pid] = {"id": fm.get("id", pid), "intent": first_para(body),
+                     "scoring": fm.get("scoring"), "dispositions": disp}
 
 policy_ids = list(policies)
 short = {p: p.replace("Enterprise Grade", "Enterprise").replace("Zalando Extended", "Zal. Ext.") for p in policy_ids}
@@ -135,6 +136,9 @@ for pid, pol in policies.items():
     if pol["intent"]:
         lines += [pol["intent"], ""]
     lines.append(f"- **{len(active)}** rules active" + (f", **{len(prohibited)}** prohibited" if prohibited else ""))
+    if pol.get("scoring"):
+        lines.append(f"- suggested gate: `{pol['scoring']}` "
+                     "(used by the [automation API](../automation-api.md) unless overridden)")
     lines.append("")
     if overrides:
         lines += ["Parameter overrides:", "", "| Rule | Overrides |", "|---|---|"]

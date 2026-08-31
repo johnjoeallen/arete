@@ -29,6 +29,14 @@ you launch from:
 | `~/.arete/plugins` | Drop extra validation plugin jars here — see [Writing a Plugin](validation/writing-a-plugin.md). |
 | `~/.arete/policies` | Drop extra `*.md` policy files here to add them to the bundled [Areté Policy Engine](validation/policy-engine.md#user-policies). |
 
+### Automation API settings
+
+| Property | Default | Effect |
+|---|---|---|
+| `arete.deployment.mode` | `local` | `shared` locks down local-filesystem features — see the [Automation API](automation-api.md#deployment-mode). |
+| `arete.api.url-fetch.allow-private` | `false` | Allow the URL fetcher to reach private/loopback addresses. Ignored in `shared` mode. |
+| `arete.api.url-fetch.timeout` | `10s` | Connect/read timeout for a URL fetch. |
+
 `~/.arete/plugins` is created automatically on startup if it doesn't exist.
 The `plugins/` folder next to `arete.jar` (shipped in the release zip) is
 **not** created automatically when missing — in a from-source dev run it would

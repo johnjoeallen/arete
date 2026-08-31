@@ -312,6 +312,7 @@ costs.
 ```markdown
 ---
 id: Enterprise Grade              # must match the manifest key (quote if it has spaces)
+scoring: score<90                 # optional: the gate the automation API suggests
 rules:
   REST001: 0.5                    # deduct 0.5 points once if this rule matches
   CASE001: 0.5
@@ -323,8 +324,12 @@ rules:
 Prose describing the policy's intent.
 ```
 
-- Each value is either a **number `0`–`100`** (a point deduction) or the
+- Each rule value is either a **number `0`–`100`** (a point deduction) or the
   literal **`PROHIBITED`**.
+- `scoring:` (optional) is the pass level this policy suggests for automated
+  gating — `blocker`, `error`, or `score<NN`. The
+  [Automation API](../automation-api.md#scoring-level) honours it unless a
+  caller overrides it; absent, it defaults to `blocker`.
 - A deduction is applied **once per rule**, no matter how many diagnostics the
   rule reported.
 - Every rule id must exist in the bundle.

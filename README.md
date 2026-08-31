@@ -60,6 +60,12 @@ a safe-by-construction expression language. It ships the Enterprise Grade,
 Zalando, and Zalando Extended policies. Drop additional plugin jars into
 `~/.arete/plugins`.
 
+For CI, the **Automation API** (`/api/v1`) takes a spec inline or by URL, runs
+the validator/policy combinations you name, and returns findings plus a
+pass/fail verdict (JSON or SARIF). No authentication — put it behind a
+protected boundary.
+
+- [Automation API](https://johnjoeallen.github.io/arete/automation-api/)
 - [Validation overview](https://johnjoeallen.github.io/arete/validation/)
 - [Policy engine](https://johnjoeallen.github.io/arete/validation/policy-engine/)
 - [Distill reference](https://johnjoeallen.github.io/arete/validation/distill/)
