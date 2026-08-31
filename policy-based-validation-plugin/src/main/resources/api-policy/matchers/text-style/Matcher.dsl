@@ -1,5 +1,5 @@
 distill(api, rule) {
-    return checks(api.operations.filter { it.summary != null && it.summary.trim() != "" }) {
+    return checks(api.operations.filter { !(it.summary is blank) }) {
 
         filter { rule.parameters["initial-capital"] != null
                  && (it.summary.trim() ==~ /[A-Z].*/) == rule.parameters["initial-capital"] }
@@ -32,7 +32,7 @@ distill(api, rule) {
                             "Operation summary contains an unusually long word") },
 
         filter { rule.parameters["match"] == "non-action-oriented"
-                 && !(it.summary.trim() ==~ /(Get|List|Create|Update|Delete|Replace|Search|Find|Cancel|Activate|Deactivate)( .*)?/) }
+                 && !(it.summary.trim() ==~ /({{join("|", tokenize(",", rule.parameters["action-prefixes"] != null ? rule.parameters["action-prefixes"] : "Get,List,Create,Update,Delete,Replace,Search,Find,Cancel,Activate,Deactivate").map { t -> t.trim() }.filter { t -> t != "" })}})( .*)?/) }
           .map { occurrence(it.pointer, it.method + " " + it.path,
                             "Operation summary is not action-oriented") }
     };

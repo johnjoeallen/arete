@@ -55,6 +55,33 @@ class DistillMatcherEvaluatorTest {
     }
 
     @Test
+    void stringLiteralInterpolatesDoubleBraceHoles() {
+        assertEquals(List.of(new Diagnostic("/", "x", "prefix-Widget-v2")), runtime.execute("""
+                distill(api, rule) { return [occurrence("/", "x", "prefix-{{rule.parameters.name}}-{{rule.parameters.suffix}}")]; }
+                """,
+                Map.of(),
+                Map.of("parameters", Map.of("name", "Widget", "suffix", "v2"))));
+    }
+
+    @Test
+    void regexLiteralInterpolatesDoubleBraceHolesIncludingQuotedSubExpressions() {
+        // The alternation is built from a rule parameter — the hole holds a string
+        // literal, whose quotes are not the enclosing regex/string delimiters.
+        List<Diagnostic> found = runtime.execute("""
+                distill(api, rule) {
+                    return api.values
+                        .filter { v -> v ==~ /({{join("|", tokenize(",", rule.parameters["verbs"]))}}) .*/ }
+                        .map { v -> occurrence("/", v, "verb") };
+                }
+                """,
+                Map.of("values", List.of("Fetch a widget", "Get a widget", "Delete a widget")),
+                Map.of("parameters", Map.of("verbs", "Fetch,Delete")));
+        assertEquals(List.of(
+                new Diagnostic("/", "Fetch a widget", "verb"),
+                new Diagnostic("/", "Delete a widget", "verb")), found);
+    }
+
+    @Test
     void checksConcatenatesRepeatableFilterMapStanzasOverOneBoundSource() {
         // The source (api.values, blank-filtered) is bound once; each comma-separated
         // stanza is a bare filter{}.map{} rooted at it and using the implicit `it`;

@@ -439,6 +439,15 @@ class DistillGroovyParityTest {
         assertParity("text-style", "operation-summary", Map.of("match", "non-action-oriented"), true);
     }
 
+    /** action-prefixes overrides the verb list, spliced into the check regex via a {{ }} hole. */
+    @Test void textStyleNonActionOrientedCustomPrefixes() {
+        assertParity("text-style", "operation-summary",
+                Map.of("match", "non-action-oriented", "action-prefixes", "Fetch, Remove"), true);
+        assertParity("text-style", "operation-summary",
+                Map.of("match", "non-action-oriented", "action-prefixes", "Get,List,Create,Update,Delete,Replace,Search,Find,Cancel,Activate,Deactivate"),
+                true, HOUSE_STYLE_SPEC);
+    }
+
     @Test void apiTitleHouseStyle() {
         assertParity("api-title", "api",
                 Map.of("suffix", "API", "forbidden", "PoC,Test,WIP,Draft", "case", "title-case"), false);

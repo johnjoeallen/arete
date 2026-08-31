@@ -32,6 +32,9 @@ parameters:
     required: false
     values:
       - non-action-oriented
+  action-prefixes:
+    type: string
+    required: false
 ---
 
 # Text-style rule
@@ -43,6 +46,12 @@ A rule selects one check using the declared parameters. The matcher is a
 supplies several parameters reports each satisfied check independently rather
 than only summaries that satisfy all of them. No bundled rule supplies more
 than one. A rule that supplies none of the check parameters produces nothing.
+
+With `match: non-action-oriented`, `action-prefixes` overrides the recognised
+verb list — a comma-separated string (default
+`Get,List,Create,Update,Delete,Replace,Search,Find,Cancel,Activate,Deactivate`).
+The list is spliced into the check's regex with a `{{ ... }}` interpolation
+hole.
 
 The rule ignores operations without a summary. `DOC001` owns the distinct
 condition that a summary is missing.

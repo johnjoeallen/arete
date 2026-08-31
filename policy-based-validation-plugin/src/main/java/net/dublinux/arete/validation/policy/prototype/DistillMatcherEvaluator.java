@@ -328,16 +328,38 @@ public final class DistillMatcherEvaluator {
             if (cursor == source.length()) return new Token(Kind.EOF, "");
             char ch = source.charAt(cursor);
             if (Character.isJavaIdentifierStart(ch)) { int start = cursor++; while (cursor < source.length() && Character.isJavaIdentifierPart(source.charAt(cursor))) cursor++; return new Token(Kind.ID, source.substring(start, cursor)); }
-            if (ch == '"') { StringBuilder out = new StringBuilder(); cursor++; while (cursor < source.length() && source.charAt(cursor) != '"') { if (source.charAt(cursor) == '\\') cursor++; out.append(source.charAt(cursor++)); } if (cursor == source.length()) throw error("unterminated string"); cursor++; return new Token(Kind.STRING, out.toString()); }
+            if (ch == '"') {
+                // A {{ ... }} interpolation hole holds Distill code, so a " or \ inside
+                // one is not a string delimiter or escape; the hole text is kept verbatim
+                // for the parser to compile.
+                StringBuilder out = new StringBuilder();
+                cursor++;
+                int hole = 0;
+                while (cursor < source.length()) {
+                    char c = source.charAt(cursor);
+                    if (hole == 0 && c == '"') break;
+                    if (c == '{' && cursor + 1 < source.length() && source.charAt(cursor + 1) == '{') { hole++; out.append("{{"); cursor += 2; continue; }
+                    if (hole > 0 && c == '}' && cursor + 1 < source.length() && source.charAt(cursor + 1) == '}') { hole--; out.append("}}"); cursor += 2; continue; }
+                    if (hole == 0 && c == '\\' && cursor + 1 < source.length()) { out.append(source.charAt(cursor + 1)); cursor += 2; continue; }
+                    out.append(c); cursor++;
+                }
+                if (cursor >= source.length()) throw error("unterminated string");
+                cursor++;
+                return new Token(Kind.STRING, out.toString());
+            }
             if (Character.isDigit(ch)) { int start = cursor++; while (cursor < source.length() && Character.isDigit(source.charAt(cursor))) cursor++; return new Token(Kind.NUMBER, source.substring(start, cursor)); }
             // ~/pattern/ (explicit) or /pattern/ where an operand is expected.
             boolean tildeSlash = ch == '~' && cursor + 1 < source.length() && source.charAt(cursor + 1) == '/';
             if (tildeSlash || (ch == '/' && regexExpected())) {
                 cursor += tildeSlash ? 2 : 1;
                 StringBuilder out = new StringBuilder();
-                while (cursor < source.length() && source.charAt(cursor) != '/') {
+                int hole = 0;
+                while (cursor < source.length()) {
                     char c = source.charAt(cursor);
-                    if (c == '\\' && cursor + 1 < source.length()) {
+                    if (hole == 0 && c == '/') break;
+                    if (c == '{' && cursor + 1 < source.length() && source.charAt(cursor + 1) == '{') { hole++; out.append("{{"); cursor += 2; continue; }
+                    if (hole > 0 && c == '}' && cursor + 1 < source.length() && source.charAt(cursor + 1) == '}') { hole--; out.append("}}"); cursor += 2; continue; }
+                    if (hole == 0 && c == '\\' && cursor + 1 < source.length()) {
                         char escaped = source.charAt(cursor + 1);
                         out.append(escaped == '/' ? "/" : "\\" + escaped);
                         cursor += 2;
@@ -345,7 +367,7 @@ public final class DistillMatcherEvaluator {
                     }
                     out.append(c); cursor++;
                 }
-                if (cursor == source.length()) throw error("unterminated regex");
+                if (cursor >= source.length()) throw error("unterminated regex");
                 cursor++; return new Token(Kind.REGEX, out.toString());
             }
             for (String operator : List.of("==~", "=~", "==", "!=", "<=", ">=", "&&", "||", "->")) if (source.startsWith(operator, cursor)) { cursor += operator.length(); return new Token(Kind.SYMBOL, operator); }
@@ -411,8 +433,8 @@ public final class DistillMatcherEvaluator {
                 List<Expr> els = elements;
                 return env -> { List<Object> list = new ArrayList<>(); for (Expr e : els) list.add(e.eval(env)); return list; };
             }
-            if (token.kind() == Kind.STRING) { String value = token.text(); advance(); return env -> value; }
-            if (token.kind() == Kind.REGEX) { Regex value = new Regex(token.text()); advance(); return env -> value; }
+            if (token.kind() == Kind.STRING) { String value = token.text(); advance(); return interpolated(value, false); }
+            if (token.kind() == Kind.REGEX) { String value = token.text(); advance(); return interpolated(value, true); }
             if (token.kind() == Kind.NUMBER) { long value = Long.parseLong(token.text()); advance(); return env -> value; }
             if (token.kind() == Kind.ID && (token.text().equals("true") || token.text().equals("false"))) { boolean value = token.text().equals("true"); advance(); return env -> value; }
             String name = expectId();
@@ -431,6 +453,47 @@ public final class DistillMatcherEvaluator {
             }
             return env -> env.get(name);
         }
+
+        /** {@code {{ expr }}} holes in a string or regex literal. */
+        private static final java.util.regex.Pattern HOLE = java.util.regex.Pattern.compile("\\{\\{(.*?)\\}\\}");
+
+        /**
+         * A string or regex literal, with {@code {{ expr }}} holes spliced in at
+         * evaluation time (each hole is a full Distill expression, stringified).
+         * A literal with no hole compiles to a constant, exactly as before.
+         */
+        private Expr interpolated(String raw, boolean regex) {
+            if (!HOLE.matcher(raw).find()) return regex ? env -> new Regex(raw) : env -> raw;
+            List<Object> parts = new ArrayList<>();
+            java.util.regex.Matcher matcher = HOLE.matcher(raw);
+            int last = 0;
+            while (matcher.find()) {
+                if (matcher.start() > last) parts.add(raw.substring(last, matcher.start()));
+                parts.add(subExpression(matcher.group(1).trim()));
+                last = matcher.end();
+            }
+            if (last < raw.length()) parts.add(raw.substring(last));
+            List<Object> segments = parts;
+            if (regex) return env -> new Regex(splice(segments, env));
+            return env -> splice(segments, env);
+        }
+
+        /** Compiles a hole's text as a standalone Distill expression (validated at bundle load). */
+        private static Expr subExpression(String source) {
+            Parser parser = new Parser(source);
+            Expr expr = parser.expression();
+            parser.expectKind(Kind.EOF);
+            return expr;
+        }
+
+        private static String splice(List<Object> segments, Map<String, Object> env) {
+            StringBuilder out = new StringBuilder();
+            for (Object segment : segments) {
+                out.append(segment instanceof Expr expr ? Objects.toString(expr.eval(env), "") : (String) segment);
+            }
+            return out.toString();
+        }
+
         /**
          * {@code checks(source) { stanza, stanza, ... }} — binds {@code source}
          * once, then evaluates each comma-separated stanza (a bare

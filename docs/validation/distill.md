@@ -64,6 +64,24 @@ There are no comments.
 There is no map literal. `null` is not a keyword — it arrives from the model
 (a missing field) and is produced by builtins such as `find`.
 
+### Interpolation — `{{ expr }}`
+
+A string **or** regex literal may contain `{{ … }}` holes. Each hole is a full
+Distill expression, evaluated when the literal is evaluated and spliced in as a
+string (`null` becomes `""`). Quotes and `/` inside a hole are not the
+enclosing delimiter, so a hole can itself contain string literals.
+
+```java
+occurrence("/info/title", api.info.title,
+    "Title should end with '{{rule.parameters.suffix}}'")
+
+// build a pattern from a configurable list
+op.summary ==~ /({{join("|", tokenize(",", rule.parameters["action-prefixes"]))}}) .*/
+```
+
+A literal with no `{{` is an ordinary constant with no added cost. A hole is
+compiled and validated at bundle load like any other expression.
+
 ### Truthiness
 
 `false` and `null` are falsy. **Everything else is truthy**, including `""`,
@@ -174,7 +192,7 @@ checks(<source>) {
 ```
 
 - `<source>` is evaluated **once** and bound for the whole block. Apply any
-  shared guard here: `checks(api.operations.filter { it.summary != null }) { … }`.
+  shared guard here: `checks(api.operations.filter { !(it.summary is blank) }) { … }`.
 - Each comma-separated **stanza** is a bare `filter { … }.map { … }` chain
   rooted at the source — no receiver token; `filter` with nothing before it
   means "the block's source". The closures use the implicit `it`.
@@ -229,6 +247,11 @@ regexFullMatch("(?i).*\\berror\\b.*", text)   // string pattern: normal Java esc
 
 `a ==~ r` is a whole-string match, `a =~ r` is a search. The engine is RE2/J:
 linear-time, no backreferences, no catastrophic backtracking.
+
+A regex literal may contain [`{{ expr }}` holes](#interpolation--expr) to build
+part of the pattern from a rule parameter at evaluation time. The resolved
+pattern is compiled once and cached, so a hole whose value is constant for the
+run costs nothing after the first call.
 
 ## Worked examples
 
@@ -394,7 +417,7 @@ distill(api, rule) {
 ```java
 // after — one stanza per check, condition directly above its message
 distill(api, rule) {
-    return checks(api.operations.filter { it.summary != null && it.summary.trim() != "" }) {
+    return checks(api.operations.filter { !(it.summary is blank) }) {
 
         filter { rule.parameters["trailing-period"] == "present" && it.summary.trim().endsWith(".") }
           .map { occurrence(it.pointer, it.method + " " + it.path,

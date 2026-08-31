@@ -200,6 +200,12 @@ message; those modes were removed from the matchers and their descriptors.
 schema rule" (`enum-type`, `enum-case`, `extensible`) were given messages that
 name the violation.
 
+String and regex literals then gained `{{ expr }}` interpolation — a hole is a
+full Distill expression spliced in at evaluation time, with quotes and `/`
+inside it no longer treated as the enclosing delimiter. Its first use let
+`text-style`'s `non-action-oriented` check take an `action-prefixes` parameter
+and splice the verb list straight into the check's regex.
+
 ## Runtime execution model
 
 Distill matcher sources are parsed once when the bundle loads and the compiled

@@ -51,7 +51,8 @@
  */
 { Map api, Map rule ->
     def parameters = rule.parameters ?: [:]
-    def actionVerbs = ['Get', 'List', 'Create', 'Update', 'Delete', 'Replace', 'Search', 'Find', 'Cancel', 'Activate', 'Deactivate']
+    def actionVerbs = (parameters['action-prefixes'] ?: 'Get,List,Create,Update,Delete,Replace,Search,Find,Cancel,Activate,Deactivate')
+        .toString().split(',').collect { it.trim() }.findAll { it }
     def checkKeys = ['initial-capital', 'convention', 'trailing-period', 'maximum-length', 'minimum-words', 'maximum-word-length', 'match']
     if (!checkKeys.any { parameters.containsKey(it) }) return []
 
