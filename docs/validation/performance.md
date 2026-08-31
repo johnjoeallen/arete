@@ -35,8 +35,8 @@ call — it was roughly 50× slower again. It offered neither safety nor speed.
 
 The other alternative is [Zally](https://github.com/zalando/zally)'s model:
 every rule is a compiled Java class. That is genuinely fast — hand-written
-Java is **~5–6× faster than Distill** (measured below). But it fails the other
-two requirements:
+Java is **~5–6× faster than Distill** (measured below). But as the unit in
+which *rules* are written, it fails the other two requirements:
 
 - A rule whose logic isn't covered by an existing matcher needs a **new Java
   class, a new release, and a redeploy** before anyone can use it.
@@ -61,6 +61,24 @@ trusted**: it can be loaded from anywhere and run without vetting its author,
 because the worst it can do is inspect the spec and hand back a list. The cost
 is interpreter overhead — a tree-walk instead of compiled bytecode — which the
 rest of this page quantifies.
+
+## Plugins are a separate trust tier
+
+None of this replaces Areté's plugin facility. A validation plugin is
+arbitrary compiled Java loaded through the SPI and a child-first classloader;
+`policy-based-validation-plugin` is itself one. A plugin runs with full
+application privileges, so **installing one is a trust decision** — and
+building it from source does not remove that boundary, it only moves the
+audit to you: the plugin's own code, its transitive dependencies, and its
+build. That trust is appropriate for a plugin, which is deliberately chosen,
+versioned, and deployed like any other dependency.
+
+Distill exists so that trust is spent **once, at the plugin boundary**, and
+not again for every rule inside it. The policy plugin is vetted and installed;
+after that its matchers — bundled, local, or remote — carry no further risk,
+because a matcher cannot do what the plugin can. Coded plugins and sandboxed
+matchers are complementary: the plugin is where trusted, complex, compiled
+logic belongs; the matcher is where a shareable rule belongs.
 
 ## Measurements
 
