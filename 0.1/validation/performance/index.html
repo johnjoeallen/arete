@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://johnjoeallen.github.io/arete/0.1/validation/writing-a-plugin/">
+        <link rel="canonical" href="https://johnjoeallen.github.io/arete/0.1/validation/performance/">
       
       
-        <link rel="prev" href="../policies/">
+        <link rel="prev" href="../distill/">
       
       
-        <link rel="next" href="../../releasing/">
+        <link rel="next" href="../rules/">
       
       
         
@@ -27,7 +27,7 @@
     
     
       
-        <title>Writing a Plugin - Areté</title>
+        <title>Matcher performance - Areté</title>
       
     
     
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#writing-a-plugin" class="md-skip">
+        <a href="#matcher-performance-distill-vs-groovy" class="md-skip">
           Skip to content
         </a>
       
@@ -119,7 +119,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Writing a Plugin
+              Matcher performance
             
           </span>
         </div>
@@ -509,10 +509,37 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../performance/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Matcher performance
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -528,6 +555,87 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#method" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Method
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#headline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Headline
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#per-matcher" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per-matcher
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Per-matcher">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#reading-the-outliers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reading the outliers
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reproducing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reproducing
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -593,37 +701,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Writing a Plugin
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../writing-a-plugin/" class="md-nav__link">
         
   
   
@@ -639,87 +720,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#the-spi" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        The SPI
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="The SPI">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#interface-shape" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Interface shape
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#a-minimal-plugin" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        A minimal plugin
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#packaging" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Packaging
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#a-worked-example" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        A worked example
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -813,22 +813,44 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#the-spi" class="md-nav__link">
+  <a href="#method" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The SPI
+        Method
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="The SPI">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#headline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Headline
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#per-matcher" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Per-matcher
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Per-matcher">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#interface-shape" class="md-nav__link">
+  <a href="#reading-the-outliers" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Interface shape
+        Reading the outliers
       
     </span>
   </a>
@@ -841,32 +863,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#a-minimal-plugin" class="md-nav__link">
+  <a href="#reproducing" class="md-nav__link">
     <span class="md-ellipsis">
       
-        A minimal plugin
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#packaging" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Packaging
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#a-worked-example" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        A worked example
+        Reproducing
       
     </span>
   </a>
@@ -890,7 +890,7 @@
 
 
   
-    <a href="https://github.com/johnjoeallen/arete/edit/main/docs/validation/writing-a-plugin.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/johnjoeallen/arete/edit/main/docs/validation/performance.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -898,130 +898,421 @@
   
 
 
-<h1 id="writing-a-plugin">Writing a Plugin<a class="headerlink" href="#writing-a-plugin" title="Permanent link">&para;</a></h1>
-<p>A validation plugin implements
-<a href="https://github.com/johnjoeallen/arete/blob/main/arete-validation-spi/src/main/java/net/dublinux/arete/validation/spi/SpecValidationPlugin.java"><code>SpecValidationPlugin</code></a>
-from the <code>arete-validation-spi</code> module and registers itself via
-<code>ServiceLoader</code> — no Areté-specific base class or annotations required.</p>
-<div class="admonition tip">
-<p class="admonition-title">Prefer the policy bundle for rule changes</p>
-<p>If you just want different <strong>rules</strong>, you probably don't need a new plugin
-at all. The bundled <a href="../policy-engine/">Areté Policy Engine</a> is
-driven entirely by text files — add a rule, matcher, or policy by editing
-Markdown, YAML, and a <a href="../distill/">Distill</a> matcher. Write a
-<code>SpecValidationPlugin</code> only when you need a different <strong>engine</strong>.</p>
+<h1 id="matcher-performance-distill-vs-groovy">Matcher performance: Distill vs Groovy<a class="headerlink" href="#matcher-performance-distill-vs-groovy" title="Permanent link">&para;</a></h1>
+<p>Areté evaluates every matcher with <a href="../distill/">Distill</a>. The <code>Matcher.groovy</code>
+files that ship next to some <code>Matcher.dsl</code> files are a build-time parity
+reference only — see the <a href="../policy-engine/">policy engine</a> overview. This page
+records how the two engines compare, so the choice of a purpose-built
+interpreter over an embedded scripting language is grounded in numbers rather
+than assertion.</p>
+<h2 id="method">Method<a class="headerlink" href="#method" title="Permanent link">&para;</a></h2>
+<p><code>DistillGroovyParityTest.fullSweepParityAndPerformance</code> runs every
+dual-implemented matcher (38 of them) against <strong>five fixture specs</strong>, for
+<strong>every scope the matcher declares</strong>, supplying a loader-valid value for each
+required parameter — 300 matcher × scope × spec combinations in total. For each
+combination it:</p>
+<ul>
+<li>asserts Groovy and Distill produce <strong>identical diagnostics</strong>, then</li>
+<li>times both engines: best of five runs of 100 calls each, after 50 warm-up
+  calls.</li>
+</ul>
+<p>Two things are deliberately levelled so the comparison is about the engines,
+not their wiring:</p>
+<ul>
+<li><strong>Groovy is compiled once</strong> and the closure reused. The plugin's former
+  Groovy path recompiled the script with a fresh <code>GroovyShell</code> on <em>every</em>
+  call — roughly 50× slower again than the figures below — but that is an
+  integration flaw, not an inherent property of Groovy.</li>
+<li><strong>Distill uses its parse cache</strong>: the program is parsed once at bundle load
+  and reused, which is exactly how the deployed engine behaves.</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">These are ratios, not a benchmark suite</p>
+<p>Figures come from a single developer-machine run and will vary with
+hardware and JIT state. The <em>shape</em> — Distill several times faster on
+almost every matcher, at a fraction of the allocation — is stable across
+runs; the exact microseconds are not.</p>
 </div>
-<h2 id="the-spi">The SPI<a class="headerlink" href="#the-spi" title="Permanent link">&para;</a></h2>
-<p>Add the dependency (published to Maven Central) with <code>provided</code> scope — never
-by copying its source. A copy compiled into your plugin jar is a <em>different</em>
-class from the host's, and <code>ServiceLoader</code> won't recognise it as implementing
-<code>SpecValidationPlugin</code>.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">&lt;dependency&gt;</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="nt">&lt;groupId&gt;</span>net.dublinux.arete<span class="nt">&lt;/groupId&gt;</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="nt">&lt;artifactId&gt;</span>arete-validation-spi<span class="nt">&lt;/artifactId&gt;</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="nt">&lt;version&gt;</span>...<span class="nt">&lt;/version&gt;</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="nt">&lt;scope&gt;</span>provided<span class="nt">&lt;/scope&gt;</span>
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="nt">&lt;/dependency&gt;</span>
-</code></pre></div>
-<p>Use the version matching the latest published deployment — check
-<a href="https://central.sonatype.com">central.sonatype.com</a> or search
-<code>net.dublinux.arete:arete-validation-spi</code>. It isn't always the latest
-<code>arete</code> release tag: publishing to Central is a separate, manually-triggered
-step, not something every tagged release does.</p>
-<h3 id="interface-shape">Interface shape<a class="headerlink" href="#interface-shape" title="Permanent link">&para;</a></h3>
+<h2 id="headline">Headline<a class="headerlink" href="#headline" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>Method</th>
-<th>Purpose</th>
+<th></th>
+<th style="text-align: right;">Groovy (compiled once)</th>
+<th style="text-align: right;">Distill (cached parse)</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>getId()</code></td>
-<td>Stable unique identifier, e.g. <code>"my-validator"</code>.</td>
+<td>per-call time, summed over all 38 matchers</td>
+<td style="text-align: right;">~280 µs</td>
+<td style="text-align: right;"><strong>~65 µs</strong></td>
 </tr>
 <tr>
-<td><code>getName()</code></td>
-<td>Human-readable display name.</td>
+<td>mean speedup</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;"><strong>~4–5× faster</strong></td>
 </tr>
 <tr>
-<td><code>getVersion()</code></td>
-<td>Engine/plugin version string, for diagnostics.</td>
-</tr>
-<tr>
-<td><code>getSupportedFormats()</code></td>
-<td><code>Set&lt;SpecFormat&gt;</code> — never null or empty.</td>
-</tr>
-<tr>
-<td><code>getRuleSets()</code></td>
-<td><code>List&lt;String&gt;</code> of named rule-set variants (default: one entry, <code>"default"</code>). Order is significant.</td>
-</tr>
-<tr>
-<td><code>getSeverityLabel(Severity)</code></td>
-<td>Display label for one of the four fixed severities (default: title-cased enum name).</td>
-</tr>
-<tr>
-<td><code>configure(Map&lt;String,String&gt;)</code></td>
-<td>Called exactly once, before any <code>validate</code> call.</td>
-</tr>
-<tr>
-<td><code>validate(SpecInput)</code></td>
-<td>Validates one spec; returns a <code>ValidationResult</code>. Must not throw for expected failures — return <code>ValidationResult.pluginError(...)</code> instead.</td>
+<td>full sweep, 300 combos</td>
+<td style="text-align: right;">—</td>
+<td style="text-align: right;">300 identical, 0 divergent</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Lifecycle &amp; thread safety.</strong> The host instantiates the plugin via its no-arg
-constructor, calls <code>configure(...)</code> once, then calls <code>validate(...)</code> any number
-of times, <strong>potentially concurrently</strong>. Don't mutate instance fields inside
-<code>validate()</code>.</p>
-<p><strong>Classloading contract.</strong> Every type in a method signature must be a JDK type
-or declared in the SPI module. The SPI is the shared parent classloader for
-every plugin's isolated <code>URLClassLoader</code>, so those are the only types safe to
-pass across the boundary. Never add a method mentioning, say, a swagger-parser
-or Kotlin type.</p>
-<h2 id="a-minimal-plugin">A minimal plugin<a class="headerlink" href="#a-minimal-plugin" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">package</span><span class="w"> </span><span class="nn">com.example.myvalidator</span><span class="p">;</span>
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">net.dublinux.arete.validation.spi.*</span><span class="p">;</span>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="kn">import</span><span class="w"> </span><span class="nn">java.util.*</span><span class="p">;</span>
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="kd">public</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">MyValidatorPlugin</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">SpecValidationPlugin</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">    </span><span class="nd">@Override</span><span class="w"> </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">getId</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="s">"my-validator"</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">    </span><span class="nd">@Override</span><span class="w"> </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">getName</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="s">"My Validator"</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">    </span><span class="nd">@Override</span><span class="w"> </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">getVersion</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="s">"1.0.0"</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">    </span><span class="nd">@Override</span><span class="w"> </span><span class="kd">public</span><span class="w"> </span><span class="n">Set</span><span class="o">&lt;</span><span class="n">SpecFormat</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">getSupportedFormats</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">EnumSet</span><span class="p">.</span><span class="na">of</span><span class="p">(</span><span class="n">SpecFormat</span><span class="p">.</span><span class="na">OPENAPI3</span><span class="p">);</span>
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">    </span><span class="nd">@Override</span><span class="w"> </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">configure</span><span class="p">(</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">config</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
-<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>
-<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">    </span><span class="nd">@Override</span><span class="w"> </span><span class="kd">public</span><span class="w"> </span><span class="n">ValidationResult</span><span class="w"> </span><span class="nf">validate</span><span class="p">(</span><span class="n">SpecInput</span><span class="w"> </span><span class="n">input</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="w">        </span><span class="n">List</span><span class="o">&lt;</span><span class="n">Diagnostic</span><span class="o">&gt;</span><span class="w"> </span><span class="n">diagnostics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ArrayList</span><span class="o">&lt;&gt;</span><span class="p">();</span>
-<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="w">        </span><span class="c1">// ... run your engine against input.getContent(), append Diagnostics ...</span>
-<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">ValidationResult</span><span class="p">.</span><span class="na">success</span><span class="p">(</span><span class="n">diagnostics</span><span class="p">,</span><span class="w"> </span><span class="cm">/* rules evaluated */</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
-<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="w">    </span><span class="p">}</span>
-<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="p">}</span>
+<p>Across the wider evaluation loop the same changes take a full-policy pass
+(109 rules) from ~8.8 ms to ~4.5 ms and roughly a third of the allocation; an
+end-to-end <code>validate()</code> on a 40-path spec drops from ~15.7 ms to ~9.7 ms, of
+which the OpenAPI parse (~3 ms) and model adaptation (~1 ms) are now the larger
+share.</p>
+<h2 id="per-matcher">Per-matcher<a class="headerlink" href="#per-matcher" title="Permanent link">&para;</a></h2>
+<p>Time is microseconds per call, averaged over the matcher's scope × spec
+combinations. "Speedup" is Groovy ÷ Distill.</p>
+<table>
+<thead>
+<tr>
+<th>Matcher</th>
+<th style="text-align: right;">Combos</th>
+<th style="text-align: right;">Findings</th>
+<th style="text-align: right;">Groovy µs/call</th>
+<th style="text-align: right;">Distill µs/call</th>
+<th style="text-align: right;">Speedup</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>api-title</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">5.5</td>
+<td style="text-align: right;">1.3</td>
+<td style="text-align: right;">4.3×</td>
+</tr>
+<tr>
+<td><code>bulk-operation</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">7.4</td>
+<td style="text-align: right;">0.4</td>
+<td style="text-align: right;">17.2×</td>
+</tr>
+<tr>
+<td><code>common-field</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">3.8</td>
+<td style="text-align: right;">0.6</td>
+<td style="text-align: right;">6.5×</td>
+</tr>
+<tr>
+<td><code>compatibility</code></td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">&lt;0.1</td>
+<td style="text-align: right;">0.1</td>
+<td style="text-align: right;">~1×</td>
+</tr>
+<tr>
+<td><code>date-time-name</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">3.9</td>
+<td style="text-align: right;">0.5</td>
+<td style="text-align: right;">7.3×</td>
+</tr>
+<tr>
+<td><code>document-lint</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.1</td>
+<td style="text-align: right;">0.2</td>
+<td style="text-align: right;">4.6×</td>
+</tr>
+<tr>
+<td><code>documentation-completeness</code></td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">7.4</td>
+<td style="text-align: right;">1.3</td>
+<td style="text-align: right;">5.7×</td>
+</tr>
+<tr>
+<td><code>enum-values</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">3.7</td>
+<td style="text-align: right;">0.3</td>
+<td style="text-align: right;">11.9×</td>
+</tr>
+<tr>
+<td><code>example-validity</code></td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">2.0</td>
+<td style="text-align: right;">0.5</td>
+<td style="text-align: right;">3.8×</td>
+</tr>
+<tr>
+<td><code>extensions</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">25.5</td>
+<td style="text-align: right;">1.4</td>
+<td style="text-align: right;">18.1×</td>
+</tr>
+<tr>
+<td><code>header-schema</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">8.4</td>
+<td style="text-align: right;">0.5</td>
+<td style="text-align: right;">15.6×</td>
+</tr>
+<tr>
+<td><code>hostname</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">2.4</td>
+<td style="text-align: right;">1.7</td>
+<td style="text-align: right;">1.4×</td>
+</tr>
+<tr>
+<td><code>manual</code></td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">&lt;0.1</td>
+<td style="text-align: right;">0.1</td>
+<td style="text-align: right;">~1×</td>
+</tr>
+<tr>
+<td><code>media-type</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">11.6</td>
+<td style="text-align: right;">1.3</td>
+<td style="text-align: right;">9.0×</td>
+</tr>
+<tr>
+<td><code>metadata</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">7.7</td>
+<td style="text-align: right;">2.6</td>
+<td style="text-align: right;">3.0×</td>
+</tr>
+<tr>
+<td><code>naming</code></td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">6.8</td>
+<td style="text-align: right;">1.4</td>
+<td style="text-align: right;">5.0×</td>
+</tr>
+<tr>
+<td><code>openapi-version</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">4.3</td>
+<td style="text-align: right;">2.1</td>
+<td style="text-align: right;">2.1×</td>
+</tr>
+<tr>
+<td><code>operation</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">12.0</td>
+<td style="text-align: right;">2.7</td>
+<td style="text-align: right;">4.4×</td>
+</tr>
+<tr>
+<td><code>operation-metadata</code></td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">9.8</td>
+<td style="text-align: right;">1.6</td>
+<td style="text-align: right;">6.0×</td>
+</tr>
+<tr>
+<td><code>operation-semantics</code></td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">12.1</td>
+<td style="text-align: right;">0.9</td>
+<td style="text-align: right;">13.8×</td>
+</tr>
+<tr>
+<td><code>parameter</code></td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">5.3</td>
+<td style="text-align: right;">1.7</td>
+<td style="text-align: right;">3.1×</td>
+</tr>
+<tr>
+<td><code>path-count</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">10.6</td>
+<td style="text-align: right;">4.3</td>
+<td style="text-align: right;">2.5×</td>
+</tr>
+<tr>
+<td><code>path-set</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">7.4</td>
+<td style="text-align: right;">10.6</td>
+<td style="text-align: right;">0.7×</td>
+</tr>
+<tr>
+<td><code>proprietary-header</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">18.7</td>
+<td style="text-align: right;">1.6</td>
+<td style="text-align: right;">11.6×</td>
+</tr>
+<tr>
+<td><code>query-collection</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">8.7</td>
+<td style="text-align: right;">0.7</td>
+<td style="text-align: right;">13.2×</td>
+</tr>
+<tr>
+<td><code>request-body</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">7.0</td>
+<td style="text-align: right;">0.6</td>
+<td style="text-align: right;">11.1×</td>
+</tr>
+<tr>
+<td><code>resource-path</code></td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">7.9</td>
+<td style="text-align: right;">3.0</td>
+<td style="text-align: right;">2.7×</td>
+</tr>
+<tr>
+<td><code>response-code</code></td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">7.1</td>
+<td style="text-align: right;">0.9</td>
+<td style="text-align: right;">7.8×</td>
+</tr>
+<tr>
+<td><code>response-example</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">14.1</td>
+<td style="text-align: right;">1.5</td>
+<td style="text-align: right;">9.2×</td>
+</tr>
+<tr>
+<td><code>response-header</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">7.9</td>
+<td style="text-align: right;">0.6</td>
+<td style="text-align: right;">13.8×</td>
+</tr>
+<tr>
+<td><code>schema</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">10.4</td>
+<td style="text-align: right;">3.6</td>
+<td style="text-align: right;">2.9×</td>
+</tr>
+<tr>
+<td><code>schema-composition</code></td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">1.6</td>
+<td style="text-align: right;">0.3</td>
+<td style="text-align: right;">6.4×</td>
+</tr>
+<tr>
+<td><code>schema-name</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">3.7</td>
+<td style="text-align: right;">1.1</td>
+<td style="text-align: right;">3.3×</td>
+</tr>
+<tr>
+<td><code>security</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">11.3</td>
+<td style="text-align: right;">5.5</td>
+<td style="text-align: right;">2.0×</td>
+</tr>
+<tr>
+<td><code>server-url</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">4.0</td>
+<td style="text-align: right;">1.4</td>
+<td style="text-align: right;">2.9×</td>
+</tr>
+<tr>
+<td><code>status-class</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">10.2</td>
+<td style="text-align: right;">1.6</td>
+<td style="text-align: right;">6.5×</td>
+</tr>
+<tr>
+<td><code>text-style</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">9.0</td>
+<td style="text-align: right;">1.6</td>
+<td style="text-align: right;">5.5×</td>
+</tr>
+<tr>
+<td><code>versioning</code></td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.6</td>
+<td style="text-align: right;">0.4</td>
+<td style="text-align: right;">3.6×</td>
+</tr>
+</tbody>
+</table>
+<h3 id="reading-the-outliers">Reading the outliers<a class="headerlink" href="#reading-the-outliers" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong><code>path-set</code> (0.7×)</strong> is the only matcher where Distill is slower. Its DSL is
+  <code>O(n²)</code> — a nested <code>api.paths.find { … }</code> inside both <code>filter</code> and <code>map</code>,
+  re-tokenising every path each time — so the inner loop runs thousands of
+  times on the fixture specs and Groovy's JIT-compiled bytecode edges ahead of
+  the interpreted tree-walk. This is a matcher-authoring cost, not an engine
+  cost: both engines do the same quadratic work.</li>
+<li><strong><code>hostname</code>, <code>security</code>, <code>openapi-version</code> (~1.4–2.1×)</strong> do most of their
+  work in RE2/J regex and string operations, where the two engines share the
+  same underlying calls and the interpreter overhead is proportionally small.</li>
+<li><strong><code>compatibility</code>, <code>manual</code> (~1×)</strong> are sub-microsecond on both engines with
+  these inputs; the ratio is noise.</li>
+<li><strong><code>extensions</code>, <code>proprietary-header</code>, <code>bulk-operation</code>, <code>header-schema</code>
+  (12–18×)</strong> spend their time in Groovy's dynamic dispatch and closure
+  machinery over small collections — exactly the overhead Distill's fixed
+  builtin set and direct iteration avoid.</li>
+</ul>
+<h2 id="reproducing">Reproducing<a class="headerlink" href="#reproducing" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>mvn<span class="w"> </span>-pl<span class="w"> </span>policy-based-validation-plugin<span class="w"> </span><span class="nb">test</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span>-Dtest<span class="o">=</span>DistillGroovyParityTest#fullSweepParityAndPerformance<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span>-Darete.benchmark<span class="o">=</span><span class="nb">true</span>
 </code></pre></div>
-<p>Register it by packaging a jar containing
-<code>META-INF/services/net.dublinux.arete.validation.spi.SpecValidationPlugin</code>
-with the single line:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>com.example.myvalidator.MyValidatorPlugin
-</code></pre></div>
-<p>Then drop the jar into <code>~/.arete/plugins</code> and restart.</p>
-<h2 id="packaging">Packaging<a class="headerlink" href="#packaging" title="Permanent link">&para;</a></h2>
-<p>Areté loads each plugin through an <strong>isolated, single-jar</strong>
-<code>URLClassLoader</code>, so unless your only dependency is the SPI itself, the jar
-must be self-contained. Use <code>maven-shade-plugin</code> (with
-<code>ServicesResourceTransformer</code> so the <code>META-INF/services</code> entries merge
-correctly) to bundle your engine and its dependencies.</p>
-<p>Because each plugin jar loads in its own classloader, dependency versions
-between plugins — and between a plugin and Areté itself — never collide.</p>
-<h2 id="a-worked-example">A worked example<a class="headerlink" href="#a-worked-example" title="Permanent link">&para;</a></h2>
-<p>The bundled
-<a href="https://github.com/johnjoeallen/arete/tree/main/policy-based-validation-plugin"><code>policy-based-validation-plugin</code></a>
-is a complete, shaded <code>SpecValidationPlugin</code> — its <code>pom.xml</code>, <code>META-INF/services</code>
-registration, <code>getRuleSets()</code> implementation, and packaging are the best
-starting point for your own.</p>
+<p>The parity assertion runs unconditionally in the normal build; the
+<code>-Darete.benchmark=true</code> flag adds the timing table.
+<code>PerformanceGainBenchmarkTest</code> (same flag) covers the end-to-end and
+allocation figures.</p>
 
 
 
