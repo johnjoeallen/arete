@@ -211,6 +211,9 @@ a stanza's `filter` (`rule.parameters["trailing-period"] == "present" && …`).
 
 ## Builtin functions
 
+This is the complete set — a closed boundary, not a starter kit. A matcher can
+call these and nothing else.
+
 | Function | Result |
 |---|---|
 | `occurrence(pointer, path, message)` | an occurrence; `pointer` and `path` may be `null`, `message` must be non-blank. Non-string arguments are stringified. |
@@ -231,8 +234,9 @@ a stanza's `filter` (`rule.parameters["trailing-period"] == "present" && …`).
 | `enumerate(list)` | list of `[index, value]` pairs; `index` is an integer |
 | `pathSegments(path)` | the `/`-separated segments of `path`, dropping empty segments and `{templated}` ones |
 
-Anything outside this list is a deliberate, reviewed addition to the runtime —
-not something a script can reach around.
+Adding to this list means a reviewed change to the interpreter itself. A
+matcher cannot define its own functions, import anything, or otherwise reach
+past the set.
 
 ## Regular expressions
 

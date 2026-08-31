@@ -275,12 +275,12 @@ Matchers:
 
 **Safe by construction.** `api` and `rule` are deep-immutable. The language
 has no `import`, no I/O, no reflection, no recursion, and execution is bounded
-by a hard interpreter-step cap. Matchers work with the core
-list/string/closure operations plus a small, fixed set of builtins
+by a hard interpreter-step cap. A matcher can call only the core
+list/string/closure operations and a fixed, closed set of builtins
 (`regexFullMatch`, `tokenize`, `pathSegments`, `parseInt`, …), catalogued in
-the [Distill reference](distill.md#builtin-functions). Anything outside that
-set is a deliberate, reviewed addition to the runtime, not a workaround in the
-script.
+the [Distill reference](distill.md#builtin-functions). That set is the
+boundary: widening it takes a reviewed change to the interpreter, and a matcher
+has no way to reach around it.
 
 The `manual` matcher is the deliberate no-op (`distill(api, rule) { return []; }`).
 It keeps a rule in the catalogue as a checklist item that cannot be inferred
