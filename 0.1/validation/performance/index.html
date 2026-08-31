@@ -1401,11 +1401,11 @@ loop, but hand Java — running the same algorithm — is 5× faster than either
 <p>That is the whole trade. A validation runs ~150 rule evaluations; at 1–11 µs
 each the entire matcher phase is 1–4 ms, against a ~3 ms OpenAPI parse it
 cannot avoid. Distill spends a few milliseconds of interpreter overhead per
-spec to keep matchers as safe-by-construction declarative text — editable
-without a rebuild, ~5–15 lines each, with no unsandboxed code path — rather
-than ~40 lines of null-checked map navigation per matcher in a language where
-a rule change means recompile and redeploy. The Groovy it replaced offered
-none of Java's speed and none of Distill's safety.</p>
+spec to keep matchers as sandboxed Distill programs — ~5–15 lines each,
+editable without a rebuild, and unable to do anything but inspect the spec and
+return occurrences — rather than ~40 lines of null-checked map navigation per
+matcher in a language where a rule change means recompile and redeploy. The
+Groovy it replaced offered none of Java's speed and none of Distill's safety.</p>
 <div class="admonition warning">
 <p class="admonition-title">The Java baseline is a measurement, not a proposal</p>
 <p>Hand-written Java matchers — the model <a href="https://github.com/zalando/zally">Zally</a>
@@ -1414,14 +1414,15 @@ built to avoid</strong>, and the speed advantage above does not change that.</p>
 <p>A rule whose logic isn't expressible with an existing matcher would need a
 <strong>new Java class, a new release, and a redeploy</strong> before anyone could use
 it. Matchers could only ever ship inside the application jar.</p>
-<p>Areté's matchers are declarative text (<code>Matcher.dsl</code>) evaluated by a
-sandboxed interpreter precisely so that a new matcher is <strong>data, not code</strong>.
-User <a href="../../configuration/">policy files</a> already load from outside the jar,
-and the same property is what makes the intended next step possible: a
-matcher <strong>delivered from a remote source over the internet</strong> can be run
-safely without trusting its author with the host JVM. Hand-written Java
-forecloses that entirely. A few milliseconds of interpreter overhead per
-spec is the price of keeping it open, and it is one worth paying.</p>
+<p>Areté's matchers are code too — Distill programs — but the interpreter can
+only feed one the spec and collect the occurrences it returns; it grants no
+I/O, reflection, recursion, or unbounded iteration. That is why a new
+matcher needs no new release, why user <a href="../../configuration/">policy files</a>
+can already load from outside the jar, and why a matcher <strong>delivered from a
+remote source over the internet</strong> could be run without trusting its author
+with the host JVM. Hand-written Java forecloses that entirely. A few
+milliseconds of interpreter overhead per spec is the price of keeping it
+open, and it is one worth paying.</p>
 </div>
 <h2 id="reproducing">Reproducing<a class="headerlink" href="#reproducing" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>mvn<span class="w"> </span>-pl<span class="w"> </span>policy-based-validation-plugin<span class="w"> </span><span class="nb">test</span><span class="w"> </span><span class="se">\</span>
