@@ -10,21 +10,37 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 /** Interpreter for Distill, the Java-shaped fluent rule language (Matcher.dsl). */
 public final class DistillMatcherEvaluator {
+
+    /**
+     * Parsed programs keyed by {@code matcher.id() + "\0" + matcher.source()},
+     * so a bundle's matchers are parsed once at load and reused for every spec
+     * validation instead of being reparsed and discarded on each invocation.
+     * The raw {@link #execute(String, Map, Map)} entry point does not consult
+     * this cache.
+     */
+    private final Map<String, Program> compiled = new ConcurrentHashMap<>();
+
     public List<Diagnostic> execute(String source, Map<String, Object> api, Map<String, Object> rule) {
         return new Parser(source).parse().apply(Map.of("api", api, "rule", rule));
     }
 
-    /** Parses the rule source, failing the bundle load on a syntax error. */
+    private Program compiled(Matcher matcher) {
+        return compiled.computeIfAbsent(matcher.id() + "\0" + matcher.source(),
+                key -> new Parser(matcher.source()).parse());
+    }
+
+    /** Parses the rule source, failing the bundle load on a syntax error, and caches the result. */
     void validate(Matcher rule) {
         if (!"distill".equals(rule.language())) {
             throw new BundleValidationException("Unsupported rule language '" + rule.language() + "'");
         }
         try {
-            new Parser(rule.source()).parse();
+            compiled(rule);
         } catch (RuntimeException e) {
             throw new BundleValidationException("Matcher '" + rule.id() + "' does not compile: " + e.getMessage());
         }
@@ -35,7 +51,7 @@ public final class DistillMatcherEvaluator {
             throw new MatcherEvaluationException("Unsupported rule language '" + matcher.language() + "'");
         }
         try {
-            List<Diagnostic> diagnostics = execute(matcher.source(), api, rule.asMap());
+            List<Diagnostic> diagnostics = compiled(matcher).apply(Map.of("api", api, "rule", rule.asMap()));
             if (diagnostics.size() > 1_000) throw new MatcherEvaluationException("Matcher returned more than 1000 diagnostics");
             return diagnostics;
         } catch (MatcherEvaluationException e) {

@@ -27,12 +27,12 @@ final class PolicyBundleLoader {
 
     /**
      * Ordered list of rule languages to try for each rule. The first
-     * language in the list that has a source file present wins, so a rule
-     * shipping only {@code Matcher.groovy} runs on Groovy even while a
-     * rule that also ships {@code Matcher.groovy} stays on Groovy.
+     * language in the list that has a source file present wins.
      *
-     * <p>The default is {@code ["distill", "groovy"]}; Distill wins when
-     * both sources are present. Callers may override this via configuration.
+     * <p>The default is {@code ["distill"]}: the deployed runtime only ever
+     * evaluates {@code Matcher.dsl}. {@code Matcher.groovy} is a build-time
+     * parity reference, not a live source. Tests may pass a different
+     * precedence explicitly.
      */
     record LoadOptions(List<String> languagePrecedence) {
         LoadOptions {
@@ -47,7 +47,7 @@ final class PolicyBundleLoader {
             }
             languagePrecedence = List.copyOf(languagePrecedence);
         }
-        static LoadOptions defaults() { return new LoadOptions(List.of("distill", "groovy")); }
+        static LoadOptions defaults() { return new LoadOptions(List.of("distill")); }
     }
 
     PolicyBundleLoader() {

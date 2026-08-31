@@ -42,10 +42,7 @@ public final class PolicyBasedValidationPlugin implements SpecValidationPlugin, 
 
     private volatile PolicyBundle bundle;
     private final PolicyBundleLoader bundleLoader = new PolicyBundleLoader();
-    private final GroovyMatcherEvaluator groovyRuntime = new GroovyMatcherEvaluator();
     private final DistillMatcherEvaluator distillRuntime = new DistillMatcherEvaluator();
-    private volatile boolean forkRules;
-    private volatile long forkRuleTimeoutMillis = 5000;
 
     @Override public String getId() { return "generic-policy"; }
     @Override public String getName() { return "Areté Policy Engine"; }
@@ -61,46 +58,10 @@ public final class PolicyBasedValidationPlugin implements SpecValidationPlugin, 
         return activeBundle().policies().keySet().stream().toList();
     }
 
-    /** Matcher language precedence used when nothing is configured. */
-    static final List<String> DEFAULT_LANGUAGE_PRECEDENCE = List.of("distill", "groovy");
-
     @Override
     public synchronized void configure(Map<String, String> config) {
-        List<String> precedence = resolveLanguagePrecedence(config);
         bundle = bundleLoader.load(new ClasspathBundleResources(getClass().getClassLoader()),
-                new PolicyBundleLoader.LoadOptions(precedence), loadUserPolicies(config));
-        forkRules = booleanConfig(config, "fork-rules", "arete.policy.fork-rules", false);
-        forkRuleTimeoutMillis = longConfig(config, "fork-rule-timeout-ms", "arete.policy.fork-rule-timeout-ms", 5000);
-    }
-
-    /**
-     * Resolves the rule language precedence, in order of precedence:
-     * the {@code rule-languages} plugin config key (comma-separated), the
-     * {@code rule-language} key (a single language, appended to the
-     * Distill/Groovy default), then the matching {@code arete.policy.*} system
-     * properties, then the default.
-     */
-    private static List<String> resolveLanguagePrecedence(Map<String, String> config) {
-        String list = configOrProperty(config, "rule-languages", "arete.policy.rule-languages");
-        if (list != null && !list.isBlank()) {
-            List<String> parsed = new ArrayList<>();
-            for (String token : list.split(",")) {
-                String language = token.trim().toLowerCase();
-                if (!language.isEmpty() && !parsed.contains(language)) parsed.add(language);
-            }
-            if (!parsed.isEmpty()) return List.copyOf(parsed);
-        }
-        String single = configOrProperty(config, "rule-language", "arete.policy.rule-language");
-        if (single != null && !single.isBlank()) {
-            String language = single.trim().toLowerCase();
-            if (DEFAULT_LANGUAGE_PRECEDENCE.contains(language)) return List.of(language);
-            // A single language outside the default means "also allow this one",
-            // with the default runtimes still preferred where a source exists.
-            List<String> precedence = new ArrayList<>(DEFAULT_LANGUAGE_PRECEDENCE);
-            precedence.add(language);
-            return List.copyOf(precedence);
-        }
-        return DEFAULT_LANGUAGE_PRECEDENCE;
+                PolicyBundleLoader.LoadOptions.defaults(), loadUserPolicies(config));
     }
 
     /**
@@ -143,26 +104,6 @@ public final class PolicyBasedValidationPlugin implements SpecValidationPlugin, 
         return value != null ? value : System.getProperty(propertyKey);
     }
 
-    private static boolean booleanConfig(Map<String, String> config, String configKey, String propertyKey, boolean fallback) {
-        String value = configOrProperty(config, configKey, propertyKey);
-        if (value == null || value.isBlank()) return fallback;
-        if (value.equalsIgnoreCase("true")) return true;
-        if (value.equalsIgnoreCase("false")) return false;
-        throw new IllegalArgumentException(configKey + " must be true or false");
-    }
-
-    private static long longConfig(Map<String, String> config, String configKey, String propertyKey, long fallback) {
-        String value = configOrProperty(config, configKey, propertyKey);
-        if (value == null || value.isBlank()) return fallback;
-        try {
-            long parsed = Long.parseLong(value);
-            if (parsed < 1) throw new NumberFormatException();
-            return parsed;
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException(configKey + " must be a positive integer");
-        }
-    }
-
     @Override
     public ValidationResult validate(SpecInput input) {
         PolicyBundle currentBundle;
@@ -196,13 +137,7 @@ public final class PolicyBasedValidationPlugin implements SpecValidationPlugin, 
                 Map<String, Object> parameters = new LinkedHashMap<>(rule.parameters());
                 parameters.putAll(policyRule.getValue().parameters());
                 PolicyRule effectiveRule = new PolicyRule(rule.id(), rule.title(), rule.category(), rule.matcherId(), rule.scope(), parameters, rule.documentationMarkdown());
-                matches = forkRules
-                        ? new ForkedMatcherEvaluator(forkRuleTimeoutMillis).execute(matcher, api, effectiveRule)
-                        : switch (matcher.language()) {
-                            case "groovy" -> groovyRuntime.execute(matcher, api, effectiveRule);
-                            case "distill" -> distillRuntime.execute(matcher, api, effectiveRule);
-                            default -> throw new MatcherEvaluationException("Unsupported matcher language: " + matcher.language());
-                        };
+                matches = distillRuntime.execute(matcher, api, effectiveRule);
             } catch (MatcherEvaluationException e) {
                 return ValidationResult.pluginError("Matcher '" + rule.matcherId() + "' failed for " + rule.id() + ": " + e.getMessage());
             }
@@ -239,21 +174,16 @@ public final class PolicyBasedValidationPlugin implements SpecValidationPlugin, 
                 String detail = parsed.getMessages() == null ? "unknown parse error" : String.join("; ", parsed.getMessages());
                 return ValidationResult.parseError("OpenAPI parsing failed: " + detail);
             }
+            if (!"distill".equals(request.language())) {
+                throw new MatcherEvaluationException("Unsupported matcher language: " + request.language());
+            }
             Matcher matcher = new Matcher(request.matcherId(), request.language(), request.source(),
                     List.of(request.scope()), Map.of());
-            switch (request.language()) {
-                case "distill" -> distillRuntime.validate(matcher);
-                case "groovy" -> groovyRuntime.validate(matcher);
-                default -> throw new MatcherEvaluationException("Unsupported matcher language: " + request.language());
-            }
+            distillRuntime.validate(matcher);
             Map<String, Object> api = OpenApiMapAdapter.toMap(parsed.getOpenAPI(), parsed.getMessages(), request.spec());
             PolicyRule rule = new PolicyRule(request.matcherId(), request.matcherId(), "Matcher test",
                     request.matcherId(), request.scope(), request.parameters(), "");
-            List<Diagnostic> matches = switch (request.language()) {
-                case "distill" -> distillRuntime.execute(matcher, api, rule);
-                case "groovy" -> groovyRuntime.execute(matcher, api, rule);
-                default -> throw new MatcherEvaluationException("Unsupported matcher language: " + request.language());
-            };
+            List<Diagnostic> matches = distillRuntime.execute(matcher, api, rule);
             List<net.dublinux.arete.validation.spi.Diagnostic> diagnostics = matches.stream().map(match -> {
                 net.dublinux.arete.validation.spi.Diagnostic.Builder diagnostic = net.dublinux.arete.validation.spi.Diagnostic.builder()
                         .ruleId(request.matcherId()).title(request.matcherId()).description(match.message())

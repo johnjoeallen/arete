@@ -837,32 +837,6 @@ class PolicyBasedValidationPluginTest {
     }
 
     @Test
-    void forkedRuntimeReturnsRuleDiagnosticsThroughJsonLines() {
-        PolicyBundle bundle = distillBundle();
-        String spec = """
-                openapi: 3.0.0
-                info: { title: Test API, version: 1.0.0 }
-                paths:
-                  /customers:
-                    post:
-                      requestBody: { content: { application/json: { schema: { type: object } } } }
-                      responses: { '200': { description: OK } }
-                """;
-        Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser()
-                .readContents(spec, null, new ParseOptions()).getOpenAPI());
-
-        PolicyRule operationRule = bundle.rules().get("HTTP005");
-        operationRule = new PolicyRule(operationRule.id(), operationRule.title(), operationRule.category(),
-                operationRule.matcherId(), operationRule.scope(), Map.of("method", "POST", "request-body", "present"),
-                operationRule.documentationMarkdown());
-        java.util.List<Diagnostic> diagnostics = new ForkedMatcherEvaluator(10000)
-                .execute(bundle.matchers().get("operation"), api, operationRule);
-
-        assertEquals(1, diagnostics.size());
-        assertEquals("POST /customers", diagnostics.get(0).path());
-    }
-
-    @Test
     void operationSemanticsRuleReportsOnlyDocumentedHeuristicSignals() {
         PolicyBundle bundle = distillBundle();
         String spec = """
