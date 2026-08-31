@@ -1439,6 +1439,10 @@ appear in trailing position.</p>
 <td>split <code>text</code> on the <strong>literal string</strong> <code>delim</code>; empty tokens are kept (pair with <code>.filter { t -&gt; t != "" }</code>)</td>
 </tr>
 <tr>
+<td><code>words(text)</code></td>
+<td>substantive words of <code>text</code>: whitespace-separated tokens, leading/trailing punctuation stripped, keeping only those that still contain a letter. Count is <code>size(words(text))</code>; per-word length is <code>w.length</code> inside <code>.any</code> / <code>.all</code> / <code>.filter</code></td>
+</tr>
+<tr>
 <td><code>size(list)</code></td>
 <td>element count (an integer)</td>
 </tr>
@@ -1556,6 +1560,14 @@ linear-time, no backreferences, no catastrophic backtracking.</p>
 <tr>
 <td><code>pathSegments("/v1/orders/{id}/items")</code></td>
 <td><code>["v1", "orders", "items"]</code> — empty and <code>{…}</code> segments dropped</td>
+</tr>
+<tr>
+<td><code>words("Get  the widget — v2!")</code></td>
+<td><code>["Get", "the", "widget", "v2"]</code> — whitespace runs collapsed, <code>—</code> and <code>!</code> dropped</td>
+</tr>
+<tr>
+<td><code>words("List").size()</code> &nbsp; <code>size(words("List all customers"))</code></td>
+<td><code>1</code> &nbsp; <code>3</code></td>
 </tr>
 <tr>
 <td><code>parseInt("  42 ")</code> &nbsp; <code>parseInt("x", 0)</code></td>

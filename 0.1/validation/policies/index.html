@@ -882,7 +882,7 @@ listed here is the default when an unknown rule set is requested.</p>
 <h2 id="enterprise-grade">Enterprise Grade<a class="headerlink" href="#enterprise-grade" title="Permanent link">&para;</a></h2>
 <p>The default policy: it enables every generally-applicable bundled rule, with a few rule parameters calibrated for a typical enterprise API (allow-listed proprietary headers, expected OAuth2 scopes, standard rate-limit headers).</p>
 <ul>
-<li><strong>109</strong> rules active</li>
+<li><strong>111</strong> rules active</li>
 <li>passing score: <strong>90</strong> (the <a href="../../automation-api/">automation API</a> fails below this unless overridden)</li>
 <li>grades: A ≥ 95, B ≥ 90, C ≥ 80, D ≥ 70, else F</li>
 </ul>
@@ -910,7 +910,7 @@ listed here is the default when an unknown rule set is requested.</p>
 </tbody>
 </table>
 <details class="example">
-<summary>All 109 rules in Enterprise Grade</summary>
+<summary>All 111 rules in Enterprise Grade</summary>
 <table>
 <thead>
 <tr>
@@ -1464,6 +1464,16 @@ listed here is the default when an unknown rule set is requested.</p>
 <td><code>DOC020</code></td>
 <td>−0.5</td>
 <td>API does not declare a license</td>
+</tr>
+<tr>
+<td><code>DOC021</code></td>
+<td>−0.5</td>
+<td>Operation summary has too few words</td>
+</tr>
+<tr>
+<td><code>DOC022</code></td>
+<td>−0.5</td>
+<td>Operation summary contains an unusually long word</td>
 </tr>
 </tbody>
 </table>
