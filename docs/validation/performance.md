@@ -58,11 +58,11 @@ no I/O, reflection, recursion, or unbounded iteration. It is a narrow
 data-pipeline processor — `.map` / `.filter` / `.expand`, slashy regex
 literals, a fixed builtin set — and can be nothing else.
 
-That narrowness is what makes a matcher **data rather than a program to be
-trusted**: it can be loaded from anywhere and run without vetting its author,
-because the worst it can do is inspect the spec and hand back a list. The cost
-is interpreter overhead — a tree-walk instead of compiled bytecode — which the
-rest of this page quantifies.
+That narrowness is what lets a matcher **run without trusting its author**: it
+can be loaded from anywhere — a directory, an artifact repository, a URL — and
+executed unvetted, because the worst it can do is read the spec and return a
+list. The cost is interpreter overhead — a tree-walk instead of compiled
+bytecode — which the rest of this page quantifies.
 
 ## Plugins are a separate trust tier
 
