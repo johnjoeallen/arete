@@ -1,7 +1,9 @@
 # The case for Distill
 
-Areté evaluates every matcher with [Distill](distill.md). This page makes the
-argument for that choice and shows the measurements behind it.
+Areté evaluates every matcher with [Distill](distill.md). The policy engine
+exists so that adding a rule means writing a matcher, not writing a plugin;
+Distill is the language those matchers are written in. This page makes the
+argument for that design and shows the measurements behind it.
 
 A matcher has to be three things at once:
 
@@ -73,12 +75,21 @@ audit to you: the plugin's own code, its transitive dependencies, and its
 build. That trust is appropriate for a plugin, which is deliberately chosen,
 versioned, and deployed like any other dependency.
 
-Distill exists so that trust is spent **once, at the plugin boundary**, and
-not again for every rule inside it. The policy plugin is vetted and installed;
-after that its matchers — bundled, local, or remote — carry no further risk,
-because a matcher cannot do what the plugin can. Coded plugins and sandboxed
-matchers are complementary: the plugin is where trusted, complex, compiled
-logic belongs; the matcher is where a shareable rule belongs.
+The policy engine was built precisely so that this is the **last plugin most
+deployments ever need**. It cannot cover every conceivable check — a rule that
+needs data the model does not expose, or logic the pipeline cannot phrase,
+still calls for a plugin — but in practice virtually every API-style rule is
+expressible as a matcher. The intended path for a new rule is: write a
+`Matcher.dsl`, not a Java class; reserve a new plugin for the rare case that
+genuinely needs one.
+
+So trust is spent **once, at the plugin boundary**, and not again for every
+rule inside it. The policy plugin is vetted and installed; after that its
+matchers — bundled, local, or remote — carry no further risk, because a
+matcher cannot do what the plugin can. Coded plugins and sandboxed matchers
+are complementary: the plugin is where trusted, complex, compiled logic
+belongs; the matcher is where a shareable rule belongs — and the second is
+where nearly all the work happens.
 
 ## Measurements
 
