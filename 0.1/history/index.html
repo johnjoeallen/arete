@@ -1147,6 +1147,31 @@ can only inspect the spec and hand back occurrences, the trust needed to run
 one is the trust that its <em>rules</em> are sensible — not that its code is safe.
 See <a href="../validation/performance/">The case for Distill</a> for the measured
 trade-off.</p>
+<p>Several bundled matchers apply a handful of unrelated checks to one collection
+— an operation summary, a schema property — selected per rule by a parameter.
+Written as one nested <code>filter</code>/<code>map</code> this became an inverted
+<code>!(passA || passB || …)</code> predicate paired with a separate, parallel message
+cascade: the condition that triggered an occurrence and the text describing it
+were never next to each other. A <code>checks(source) { … }</code> block was added to
+address this without widening the language: it binds the source collection
+once, then takes a list of bare <code>filter { } .map { }</code> stanzas — one check per
+stanza, condition directly above message — whose occurrences concatenate. It
+introduces no statements; a closure parameter became optional (the item is
+<code>it</code>), and flat <code>api.operations</code> / <code>api.responses</code> / <code>api.schemaProperties</code>
+views were added so a stanza rarely needs an outer <code>expand</code> to reach its
+subject. The list-length builtin <code>size(list)</code> was renamed <code>count(list)</code> to
+match the <code>xs.count { }</code> sequence form. <code>text-style</code>, <code>schema</code>, and
+<code>media-type</code> were migrated first, gated by the Groovy parity suite.</p>
+<p>The same pass audited every matcher against one rule: <strong>an occurrence is a
+violation</strong> — a matcher emits one only for a subject that breaks the rule, and
+a compliant subject yields nothing. A few matchers carried parameter modes
+(<code>operation</code> <code>summary: present</code>, <code>schema</code> <code>max-items: present</code>, <code>text-style</code>
+with no parameters) that were declared but unused and, had a rule set them,
+would have flagged compliant subjects with a "matches the configured rule"
+message; those modes were removed from the matchers and their descriptors.
+<code>schema</code> findings that had fallen through to "Property matches the configured
+schema rule" (<code>enum-type</code>, <code>enum-case</code>, <code>extensible</code>) were given messages that
+name the violation.</p>
 <h2 id="runtime-execution-model">Runtime execution model<a class="headerlink" href="#runtime-execution-model" title="Permanent link">&para;</a></h2>
 <p>Distill matcher sources are parsed once when the bundle loads and the compiled
 programs are reused for every validation, rather than reparsed and discarded
