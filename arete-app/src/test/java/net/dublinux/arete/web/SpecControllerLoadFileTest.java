@@ -52,6 +52,9 @@ class SpecControllerLoadFileTest {
     private SpecFileWatcher specFileWatcher;
 
     @MockitoBean
+    private net.dublinux.arete.web.api.DeploymentMode deploymentMode;
+
+    @MockitoBean
     private PluginRegistry pluginRegistry;
 
     @MockitoBean

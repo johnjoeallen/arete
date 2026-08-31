@@ -65,21 +65,31 @@ public class SpecFileWatcher {
     private final ScheduledExecutorService watchLoopExecutor =
             Executors.newSingleThreadScheduledExecutor(SpecFileWatcher::newDaemonThread);
 
+    private final boolean disabledForSharedDeployment;
+
     @Autowired
     public SpecFileWatcher(
             @Value("${arete.specs-dir}") String specsDir,
             @Value("${arete.watch-debounce-ms:300}") long debounceMillis,
+            @Value("${arete.deployment.mode:local}") String deploymentMode,
             SpecParserService specParserService,
             SpecStorageService specStorageService) {
-        this(Path.of(specsDir), debounceMillis, specParserService, specStorageService);
+        this(Path.of(specsDir), debounceMillis, specParserService, specStorageService,
+                "shared".equalsIgnoreCase(deploymentMode == null ? "" : deploymentMode.trim()));
     }
 
     SpecFileWatcher(Path specsHome, long debounceMillis, SpecParserService specParserService,
             SpecStorageService specStorageService) {
+        this(specsHome, debounceMillis, specParserService, specStorageService, false);
+    }
+
+    SpecFileWatcher(Path specsHome, long debounceMillis, SpecParserService specParserService,
+            SpecStorageService specStorageService, boolean disabledForSharedDeployment) {
         this.specsHome = specsHome.toAbsolutePath().normalize();
         this.debounceMillis = debounceMillis;
         this.specParserService = specParserService;
         this.specStorageService = specStorageService;
+        this.disabledForSharedDeployment = disabledForSharedDeployment;
         try {
             this.watchService = FileSystems.getDefault().newWatchService();
         } catch (IOException e) {
@@ -89,6 +99,10 @@ public class SpecFileWatcher {
 
     @PostConstruct
     void start() {
+        if (disabledForSharedDeployment) {
+            log.info("Deployment mode is 'shared'; the local drop-folder watcher is disabled.");
+            return;
+        }
         try {
             Files.createDirectories(specsHome);
         } catch (IOException e) {

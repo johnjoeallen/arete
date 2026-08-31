@@ -64,11 +64,13 @@ public class SpecController {
     private final PluginSettingsService pluginSettingsService;
     private final SpecPluginSettingsService specPluginSettingsService;
     private final SpecValidationResultService specValidationResultService;
+    private final net.dublinux.arete.web.api.DeploymentMode deploymentMode;
 
     public SpecController(SpecParserService specParserService, SpecStorageService specStorageService,
             PluginValidationService pluginValidationService, SpecFileWatcher specFileWatcher,
             PluginRegistry pluginRegistry, PluginSettingsService pluginSettingsService,
-            SpecPluginSettingsService specPluginSettingsService, SpecValidationResultService specValidationResultService) {
+            SpecPluginSettingsService specPluginSettingsService, SpecValidationResultService specValidationResultService,
+            net.dublinux.arete.web.api.DeploymentMode deploymentMode) {
         this.specParserService = specParserService;
         this.specStorageService = specStorageService;
         this.pluginValidationService = pluginValidationService;
@@ -77,6 +79,7 @@ public class SpecController {
         this.pluginSettingsService = pluginSettingsService;
         this.specPluginSettingsService = specPluginSettingsService;
         this.specValidationResultService = specValidationResultService;
+        this.deploymentMode = deploymentMode;
     }
 
     @GetMapping("/")
@@ -103,6 +106,10 @@ public class SpecController {
      */
     @PostMapping("/api/load-file")
     public String loadFile(@RequestParam String filePath, Model model) {
+        if (deploymentMode.isShared()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Loading specs from a local path is disabled in shared deployment mode.");
+        }
         String trimmedPath = filePath == null ? "" : filePath.trim();
         if (trimmedPath.isEmpty()) {
             model.addAttribute("openApi", null);

@@ -2,6 +2,7 @@ package net.dublinux.arete.validation.spi;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -127,6 +128,24 @@ public interface SpecValidationPlugin {
      */
     default List<String> getRuleSets() {
         return List.of(DEFAULT_RULE_SET);
+    }
+
+    /**
+     * The pass level this rule set suggests for automated gating — the bar a
+     * spec should clear when validated under it. Returned in a small fixed
+     * grammar the host understands: {@code "blocker"} (fail only on a
+     * prohibited/blocking finding), {@code "error"} (fail on any error-severity
+     * finding), or {@code "score<NN"} (fail below a numeric score, e.g.
+     * {@code "score<90"}).
+     *
+     * <p>A plugin that has no opinion returns {@link Optional#empty()}; the
+     * host then treats the rule set as {@code "blocker"}. The value is
+     * advisory: a caller can always override it with an explicit level.
+     *
+     * @param ruleSet one of {@link #getRuleSets()}, or {@link #DEFAULT_RULE_SET}
+     */
+    default Optional<String> getSuggestedScoreLevel(String ruleSet) {
+        return Optional.empty();
     }
 
     /**

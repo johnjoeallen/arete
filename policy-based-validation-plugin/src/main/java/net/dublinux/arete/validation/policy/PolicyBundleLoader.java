@@ -175,7 +175,8 @@ final class PolicyBundleLoader {
 
     private Policy parsePolicy(String path, String content, Map<String, PolicyRule> rules, Map<String, Matcher> matchers) {
         Map<String, Object> data = frontMatter(path, content);
-        rejectUnknown(path, data, Set.of("id", "rules"));
+        rejectUnknown(path, data, Set.of("id", "rules", "scoring"));
+        String scoreLevel = data.containsKey("scoring") ? scoreLevel(path, data.get("scoring")) : null;
         Map<String, PolicyDisposition> dispositions = new LinkedHashMap<>();
         for (Map.Entry<String, Object> entry : map(path, "rules", data.get("rules")).entrySet()) {
             Object value = entry.getValue();
@@ -198,7 +199,30 @@ final class PolicyBundleLoader {
                 else throw new BundleValidationException(path + ": " + entry.getKey() + ".points must be a number from 0 to 100 or PROHIBITED");
             } else throw new BundleValidationException(path + ": " + entry.getKey() + " must be a number, PROHIBITED, or a declaration with points and parameters");
         }
-        return new Policy(requiredString(path, "id", data.get("id")), dispositions);
+        return new Policy(requiredString(path, "id", data.get("id")), dispositions, scoreLevel);
+    }
+
+    /** Validates and normalises a policy's {@code scoring:} value: {@code blocker | error | score<NN}. */
+    private static String scoreLevel(String path, Object value) {
+        if (!(value instanceof String raw) || raw.isBlank()) {
+            throw new BundleValidationException(path + ": scoring must be 'blocker', 'error', or 'score<NN'");
+        }
+        String level = raw.trim();
+        if (level.equals("blocker") || level.equals("error")) {
+            return level;
+        }
+        if (level.startsWith("score<")) {
+            try {
+                double bar = Double.parseDouble(level.substring("score<".length()).trim());
+                if (bar >= 0 && bar <= 100) {
+                    return "score<" + (bar == Math.rint(bar) ? Long.toString((long) bar) : Double.toString(bar));
+                }
+            } catch (NumberFormatException ignored) {
+                // fall through to the error below
+            }
+        }
+        throw new BundleValidationException(path + ": scoring '" + raw
+                + "' must be 'blocker', 'error', or 'score<NN' with NN from 0 to 100");
     }
 
     private static boolean validPoints(Number number) {

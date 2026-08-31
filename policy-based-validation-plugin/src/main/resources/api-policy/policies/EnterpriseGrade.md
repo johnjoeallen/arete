@@ -1,5 +1,6 @@
 ---
 id: Enterprise Grade
+scoring: score<90
 rules:
   REST001: 0.5
   DOC001: 0.5

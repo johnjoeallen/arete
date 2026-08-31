@@ -24,11 +24,20 @@ record PolicyRule(String id, String title, String category, String matcherId, St
 
 record Matcher(String id, String language, String source, List<String> scopes, Map<String, ParameterDefinition> parameters) { }
 record ParameterDefinition(String type, boolean required, List<String> values) { }
-record Policy(String id, Map<String, PolicyDisposition> dispositions) {
+/**
+ * @param scoreLevel the policy's suggested pass level for automated gating, in
+ *                   the {@code blocker | error | score<NN} grammar, or null if
+ *                   the policy states no opinion.
+ */
+record Policy(String id, Map<String, PolicyDisposition> dispositions, String scoreLevel) {
     Policy {
         // Policy declaration order is report order. Map.copyOf deliberately
         // makes no iteration-order promise, so retain the YAML LinkedHashMap.
         dispositions = Collections.unmodifiableMap(new LinkedHashMap<>(dispositions));
+    }
+
+    Policy(String id, Map<String, PolicyDisposition> dispositions) {
+        this(id, dispositions, null);
     }
 }
 sealed interface PolicyDisposition permits Deduction, Prohibited {

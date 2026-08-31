@@ -1,5 +1,6 @@
 ---
 id: Zalando Extended
+scoring: error
 rules:
   DOC006: 0.5
   DOC007: 0.5

@@ -59,6 +59,12 @@ public final class PolicyBasedValidationPlugin implements SpecValidationPlugin, 
     }
 
     @Override
+    public Optional<String> getSuggestedScoreLevel(String ruleSet) {
+        Policy policy = activeBundle().policies().get(ruleSet);
+        return policy == null ? Optional.empty() : Optional.ofNullable(policy.scoreLevel());
+    }
+
+    @Override
     public synchronized void configure(Map<String, String> config) {
         bundle = bundleLoader.load(new ClasspathBundleResources(getClass().getClassLoader()),
                 PolicyBundleLoader.LoadOptions.defaults(), loadUserPolicies(config));
