@@ -126,17 +126,23 @@ to "disabled pending sandbox" to an explicit opt-in, with a configurable
 language-precedence list. An optional mode that ran each rule in a disposable
 child JVM was added as a second containment option.
 
-Starlark was then itself replaced by **Distill**, a small fluent expression
-language shaped for rule pipelines and closer to the Java the rest of the
-codebase is written in. It was prototyped as "DetectorScript", renamed
-**Sift** (`.sift`), and finally **Distill** (`Matcher.dsl`). It grew in
-phases — Groovy-style `~/regex/` literals with `==~` / `=~`, bare `/regex/`
-in operand position, `[key]` indexing, numeric operators, short-circuit
-`&&` / `||`, value-based numeric equality, and `distinct` / `urlHost` /
-`join` / `group` / `type` / `blank` builtins — with every detector ported
-under a Groovy parity test at each step. Its result model uses
-`occurrence(...)` rather than a separate diagnostic abstraction, reflecting
-that a matcher reports observed rule occurrences.
+Starlark was then itself replaced by **Distill**. Distill is not a
+general-purpose language — even Starlark, for all its restrictions, was more
+than the job needed. A Distill matcher is a **single expression** in a fixed
+frame: given `api` and `rule`, walk the model, keep what matches, and return a
+list of `occurrence(...)` values. There are no statements, no local variables,
+no user-defined functions, and no way to produce any other kind of result.
+It is a focused data-pipeline processor — `.map` / `.filter` / `.expand`,
+slashy regex literals, a fixed builtin set — and nothing else.
+
+It was prototyped as "DetectorScript", renamed **Sift** (`.sift`), and finally
+**Distill** (`Matcher.dsl`). It grew in phases — Groovy-style `~/regex/`
+literals with `==~` / `=~`, bare `/regex/` in operand position, `[key]`
+indexing, numeric operators, short-circuit `&&` / `||`, value-based numeric
+equality, and `distinct` / `urlHost` / `join` / `group` / `type` / `blank`
+builtins — with every detector ported under a Groovy parity test at each step.
+Its result model uses `occurrence(...)` rather than a separate diagnostic
+abstraction, reflecting that a matcher reports observed rule occurrences.
 
 Once Distill reached parity it became the primary language, and **Starlark
 was removed entirely**. Groovy was then withdrawn from the runtime as well: a
@@ -149,10 +155,11 @@ matcher across each scope and fixture spec, alongside the curated cases, and a
 hand-written Java baseline was added to the comparison to quantify the
 interpreter's cost.
 
-A matcher is still code — a Distill program, with expressions and closures —
-but the interpreter confines it to reading the immutable `api` and `rule`
-inputs and returning occurrences: no I/O, reflection, recursion, or unbounded
-loops. That confinement, rather than compiled Java in the mould of Zally, is
+A matcher is still code — a Distill program — but it is code with only one
+shape available to it: consume the immutable `api` and `rule` inputs, and
+return occurrences. The interpreter offers no I/O, reflection, recursion, or
+unbounded loops, and the grammar offers no way to express anything but the
+pipeline. That narrowness, rather than compiled Java in the mould of Zally, is
 the deliberate choice. It means a new matcher needs no new release and can
 load from outside the application jar — today from the `~/.arete/policies/`
 directory, and in future from a remote source pulled and run without trusting

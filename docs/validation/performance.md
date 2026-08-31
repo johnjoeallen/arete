@@ -154,15 +154,18 @@ Groovy it replaced offered none of Java's speed and none of Distill's safety.
     **new Java class, a new release, and a redeploy** before anyone could use
     it. Matchers could only ever ship inside the application jar.
 
-    Areté's matchers are code too — Distill programs — but the interpreter can
-    only feed one the spec and collect the occurrences it returns; it grants no
-    I/O, reflection, recursion, or unbounded iteration. That is why a new
-    matcher needs no new release, why user [policy files](../configuration.md)
-    can already load from outside the jar, and why a matcher **delivered from a
-    remote source over the internet** could be run without trusting its author
-    with the host JVM. Hand-written Java forecloses that entirely. A few
-    milliseconds of interpreter overhead per spec is the price of keeping it
-    open, and it is one worth paying.
+    Areté's matchers are code too — but Distill is not a general-purpose
+    language. A matcher is a single expression that consumes `api` and `rule`
+    and returns occurrences; the grammar has no statements, no user functions,
+    no other result type, and the interpreter grants no I/O, reflection,
+    recursion, or unbounded iteration. It is a narrow data-pipeline processor
+    and can be nothing else. That is why a new matcher needs no new release,
+    why user [policy files](../configuration.md) can already load from outside
+    the jar, and why a matcher **delivered from a remote source over the
+    internet** could be run without trusting its author with the host JVM.
+    Hand-written Java forecloses that entirely. A few milliseconds of
+    interpreter overhead per spec is the price of keeping it open, and it is
+    one worth paying.
 
 ## Reproducing
 
