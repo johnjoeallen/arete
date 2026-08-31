@@ -145,6 +145,24 @@ than ~40 lines of null-checked map navigation per matcher in a language where
 a rule change means recompile and redeploy. The Groovy it replaced offered
 none of Java's speed and none of Distill's safety.
 
+!!! warning "The Java baseline is a measurement, not a proposal"
+    Hand-written Java matchers — the model [Zally](https://github.com/zalando/zally)
+    uses, where every rule is a compiled class — are **explicitly what Areté is
+    built to avoid**, and the speed advantage above does not change that.
+
+    A rule whose logic isn't expressible with an existing matcher would need a
+    **new Java class, a new release, and a redeploy** before anyone could use
+    it. Matchers could only ever ship inside the application jar.
+
+    Areté's matchers are declarative text (`Matcher.dsl`) evaluated by a
+    sandboxed interpreter precisely so that a new matcher is **data, not code**.
+    User [policy files](../configuration.md) already load from outside the jar,
+    and the same property is what makes the intended next step possible: a
+    matcher **delivered from a remote source over the internet** can be run
+    safely without trusting its author with the host JVM. Hand-written Java
+    forecloses that entirely. A few milliseconds of interpreter overhead per
+    spec is the price of keeping it open, and it is one worth paying.
+
 ## Reproducing
 
 ```bash
