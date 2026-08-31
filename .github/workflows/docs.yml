@@ -13,6 +13,15 @@ on:
       version:
         description: 'Docs version to publish (e.g. 0.99). Blank = MAJOR.MINOR of the latest git tag.'
         required: false
+      retire:
+        description: 'Optional: a previously published docs version to delete (e.g. 0.1).'
+        required: false
+  workflow_call:
+    inputs:
+      version:
+        description: 'Docs version to publish. Blank = MAJOR.MINOR of the latest git tag.'
+        type: string
+        required: false
 
 permissions:
   contents: write
@@ -41,7 +50,7 @@ jobs:
       - name: Resolve docs version
         id: v
         run: |
-          VERSION="${{ github.event.inputs.version }}"
+          VERSION="${{ inputs.version }}"
           if [ -z "$VERSION" ]; then
             TAG="$(git describe --tags --abbrev=0 2>/dev/null || echo v0.0.0)"
             VERSION="$(echo "${TAG#v}" | cut -d. -f1,2)"
@@ -53,3 +62,7 @@ jobs:
           git fetch origin gh-pages --depth=1 || true
           mike deploy --push --update-aliases "${{ steps.v.outputs.version }}" latest
           mike set-default --push latest
+
+      - name: Retire an old docs version
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.retire != '' }}
+        run: mike delete --push "${{ inputs.retire }}"

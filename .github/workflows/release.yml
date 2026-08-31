@@ -51,3 +51,9 @@ jobs:
       # this workflow — it doesn't belong on every tag push. See
       # publish-spi.yml, triggered by hand from the Actions tab against a
       # specific tag once that release is ready to be published externally.
+
+  docs:
+    needs: release
+    permissions:
+      contents: write
+    uses: ./.github/workflows/docs.yml
