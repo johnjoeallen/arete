@@ -39,7 +39,7 @@ rule pipelines (`.map` / `.filter` / `.expand`, slashy regex literals,
 
 The build also runs optional `Matcher.groovy` counterparts as parity checks;
 they are not part of the deployed matcher runtime. See
-[Matcher performance](performance.md) for how the two engines compare.
+[The case for Distill](performance.md) for how the engines compare.
 
 ---
 

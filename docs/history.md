@@ -170,7 +170,7 @@ store (S3, GCS), an OCI registry alongside container images, or a shared
 "policy service" that a team's Areté instances subscribe to. Because a matcher
 can only inspect the spec and hand back occurrences, the trust needed to run
 one is the trust that its *rules* are sensible — not that its code is safe.
-See [Matcher performance](validation/performance.md) for the measured
+See [The case for Distill](validation/performance.md) for the measured
 trade-off.
 
 ## Runtime execution model

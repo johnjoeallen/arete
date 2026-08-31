@@ -69,7 +69,7 @@ nav:
       - Overview: validation/index.md
       - Areté Policy Engine: validation/policy-engine.md
       - Distill reference: validation/distill.md
-      - Matcher performance: validation/performance.md
+      - The case for Distill: validation/performance.md
       - Rule Catalogue: validation/rules.md
       - Policies: validation/policies.md
       - Writing a Plugin: validation/writing-a-plugin.md

@@ -1,41 +1,87 @@
-# Matcher performance: Distill vs Groovy
+# The case for Distill
 
-Areté evaluates every matcher with [Distill](distill.md). The `Matcher.groovy`
-files that ship next to some `Matcher.dsl` files are a build-time parity
-reference only — see the [policy engine](policy-engine.md) overview. This page
-records how the two engines compare, so the choice of a purpose-built
-interpreter over an embedded scripting language is grounded in numbers rather
-than assertion.
+Areté evaluates every matcher with [Distill](distill.md). This page makes the
+argument for that choice and shows the measurements behind it.
 
-## Method
+A matcher has to be three things at once:
+
+- **Safe to run from any source.** Matchers are meant to be shared — bundled,
+  dropped into `~/.arete/policies/`, and in future pulled from a remote
+  source. Running one must not require trusting its author with the host JVM.
+- **Changeable without a release.** A new or adjusted rule should be an edit
+  to a text file, not a recompile-and-redeploy.
+- **Cheap enough to ignore.** A validation runs ~150 matcher evaluations;
+  their combined cost must stay small next to the unavoidable OpenAPI parse.
+
+Distill is the design that delivers all three. The two obvious alternatives
+each give one of them up, and the numbers below show what that buys — or
+doesn't.
+
+## Why not Groovy
+
+Matchers were originally Groovy closures run in-process. Groovy executes
+arbitrary code with full JVM access, so it fails the first requirement
+outright: a Groovy matcher from an untrusted source can do anything the
+application can. It is retained now only as a build-time parity reference —
+`Matcher.groovy` files are run against `Matcher.dsl` on every build to catch
+any semantic drift, never against a submitted spec.
+
+Groovy is not even the fast option. Compiled once and reused, it is **~4–5×
+slower than Distill** across the matcher set (measured below); as it was
+actually wired — recompiling the script with a fresh `GroovyShell` on every
+call — it was roughly 50× slower again. It offered neither safety nor speed.
+
+## Why not hand-written Java
+
+The other alternative is [Zally](https://github.com/zalando/zally)'s model:
+every rule is a compiled Java class. That is genuinely fast — hand-written
+Java is **~5–6× faster than Distill** (measured below). But it fails the other
+two requirements:
+
+- A rule whose logic isn't covered by an existing matcher needs a **new Java
+  class, a new release, and a redeploy** before anyone can use it.
+- Matchers can only ever ship **inside the application jar**. There is no safe
+  way to load one from `~/.arete/policies/`, an internal artifact repository
+  (Nexus, Artifactory), a Git repository or release asset (GitHub, GitLab, an
+  internal host), an HTTPS URL or object store (S3, GCS), an OCI registry, or
+  a shared policy service — because a Java class *is* code with full access.
+
+## What Distill gives up, and what it keeps
+
+Distill is code too — but it is not a general-purpose language. A matcher is a
+**single expression** that consumes `api` and `rule` and returns
+`occurrence(...)` values. The grammar has no statements, no local variables,
+no user-defined functions, and no other result type; the interpreter grants
+no I/O, reflection, recursion, or unbounded iteration. It is a narrow
+data-pipeline processor — `.map` / `.filter` / `.expand`, slashy regex
+literals, a fixed builtin set — and can be nothing else.
+
+That narrowness is what makes a matcher **data rather than a program to be
+trusted**: it can be loaded from anywhere and run without vetting its author,
+because the worst it can do is inspect the spec and hand back a list. The cost
+is interpreter overhead — a tree-walk instead of compiled bytecode — which the
+rest of this page quantifies.
+
+## Measurements
+
+!!! note "These are ratios, not a benchmark suite"
+    Figures come from a single developer-machine run and vary with hardware
+    and JIT state. The *shape* — Distill several times faster than Groovy on
+    almost every matcher, several times slower than hand Java — is stable
+    across runs; the exact microseconds are not.
+
+### Method
 
 `DistillGroovyParityTest.fullSweepParityAndPerformance` runs every
 dual-implemented matcher (38 of them) against **five fixture specs**, for
 **every scope the matcher declares**, supplying a loader-valid value for each
-required parameter — 300 matcher × scope × spec combinations in total. For each
-combination it:
+required parameter — 300 matcher × scope × spec combinations. For each it
+asserts Groovy and Distill produce **identical diagnostics**, then times both:
+best of five runs of 100 calls, after 50 warm-up calls. Groovy is compiled
+once and the closure reused; Distill uses its parse cache — both as the
+deployed engine would behave (or would have).
 
-- asserts Groovy and Distill produce **identical diagnostics**, then
-- times both engines: best of five runs of 100 calls each, after 50 warm-up
-  calls.
-
-Two things are deliberately levelled so the comparison is about the engines,
-not their wiring:
-
-- **Groovy is compiled once** and the closure reused. The plugin's former
-  Groovy path recompiled the script with a fresh `GroovyShell` on *every*
-  call — roughly 50× slower again than the figures below — but that is an
-  integration flaw, not an inherent property of Groovy.
-- **Distill uses its parse cache**: the program is parsed once at bundle load
-  and reused, which is exactly how the deployed engine behaves.
-
-!!! note "These are ratios, not a benchmark suite"
-    Figures come from a single developer-machine run and will vary with
-    hardware and JIT state. The *shape* — Distill several times faster on
-    almost every matcher, at a fraction of the allocation — is stable across
-    runs; the exact microseconds are not.
-
-## Headline
+### Headline
 
 | | Groovy (compiled once) | Distill (cached parse) |
 |---|--:|--:|
@@ -43,16 +89,14 @@ not their wiring:
 | mean speedup | — | **~4–5× faster** |
 | full sweep, 300 combos | — | 300 identical, 0 divergent |
 
-Across the wider evaluation loop the same changes take a full-policy pass
-(109 rules) from ~8.8 ms to ~4.5 ms and roughly a third of the allocation; an
-end-to-end `validate()` on a 40-path spec drops from ~15.7 ms to ~9.7 ms, of
-which the OpenAPI parse (~3 ms) and model adaptation (~1 ms) are now the larger
-share.
+Across the wider loop, a full-policy pass (109 rules) is ~4.5 ms and an
+end-to-end `validate()` on a 40-path spec is ~9.7 ms — of which the OpenAPI
+parse (~3 ms) and model adaptation (~1 ms) are the larger share.
 
-## Per-matcher
+### Per-matcher
 
-Time is microseconds per call, averaged over the matcher's scope × spec
-combinations. "Speedup" is Groovy ÷ Distill.
+Microseconds per call, averaged over the matcher's scope × spec combinations.
+Speedup is Groovy ÷ Distill.
 
 | Matcher | Combos | Findings | Groovy µs/call | Distill µs/call | Speedup |
 |---|--:|--:|--:|--:|--:|
@@ -95,31 +139,29 @@ combinations. "Speedup" is Groovy ÷ Distill.
 | `text-style` | 5 | 2 | 9.0 | 1.6 | 5.5× |
 | `versioning` | 20 | 0 | 1.6 | 0.4 | 3.6× |
 
-### Reading the outliers
+**Reading the outliers**
 
 - **`path-set` (0.7×)** is the only matcher where Distill is slower. Its DSL is
   `O(n²)` — a nested `api.paths.find { … }` inside both `filter` and `map`,
-  re-tokenising every path each time — so the inner loop runs thousands of
-  times on the fixture specs and Groovy's JIT-compiled bytecode edges ahead of
-  the interpreted tree-walk. This is a matcher-authoring cost, not an engine
-  cost: both engines do the same quadratic work.
-- **`hostname`, `security`, `openapi-version` (~1.4–2.1×)** do most of their
-  work in RE2/J regex and string operations, where the two engines share the
-  same underlying calls and the interpreter overhead is proportionally small.
-- **`compatibility`, `manual` (~1×)** are sub-microsecond on both engines with
-  these inputs; the ratio is noise.
+  re-tokenising every path — so Groovy's JIT-compiled inner loop edges ahead of
+  the interpreted tree-walk. A matcher-authoring cost, not an engine cost:
+  both do the same quadratic work.
+- **`hostname`, `security`, `openapi-version` (~1.4–2.1×)** spend most of their
+  time in RE2/J regex and string operations, shared by both engines, so the
+  interpreter overhead is proportionally small.
+- **`compatibility`, `manual` (~1×)** are sub-microsecond on both; the ratio is
+  noise.
 - **`extensions`, `proprietary-header`, `bulk-operation`, `header-schema`
   (12–18×)** spend their time in Groovy's dynamic dispatch and closure
-  machinery over small collections — exactly the overhead Distill's fixed
-  builtin set and direct iteration avoid.
+  machinery over small collections — exactly what Distill's fixed builtin set
+  and direct iteration avoid.
 
-## A hand-written Java baseline
+### The hand-written Java baseline
 
-To place both engines against the floor, five matchers spanning the cost
-spectrum were re-implemented as plain Java (`JavaMatchers`, test scope only)
-against the same `(api, rule)` map contract. All three implementations produce
-identical diagnostics; the times are microseconds per call, best of five runs
-of 200, averaged over the fixture specs.
+Five matchers spanning the cost spectrum were re-implemented as plain Java
+(`JavaMatchers`, test scope only) against the same `(api, rule)` map contract.
+All three implementations produce identical diagnostics; times are best of
+five runs of 200, averaged over the fixture specs.
 
 | Matcher | Findings | Groovy µs | Distill µs | Java µs | Distill ÷ Java | Groovy ÷ Java |
 |---|--:|--:|--:|--:|--:|--:|
@@ -129,46 +171,23 @@ of 200, averaged over the fixture specs.
 | `operation-semantics` | 2 | 20.7 | 6.5 | 1.23 | 5.2× | 16.8× |
 | `path-set` (O(n²)) | 1 | 10.5 | 11.0 | 2.10 | 5.2× | 5.0× |
 
-Hand-written Java is **~5–6× faster than Distill**, consistently, across trivial
-and complex matchers alike — that multiple is the price of a tree-walking
-interpreter over compiled bytecode, and it is stable and predictable. It is
-also **5–32× faster than compiled Groovy**. For `path-set`, where an O(n²)
-algorithm dominates, Distill falls slightly behind Groovy's JIT-compiled inner
-loop, but hand Java — running the same algorithm — is 5× faster than either.
+Hand-written Java is a stable **~5–6× faster than Distill** across trivial and
+complex matchers alike — the price of a tree-walk over compiled bytecode — and
+**5–32× faster than compiled Groovy**. Even on `path-set`, where Distill trails
+Groovy, hand Java running the same algorithm beats both by 5×.
 
-That is the whole trade. A validation runs ~150 rule evaluations; at 1–11 µs
-each the entire matcher phase is 1–4 ms, against a ~3 ms OpenAPI parse it
-cannot avoid. Distill spends a few milliseconds of interpreter overhead per
-spec to keep matchers as sandboxed Distill programs — ~5–15 lines each,
-editable without a rebuild, and unable to do anything but inspect the spec and
-return occurrences — rather than ~40 lines of null-checked map navigation per
-matcher in a language where a rule change means recompile and redeploy. The
-Groovy it replaced offered none of Java's speed and none of Distill's safety.
+## What the overhead actually costs
 
-!!! warning "The Java baseline is a measurement, not a proposal"
-    Hand-written Java matchers — the model [Zally](https://github.com/zalando/zally)
-    uses, where every rule is a compiled class — are **explicitly what Areté is
-    built to avoid**, and the speed advantage above does not change that.
+At 1–11 µs per matcher call and ~150 evaluations per validation, the entire
+matcher phase is **1–4 ms** — against a ~3 ms OpenAPI parse Areté cannot
+avoid. Distill's interpreter overhead is real and measurable, and it is not
+where a validation spends its time.
 
-    A rule whose logic isn't expressible with an existing matcher would need a
-    **new Java class, a new release, and a redeploy** before anyone could use
-    it. Matchers could only ever ship inside the application jar.
-
-    Areté's matchers are code too — but Distill is not a general-purpose
-    language. A matcher is a single expression that consumes `api` and `rule`
-    and returns occurrences; the grammar has no statements, no user functions,
-    no other result type, and the interpreter grants no I/O, reflection,
-    recursion, or unbounded iteration. It is a narrow data-pipeline processor
-    and can be nothing else. That is why a new matcher needs no new release,
-    why user [policy files](../configuration.md) can already load from outside
-    the jar, and why a matcher **delivered from a remote source** could be run
-    without trusting its author with the host JVM — from an internal artifact
-    repository (Nexus, Artifactory), a Git repository or release asset (GitHub,
-    GitLab, an internal host), a plain HTTPS URL or object store (S3, GCS), an
-    OCI registry alongside container images, or a shared policy service a team
-    subscribes to. Hand-written Java forecloses that entirely. A few milliseconds of
-    interpreter overhead per spec is the price of keeping it open, and it is
-    one worth paying.
+That is the trade in full: a few milliseconds per spec to keep every matcher a
+~5–15-line sandboxed expression that can be edited without a rebuild and run
+from any source — instead of ~40 lines of null-checked Java per matcher, in a
+language where a rule change means a release and a matcher can never leave the
+jar.
 
 ## Reproducing
 
