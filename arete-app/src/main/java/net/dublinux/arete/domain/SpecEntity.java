@@ -9,19 +9,31 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 
 import java.time.Instant;
 
 @Entity
-@Table(name = "specs", uniqueConstraints = @UniqueConstraint(columnNames = "title"))
+@Table(name = "specs")
 public class SpecEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    /**
+     * The namespace this spec belongs to — a plain caller-asserted slug, not a
+     * security boundary. Uniqueness is {@code (namespace, title)}, enforced by
+     * {@code SpecSchemaMigration} rather than a {@code @UniqueConstraint} so
+     * the migration owns dropping the old title-only index.
+     */
+    @Column(nullable = false, columnDefinition = "varchar(64) default 'default'")
+    private String namespace = "default";
+
+    /** The self-declared submitter — a slug, never authenticated. */
+    @Column(nullable = false, columnDefinition = "varchar(64) default 'anonymous'")
+    private String submitter = "anonymous";
+
+    @Column(nullable = false)
     private String title;
 
     @Lob
@@ -38,9 +50,13 @@ public class SpecEntity {
     @Column(nullable = false, columnDefinition = "varchar(20) default 'PASTED'")
     private SpecSource source = SpecSource.PASTED;
 
-    /** Absolute path of the source file; null for a {@link SpecSource#PASTED} spec. */
+    /** Absolute path of the source file; null unless {@link #source} is {@link SpecSource#FILE}. */
     @Column(name = "file_path")
     private String filePath;
+
+    /** The URL the spec was fetched from; null unless {@link #source} is {@link SpecSource#URL}. */
+    @Column(name = "source_url")
+    private String sourceUrl;
 
     /**
      * Hex-encoded SHA-256 of {@link #rawContent} as last saved, used to
@@ -56,6 +72,30 @@ public class SpecEntity {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getNamespace() {
+        return namespace;
+    }
+
+    public void setNamespace(String namespace) {
+        this.namespace = namespace;
+    }
+
+    public String getSubmitter() {
+        return submitter;
+    }
+
+    public void setSubmitter(String submitter) {
+        this.submitter = submitter;
+    }
+
+    public String getSourceUrl() {
+        return sourceUrl;
+    }
+
+    public void setSourceUrl(String sourceUrl) {
+        this.sourceUrl = sourceUrl;
     }
 
     public String getTitle() {
