@@ -71,6 +71,10 @@ groups specs, the submitter attributes them.
 
 ## UI
 
+This is **required scope, not polish**. `specs.namespace` / `specs.submitter`
+become `NOT NULL`, and every save path (paste, load-file, drop folder) has to
+supply both — the existing flows break otherwise.
+
 - **Sidebar**: a namespace picker — a small `<select>` of the slugs currently
   in use, plus a text input to **type a new slug** and switch to it. Switching
   is instant; the new slug only becomes "real" when a spec is saved under it.
