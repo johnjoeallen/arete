@@ -149,20 +149,22 @@ matcher across each scope and fixture spec, alongside the curated cases, and a
 hand-written Java baseline was added to the comparison to quantify the
 interpreter's cost.
 
-Keeping matchers as sandboxed declarative text — rather than compiled Java in
-the mould of Zally — is a deliberate choice: a new matcher is data, not code,
-so it needs no new release and can load from outside the application jar.
-Today that means the `~/.arete/policies/` directory; the same property makes
-it possible in future to pull a bundle from a remote source and run it
-without trusting its author with the host JVM. Plausible sources include an
-organisation's internal artifact repository (Nexus, Artifactory), a Git
-repository or release asset (GitHub, GitLab, an internal host), a plain
-HTTPS URL or object store (S3, GCS), an OCI registry alongside container
-images, or a shared "policy service" that a team's Areté instances subscribe
-to. Because the matcher is interpreted in a sandbox with no I/O, reflection
-or unbounded loops, the trust needed to run one is the trust that its
-*rules* are sensible — not the trust that its code is safe. See
-[Matcher performance](validation/performance.md) for the measured trade-off.
+A matcher is still code — a Distill program, with expressions and closures —
+but the interpreter confines it to reading the immutable `api` and `rule`
+inputs and returning occurrences: no I/O, reflection, recursion, or unbounded
+loops. That confinement, rather than compiled Java in the mould of Zally, is
+the deliberate choice. It means a new matcher needs no new release and can
+load from outside the application jar — today from the `~/.arete/policies/`
+directory, and in future from a remote source pulled and run without trusting
+its author with the host JVM. Plausible sources include an organisation's
+internal artifact repository (Nexus, Artifactory), a Git repository or
+release asset (GitHub, GitLab, an internal host), a plain HTTPS URL or object
+store (S3, GCS), an OCI registry alongside container images, or a shared
+"policy service" that a team's Areté instances subscribe to. Because a matcher
+can only inspect the spec and hand back occurrences, the trust needed to run
+one is the trust that its *rules* are sensible — not that its code is safe.
+See [Matcher performance](validation/performance.md) for the measured
+trade-off.
 
 ## Runtime execution model
 

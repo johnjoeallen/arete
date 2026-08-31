@@ -139,11 +139,11 @@ loop, but hand Java — running the same algorithm — is 5× faster than either
 That is the whole trade. A validation runs ~150 rule evaluations; at 1–11 µs
 each the entire matcher phase is 1–4 ms, against a ~3 ms OpenAPI parse it
 cannot avoid. Distill spends a few milliseconds of interpreter overhead per
-spec to keep matchers as safe-by-construction declarative text — editable
-without a rebuild, ~5–15 lines each, with no unsandboxed code path — rather
-than ~40 lines of null-checked map navigation per matcher in a language where
-a rule change means recompile and redeploy. The Groovy it replaced offered
-none of Java's speed and none of Distill's safety.
+spec to keep matchers as sandboxed Distill programs — ~5–15 lines each,
+editable without a rebuild, and unable to do anything but inspect the spec and
+return occurrences — rather than ~40 lines of null-checked map navigation per
+matcher in a language where a rule change means recompile and redeploy. The
+Groovy it replaced offered none of Java's speed and none of Distill's safety.
 
 !!! warning "The Java baseline is a measurement, not a proposal"
     Hand-written Java matchers — the model [Zally](https://github.com/zalando/zally)
@@ -154,14 +154,15 @@ none of Java's speed and none of Distill's safety.
     **new Java class, a new release, and a redeploy** before anyone could use
     it. Matchers could only ever ship inside the application jar.
 
-    Areté's matchers are declarative text (`Matcher.dsl`) evaluated by a
-    sandboxed interpreter precisely so that a new matcher is **data, not code**.
-    User [policy files](../configuration.md) already load from outside the jar,
-    and the same property is what makes the intended next step possible: a
-    matcher **delivered from a remote source over the internet** can be run
-    safely without trusting its author with the host JVM. Hand-written Java
-    forecloses that entirely. A few milliseconds of interpreter overhead per
-    spec is the price of keeping it open, and it is one worth paying.
+    Areté's matchers are code too — Distill programs — but the interpreter can
+    only feed one the spec and collect the occurrences it returns; it grants no
+    I/O, reflection, recursion, or unbounded iteration. That is why a new
+    matcher needs no new release, why user [policy files](../configuration.md)
+    can already load from outside the jar, and why a matcher **delivered from a
+    remote source over the internet** could be run without trusting its author
+    with the host JVM. Hand-written Java forecloses that entirely. A few
+    milliseconds of interpreter overhead per spec is the price of keeping it
+    open, and it is one worth paying.
 
 ## Reproducing
 
