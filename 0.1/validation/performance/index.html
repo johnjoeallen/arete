@@ -605,6 +605,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#plugins-are-a-separate-trust-tier" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Plugins are a separate trust tier
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#measurements" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -901,6 +912,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#plugins-are-a-separate-trust-tier" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Plugins are a separate trust tier
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#measurements" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1038,8 +1060,8 @@ call — it was roughly 50× slower again. It offered neither safety nor speed.<
 <h2 id="why-not-hand-written-java">Why not hand-written Java<a class="headerlink" href="#why-not-hand-written-java" title="Permanent link">&para;</a></h2>
 <p>The other alternative is <a href="https://github.com/zalando/zally">Zally</a>'s model:
 every rule is a compiled Java class. That is genuinely fast — hand-written
-Java is <strong>~5–6× faster than Distill</strong> (measured below). But it fails the other
-two requirements:</p>
+Java is <strong>~5–6× faster than Distill</strong> (measured below). But as the unit in
+which <em>rules</em> are written, it fails the other two requirements:</p>
 <ul>
 <li>A rule whose logic isn't covered by an existing matcher needs a <strong>new Java
   class, a new release, and a redeploy</strong> before anyone can use it.</li>
@@ -1062,6 +1084,21 @@ trusted</strong>: it can be loaded from anywhere and run without vetting its aut
 because the worst it can do is inspect the spec and hand back a list. The cost
 is interpreter overhead — a tree-walk instead of compiled bytecode — which the
 rest of this page quantifies.</p>
+<h2 id="plugins-are-a-separate-trust-tier">Plugins are a separate trust tier<a class="headerlink" href="#plugins-are-a-separate-trust-tier" title="Permanent link">&para;</a></h2>
+<p>None of this replaces Areté's plugin facility. A validation plugin is
+arbitrary compiled Java loaded through the SPI and a child-first classloader;
+<code>policy-based-validation-plugin</code> is itself one. A plugin runs with full
+application privileges, so <strong>installing one is a trust decision</strong> — and
+building it from source does not remove that boundary, it only moves the
+audit to you: the plugin's own code, its transitive dependencies, and its
+build. That trust is appropriate for a plugin, which is deliberately chosen,
+versioned, and deployed like any other dependency.</p>
+<p>Distill exists so that trust is spent <strong>once, at the plugin boundary</strong>, and
+not again for every rule inside it. The policy plugin is vetted and installed;
+after that its matchers — bundled, local, or remote — carry no further risk,
+because a matcher cannot do what the plugin can. Coded plugins and sandboxed
+matchers are complementary: the plugin is where trusted, complex, compiled
+logic belongs; the matcher is where a shareable rule belongs.</p>
 <h2 id="measurements">Measurements<a class="headerlink" href="#measurements" title="Permanent link">&para;</a></h2>
 <div class="admonition note">
 <p class="admonition-title">These are ratios, not a benchmark suite</p>
