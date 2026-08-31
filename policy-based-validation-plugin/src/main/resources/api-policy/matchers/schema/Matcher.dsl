@@ -1,41 +1,64 @@
 distill(api, rule) {
-    return api.schemas.expand { schema -> schema.properties
-        .filter { prop ->
-            (rule.parameters["type"] != null && prop.type != rule.parameters["type"]) ? false
-            : ((rule.parameters["format"] == "absent")
-                    && (!(["integer", "number"].any { t -> t == prop.type }) || truthy(prop.format))) ? false
-            : ((rule.parameters["format"] == "present") && !truthy(prop.format)) ? false
-            : (rule.parameters["enum-type"] == "consistent")
-                ? (truthy(prop.enumPresent) && prop.enumValues.any { v ->
-                        prop.type == "string" ? type(v) != "string"
-                        : prop.type == "integer" ? type(v) != "int"
-                        : prop.type == "number" ? !(["int", "float"].any { x -> x == type(v) })
-                        : false })
-            : (rule.parameters["extensible"] == "required")
-                ? (truthy(prop.enumPresent) && !truthy(prop.extensibleEnum))
-            : (rule.parameters["enum-case"] == "upper-snake-case")
-                ? (truthy(prop.enumPresent) && prop.enumValues.any { v ->
-                        type(v) == "string" && !(("" + v) ==~ /[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*/) })
-            : ((rule.parameters["max-items"] == "absent") && prop.maxItems != null) ? false
-            : ((rule.parameters["max-items"] == "present") && prop.maxItems == null) ? false
-            : ((rule.parameters["bounds"] == "complete")
-                    && (!(["integer", "number"].any { t -> t == prop.type })
-                        || (prop.minimum != null && prop.maximum != null))) ? false
-            : ((rule.parameters["max-length"] == "absent")
-                    && (prop.type != "string" || prop.maxLength != null)) ? false
-            : ((rule.parameters["enum"] == "present") && !truthy(prop.enumPresent)) ? false
-            : ((rule.parameters["enum"] == "absent") && truthy(prop.enumPresent)) ? false
-            : (rule.parameters.keys.any { k -> k == "nullable" } && prop.nullable != rule.parameters["nullable"]) ? false
-            : (rule.parameters.keys.any { k -> k == "required" } && prop.required != rule.parameters["required"]) ? false
-            : true }
-        .map { prop -> occurrence(prop.pointer, prop.name,
-            rule.parameters["enum"] == "present" ? "Property uses an enum"
-            : rule.parameters["enum"] == "absent" ? "Property does not use an enum"
-            : (rule.parameters.keys.any { k -> k == "nullable" } && rule.parameters["required"] == false)
-                ? "Optional property explicitly permits null"
-            : rule.parameters["max-items"] == "absent" ? "Array property has no maximum item count"
-            : rule.parameters["bounds"] == "complete" ? "Numeric property does not declare both a minimum and a maximum"
-            : rule.parameters["max-length"] == "absent" ? "String property does not declare a maximum length"
-            : rule.parameters["format"] == "absent" ? "Numeric property does not declare a format"
-            : "Property matches the configured schema rule") } };
+    return checks(api.schemaProperties
+            .filter { p -> rule.parameters["type"] == null || p.type == rule.parameters["type"] }) {
+
+        filter { p -> rule.parameters["format"] == "absent"
+                      && ["integer", "number"].any { t -> t == p.type } && !truthy(p.format) }
+          .map { p -> occurrence(p.pointer, p.name,
+                                 "Numeric property does not declare a format") },
+
+        filter { p -> rule.parameters["max-length"] == "absent"
+                      && p.type == "string" && p.maxLength == null }
+          .map { p -> occurrence(p.pointer, p.name,
+                                 "String property does not declare a maximum length") },
+
+        filter { p -> rule.parameters["max-items"] == "absent" && p.maxItems == null }
+          .map { p -> occurrence(p.pointer, p.name,
+                                 "Array property has no maximum item count") },
+
+        filter { p -> rule.parameters["bounds"] == "complete"
+                      && ["integer", "number"].any { t -> t == p.type }
+                      && !(p.minimum != null && p.maximum != null) }
+          .map { p -> occurrence(p.pointer, p.name,
+                                 "Numeric property does not declare both a minimum and a maximum") },
+
+        filter { p -> rule.parameters["enum-type"] == "consistent"
+                      && truthy(p.enumPresent)
+                      && p.enumValues.any { v ->
+                             p.type == "string" ? type(v) != "string"
+                             : p.type == "integer" ? type(v) != "int"
+                             : p.type == "number" ? !(["int", "float"].any { x -> x == type(v) })
+                             : false } }
+          .map { p -> occurrence(p.pointer, p.name,
+                                 "Enum value type is inconsistent with the property type") },
+
+        filter { p -> rule.parameters["enum-case"] == "upper-snake-case"
+                      && truthy(p.enumPresent)
+                      && p.enumValues.any { v ->
+                             type(v) == "string" && !(("" + v) ==~ /[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*/) } }
+          .map { p -> occurrence(p.pointer, p.name,
+                                 "Enum value is not UPPER_SNAKE_CASE") },
+
+        filter { p -> rule.parameters["extensible"] == "required"
+                      && truthy(p.enumPresent) && !truthy(p.extensibleEnum) }
+          .map { p -> occurrence(p.pointer, p.name,
+                                 "Enum is not marked extensible") },
+
+        filter { p -> rule.parameters["enum"] == "present" && truthy(p.enumPresent) }
+          .map { p -> occurrence(p.pointer, p.name, "Property uses an enum") },
+
+        filter { p -> rule.parameters["enum"] == "absent" && !truthy(p.enumPresent) }
+          .map { p -> occurrence(p.pointer, p.name, "Property does not use an enum") },
+
+        filter { p -> (rule.parameters.keys.any { k -> k == "nullable" }
+                       || rule.parameters.keys.any { k -> k == "required" })
+                      && (!(rule.parameters.keys.any { k -> k == "nullable" })
+                          || p.nullable == rule.parameters["nullable"])
+                      && (!(rule.parameters.keys.any { k -> k == "required" })
+                          || p.required == rule.parameters["required"]) }
+          .map { p -> occurrence(p.pointer, p.name,
+                     (rule.parameters["nullable"] == true && rule.parameters["required"] == false)
+                         ? "Optional property explicitly permits null"
+                         : "Property matches the flagged nullable/required condition") }
+    };
 }

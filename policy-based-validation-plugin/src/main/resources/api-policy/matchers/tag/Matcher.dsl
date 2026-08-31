@@ -8,7 +8,7 @@ distill(api, rule) {
         ? api.tags
             .group { t -> t.name }
             .values
-            .filter { dupes -> size(dupes) > 1 }
+            .filter { dupes -> count(dupes) > 1 }
             .expand { dupes -> enumerate(dupes)
                 .filter { indexed -> indexed[0] > 0 }
                 .map { indexed -> occurrence(indexed[1].pointer, indexed[1].name,

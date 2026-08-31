@@ -193,6 +193,17 @@ class DistillGroovyParityTest {
         assertParity("media-type", "media-type", Map.of("location", "request", "match", "absent"), true);
     }
 
+    @Test void mediaTypeRequestWildcard() {
+        assertParity("media-type", "media-type", Map.of("location", "request", "match", "wildcard"), false);
+    }
+
+    @Test void mediaTypeRequestNotAllowed() {
+        // No fixture spec documents a request body with a disallowed media type; this
+        // pins that the request/not-allowed stanza stays parity-correct (both empty).
+        assertParity("media-type", "media-type",
+                Map.of("location", "request", "match", "not-allowed", "allowed", "application/json"), false);
+    }
+
     @Test void operationSummaryAbsent() {
         assertParity("operation", "operation", Map.of("summary", "absent"), true);
     }
@@ -622,6 +633,24 @@ class DistillGroovyParityTest {
 
     @Test void schemaOptionalNullable() {
         assertParity("schema", "property", Map.of("required", false, "nullable", true, "semantics", "undefined"), false, SCHEMA_SPEC);
+    }
+
+    @Test void schemaBoundsComplete() {
+        assertParity("schema", "property", Map.of("bounds", "complete"), true, SCHEMA_SPEC);
+    }
+
+    @Test void schemaMaxLengthAbsent() {
+        assertParity("schema", "property", Map.of("max-length", "absent"), true, SCHEMA_SPEC);
+    }
+
+    @Test void schemaIntegerEnumPresent() {
+        assertParity("schema", "property", Map.of("type", "integer", "enum", "present"), false, SCHEMA_SPEC);
+    }
+
+    /** type-only (or empty) config selects a property set but no check — nothing is reported. */
+    @Test void schemaWithNoCheckParameterReportsNothing() {
+        assertParity("schema", "property", Map.of("type", "string"), false, SCHEMA_SPEC);
+        assertParity("schema", "property", Map.of(), false, SCHEMA_SPEC);
     }
 
     @Test void exampleCoversRequired() {

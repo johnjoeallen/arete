@@ -20,13 +20,11 @@ parameters:
     type: enum
     required: false
     values:
-      - present
       - absent
   description:
     type: enum
     required: false
     values:
-      - present
       - absent
   request-body:
     type: enum
@@ -38,9 +36,10 @@ parameters:
 
 # Operation rule
 
-Inspects each OpenAPI operation through the stable rule API. It supports
-method selection and checks for an operation summary or request body. Rules
-may combine these parameters; every supplied condition must match.
+Inspects each OpenAPI operation through the stable rule API. It selects
+operations by method, by a missing summary or description, or by the presence
+or absence of a request body. Rules may combine these parameters; every
+supplied condition must match, and a rule that supplies none matches nothing.
 
 The rule reports operation diagnostics only. It cannot inspect the active
 policy and never calculates severity or score.

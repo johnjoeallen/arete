@@ -29,6 +29,17 @@ terminated by `;`. The expression must evaluate to a list of occurrences
 (often built with `.map { … -> occurrence(...) }`); returning more than 1000
 occurrences is a matcher error.
 
+A matcher that applies several independent checks to one collection is written
+with [`checks(source) { … }`](#repeatable-filtermap-checks) — a block of bare
+`filter { } .map { }` stanzas, one per check — rather than one deeply nested
+`filter`/`map`.
+
+**An occurrence is a violation.** Emit one only for a subject that breaks the
+rule; a compliant subject yields nothing. Every `filter` keeps the *offending*
+items — `filter { it.summary.trim().endsWith(".") }` for "summary must not end
+with a period", never the inverse — and no matcher emits a "matches the rule"
+message.
+
 - `api` is the deep-immutable API model. Its shape (`api.paths`,
   `path.operationDetails`, `api.schemas`,
   `schema.properties`, `api.info`, `api.security`, `api.tags`,
@@ -56,7 +67,7 @@ There is no map literal. `null` is not a keyword — it arrives from the model
 ### Truthiness
 
 `false` and `null` are falsy. **Everything else is truthy**, including `""`,
-`0`, and `[]`. Use explicit checks (`text != ""`, `size(list) > 0`) rather than
+`0`, and `[]`. Use explicit checks (`text != ""`, `count(list) > 0`) rather than
 relying on emptiness, and use `truthy(x)` when you need the boolean itself.
 
 ## Operators
@@ -65,7 +76,7 @@ Highest precedence first:
 
 | Operator | Meaning |
 |---|---|
-| `a.b`  `a.b(...)`  `a.b { x -> ... }`  `a[k]` | member / method / trailing-closure / index |
+| `a.b`  `a.b(...)`  `a.b { x -> ... }`  `a.b { ... }`  `a[k]` | member / method / trailing-closure / index |
 | `!a`  `-a` | logical not, numeric negation |
 | `a + b` | numeric **integer** add if both are numbers; list concat if both are lists; otherwise string concatenation (`null` renders as `"null"`) |
 | `a < b` `a <= b` `a > b` `a >= b` | numeric by value; otherwise lexicographic on strings |
@@ -124,8 +135,9 @@ Notes:
 ### Sequence methods
 
 Each takes a **trailing closure** `{ item -> expression }` (except `toList`).
-Closures have exactly one parameter and one expression body, and may only
-appear in trailing position.
+Closures have one expression body and may only appear in trailing position. The
+parameter name is optional: `{ x -> x.type }` and `{ it.type }` are equivalent —
+omit the `x ->` and the item is `it`.
 
 | Call | Result |
 |---|---|
@@ -146,6 +158,37 @@ api.paths.expand { path -> path.operationDetails.map { operation ->
     occurrence(operation.pointer, operation.method + " " + path.path, "…") } }
 ```
 
+### Repeatable filter/map: `checks`
+
+When a matcher runs several **independent** checks over the same collection,
+one nested `filter`/`map` forces the conditions into an inverted
+`!(passA || passB || …)` predicate and the messages into a parallel `? :`
+cascade — the condition that triggers an occurrence and the message that
+describes it end up far apart. `checks` keeps them together:
+
+```java
+checks(<source>) {
+    filter { <condition A> }.map { occurrence(<pointer>, <path>, "<message A>") },
+    filter { <condition B> }.map { occurrence(<pointer>, <path>, "<message B>") }
+}
+```
+
+- `<source>` is evaluated **once** and bound for the whole block. Apply any
+  shared guard here: `checks(api.operations.filter { it.summary != null }) { … }`.
+- Each comma-separated **stanza** is a bare `filter { … }.map { … }` chain
+  rooted at the source — no receiver token; `filter` with nothing before it
+  means "the block's source". The closures use the implicit `it`.
+- The block's result is every stanza's occurrences **concatenated**. A subject
+  that matches two stanzas produces two occurrences.
+- `api.operations` and `api.schemaProperties` are flat views — every operation
+  / every schema property in one list, each element carrying its own `path`,
+  `pointer`, `name`, … — so a stanza rarely needs an outer `expand` to reach
+  its subject.
+
+`checks` adds no statements: it is one expression, the stanzas are ordinary
+`filter`/`map` chains, and a per-rule parameter guard is just the first term of
+a stanza's `filter` (`rule.parameters["trailing-period"] == "present" && …`).
+
 ## Builtin functions
 
 | Function | Result |
@@ -154,8 +197,8 @@ api.paths.expand { path -> path.operationDetails.map { operation ->
 | `regexFullMatch(pattern, text)` | whole-string match; `pattern` is a regex literal or a string |
 | `regexSearch(pattern, text)` | match anywhere in `text` |
 | `tokenize(delim, text)` | split `text` on the **literal string** `delim`; empty tokens are kept (pair with `.filter { t -> t != "" }`) |
-| `words(text)` | substantive words of `text`: whitespace-separated tokens, leading/trailing punctuation stripped, keeping only those that still contain a letter. Count is `size(words(text))`; per-word length is `w.length` inside `.any` / `.all` / `.filter` |
-| `size(list)` | element count (an integer) |
+| `words(text)` | substantive words of `text`: whitespace-separated tokens, leading/trailing punctuation stripped, keeping only those that still contain a letter. Count is `count(words(text))`; per-word length is `w.length` inside `.any` / `.all` / `.filter` |
+| `count(list)` | element count (an integer). For a filtered count use the sequence form `list.count { x -> ... }`. |
 | `distinct(list)` | de-duplicated list — drops `null`, keeps first-seen order, compares by string value |
 | `parseInt(text)` / `parseInt(text, fallback)` | base-10 integer after trimming; `fallback` (default `-1`) on failure |
 | `join(sep, list)` | elements joined with `sep` |
@@ -203,12 +246,12 @@ Each row is a complete expression and the value it produces.
 | `type(3)` &nbsp; `type("s")` &nbsp; `type([1])` | `"int"` &nbsp; `"string"` &nbsp; `"list"` |
 | `truthy("")` &nbsp; `truthy([])` &nbsp; `truthy(0)` | `true` &nbsp; `true` &nbsp; `true` |
 | `tokenize(",", "a,,b")` | `["a", "", "b"]` — empty token kept |
-| `size(tokenize(",", "a,,b"))` | `3` |
+| `count(tokenize(",", "a,,b"))` | `3` |
 | `join("|", tokenize(",", "a,,b"))` | `"a\|\|b"` |
 | `distinct(["b", "a", "b", null, "a"])` | `["b", "a"]` — `null` dropped, first-seen order |
 | `pathSegments("/v1/orders/{id}/items")` | `["v1", "orders", "items"]` — empty and `{…}` segments dropped |
 | `words("Get  the widget — v2!")` | `["Get", "the", "widget", "v2"]` — whitespace runs collapsed, `—` and `!` dropped |
-| `words("List").size()` &nbsp; `size(words("List all customers"))` | `1` &nbsp; `3` |
+| `words("List").size()` &nbsp; `count(words("List all customers"))` | `1` &nbsp; `3` |
 | `parseInt("  42 ")` &nbsp; `parseInt("x", 0)` | `42` &nbsp; `0` |
 | `strip("--hi--", "-")` &nbsp; `strip("  hi  ")` | `"hi"` &nbsp; `"hi"` |
 | `last(["a", "b"])` &nbsp; `last([])` | `"b"` &nbsp; `""` |
@@ -303,7 +346,7 @@ distill(api, rule) {
             [op.pointer, op.method + " " + path.path, op.operationId] } }
         .group { entry -> "" + entry[2] }
         .values
-        .filter { group -> size(group) > 1 }
+        .filter { group -> count(group) > 1 }
         .expand { group -> enumerate(group)
             .filter { indexed -> indexed[0] > 0 }
             .map { indexed -> occurrence(indexed[1][0], indexed[1][1],
@@ -322,19 +365,70 @@ paths:
 /paths/~1orders~1{id}/put  |  PUT /orders/{id}  |  operationId 'getOrder' is also used by GET /orders/{id}
 ```
 
+**Several checks over one collection — nested `filter`/`map` vs `checks`.**
+The `text-style` matcher inspects an operation summary against a handful of
+mechanical style checks, one selected per rule via `rule.parameters`. Written
+as one nested pipeline the selecting conditions invert into a single
+`!(… || … || …)` predicate and the messages sit in a separate parallel
+cascade:
+
+```java
+// before — condition and message never adjacent
+distill(api, rule) {
+    return api.paths.expand { path -> path.operationDetails
+        .filter { op -> op.summary != null && op.summary.trim() != ""
+            && !(
+                (rule.parameters["trailing-period"] == "present" && !op.summary.trim().endsWith("."))
+                || (rule.parameters["trailing-period"] == "absent" && op.summary.trim().endsWith("."))
+                || (rule.parameters["minimum-words"] != null
+                    && count(words(op.summary)) >= rule.parameters["minimum-words"])
+                /* …four more branches… */) }
+        .map { op -> occurrence(op.pointer, op.method + " " + path.path,
+            rule.parameters["trailing-period"] == "present" ? "Operation summary ends with a period"
+                : rule.parameters["minimum-words"] != null ? "Operation summary has too few words to be meaningful"
+                /* …four more branches, kept in the same order as above… */
+                : "Operation summary matches the configured style rule") } };
+}
+```
+
+```java
+// after — one stanza per check, condition directly above its message
+distill(api, rule) {
+    return checks(api.operations.filter { it.summary != null && it.summary.trim() != "" }) {
+
+        filter { rule.parameters["trailing-period"] == "present" && it.summary.trim().endsWith(".") }
+          .map { occurrence(it.pointer, it.method + " " + it.path,
+                            "Operation summary ends with a period") },
+
+        filter { rule.parameters["minimum-words"] != null
+                 && count(words(it.summary)) < rule.parameters["minimum-words"] }
+          .map { occurrence(it.pointer, it.method + " " + it.path,
+                            "Operation summary has too few words to be meaningful") },
+
+        filter { rule.parameters["maximum-word-length"] != null
+                 && words(it.summary).any { w -> w.length > rule.parameters["maximum-word-length"] } }
+          .map { occurrence(it.pointer, it.method + " " + it.path,
+                            "Operation summary contains an unusually long word") }
+        /* …the remaining checks, each its own stanza… */
+    };
+}
+```
+
 ## Idioms
 
 Because Distill has no local variables, a few patterns recur.
 
 **Repeat, don't bind.** A value used several times is written out each time.
-Keep sub-expressions small and let `filter` / `map` carry the structure.
+Keep sub-expressions small and let `filter` / `map` carry the structure. The
+one exception is [`checks(source) { … }`](#repeatable-filtermap-checks), which
+binds its source collection once for a block of `filter`/`map` stanzas.
 
 **Optional single occurrence.** Use a list literal for the "emit one" and "emit
 nothing" branches, then let the surrounding `expand` flatten it:
 
 ```java
 api.paths.expand { path ->
-    size(pathSegments(path.path)) > rule.parameters["maximum-depth"]
+    count(pathSegments(path.path)) > rule.parameters["maximum-depth"]
         ? [occurrence(path.pointer, path.path, "Path nests too deeply")]
         : [] }
 ```
@@ -343,7 +437,7 @@ api.paths.expand { path ->
 
 ```java
 distill(api, rule) {
-    return size(distinct(api.paths.map { p -> pathSegments(p.path)[0] })) > rule.parameters["maximum"]
+    return count(distinct(api.paths.map { p -> pathSegments(p.path)[0] })) > rule.parameters["maximum"]
         ? [occurrence("/paths", "API", "Too many top-level resources")]
         : [];
 }
@@ -355,12 +449,17 @@ member, and report all but the first (see the duplicate-`operationId` example
 above). `enumerate` then supplies the positional "all but the first" filter,
 `indexed[0] > 0`. This is O(n) and needs no repetition.
 
-**List building.** Concatenate independent checks with `+`:
+**List building.** Concatenate independent checks with `+` when they run over
+*different* sources:
 
 ```java
 info.extensionKeys.filter { k -> ... }.map { k -> occurrence(...) }
   + api.paths.expand { path -> ... }
 ```
+
+When the checks share one source, use
+[`checks(source) { … }`](#repeatable-filtermap-checks) instead — it binds the
+source once and drops the repeated selector.
 
 ## Coverage
 

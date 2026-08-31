@@ -2,7 +2,7 @@ distill(api, rule) {
     return rule.parameters["response-shape"] == "json-object"
         ? api.paths.expand { path -> path.operationDetails.expand { operation -> operation.responses
             .filter { resp -> parseInt(resp.status, -1) >= 200 && parseInt(resp.status, -1) < 300
-                && size(resp.schemaTypes) > 0
+                && count(resp.schemaTypes) > 0
                 && resp.schemaTypes.any { t -> t != "object" } }
             .map { resp -> occurrence(path.pointer, operation.method + " " + path.path,
                 "Successful response is not a JSON object") } } }

@@ -32,6 +32,9 @@
  */
 { Map api, Map rule ->
     def parameters = rule.parameters ?: [:]
+    def checkKeys = ['format', 'enum', 'enum-type', 'enum-case', 'extensible',
+                     'max-items', 'max-length', 'bounds', 'nullable', 'required']
+    if (!checkKeys.any { parameters.containsKey(it) }) return []
     def enumInconsistent = { v, t ->
         t == 'string' ? !(v instanceof CharSequence)
             : t == 'integer' ? !(v instanceof Integer || v instanceof Long)
@@ -45,7 +48,10 @@
         boolean notNumeric = !(property.type in ['integer', 'number'])
         boolean formatMissing = !property.format
         if (formatAbsent && (notNumeric || !formatMissing)) return false
-        if (parameters.format == 'present' && formatMissing) return false
+
+        if (parameters['max-length'] == 'absent' && (property.type != 'string' || property.maxLength != null)) return false
+        if (parameters.bounds == 'complete'
+            && (notNumeric || (property.minimum != null && property.maximum != null))) return false
 
         if (parameters['enum-type'] == 'consistent') {
             return property.enumPresent && property.enumValues.any { v -> enumInconsistent(v, property.type) }
@@ -59,7 +65,6 @@
             }
         }
         if (parameters['max-items'] == 'absent' && property.maxItems != null) return false
-        if (parameters['max-items'] == 'present' && property.maxItems == null) return false
         if (parameters.enum == 'present' && !property.enumPresent) return false
         if (parameters.enum == 'absent' && property.enumPresent) return false
         if (parameters.containsKey('nullable') && property.nullable != parameters.nullable) return false
@@ -70,8 +75,13 @@
         : parameters.enum == 'absent' ? 'Property does not use an enum'
         : parameters.containsKey('nullable') && parameters.required == false ? 'Optional property explicitly permits null'
         : parameters['max-items'] == 'absent' ? 'Array property has no maximum item count'
+        : parameters['max-length'] == 'absent' ? 'String property does not declare a maximum length'
+        : parameters.bounds == 'complete' ? 'Numeric property does not declare both a minimum and a maximum'
         : parameters.format == 'absent' ? 'Numeric property does not declare a format'
-        : 'Property matches the configured schema rule'
+        : parameters['enum-type'] == 'consistent' ? 'Enum value type is inconsistent with the property type'
+        : parameters['enum-case'] == 'upper-snake-case' ? 'Enum value is not UPPER_SNAKE_CASE'
+        : parameters.extensible == 'required' ? 'Enum is not marked extensible'
+        : 'Property matches the flagged nullable/required condition'
 
     api.schemas.collectMany { schema -> schema.properties ?: [] }
         .findAll(matches)

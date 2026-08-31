@@ -17,7 +17,7 @@ distill(api, rule) {
                 : rule.parameters["match"] == "query-predicate"
                     ? last(tokenize("/", path.path)) ==~ /(?i).*(find|get|search)By[A-Z].*/
                 : rule.parameters["match"] == "rpc-style"
-                    ? size(tokenize("/", path.path)) > 1
+                    ? count(tokenize("/", path.path)) > 1
                       && last(tokenize("/", path.path)).lower() ==~ /(get|list|create|update|delete|remove|add|set)/
                 : rule.parameters["match"] == "custom-action"
                     ? path.path ==~ /(?i).*\/actions(?:\/[^\/]+)?/

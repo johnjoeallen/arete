@@ -3,7 +3,7 @@ distill(api, rule) {
         ? api.lint.parserMessages
             .filter { message -> message =~ rule.parameters["pattern"] }
             .map { message -> occurrence("/", "document", "Parser reported: " + message) }
-        : (rule.parameters["check"] == "numeric-status-key" && size(api.lint.numericStatusKeys) > 0)
+        : (rule.parameters["check"] == "numeric-status-key" && count(api.lint.numericStatusKeys) > 0)
             ? tokenize(",", "x").map { u -> occurrence("/paths", "document",
                 "HTTP status keys are declared as bare numbers, not strings: "
                 + join(", ", api.lint.numericStatusKeys)) }

@@ -75,6 +75,7 @@ final class OpenApiMapAdapter {
                         Operation operation = operationEntry.getValue();
                         Map<String, Object> detail = new LinkedHashMap<>();
                         detail.put("method", operationEntry.getKey().name());
+                        detail.put("path", entry.getKey());
                         detail.put("pointer", path.get("pointer") + "/" + operationEntry.getKey().name().toLowerCase());
                         detail.put("summary", operation == null ? null : operation.getSummary());
                         detail.put("description", operation == null ? null : operation.getDescription());
@@ -99,6 +100,10 @@ final class OpenApiMapAdapter {
                                 Object response = responseEntry.getValue();
                                 Map<String, Object> responseMap = new LinkedHashMap<>();
                                 responseMap.put("status", responseEntry.getKey());
+                                // Operation context, so api.responses elements are self-locating.
+                                responseMap.put("method", operationEntry.getKey().name());
+                                responseMap.put("path", entry.getKey());
+                                responseMap.put("pointer", detail.get("pointer"));
                                 responseMap.put("description", responseProperty(response, "getDescription"));
                                 Object headers = responseProperty(response, "getHeaders");
                                 responseMap.put("headers", headers instanceof Map<?, ?> map ? new ArrayList<>(map.keySet()) : List.of());
@@ -251,9 +256,35 @@ final class OpenApiMapAdapter {
         if (openApi.getComponents() != null && openApi.getComponents().getSecuritySchemes() != null) {
             securitySchemes.addAll(openApi.getComponents().getSecuritySchemes().keySet());
         }
+        // Flat views: every operation / every schema property in one list, each
+        // element carrying its own location (path, pointer). Lets a matcher say
+        // checks(api.operations) { filter { ... }.map { ... }, ... } without an
+        // outer .expand to reach the subject.
+        List<Map<String, Object>> operations = new ArrayList<>();
+        for (Map<String, Object> path : paths) {
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> details = (List<Map<String, Object>>) path.get("operationDetails");
+            if (details != null) operations.addAll(details);
+        }
+        List<Map<String, Object>> allResponses = new ArrayList<>();
+        for (Map<String, Object> operation : operations) {
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> rs = (List<Map<String, Object>>) operation.get("responses");
+            if (rs != null) allResponses.addAll(rs);
+        }
+        List<Map<String, Object>> schemaProperties = new ArrayList<>();
+        for (Map<String, Object> schema : schemas) {
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> props = (List<Map<String, Object>>) schema.get("properties");
+            if (props != null) schemaProperties.addAll(props);
+        }
+
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("paths", paths);
+        result.put("operations", operations);
+        result.put("responses", allResponses);
         result.put("schemas", schemas);
+        result.put("schemaProperties", schemaProperties);
         result.put("info", info);
         result.put("servers", servers);
         result.put("tags", tags);

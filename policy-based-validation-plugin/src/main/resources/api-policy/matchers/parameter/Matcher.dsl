@@ -1,10 +1,10 @@
 distill(api, rule) {
     return api.paths.expand { path -> path.operationDetails.expand { operation ->
         rule.parameters.check == "max-count"
-            ? ((rule.parameters.maximum != null && size(operation.parameters) > rule.parameters.maximum)
+            ? ((rule.parameters.maximum != null && count(operation.parameters) > rule.parameters.maximum)
                 ? tokenize(",", "x").map { u -> occurrence(operation.pointer,
                     operation.method + " " + path.path,
-                    "Operation declares " + size(operation.parameters)
+                    "Operation declares " + count(operation.parameters)
                         + " parameters, more than the maximum of " + rule.parameters.maximum) }
                 : tokenize(",", "x").filter { u -> false })
         : rule.parameters.check == "path-required"
@@ -23,7 +23,7 @@ distill(api, rule) {
             ? operation.parameters
                 .group { param -> param.in + " " + param.name }
                 .values
-                .filter { dupes -> size(dupes) > 1 }
+                .filter { dupes -> count(dupes) > 1 }
                 .expand { dupes -> enumerate(dupes)
                     .filter { indexed -> indexed[0] > 0 }
                     .map { indexed -> occurrence(indexed[1].pointer,

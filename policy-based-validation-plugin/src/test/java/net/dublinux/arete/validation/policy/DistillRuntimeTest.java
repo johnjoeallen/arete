@@ -55,16 +55,36 @@ class DistillMatcherEvaluatorTest {
     }
 
     @Test
+    void checksConcatenatesRepeatableFilterMapStanzasOverOneBoundSource() {
+        // The source (api.values, blank-filtered) is bound once; each comma-separated
+        // stanza is a bare filter{}.map{} rooted at it and using the implicit `it`;
+        // results concatenate. Two stanzas both match "aaa" -> two occurrences.
+        List<Diagnostic> found = runtime.execute("""
+                distill(api, rule) {
+                    return checks(api.values.filter { it != "" }) {
+                        filter { it.startsWith("a") }.map { occurrence("/", it, "starts-a") },
+                        filter { it.length > 2 }.map { occurrence("/", it, "long") }
+                    };
+                }
+                """,
+                Map.of("values", List.of("aaa", "b", "")),
+                Map.of("parameters", Map.of()));
+        assertEquals(List.of(
+                new Diagnostic("/", "aaa", "starts-a"),
+                new Diagnostic("/", "aaa", "long")), found);
+    }
+
+    @Test
     void wordsSplitsProseIntoSubstantiveTokens() {
         // "Get  the widget — v2!" -> [Get, the, widget, v2] : whitespace runs collapse,
         // the em dash drops (no letter), trailing "!" is stripped. "-" alone has no word.
         assertEquals(1, runtime.execute(
-                "distill(api, rule) { return api.values.filter { v -> size(words(v)) == 4 }.map { v -> occurrence(\"/\", \"v\", \"4\") }; }",
+                "distill(api, rule) { return api.values.filter { v -> count(words(v)) == 4 }.map { v -> occurrence(\"/\", \"v\", \"4\") }; }",
                 Map.of("values", java.util.List.of("Get  the widget — v2!", "one two")),
                 Map.of("parameters", Map.of())).size());
         // too few words
         assertEquals(1, runtime.execute(
-                "distill(api, rule) { return api.values.filter { v -> size(words(v)) < 3 }.map { v -> occurrence(\"/\", \"v\", \"few\") }; }",
+                "distill(api, rule) { return api.values.filter { v -> count(words(v)) < 3 }.map { v -> occurrence(\"/\", \"v\", \"few\") }; }",
                 Map.of("values", java.util.List.of("List", "List all customers")),
                 Map.of("parameters", Map.of())).size());
         // per-word length
@@ -274,9 +294,9 @@ class DistillMatcherEvaluatorTest {
                     return api.paths
                         .group { path -> pathSegments(path.path)[0] }
                         .values
-                        .filter { g -> size(g) > 1 }
+                        .filter { g -> count(g) > 1 }
                         .expand { g -> g.map { path -> occurrence(path.pointer, path.path,
-                            "shares a root with " + size(g) + " paths") } };
+                            "shares a root with " + count(g) + " paths") } };
                 }
                 """;
         Map<String, Object> api = api("""

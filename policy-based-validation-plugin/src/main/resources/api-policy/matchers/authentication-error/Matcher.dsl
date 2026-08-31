@@ -3,7 +3,7 @@ distill(api, rule) {
         ? api.paths.expand { path -> path.operationDetails
             .filter { operation ->
                 ((operation.security != null ? operation.security : api.security) != null
-                    && size(operation.security != null ? operation.security : api.security) > 0)
+                    && count(operation.security != null ? operation.security : api.security) > 0)
                 && rule.parameters["required-status"] != null
                 && !operation.responses.any { r -> parseInt(r.status, -1) == rule.parameters["required-status"] } }
             .map { operation -> occurrence(operation.pointer, operation.method + " " + path.path,

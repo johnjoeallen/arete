@@ -48,11 +48,11 @@
 { Map api, Map rule ->
     def parameters = rule.parameters ?: [:]
 
+    if (parameters.isEmpty()) return []
+
     def matches = { operation ->
         if (parameters.method && operation.method != parameters.method) return false
-        if (parameters.summary == 'present' && !operation.summary?.trim()) return false
         if (parameters.summary == 'absent' && operation.summary?.trim()) return false
-        if (parameters.description == 'present' && !operation.description?.trim()) return false
         if (parameters.description == 'absent' && operation.description?.trim()) return false
         if (parameters['request-body'] == 'present' && !operation.requestBodyPresent) return false
         if (parameters['request-body'] == 'absent' && operation.requestBodyPresent) return false

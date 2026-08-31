@@ -173,6 +173,33 @@ one is the trust that its *rules* are sensible — not that its code is safe.
 See [The case for Distill](validation/performance.md) for the measured
 trade-off.
 
+Several bundled matchers apply a handful of unrelated checks to one collection
+— an operation summary, a schema property — selected per rule by a parameter.
+Written as one nested `filter`/`map` this became an inverted
+`!(passA || passB || …)` predicate paired with a separate, parallel message
+cascade: the condition that triggered an occurrence and the text describing it
+were never next to each other. A `checks(source) { … }` block was added to
+address this without widening the language: it binds the source collection
+once, then takes a list of bare `filter { } .map { }` stanzas — one check per
+stanza, condition directly above message — whose occurrences concatenate. It
+introduces no statements; a closure parameter became optional (the item is
+`it`), and flat `api.operations` / `api.responses` / `api.schemaProperties`
+views were added so a stanza rarely needs an outer `expand` to reach its
+subject. The list-length builtin `size(list)` was renamed `count(list)` to
+match the `xs.count { }` sequence form. `text-style`, `schema`, and
+`media-type` were migrated first, gated by the Groovy parity suite.
+
+The same pass audited every matcher against one rule: **an occurrence is a
+violation** — a matcher emits one only for a subject that breaks the rule, and
+a compliant subject yields nothing. A few matchers carried parameter modes
+(`operation` `summary: present`, `schema` `max-items: present`, `text-style`
+with no parameters) that were declared but unused and, had a rule set them,
+would have flagged compliant subjects with a "matches the configured rule"
+message; those modes were removed from the matchers and their descriptors.
+`schema` findings that had fallen through to "Property matches the configured
+schema rule" (`enum-type`, `enum-case`, `extensible`) were given messages that
+name the violation.
+
 ## Runtime execution model
 
 Distill matcher sources are parsed once when the bundle loads and the compiled

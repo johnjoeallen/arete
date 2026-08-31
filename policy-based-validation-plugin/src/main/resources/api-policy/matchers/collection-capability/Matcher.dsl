@@ -2,7 +2,7 @@ distill(api, rule) {
     return rule.scope == "operation"
         ? api.paths.expand { path -> path.operationDetails
             .filter { operation -> operation.method == "GET" && !path.path.contains("{")
-                && size(operation.parameters.filter { param -> param.in == "query"
+                && count(operation.parameters.filter { param -> param.in == "query"
                     && param.name =~ ("(?i)" + rule.parameters["name-pattern"]) }) == 0 }
             .map { operation -> occurrence(operation.pointer,
                 operation.method + " " + path.path,

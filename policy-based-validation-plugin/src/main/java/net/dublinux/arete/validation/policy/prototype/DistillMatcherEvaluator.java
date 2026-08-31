@@ -214,7 +214,7 @@ public final class DistillMatcherEvaluator {
      * leading/trailing non-alphanumerics stripped, keeping only those left
      * holding at least one letter. {@code "Get  the widget — v2!"} →
      * {@code ["Get", "the", "widget", "v2"]}. Per-word length is then
-     * {@code w.length}; the count is {@code size(words(...))}.
+     * {@code w.length}; the count is {@code count(words(...))}.
      */
     private static List<Object> words(Object text) {
         List<Object> out = new ArrayList<>();
@@ -235,7 +235,7 @@ public final class DistillMatcherEvaluator {
             case "tokenize" -> List.of(String.valueOf(args.get(1)).split(java.util.regex.Pattern.quote(String.valueOf(args.get(0)))));
             case "words" -> words(args.get(0));
             case "last" -> { List<Object> values = iterableOf(args.get(0)); yield values.isEmpty() ? "" : values.get(values.size() - 1); }
-            case "size" -> (long) iterableOf(args.get(0)).size();
+            case "count" -> (long) iterableOf(args.get(0)).size();
             case "distinct" -> {
                 List<Object> unique = new ArrayList<>();
                 List<String> keys = new ArrayList<>();
@@ -366,8 +366,15 @@ public final class DistillMatcherEvaluator {
         private IllegalArgumentException error(String message) { return new IllegalArgumentException(message + " at " + cursor); }
     }
 
+    /** Sequence operations that may be written with no receiver inside a {@code checks(...) { }} block. */
+    private static final Set<String> SEQUENCE_OPS = Set.of(
+            "map", "filter", "match", "expand", "any", "all", "find", "count", "group");
+
     private static final class Parser {
         private final Lexer lexer; private Token token; private Token lookahead;
+        /** Inside {@code checks(source) { ... }}: the bound source, so a stanza can start {@code filter { ... }}. */
+        private Expr implicitReceiver;
+        private int checksDepth;
         Parser(String source) { lexer = new Lexer(source); token = lexer.next(); lookahead = lexer.next(); }
         Program parse() { expect("distill"); expect("("); String api = expectId(); expect(","); String rule = expectId(); expect(")"); expect("{"); expect("return"); Expr expression = expression(); expect(";"); expect("}"); expectKind(Kind.EOF); return new Program(expression); }
         private Expr expression() { Expr condition = or(); if (accept("?")) { Expr whenTrue = expression(); expect(":"); Expr whenFalse = expression(); return env -> truthy(condition.eval(env)) ? whenTrue.eval(env) : whenFalse.eval(env); } return condition; }
@@ -408,12 +415,47 @@ public final class DistillMatcherEvaluator {
             if (token.kind() == Kind.REGEX) { Regex value = new Regex(token.text()); advance(); return env -> value; }
             if (token.kind() == Kind.NUMBER) { long value = Long.parseLong(token.text()); advance(); return env -> value; }
             if (token.kind() == Kind.ID && (token.text().equals("true") || token.text().equals("false"))) { boolean value = token.text().equals("true"); advance(); return env -> value; }
-            String name = expectId(); if (accept("(")) {
+            String name = expectId();
+            if (name.equals("checks") && at("(")) return checksForm();
+            if (implicitReceiver != null && SEQUENCE_OPS.contains(name) && at("{")) {
+                ParsedClosure closure = closure();
+                Expr receiver = implicitReceiver;
+                String op = name;
+                return env -> call(receiver.eval(env), op,
+                        List.of((Closure) argument -> closure.body().eval(with(env, closure.parameter(), argument))));
+            }
+            if (accept("(")) {
                 if (!KNOWN_FUNCTIONS.contains(name)) throw new IllegalArgumentException("unknown function: " + name);
                 List<Expr> args = arguments();
                 return env -> function(name, args.stream().map(a -> a.eval(env)).toList());
             }
             return env -> env.get(name);
+        }
+        /**
+         * {@code checks(source) { stanza, stanza, ... }} — binds {@code source}
+         * once, then evaluates each comma-separated stanza (a bare
+         * {@code filter { } .map { }} chain rooted at the source) and
+         * concatenates their occurrences.
+         */
+        private Expr checksForm() {
+            expect("(");
+            Expr source = expression();
+            expect(")");
+            expect("{");
+            String key = " checks:" + checksDepth++;
+            Expr previous = implicitReceiver;
+            implicitReceiver = env -> env.get(key);
+            List<Expr> stanzas = new ArrayList<>();
+            if (!at("}")) { do stanzas.add(expression()); while (accept(",")); }
+            implicitReceiver = previous;
+            expect("}");
+            List<Expr> body = stanzas;
+            return env -> {
+                Map<String, Object> scoped = with(env, key, source.eval(env));
+                List<Object> out = new ArrayList<>();
+                for (Expr stanza : body) out.addAll(iterableOf(stanza.eval(scoped)));
+                return out;
+            };
         }
         private Expr postfix(Expr value) {
             while (at(".") || (at("?") && ".".equals(lookahead.text())) || at("[")) {
@@ -451,7 +493,14 @@ public final class DistillMatcherEvaluator {
             }
             return value;
         }
-        private ParsedClosure closure() { expect("{"); String parameter = expectId(); expect("->"); Expr body = expression(); expect("}"); return new ParsedClosure(parameter, body); }
+        private ParsedClosure closure() {
+            expect("{");
+            String parameter = "it";
+            if (token.kind() == Kind.ID && "->".equals(lookahead.text())) { parameter = expectId(); expect("->"); }
+            Expr body = expression();
+            expect("}");
+            return new ParsedClosure(parameter, body);
+        }
         private List<Expr> arguments() { List<Expr> result = new ArrayList<>(); if (!accept(")")) { do result.add(expression()); while (accept(",")); expect(")"); } return result; }
         private Expr binary(Expr left, Expr right, String op) { return env -> { Object a = left.eval(env), b = right.eval(env); return switch (op) { case "==" -> equalValue(a, b); case "!=" -> !equalValue(a, b); case "==~" -> regexFullMatch(b, a); case "=~" -> regexSearch(b, a); case "<" -> compare(a, b) < 0; case "<=" -> compare(a, b) <= 0; case ">" -> compare(a, b) > 0; case ">=" -> compare(a, b) >= 0; case "&&" -> truthy(a) && truthy(b); case "||" -> truthy(a) || truthy(b); default -> throw new IllegalStateException(op); }; }; }
         /**
@@ -489,7 +538,7 @@ public final class DistillMatcherEvaluator {
     }
 
     private static final Set<String> KNOWN_FUNCTIONS = Set.of(
-            "regexSearch", "regexFullMatch", "tokenize", "words", "last", "size", "distinct", "join", "strip",
+            "regexSearch", "regexFullMatch", "tokenize", "words", "last", "count", "checks", "distinct", "join", "strip",
             "urlHost", "parseInt", "truthy", "pathSegments", "enumerate", "type", "occurrence",
             "operationMessage");
 
@@ -506,7 +555,7 @@ public final class DistillMatcherEvaluator {
             "operationDetails", "operationId", "operations", "parameters", "parserMessages", "path", "paths",
             "pattern", "pointer", "properties", "refs", "requestBodyInlineObject", "requestBodyPresent",
             "requestBodyRequired", "requestMediaTypes", "require", "required", "requiredFields", "responses",
-            "schemaInlineObject", "schemaMaximum", "schemaPresent", "schemaType", "schemaTypes", "schemas",
+            "schemaInlineObject", "schemaMaximum", "schemaPresent", "schemaProperties", "schemaType", "schemaTypes", "schemas",
             "securitySchemes", "scope", "security", "segments", "servers", "startsWith", "status", "style", "suffix", "summary",
             "tags", "templateParameters", "text", "title", "toList", "trim", "type", "values");
 }

@@ -57,7 +57,7 @@ parameters:
   max-items:
     type: enum
     required: false
-    values: [absent, present]
+    values: [absent]
 ---
 
 # Schema rule
@@ -68,10 +68,12 @@ available in an OpenAPI contract: type, requiredness, explicit nullability,
 and whether an enum is declared. It does not resolve references or claim to
 know runtime semantics.
 
-Rules may combine supplied parameters; all conditions must match. A
-`semantics: undefined` value documents a policy concern but cannot establish
-business semantics from OpenAPI alone, so it never broadens the check beyond
-the objective nullable/optional conditions.
+The matcher is a `checks(...)` block: `type` narrows the property set, and each
+other parameter is one `filter`/`map` stanza that reports the property when it
+**violates** that check. A rule that supplies only `type` (or nothing) reports
+nothing. A `semantics: undefined` value documents a policy concern but cannot
+establish business semantics from OpenAPI alone, so it never broadens the check
+beyond the objective nullable/optional conditions.
 
 - `bounds: complete` — reports an `integer` or `number` property that does not
   declare both `minimum` and `maximum`.

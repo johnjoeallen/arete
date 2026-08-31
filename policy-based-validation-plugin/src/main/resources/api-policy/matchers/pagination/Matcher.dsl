@@ -2,7 +2,7 @@ distill(api, rule) {
     return rule.scope == "operation"
         ? api.paths.expand { path -> path.operationDetails
             .filter { operation -> operation.method == "GET" && !path.path.contains("{")
-                && size(operation.parameters.filter { p -> p.in == "query"
+                && count(operation.parameters.filter { p -> p.in == "query"
                     && p.name =~ ("(?i)" + rule.parameters["name-pattern"]) }) == 0 }
             .map { operation -> occurrence(operation.pointer, operation.method + " " + path.path,
                 "Collection operation lacks the configured pagination control") } }

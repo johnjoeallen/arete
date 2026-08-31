@@ -162,6 +162,7 @@ objects. A matcher sees data like this:
       "operationDetails": [
         {
           "method": "GET",
+          "path": "/books/{bookId}",
           "pointer": "/paths/~1books~1{bookId}/get",
           "summary": "Get a book",
           "description": null,
@@ -238,6 +239,14 @@ every `description` / `summary` in the document; `api.lint.refs` is every
 carry an `itemsPresent` flag. JSON Pointers are pre-escaped and safe to return
 verbatim as `pointer`.
 
+`api.operations`, `api.responses`, and `api.schemaProperties` are flat
+convenience views: every `operationDetails` entry across all paths, every
+response across all operations, and every property across all schemas, in one
+list. Each operation carries its `path`, and each response carries its
+operation's `method`, `path`, and `pointer`, so a matcher can select and locate
+a subject without an outer `api.paths.expand`. These pair with
+[`checks(source) { … }`](distill.md#repeatable-filtermap-checks).
+
 ### Writing a matcher
 
 Matchers are written in **Distill** (`Matcher.dsl`); its grammar and builtins
@@ -245,6 +254,15 @@ have their own chapter — the [Distill reference](distill.md).
 
 Matchers:
 
+- **An occurrence means a violation.** A matcher emits an occurrence *only* for
+  a subject that breaks the rule — a bad thing present (trailing period, inline
+  `allOf`), a required thing absent (missing summary, no `404`), or a criterion
+  failed (summary too short, example outside its own bounds). A compliant
+  subject produces **nothing**. A matcher must never emit an occurrence for a
+  passing subject, and never with a message that describes compliance
+  ("matches the configured rule"). Rules that flag a construct for human review
+  (`PATCH is used`, `version appears in the URI`) still follow this: the flagged
+  construct *is* the finding, and its absence yields no occurrence.
 - `message` is required and must be non-blank; `pointer` and `path` are
   optional strings.
 - Return an empty list when nothing matches — **never** return a score or severity.

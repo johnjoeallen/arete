@@ -52,6 +52,8 @@
 { Map api, Map rule ->
     def parameters = rule.parameters ?: [:]
     def actionVerbs = ['Get', 'List', 'Create', 'Update', 'Delete', 'Replace', 'Search', 'Find', 'Cancel', 'Activate', 'Deactivate']
+    def checkKeys = ['initial-capital', 'convention', 'trailing-period', 'maximum-length', 'minimum-words', 'maximum-word-length', 'match']
+    if (!checkKeys.any { parameters.containsKey(it) }) return []
 
     // Substantive words: whitespace-split, edge punctuation stripped, must hold a letter.
     def words = { text ->
@@ -74,7 +76,6 @@
             if (Character.isUpperCase(summary.charAt(0)) && !(summary ==~ /.*\\b[A-Z]{2,}\\b.*/)) return false
         }
         if (parameters['trailing-period'] == 'present' && !summary.endsWith('.')) return false
-        if (parameters['trailing-period'] == 'absent' && summary.endsWith('.')) return false
         if (parameters.containsKey('maximum-length') && summary.length() <= parameters['maximum-length']) return false
         if (parameters.containsKey('minimum-words') && words(summary).size() >= parameters['minimum-words']) return false
         if (parameters.containsKey('maximum-word-length')
@@ -95,9 +96,7 @@
                         ? 'Operation summary has too few words to be meaningful'
                         : parameters.containsKey('maximum-word-length')
                             ? 'Operation summary contains an unusually long word'
-                            : parameters.match == 'non-action-oriented'
-                                ? 'Operation summary is not action-oriented'
-                                : 'Operation summary matches the configured style rule'
+                            : 'Operation summary is not action-oriented'
 
     api.paths.collectMany { path ->
         path.operationDetails.findAll(matches).collect { operation ->
