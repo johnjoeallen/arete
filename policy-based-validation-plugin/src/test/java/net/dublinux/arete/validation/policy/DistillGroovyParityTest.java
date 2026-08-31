@@ -825,6 +825,122 @@ class DistillGroovyParityTest {
         System.out.printf("%-34s %.1fx faster (mean)%n", "distill vs groovy", (double) groovyNanos / distillNanos);
     }
 
+    /**
+     * Adds a hand-written Java baseline to the engine comparison for a
+     * representative slice of matchers ({@link JavaMatchers}). For each, runs
+     * Groovy (compiled once), Distill (cached parse) and plain Java against all
+     * five fixture specs with a realistic parameter set, asserts all three
+     * agree, and reports µs/call. Timing needs {@code -Darete.benchmark=true}.
+     */
+    @Test
+    void javaBaselineComparison() {
+        boolean report = Boolean.getBoolean("arete.benchmark");
+
+        Map<String, String> specs = new LinkedHashMap<>();
+        specs.put("catalogue", CATALOGUE_SPEC);
+        specs.put("lint", LINT_SPEC);
+        specs.put("house-style", HOUSE_STYLE_SPEC);
+        specs.put("schema", SCHEMA_SPEC);
+        specs.put("ops", OPS_SPEC);
+        Map<String, Map<String, Object>> apis = new LinkedHashMap<>();
+        specs.forEach((name, text) -> {
+            var parsed = new OpenAPIV3Parser().readContents(text, null, new ParseOptions());
+            apis.put(name, OpenApiMapAdapter.toMap(parsed.getOpenAPI(), parsed.getMessages(), text));
+        });
+
+        String semanticsSpec = """
+                openapi: 3.0.0
+                info: { title: T, version: 1.0.0 }
+                paths:
+                  /orders/{id}:
+                    get: { summary: Delete the order, responses: { '200': { description: ok } } }
+                    post: { summary: Replace the order, responses: { '200': { description: ok } } }
+                  /widgets:
+                    get: { summary: List widgets, responses: { '200': { description: ok } } }
+                """;
+        String collisionSpec = """
+                openapi: 3.0.0
+                info: { title: T, version: 1.0.0 }
+                paths:
+                  /pets/{id}: { get: { responses: { '200': { description: ok } } } }
+                  /pets/{petId}: { get: { responses: { '200': { description: ok } } } }
+                  /owners: { get: { responses: { '200': { description: ok } } } }
+                """;
+
+        record Case(String matcher, String scope, Map<String, Object> parameters, String spec) { }
+        List<Case> cases = List.of(
+                new Case("hostname", "api", Map.of("convention", "lowercase-hyphenated"), null),
+                new Case("date-time-name", "property", Map.of("suffix", "_at"), null),
+                new Case("status-class", "response", Map.of("forbidden", "server-error"), null),
+                new Case("operation-semantics", "operation",
+                        Map.of("match", "inconsistent-method-resource-semantics"), semanticsSpec),
+                new Case("path-set", "path", Map.of("check", "unique"), collisionSpec));
+
+        GroovyMatcherEvaluator groovy = new GroovyMatcherEvaluator();
+        DistillMatcherEvaluator distill = new DistillMatcherEvaluator();
+
+        System.out.println("\n=== Java baseline vs Distill vs Groovy ===");
+        System.out.println("| Matcher | Findings | Groovy µs | Distill µs | Java µs | Distill/Java | Groovy/Java |");
+        System.out.println("|---|--:|--:|--:|--:|--:|--:|");
+
+        for (Case c : cases) {
+            String groovySource = read("api-policy/matchers/" + c.matcher() + "/Matcher.groovy");
+            String dslSource = read("api-policy/matchers/" + c.matcher() + "/Matcher.dsl");
+            Matcher groovyMatcher = new Matcher(c.matcher(), "groovy", groovySource, List.of(c.scope()), Map.of());
+            Matcher dslMatcher = new Matcher(c.matcher(), "distill", dslSource, List.of(c.scope()), Map.of());
+            @SuppressWarnings("unchecked")
+            groovy.lang.Closure<Object> groovyClosure =
+                    (groovy.lang.Closure<Object>) new groovy.lang.GroovyShell().evaluate(groovySource);
+            JavaMatchers.Matcher javaMatcher = JavaMatchers.BY_ID.get(c.matcher());
+
+            Map<String, Map<String, Object>> caseApis = apis;
+            if (c.spec() != null) {
+                var parsed = new OpenAPIV3Parser().readContents(c.spec(), null, new ParseOptions());
+                caseApis = Map.of("case", OpenApiMapAdapter.toMap(parsed.getOpenAPI(), parsed.getMessages(), c.spec()));
+            }
+
+            long gNanos = 0, dNanos = 0, jNanos = 0;
+            int findings = 0;
+            for (Map.Entry<String, Map<String, Object>> a : caseApis.entrySet()) {
+                Map<String, Object> api = a.getValue();
+                PolicyRule rule = new PolicyRule("BASE", "Base", "Base", c.matcher(), c.scope(), c.parameters(), "");
+                Map<String, Object> ruleMap = rule.asMap();
+
+                List<Diagnostic> g = groovy.execute(groovyMatcher, api, rule);
+                List<Diagnostic> d = distill.execute(dslMatcher, api, rule);
+                List<Diagnostic> j = javaMatcher.apply(api, ruleMap);
+                assertEquals(g, d, c.matcher() + " / " + a.getKey() + ": groovy vs distill");
+                assertEquals(g, j, c.matcher() + " / " + a.getKey() + ": groovy vs java");
+                findings += d.size();
+
+                if (!report) continue;
+                for (int i = 0; i < 100; i++) { groovyClosure.call(api, ruleMap); distill.execute(dslMatcher, api, rule); javaMatcher.apply(api, ruleMap); }
+                long bestG = Long.MAX_VALUE, bestD = Long.MAX_VALUE, bestJ = Long.MAX_VALUE;
+                for (int rep = 0; rep < 5; rep++) {
+                    long t0 = System.nanoTime();
+                    for (int i = 0; i < 200; i++) groovyClosure.call(api, ruleMap);
+                    long t1 = System.nanoTime();
+                    for (int i = 0; i < 200; i++) distill.execute(dslMatcher, api, rule);
+                    long t2 = System.nanoTime();
+                    for (int i = 0; i < 200; i++) javaMatcher.apply(api, ruleMap);
+                    long t3 = System.nanoTime();
+                    bestG = Math.min(bestG, t1 - t0);
+                    bestD = Math.min(bestD, t2 - t1);
+                    bestJ = Math.min(bestJ, t3 - t2);
+                }
+                gNanos += bestG / 200; dNanos += bestD / 200; jNanos += bestJ / 200;
+            }
+
+            if (report) {
+                int n = caseApis.size();
+                double g = gNanos / 1000.0 / n, d = dNanos / 1000.0 / n, j = jNanos / 1000.0 / n;
+                System.out.printf("| `%s` | %d | %.2f | %.2f | %.2f | %.1f× | %.1f× |%n",
+                        c.matcher(), findings, g, d, j,
+                        d / Math.max(0.001, j), g / Math.max(0.001, j));
+            }
+        }
+    }
+
     /** A loader-valid value for every {@code required} parameter the matcher declares. */
     private static Map<String, Object> requiredParameters(Matcher descriptor) {
         Map<String, Object> parameters = new LinkedHashMap<>();

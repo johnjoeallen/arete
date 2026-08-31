@@ -113,15 +113,47 @@ combinations. "Speedup" is Groovy ÷ Distill.
   machinery over small collections — exactly the overhead Distill's fixed
   builtin set and direct iteration avoid.
 
+## A hand-written Java baseline
+
+To place both engines against the floor, five matchers spanning the cost
+spectrum were re-implemented as plain Java (`JavaMatchers`, test scope only)
+against the same `(api, rule)` map contract. All three implementations produce
+identical diagnostics; the times are microseconds per call, best of five runs
+of 200, averaged over the fixture specs.
+
+| Matcher | Findings | Groovy µs | Distill µs | Java µs | Distill ÷ Java | Groovy ÷ Java |
+|---|--:|--:|--:|--:|--:|--:|
+| `hostname` | 5 | 3.1 | 1.7 | 0.26 | 6.5× | 11.7× |
+| `date-time-name` | 3 | 4.7 | 1.0 | 0.15 | 6.4× | 30.9× |
+| `status-class` | 2 | 8.3 | 1.2 | 0.26 | 4.5× | 32.3× |
+| `operation-semantics` | 2 | 20.7 | 6.5 | 1.23 | 5.2× | 16.8× |
+| `path-set` (O(n²)) | 1 | 10.5 | 11.0 | 2.10 | 5.2× | 5.0× |
+
+Hand-written Java is **~5–6× faster than Distill**, consistently, across trivial
+and complex matchers alike — that multiple is the price of a tree-walking
+interpreter over compiled bytecode, and it is stable and predictable. It is
+also **5–32× faster than compiled Groovy**. For `path-set`, where an O(n²)
+algorithm dominates, Distill falls slightly behind Groovy's JIT-compiled inner
+loop, but hand Java — running the same algorithm — is 5× faster than either.
+
+That is the whole trade. A validation runs ~150 rule evaluations; at 1–11 µs
+each the entire matcher phase is 1–4 ms, against a ~3 ms OpenAPI parse it
+cannot avoid. Distill spends a few milliseconds of interpreter overhead per
+spec to keep matchers as safe-by-construction declarative text — editable
+without a rebuild, ~5–15 lines each, with no unsandboxed code path — rather
+than ~40 lines of null-checked map navigation per matcher in a language where
+a rule change means recompile and redeploy. The Groovy it replaced offered
+none of Java's speed and none of Distill's safety.
+
 ## Reproducing
 
 ```bash
 mvn -pl policy-based-validation-plugin test \
-  -Dtest=DistillGroovyParityTest#fullSweepParityAndPerformance \
+  -Dtest='DistillGroovyParityTest#fullSweepParityAndPerformance+javaBaselineComparison' \
   -Darete.benchmark=true
 ```
 
-The parity assertion runs unconditionally in the normal build; the
-`-Darete.benchmark=true` flag adds the timing table.
+The parity assertions run unconditionally in the normal build; the
+`-Darete.benchmark=true` flag adds the timing tables.
 `PerformanceGainBenchmarkTest` (same flag) covers the end-to-end and
 allocation figures.
