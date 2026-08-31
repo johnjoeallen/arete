@@ -122,6 +122,7 @@ a:hover { color: var(--link-hover); }
 .sidebar h2 { margin: 0 0 1em; font-size: 1.05em; font-weight: 600; letter-spacing: 0.01em; }
 .sidebar h2 a { color: var(--fg); text-decoration: none; display: flex; align-items: center; gap: 0.5em; }
 .brand-logo { flex-shrink: 0; }
+.brand-version { margin-left: 0.4em; font-size: 0.7em; font-weight: 400; color: var(--muted, var(--fg)); opacity: 0.7; }
 .sidebar-search { margin-bottom: 0.9em; }
 .sidebar-search input {
     width: 100%;
