@@ -622,6 +622,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#a-hand-written-java-baseline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A hand-written Java baseline
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#reproducing" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -859,6 +870,17 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#a-hand-written-java-baseline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A hand-written Java baseline
+      
+    </span>
+  </a>
   
 </li>
       
@@ -1304,13 +1326,93 @@ combinations. "Speedup" is Groovy ÷ Distill.</p>
   machinery over small collections — exactly the overhead Distill's fixed
   builtin set and direct iteration avoid.</li>
 </ul>
+<h2 id="a-hand-written-java-baseline">A hand-written Java baseline<a class="headerlink" href="#a-hand-written-java-baseline" title="Permanent link">&para;</a></h2>
+<p>To place both engines against the floor, five matchers spanning the cost
+spectrum were re-implemented as plain Java (<code>JavaMatchers</code>, test scope only)
+against the same <code>(api, rule)</code> map contract. All three implementations produce
+identical diagnostics; the times are microseconds per call, best of five runs
+of 200, averaged over the fixture specs.</p>
+<table>
+<thead>
+<tr>
+<th>Matcher</th>
+<th style="text-align: right;">Findings</th>
+<th style="text-align: right;">Groovy µs</th>
+<th style="text-align: right;">Distill µs</th>
+<th style="text-align: right;">Java µs</th>
+<th style="text-align: right;">Distill ÷ Java</th>
+<th style="text-align: right;">Groovy ÷ Java</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>hostname</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">3.1</td>
+<td style="text-align: right;">1.7</td>
+<td style="text-align: right;">0.26</td>
+<td style="text-align: right;">6.5×</td>
+<td style="text-align: right;">11.7×</td>
+</tr>
+<tr>
+<td><code>date-time-name</code></td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">4.7</td>
+<td style="text-align: right;">1.0</td>
+<td style="text-align: right;">0.15</td>
+<td style="text-align: right;">6.4×</td>
+<td style="text-align: right;">30.9×</td>
+</tr>
+<tr>
+<td><code>status-class</code></td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">8.3</td>
+<td style="text-align: right;">1.2</td>
+<td style="text-align: right;">0.26</td>
+<td style="text-align: right;">4.5×</td>
+<td style="text-align: right;">32.3×</td>
+</tr>
+<tr>
+<td><code>operation-semantics</code></td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">20.7</td>
+<td style="text-align: right;">6.5</td>
+<td style="text-align: right;">1.23</td>
+<td style="text-align: right;">5.2×</td>
+<td style="text-align: right;">16.8×</td>
+</tr>
+<tr>
+<td><code>path-set</code> (O(n²))</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">10.5</td>
+<td style="text-align: right;">11.0</td>
+<td style="text-align: right;">2.10</td>
+<td style="text-align: right;">5.2×</td>
+<td style="text-align: right;">5.0×</td>
+</tr>
+</tbody>
+</table>
+<p>Hand-written Java is <strong>~5–6× faster than Distill</strong>, consistently, across trivial
+and complex matchers alike — that multiple is the price of a tree-walking
+interpreter over compiled bytecode, and it is stable and predictable. It is
+also <strong>5–32× faster than compiled Groovy</strong>. For <code>path-set</code>, where an O(n²)
+algorithm dominates, Distill falls slightly behind Groovy's JIT-compiled inner
+loop, but hand Java — running the same algorithm — is 5× faster than either.</p>
+<p>That is the whole trade. A validation runs ~150 rule evaluations; at 1–11 µs
+each the entire matcher phase is 1–4 ms, against a ~3 ms OpenAPI parse it
+cannot avoid. Distill spends a few milliseconds of interpreter overhead per
+spec to keep matchers as safe-by-construction declarative text — editable
+without a rebuild, ~5–15 lines each, with no unsandboxed code path — rather
+than ~40 lines of null-checked map navigation per matcher in a language where
+a rule change means recompile and redeploy. The Groovy it replaced offered
+none of Java's speed and none of Distill's safety.</p>
 <h2 id="reproducing">Reproducing<a class="headerlink" href="#reproducing" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>mvn<span class="w"> </span>-pl<span class="w"> </span>policy-based-validation-plugin<span class="w"> </span><span class="nb">test</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span>-Dtest<span class="o">=</span>DistillGroovyParityTest#fullSweepParityAndPerformance<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span>-Dtest<span class="o">=</span><span class="s1">'DistillGroovyParityTest#fullSweepParityAndPerformance+javaBaselineComparison'</span><span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span>-Darete.benchmark<span class="o">=</span><span class="nb">true</span>
 </code></pre></div>
-<p>The parity assertion runs unconditionally in the normal build; the
-<code>-Darete.benchmark=true</code> flag adds the timing table.
+<p>The parity assertions run unconditionally in the normal build; the
+<code>-Darete.benchmark=true</code> flag adds the timing tables.
 <code>PerformanceGainBenchmarkTest</code> (same flag) covers the end-to-end and
 allocation figures.</p>
 
