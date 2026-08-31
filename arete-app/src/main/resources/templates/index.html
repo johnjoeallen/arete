@@ -21,6 +21,10 @@
     <div class="main-content">
         <h1>Areté</h1>
 
+        <div th:if="${saveErrors != null}" class="save-errors">
+            <p th:each="e : ${saveErrors}" th:text="${e}"></p>
+        </div>
+
         <p class="namespace-hint">
             Saving to namespace <code th:text="${currentNamespace}">default</code>
             as <code th:text="${currentSubmitter}">ui</code>

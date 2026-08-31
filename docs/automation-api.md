@@ -60,27 +60,32 @@ One call parses, stores, and validates. The request body:
     Areté fetches the URL server-side — `http`/`https` only, SSRF-guarded (see
     [Remote fetch](#remote-fetch)).
 
-**Combinations** are given as repeatable `?run=<validator>/<policy>` query
-params (any body style) or a `run` array in a JSON body. A POST with none is
-`400`.
+**Combinations** are `<validator>/<policy>` — the policy given by its name
+(`Enterprise Grade`) or its slug (`enterprise-grade`). Repeatable
+`?run=<validator>/<policy>` query params (any body style) or a `run` array in a
+JSON body. A POST with none is `400`.
 
 **Response** (`201` if the spec is new, else `200`):
 
 ```json
 {
   "spec": {
-    "id": 42, "namespace": "payments", "title": "Payments API",
+    "id": "9c1e…-uuid", "namespace": "payments", "title": "Payments API",
     "submitter": "payments-ci", "source": "URL",
     "sourceUrl": "https://git.internal/.../openapi.yaml",
     "updatedAt": "2026-09-01T10:00:00Z",
-    "links": { "self": "/api/v1/namespaces/payments/specs/42", "ui": "/spec/42" }
+    "links": {
+      "self": "/api/v1/namespaces/payments/specs/9c1e…-uuid",
+      "validate": "/api/v1/specs/9c1e…-uuid/validate",
+      "ui": "/spec/9c1e…-uuid"
+    }
   },
   "ok": false,
   "verdict": "FAIL",
   "results": [
     {
       "validator": "generic-policy", "policy": "Enterprise Grade",
-      "status": "SUCCESS", "score": 87.5,
+      "status": "SUCCESS", "score": 87.5, "grade": "C", "passingScore": 90,
       "level": { "criterion": "score<90", "source": "policy", "met": false },
       "counts": { "error": 0, "warning": 5, "info": 1, "hint": 0 },
       "rulesEvaluated": 109,
@@ -93,8 +98,20 @@ params (any body style) or a `run` array in a JSON body. A POST with none is
 }
 ```
 
-`ok` / `verdict` are `FAIL` if **any** combination fails its level. Re-validating
-is just re-POSTing the spec (upsert by `(namespace, title)`).
+`spec.id` is a **UUID** — the stable public identifier; the numeric database id
+is never exposed. `ok` / `verdict` are `FAIL` if **any** combination fails its
+level.
+
+### Score a stored spec again
+
+```
+POST /api/v1/specs/{uuid}/validate?run=<validator>/<policy>
+```
+
+Re-runs the given combinations against an already-submitted spec, by its UUID —
+no namespace, no re-upload. Same body/query options and response as the submit
+above. This is the flow a Maven/Gradle plugin uses: submit once, keep the UUID,
+score it whenever.
 
 ### Response shaping
 
@@ -107,11 +124,11 @@ is just re-POSTing the spec (upsert by `(namespace, title)`).
 ## Read and manage
 
 ```
-GET    /api/v1/namespaces                              → [{ "slug": "...", "specCount": N }]
-GET    /api/v1/namespaces/{namespace}/specs            → spec summaries; ?submitter= to filter
-GET    /api/v1/namespaces/{namespace}/specs/{id}       → one spec resource
-GET    /api/v1/namespaces/{namespace}/specs/{id}/validation   → last validation result; ?format=sarif
-DELETE /api/v1/namespaces/{namespace}/specs/{id}       → 204
+GET    /api/v1/namespaces                                → [{ "slug", "name", "specCount" }]
+GET    /api/v1/namespaces/{namespace}/specs              → spec summaries; ?submitter= to filter
+GET    /api/v1/namespaces/{namespace}/specs/{uuid}       → one spec resource
+GET    /api/v1/namespaces/{namespace}/specs/{uuid}/validation   → last validation result; ?format=sarif
+DELETE /api/v1/namespaces/{namespace}/specs/{uuid}       → 204
 ```
 
 Errors are `application/problem+json` (`{ status, title, detail }`).

@@ -6,7 +6,7 @@
 #   ARETE_NAMESPACE  namespace slug            (default default)
 #   ARETE_SUBMITTER  submitter label (cookie)  (default curl-test)
 #   ARETE_RUN        comma-separated list of <validator>/<policy> combinations
-#                    (default "generic-policy/Enterprise Grade")
+#                    (default "generic-policy/enterprise-grade")
 #   ARETE_FAIL_ON    policy | never | error | blocker | score<NN  (default policy)
 
 set -euo pipefail
@@ -14,7 +14,7 @@ set -euo pipefail
 ARETE_URL="${ARETE_URL:-http://localhost:6809}"
 ARETE_NAMESPACE="${ARETE_NAMESPACE:-default}"
 ARETE_SUBMITTER="${ARETE_SUBMITTER:-curl-test}"
-ARETE_RUN="${ARETE_RUN:-generic-policy/Enterprise Grade}"
+ARETE_RUN="${ARETE_RUN:-generic-policy/enterprise-grade}"
 ARETE_FAIL_ON="${ARETE_FAIL_ON:-policy}"
 
 API="${ARETE_URL}/api/v1"

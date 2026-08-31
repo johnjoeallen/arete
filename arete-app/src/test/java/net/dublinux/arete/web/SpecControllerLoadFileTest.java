@@ -79,7 +79,7 @@ class SpecControllerLoadFileTest {
     }
 
     @Test
-    void loadingAFileFromAConfirmedAbsolutePathReadsItAndSavesItAsFileSourced(@TempDir Path tempDir) throws Exception {
+    void loadingAFileFromAConfirmedAbsolutePathReadsItSavesItAndRedirectsToItsRef(@TempDir Path tempDir) throws Exception {
         Path specFile = tempDir.resolve("spec.yaml");
         Files.writeString(specFile, "openapi: 3.0.0");
 
@@ -88,28 +88,28 @@ class SpecControllerLoadFileTest {
 
         SpecEntity saved = new SpecEntity();
         saved.setId(1L);
+        saved.setRef("abc-123");
         saved.setTitle("Loaded API");
         saved.setFilePath(specFile.toString());
         when(specStorageService.saveOrReplaceFromFile(eq("Loaded API"), eq("openapi: 3.0.0"), eq(specFile.toString())))
                 .thenReturn(saved);
-        when(specStorageService.findAll()).thenReturn(List.of());
 
         mockMvc.perform(post("/api/load-file").param("filePath", specFile.toString()))
-                .andExpect(status().isOk())
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("Loaded from")))
-                .andExpect(content().string(org.hamcrest.Matchers.containsString(specFile.toString())));
+                .andExpect(status().is3xxRedirection())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl("/spec/abc-123"));
 
         verify(specStorageService).saveOrReplaceFromFile(eq("Loaded API"), eq("openapi: 3.0.0"), eq(specFile.toString()));
         verify(specFileWatcher).watch(eq(specFile));
     }
 
     @Test
-    void blankPathIsRejectedWithoutReadingOrSaving() throws Exception {
-        when(specStorageService.findAll()).thenReturn(List.of());
-
+    void blankPathRedirectsHomeWithAnError() throws Exception {
         mockMvc.perform(post("/api/load-file").param("filePath", "   "))
-                .andExpect(status().isOk())
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("file path is required")));
+                .andExpect(status().is3xxRedirection())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl("/"))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers
+                        .flash().attribute("saveErrors", org.hamcrest.Matchers.hasItem(
+                                org.hamcrest.Matchers.containsString("file path is required"))));
 
         verify(specStorageService, never()).saveOrReplaceFromFile(anyString(), anyString(), anyString());
         verify(specParserService, never()).parse(any());
@@ -117,28 +117,29 @@ class SpecControllerLoadFileTest {
     }
 
     @Test
-    void aBareFilenameIsRejectedAsNotAFullPath() throws Exception {
-        when(specStorageService.findAll()).thenReturn(List.of());
-
+    void aBareFilenameRedirectsHomeWithAFullPathError() throws Exception {
         mockMvc.perform(post("/api/load-file").param("filePath", "spec.yaml"))
-                .andExpect(status().isOk())
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("a full path")));
+                .andExpect(status().is3xxRedirection())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl("/"))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers
+                        .flash().attribute("saveErrors", org.hamcrest.Matchers.hasItem(
+                                org.hamcrest.Matchers.containsString("a full path"))));
 
-        verify(specStorageService, never()).saveOrReplaceFromFile(anyString(), anyString(), anyString());
         verify(specParserService, never()).parse(any());
         verify(specFileWatcher, never()).watch(any());
     }
 
     @Test
-    void aPathThatDoesNotExistProducesAReadableError(@TempDir Path tempDir) throws Exception {
+    void aPathThatDoesNotExistRedirectsHomeWithAReadableError(@TempDir Path tempDir) throws Exception {
         Path missing = tempDir.resolve("does-not-exist.yaml");
-        when(specStorageService.findAll()).thenReturn(List.of());
 
         mockMvc.perform(post("/api/load-file").param("filePath", missing.toString()))
-                .andExpect(status().isOk())
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("Couldn")));
+                .andExpect(status().is3xxRedirection())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl("/"))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers
+                        .flash().attribute("saveErrors", org.hamcrest.Matchers.hasItem(
+                                org.hamcrest.Matchers.containsString("Couldn"))));
 
-        verify(specStorageService, never()).saveOrReplaceFromFile(anyString(), anyString(), anyString());
         verify(specParserService, never()).parse(any());
         verify(specFileWatcher, never()).watch(any());
     }

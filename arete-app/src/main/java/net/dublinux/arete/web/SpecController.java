@@ -90,16 +90,26 @@ public class SpecController {
             jakarta.servlet.http.HttpServletRequest request, Model model) {
         model.addAttribute("specsDir", specFileWatcher.getSpecsHome().toString());
         model.addAttribute("sharedDeployment", deploymentMode.isShared());
-        populateSidebar(model, q, null, NamespaceContext.from(request));
+        populateSidebar(model, q, (SpecEntity) null, NamespaceContext.from(request));
         return "index";
     }
 
     @PostMapping("/api/paste")
-    public String paste(@RequestParam String specText,
-            jakarta.servlet.http.HttpServletRequest request, Model model) {
-        parseAndSave(specText, null, NamespaceContext.from(request), model);
-        return "result";
+    public String paste(@RequestParam String specText, jakarta.servlet.http.HttpServletRequest request,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes flash) {
+        return afterSave(parseAndSave(specText, null, NamespaceContext.from(request)), flash);
     }
+
+    /** Redirect-after-post: to the spec's own page on success, back to the index with the error otherwise. */
+    private static String afterSave(SaveOutcome outcome, org.springframework.web.servlet.mvc.support.RedirectAttributes flash) {
+        if (outcome.saved() != null) {
+            return "redirect:/spec/" + outcome.saved().getRef();
+        }
+        flash.addFlashAttribute("saveErrors", outcome.errors());
+        return "redirect:/";
+    }
+
+    private record SaveOutcome(SpecEntity saved, List<String> errors) { }
 
     /** Switches the browser's active namespace by key (create/delete live in Settings). */
     @PostMapping("/ui/namespace")
@@ -141,54 +151,44 @@ public class SpecController {
      * disagree. Reading the path directly keeps there being exactly one.
      */
     @PostMapping("/api/load-file")
-    public String loadFile(@RequestParam String filePath,
-            jakarta.servlet.http.HttpServletRequest request, Model model) {
+    public String loadFile(@RequestParam String filePath, jakarta.servlet.http.HttpServletRequest request,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes flash) {
         NamespaceContext ctx = NamespaceContext.from(request);
         if (deploymentMode.isShared()) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,
                     "Loading specs from a local path is disabled in shared deployment mode.");
         }
         String trimmedPath = filePath == null ? "" : filePath.trim();
+        String error = null;
+        Path path = null;
+        String content = null;
         if (trimmedPath.isEmpty()) {
-            model.addAttribute("openApi", null);
-            model.addAttribute("parseErrors", List.of("A file path is required."));
-            populateSidebar(model, null, null);
-            return "result";
+            error = "A file path is required.";
+        } else {
+            try {
+                path = Path.of(trimmedPath);
+                if (!path.isAbsolute()) {
+                    error = "'" + trimmedPath + "' isn't a full path. Enter the file's complete absolute path, "
+                            + "e.g. /home/user/spec.yaml.";
+                } else {
+                    content = Files.readString(path, StandardCharsets.UTF_8);
+                }
+            } catch (InvalidPathException e) {
+                error = "'" + trimmedPath + "' isn't a valid file path.";
+            } catch (IOException e) {
+                error = "Couldn't read '" + trimmedPath + "': " + e.getMessage();
+            }
+        }
+        if (error != null) {
+            flash.addFlashAttribute("saveErrors", List.of(error));
+            return "redirect:/";
         }
 
-        Path path;
-        try {
-            path = Path.of(trimmedPath);
-        } catch (InvalidPathException e) {
-            model.addAttribute("openApi", null);
-            model.addAttribute("parseErrors", List.of("'" + trimmedPath + "' isn't a valid file path."));
-            populateSidebar(model, null, null);
-            return "result";
-        }
-        if (!path.isAbsolute()) {
-            model.addAttribute("openApi", null);
-            model.addAttribute("parseErrors", List.of(
-                    "'" + trimmedPath + "' isn't a full path. Enter the file's complete absolute path, "
-                            + "e.g. /home/user/spec.yaml."));
-            populateSidebar(model, null, null);
-            return "result";
-        }
-
-        String content;
-        try {
-            content = Files.readString(path, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            model.addAttribute("openApi", null);
-            model.addAttribute("parseErrors", List.of("Couldn't read '" + trimmedPath + "': " + e.getMessage()));
-            populateSidebar(model, null, null);
-            return "result";
-        }
-
-        SpecEntity saved = parseAndSave(content, trimmedPath, ctx, model);
-        if (saved != null) {
+        SaveOutcome outcome = parseAndSave(content, trimmedPath, ctx);
+        if (outcome.saved() != null) {
             specFileWatcher.watch(path);
         }
-        return "result";
+        return afterSave(outcome, flash);
     }
 
     /**
@@ -211,13 +211,13 @@ public class SpecController {
      * valued by its <em>position</em> in that plugin's rule sets (e.g.
      * {@code "0"}), not its name — see {@link #resolveRuleSet}.
      */
-    @GetMapping("/spec/{id}")
-    public String open(@PathVariable Long id, @RequestParam(required = false) String q,
-            @RequestParam(required = false) String ran, @RequestParam(required = false) List<String> plugin,
-            @RequestParam Map<String, String> allParams,
+    @GetMapping("/spec/{ref}")
+    public String open(@PathVariable String ref, @RequestParam(required = false) String q,
+            @RequestParam(required = false) String scored,
             jakarta.servlet.http.HttpServletRequest request, Model model) {
-        SpecEntity entity = specStorageService.findById(id)
+        SpecEntity entity = specStorageService.findByRef(ref)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Spec not found"));
+        model.addAttribute("specRef", entity.getRef());
         model.addAttribute("specNamespace",
                 namespaceService.findByKey(entity.getNamespace())
                         .map(net.dublinux.arete.domain.NamespaceEntity::getName).orElse(entity.getNamespace()));
@@ -233,41 +233,57 @@ public class SpecController {
         model.addAttribute("specTitle", entity.getTitle());
         model.addAttribute("specFilePath", entity.getFilePath());
 
-        String currentContentHash = SpecValidationResultService.contentHashOf(entity.getRawContent());
-
-        if (ran != null) {
-            model.addAttribute("activateScore", true);
-            Set<String> checkedPluginIds = plugin == null ? Set.of() : Set.copyOf(plugin);
-            List<PluginRunRequest> requests = new ArrayList<>();
-            for (SpecValidationPlugin candidate : pluginRegistry.getPlugins()) {
-                if (!pluginSettingsService.isEnabled(candidate.getId())) {
-                    continue;
-                }
-                boolean enabledForSpec = checkedPluginIds.contains(candidate.getId());
-                Integer ruleSetIndex = parseIndexOrNull(allParams.get("ruleSet_" + candidate.getId()));
-                specPluginSettingsService.setSelection(id, candidate.getId(), enabledForSpec, ruleSetIndex);
-                if (enabledForSpec) {
-                    requests.add(new PluginRunRequest(candidate.getId(),
-                            resolveRuleSet(candidate.getId(), allParams.get("ruleSet_" + candidate.getId()))));
-                }
-            }
-            if (requests.isEmpty()) {
-                specValidationResultService.deleteForSpec(id);
-                model.addAttribute("hasBeenScored", false);
-            } else {
-                AggregatedValidationResult validation = pluginValidationService.validateMany(entity.getRawContent(), requests);
-                List<String> activePluginIds = requests.stream().map(PluginRunRequest::pluginId).toList();
-                specValidationResultService.save(id, currentContentHash, validation, activePluginIds);
-                populateValidationModel(model, validation, activePluginIds);
-            }
-        } else {
-            model.addAttribute("activateScore", false);
-            populateCachedValidation(model, id);
-        }
-
-        populateSidebar(model, q, entity.getId(), NamespaceContext.from(request));
-        model.addAttribute("pluginChoices", pluginChoices(id, allParams));
+        model.addAttribute("activateScore", scored != null);
+        populateCachedValidation(model, entity.getId());
+        populateSidebar(model, q, entity, NamespaceContext.from(request));
+        model.addAttribute("pluginChoices", pluginChoices(entity.getId(), Map.of()));
         return "result";
+    }
+
+    /**
+     * Runs the picker's chosen validator/rule-set combinations, persists both
+     * the choice and the result, and redirects back to the clean spec URL —
+     * the run parameters never appear in the address bar.
+     */
+    @PostMapping("/spec/{ref}/score")
+    public String score(@PathVariable String ref, @RequestParam(required = false) List<String> plugin,
+            @RequestParam Map<String, String> allParams) {
+        SpecEntity entity = specStorageService.findByRef(ref)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Spec not found"));
+        long id = entity.getId();
+        Set<String> checkedPluginIds = plugin == null ? Set.of() : Set.copyOf(plugin);
+        List<PluginRunRequest> requests = new ArrayList<>();
+        for (SpecValidationPlugin candidate : pluginRegistry.getPlugins()) {
+            if (!pluginSettingsService.isEnabled(candidate.getId())) {
+                continue;
+            }
+            boolean enabledForSpec = checkedPluginIds.contains(candidate.getId());
+            String submitted = allParams.get("ruleSet_" + candidate.getId());
+            String ruleSetName = resolveRuleSet(candidate.getId(), submitted);
+            specPluginSettingsService.setSelection(id, candidate.getId(), enabledForSpec,
+                    ruleSetIndex(candidate.getId(), ruleSetName));
+            if (enabledForSpec) {
+                requests.add(new PluginRunRequest(candidate.getId(), ruleSetName));
+            }
+        }
+        if (requests.isEmpty()) {
+            specValidationResultService.deleteForSpec(id);
+        } else {
+            AggregatedValidationResult validation = pluginValidationService.validateMany(entity.getRawContent(), requests);
+            specValidationResultService.save(id, SpecValidationResultService.contentHashOf(entity.getRawContent()),
+                    validation, requests.stream().map(PluginRunRequest::pluginId).toList());
+        }
+        return "redirect:/spec/" + ref + "?scored";
+    }
+
+    /** The position of {@code ruleSetName} in its plugin's rule sets, or null if unknown — for the persisted picker choice. */
+    private Integer ruleSetIndex(String pluginId, String ruleSetName) {
+        SpecValidationPlugin plugin = findEnabledPlugin(pluginId);
+        if (plugin == null) {
+            return null;
+        }
+        int i = safeRuleSets(plugin).indexOf(ruleSetName);
+        return i >= 0 ? i : null;
     }
 
     /**
@@ -296,38 +312,29 @@ public class SpecController {
         model.addAttribute("severityScoreImpact", severityScoreImpactOf(validation));
     }
 
-    /** {@code null} (not {@code 0}) for a blank/unparseable index, so a persisted row can distinguish "never chosen" from "chose index 0". */
-    private static Integer parseIndexOrNull(String value) {
-        if (value == null || value.isBlank()) {
-            return null;
-        }
-        try {
-            return Integer.parseInt(value.trim());
-        } catch (NumberFormatException e) {
-            return null;
-        }
-    }
-
     /**
      * Deleting a spec whose source file is still sitting in a watched folder
      * doesn't really make sense as a permanent removal — the file is the
      * source of truth, so once the DB row is gone this immediately reloads
-     * it from disk rather than leaving a confusing gap until the next
-     * unrelated filesystem event (or app restart) happens to pick it back up.
+     * it from disk rather than leaving a confusing gap.
      */
-    @PostMapping("/api/specs/{id}/delete")
-    public String delete(@PathVariable Long id) {
-        SpecEntity entity = specStorageService.findById(id).orElse(null);
+    @PostMapping("/api/specs/{ref}/delete")
+    public String delete(@PathVariable String ref) {
+        SpecEntity entity = specStorageService.findByRef(ref).orElse(null);
+        if (entity == null) {
+            return "redirect:/";
+        }
+        long id = entity.getId();
         specStorageService.deleteById(id);
         specPluginSettingsService.deleteAllForSpec(id);
         specValidationResultService.deleteForSpec(id);
-        if (entity != null && entity.getSource() == SpecSource.FILE && entity.getFilePath() != null) {
+        if (entity.getSource() == SpecSource.FILE && entity.getFilePath() != null) {
             Path path = Path.of(entity.getFilePath());
             if (Files.isRegularFile(path)) {
                 specFileWatcher.reload(path);
             }
         }
-        return "redirect:/?closedTab=" + id;
+        return "redirect:/?closedTab=" + ref;
     }
 
     /** Polled by the sidebar's client-side refresh so newly-watched/dropped specs appear without a manual reload. */
@@ -339,78 +346,57 @@ public class SpecController {
     }
 
     /**
-     * Shared parse/save/render-model flow for both entry points.
-     * {@code filePath == null} means pasted text; otherwise the content was
-     * loaded from that path. Returns the saved entity, or {@code null} if
-     * nothing was saved (parse failure, or no title to key it on). Never
-     * runs validation itself — that's only ever triggered from the spec
-     * view page's Refresh control (see {@link #open}).
+     * Shared parse/save flow for the paste and load-file entry points.
+     * {@code filePath == null} means pasted text. Never runs validation
+     * itself — scoring is only ever triggered from {@link #score}.
      */
-    private SpecEntity parseAndSave(String content, String filePath, NamespaceContext ctx, Model model) {
-        model.addAttribute("activateScore", false);
-        model.addAttribute("hasBeenScored", false);
+    private SaveOutcome parseAndSave(String content, String filePath, NamespaceContext ctx) {
+        ParsedSpec parsed;
         try {
-            ParsedSpec parsed = specParserService.parse(content);
-            model.addAttribute("openApi", parsed.openApi());
-            model.addAttribute("tagGroups", EndpointGrouper.group(parsed.openApi()));
-            model.addAttribute("componentSchemas", componentSchemasOf(parsed.openApi()));
-            model.addAttribute("componentRequestBodies", componentRequestBodiesOf(parsed.openApi()));
-            model.addAttribute("componentResponses", componentResponsesOf(parsed.openApi()));
-
-            if (parsed.openApi() != null) {
-                String title = parsed.title();
-                if (title != null) {
-                    String nsKey = namespaceService.resolveKey(ctx.namespace()).getNameKey();
-                    SpecEntity saved = filePath == null
-                            ? specStorageService.saveOrReplace(nsKey, ctx.submitter(), title, content)
-                            : specStorageService.saveOrReplaceFromFile(title, content, filePath);
-                    model.addAttribute("parseErrors", parsed.messages());
-                    model.addAttribute("specTitle", saved.getTitle());
-                    model.addAttribute("specFilePath", saved.getFilePath());
-                    populateCachedValidation(model, saved.getId());
-                    populateSidebar(model, null, saved.getId(), ctx);
-                    return saved;
-                } else {
-                    model.addAttribute("parseErrors", withWarning(parsed.messages(),
-                            "Spec has no 'title' in its info block; it was not saved."));
-                    populateSidebar(model, null, null, ctx);
-                }
-            } else {
-                model.addAttribute("parseErrors", parsed.messages());
-                populateSidebar(model, null, null, ctx);
-            }
+            parsed = specParserService.parse(content);
         } catch (Exception e) {
-            model.addAttribute("openApi", null);
-            model.addAttribute("parseErrors", List.of("Failed to parse spec: " + e.getMessage()));
-            populateSidebar(model, null, null, ctx);
+            return new SaveOutcome(null, List.of("Failed to parse spec: " + e.getMessage()));
         }
-        return null;
+        if (parsed.openApi() == null) {
+            return new SaveOutcome(null, parsed.messages() == null || parsed.messages().isEmpty()
+                    ? List.of("Could not parse this as an OpenAPI/Swagger spec.") : parsed.messages());
+        }
+        String title = parsed.title();
+        if (title == null) {
+            return new SaveOutcome(null, withWarning(parsed.messages(),
+                    "Spec has no 'title' in its info block; it was not saved."));
+        }
+        SpecEntity saved = filePath == null
+                ? specStorageService.saveOrReplace(namespaceService.resolveKey(ctx.namespace()).getNameKey(),
+                        ctx.submitter(), title, content)
+                : specStorageService.saveOrReplaceFromFile(title, content, filePath);
+        return new SaveOutcome(saved, parsed.messages());
     }
 
-    private void populateSidebar(Model model, String q, Long activeId) {
-        populateSidebar(model, q, activeId, new NamespaceContext(
+    private void populateSidebar(Model model, String q, SpecEntity active) {
+        populateSidebar(model, q, active, new NamespaceContext(
                 net.dublinux.arete.service.NamespaceService.DEFAULT_KEY,
                 net.dublinux.arete.service.SpecStorageService.UI_SUBMITTER));
     }
 
-    private void populateSidebar(Model model, String q, Long activeId, NamespaceContext ctx) {
+    private void populateSidebar(Model model, String q, SpecEntity active, NamespaceContext ctx) {
         net.dublinux.arete.domain.NamespaceEntity current = namespaceService.resolveKey(ctx.namespace());
         model.addAttribute("specs", toSummaries(specStorageService.findByNamespace(current.getNameKey()), q));
         model.addAttribute("q", q);
-        model.addAttribute("specId", activeId);
+        model.addAttribute("specId", active == null ? null : active.getRef());
         model.addAttribute("namespaces", namespaceService.list());
         model.addAttribute("currentNamespace", current.getName());
         model.addAttribute("currentNamespaceKey", current.getNameKey());
         model.addAttribute("currentSubmitter", ctx.submitter());
         model.addAttribute("currentUri", ctx.currentUri());
-        model.addAttribute("pluginChoices", pluginChoices(activeId, Map.of()));
+        model.addAttribute("pluginChoices", pluginChoices(active == null ? null : active.getId(), Map.of()));
     }
 
     private static List<SpecSummary> toSummaries(List<SpecEntity> entities, String q) {
         String needle = q == null ? null : q.trim().toLowerCase(Locale.ROOT);
         return entities.stream()
                 .filter(e -> needle == null || needle.isEmpty() || e.getTitle().toLowerCase(Locale.ROOT).contains(needle))
-                .map(e -> new SpecSummary(e.getId(), e.getTitle(), e.getUpdatedAt().toEpochMilli()))
+                .map(e -> new SpecSummary(e.getRef(), e.getTitle(), e.getUpdatedAt().toEpochMilli()))
                 .sorted(Comparator.comparing(SpecSummary::title, String.CASE_INSENSITIVE_ORDER))
                 .toList();
     }
@@ -449,52 +435,34 @@ public class SpecController {
     }
 
     /**
-     * Every globally-enabled plugin, for the view page's plugin picker: its
-     * declared rule sets, whether it's checked (its persisted per-spec
-     * state, unless overridden below), and which rule set is selected.
+     * Every globally-enabled plugin for the view page's picker: its rule sets
+     * (each with a URL-safe slug), whether it's checked for this spec, and the
+     * currently selected rule-set slug.
      *
-     * @param specId          nullable — no spec context (e.g. the sidebar on
-     *                        the index page) means every row defaults to
-     *                        checked, matching {@link SpecPluginSettingsService}'s
-     *                        own no-override-means-enabled default
-     * @param ruleSetSelections {@code ruleSet_<pluginId>} request params to
-     *                        read the selected index from, keyed exactly as
-     *                        the picker form submits them (a just-submitted
-     *                        Score); a plugin with no entry here falls
-     *                        back to its persisted per-spec choice, then to
-     *                        index 0 if that's absent too (or either value
-     *                        is out-of-range/non-numeric)
+     * @param specId nullable — no spec context (e.g. the index sidebar) means
+     *               every row defaults to checked.
      */
-    private List<SpecPluginRunChoice> pluginChoices(Long specId, Map<String, String> ruleSetSelections) {
+    private List<SpecPluginRunChoice> pluginChoices(Long specId, Map<String, String> ignored) {
         List<SpecPluginRunChoice> choices = new ArrayList<>();
         for (SpecValidationPlugin plugin : pluginRegistry.getPlugins()) {
             if (!pluginSettingsService.isEnabled(plugin.getId())) {
                 continue;
             }
             List<String> ruleSets = safeRuleSets(plugin);
+            List<SpecPluginRunChoice.RuleSet> options = ruleSets.stream()
+                    .map(name -> new SpecPluginRunChoice.RuleSet(name, RuleSets.slug(name)))
+                    .toList();
             boolean enabledForSpec = specId == null || specPluginSettingsService.isEnabledForSpec(specId, plugin.getId());
-            String submitted = ruleSetSelections.get("ruleSet_" + plugin.getId());
-            Integer persisted = specId == null ? null : specPluginSettingsService.ruleSetIndexForSpec(specId, plugin.getId());
-            int selectedIndex = resolveSelectedIndex(submitted, persisted, ruleSets.size());
-            choices.add(new SpecPluginRunChoice(plugin.getId(), plugin.getName(), ruleSets, enabledForSpec, selectedIndex));
+            Integer persistedIndex = specId == null ? null : specPluginSettingsService.ruleSetIndexForSpec(specId, plugin.getId());
+            int selected = persistedIndex != null && persistedIndex >= 0 && persistedIndex < ruleSets.size() ? persistedIndex : 0;
+            String selectedSlug = ruleSets.isEmpty() ? "" : RuleSets.slug(ruleSets.get(selected));
+            choices.add(new SpecPluginRunChoice(plugin.getId(), plugin.getName(), options, enabledForSpec, selectedSlug));
         }
         choices.sort(Comparator.comparing(SpecPluginRunChoice::pluginName, String.CASE_INSENSITIVE_ORDER));
         return choices;
     }
 
-    private static int resolveSelectedIndex(String submitted, Integer persisted, int ruleSetCount) {
-        Integer index = submitted != null ? parseIndexOrNull(submitted) : persisted;
-        return index != null && index >= 0 && index < ruleSetCount ? index : 0;
-    }
-
-    /**
-     * Defensive: a plugin is untrusted, dynamically loaded code, same as
-     * every other call into it (see PluginRegistry, PluginValidationService).
-     * Preserves the plugin's own declared order — see {@link
-     * SpecValidationPlugin#getRuleSets()} — rather than re-sorting it, since
-     * that order is what the picker displays and what {@link
-     * #resolveRuleSet} indexes into.
-     */
+    /** Defensive: a plugin is untrusted, dynamically loaded code. Preserves its declared rule-set order. */
     private List<String> safeRuleSets(SpecValidationPlugin plugin) {
         try {
             return List.copyOf(plugin.getRuleSets());
@@ -504,34 +472,12 @@ public class SpecController {
         }
     }
 
-    /**
-     * The rule-set picker on the spec view page submits a position in
-     * {@code plugin.getRuleSets()} (e.g. {@code "0"}) rather than the rule
-     * set's name, so results stay correct even if a plugin's declared
-     * rule-set names contain characters that would need care in a URL.
-     * Falls back to {@link
-     * SpecValidationPlugin#DEFAULT_RULE_SET} for anything that doesn't
-     * resolve: an absent/unknown plugin, a non-numeric or out-of-range
-     * index — the same "use your own default" fallback {@link
-     * SpecValidationPlugin#DEFAULT_RULE_SET}'s own javadoc describes for an
-     * unrecognized rule set.
-     */
-    private String resolveRuleSet(String pluginId, String ruleSetIndex) {
-        if (ruleSetIndex == null || ruleSetIndex.isBlank()) {
-            return SpecValidationPlugin.DEFAULT_RULE_SET;
-        }
-        int index;
-        try {
-            index = Integer.parseInt(ruleSetIndex.trim());
-        } catch (NumberFormatException e) {
-            return SpecValidationPlugin.DEFAULT_RULE_SET;
-        }
+    /** The picker submits {@code ruleSet_<pluginId>} = a rule-set slug; map it back to the plugin's real name. */
+    private String resolveRuleSet(String pluginId, String slugOrName) {
         SpecValidationPlugin plugin = findEnabledPlugin(pluginId);
-        if (plugin == null) {
-            return SpecValidationPlugin.DEFAULT_RULE_SET;
-        }
-        List<String> ruleSets = safeRuleSets(plugin);
-        return index >= 0 && index < ruleSets.size() ? ruleSets.get(index) : SpecValidationPlugin.DEFAULT_RULE_SET;
+        return plugin == null
+                ? SpecValidationPlugin.DEFAULT_RULE_SET
+                : RuleSets.resolve(safeRuleSets(plugin), slugOrName);
     }
 
     private SpecValidationPlugin findEnabledPlugin(String pluginId) {

@@ -22,6 +22,17 @@ public class SpecEntity {
     private Long id;
 
     /**
+     * The stable public identifier — a random UUID, generated on creation.
+     * Every external reference (URLs, the automation API, CI plugins) uses
+     * this; the numeric {@link #id} never leaves the app. {@code NOT NULL} and
+     * the unique index are added by {@code SpecSchemaMigration} (Hibernate
+     * can't add a {@code NOT NULL} column with no default to a non-empty
+     * table).
+     */
+    @Column(length = 36)
+    private String ref = java.util.UUID.randomUUID().toString();
+
+    /**
      * The namespace this spec belongs to — a plain caller-asserted slug, not a
      * security boundary. Uniqueness is {@code (namespace, title)}, enforced by
      * {@code SpecSchemaMigration} rather than a {@code @UniqueConstraint} so
@@ -75,6 +86,14 @@ public class SpecEntity {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getRef() {
+        return ref;
+    }
+
+    public void setRef(String ref) {
+        this.ref = ref;
     }
 
     public String getNamespace() {

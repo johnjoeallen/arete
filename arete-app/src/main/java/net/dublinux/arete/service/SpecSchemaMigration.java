@@ -42,8 +42,24 @@ class SpecSchemaMigration implements ApplicationRunner {
     public void run(ApplicationArguments args) {
         ensureLabelColumn("NAMESPACE", "default");
         ensureLabelColumn("SUBMITTER", "anonymous");
+        ensureRefColumn();
         dropTitleOnlyUnique();
         addCompositeUnique();
+    }
+
+    /** Adds SPECS.REF (a UUID) and backfills a random one into every pre-existing row. */
+    private void ensureRefColumn() {
+        boolean exists = jdbc.queryForObject("""
+                select count(*) from information_schema.columns
+                 where table_name = 'SPECS' and column_name = 'REF'
+                """, Integer.class) > 0;
+        if (!exists) {
+            jdbc.execute("alter table SPECS add column REF varchar(36)");
+            log.info("Added SPECS.REF column");
+        }
+        run("update SPECS set REF = random_uuid() where REF is null");
+        run("alter table SPECS alter column REF set not null");
+        run("alter table SPECS add constraint if not exists UK_SPECS_REF unique (REF)");
     }
 
     private void ensureLabelColumn(String column, String defaultValue) {

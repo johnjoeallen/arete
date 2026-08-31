@@ -20,7 +20,7 @@
             return false;
         }
         for (var i = 0; i < a.length; i++) {
-            if (a[i].id !== b[i].id || a[i].title !== b[i].title) {
+            if (a[i].ref !== b[i].ref || a[i].title !== b[i].title) {
                 return false;
             }
         }
@@ -44,16 +44,16 @@
             item.className = 'spec-list-item';
 
             var link = document.createElement('a');
-            link.href = '/spec/' + spec.id;
+            link.href = '/spec/' + spec.ref;
             link.textContent = spec.title;
-            if (activeId && String(activeId) === String(spec.id)) {
+            if (activeId && String(activeId) === String(spec.ref)) {
                 link.className = 'active';
             }
             item.appendChild(link);
 
             var form = document.createElement('form');
             form.method = 'post';
-            form.action = '/api/specs/' + spec.id + '/delete';
+            form.action = '/api/specs/' + spec.ref + '/delete';
             form.className = 'delete-form';
             var deleteBtn = document.createElement('button');
             deleteBtn.type = 'submit';
@@ -69,7 +69,7 @@
 
     function findSpec(specs, id) {
         for (var i = 0; i < specs.length; i++) {
-            if (String(specs[i].id) === String(id)) {
+            if (String(specs[i].ref) === String(id)) {
                 return specs[i];
             }
         }

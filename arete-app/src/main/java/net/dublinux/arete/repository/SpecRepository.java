@@ -13,6 +13,8 @@ public interface SpecRepository extends JpaRepository<SpecEntity, Long> {
 
     Optional<SpecEntity> findByTitle(String title);
 
+    Optional<SpecEntity> findByRef(String ref);
+
     Optional<SpecEntity> findByNamespaceAndTitle(String namespace, String title);
 
     List<SpecEntity> findByNamespaceOrderByTitleAsc(String namespace);

@@ -56,10 +56,9 @@
                 </div>
 
                 <div class="tab-panel" th:classappend="${activateScore} ? ' active'">
-                    <div th:if="${pluginChoices != null and !pluginChoices.isEmpty() and specId != null}" class="validation-picker-wrapper">
+                    <div th:if="${pluginChoices != null and !pluginChoices.isEmpty() and specRef != null}" class="validation-picker-wrapper">
                         <h2>Validation</h2>
-                        <form method="get" th:action="@{/spec/{id}(id=${specId})}" class="validation-picker" id="validation-picker-form">
-                            <input type="hidden" name="ran" value="1">
+                        <form method="post" th:action="@{/spec/{ref}/score(ref=${specRef})}" class="validation-picker" id="validation-picker-form">
                             <table class="plugin-picker-table">
                                 <thead>
                                     <tr><th></th><th>Plugin</th><th>Rule set</th></tr>
@@ -70,8 +69,8 @@
                                         <td th:text="${pc.pluginName()}"></td>
                                         <td>
                                             <select th:name="'ruleSet_' + ${pc.pluginId()}">
-                                                <option th:each="rs, rsStat : ${pc.ruleSets()}" th:value="${rsStat.index}" th:text="${rs}"
-                                                        th:selected="${rsStat.index == pc.selectedRuleSetIndex()}"></option>
+                                                <option th:each="rs : ${pc.ruleSets()}" th:value="${rs.slug()}" th:text="${rs.name()}"
+                                                        th:selected="${rs.slug() == pc.selectedSlug()}"></option>
                                             </select>
                                         </td>
                                     </tr>

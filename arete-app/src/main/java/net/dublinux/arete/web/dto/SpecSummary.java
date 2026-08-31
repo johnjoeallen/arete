@@ -1,4 +1,5 @@
 package net.dublinux.arete.web.dto;
 
-public record SpecSummary(Long id, String title, long updatedAtMillis) {
+/** Sidebar/list row. {@code ref} is the public UUID used in every URL; the numeric id is not exposed. */
+public record SpecSummary(String ref, String title, long updatedAtMillis) {
 }

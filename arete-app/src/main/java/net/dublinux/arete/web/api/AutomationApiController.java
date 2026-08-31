@@ -82,7 +82,7 @@ public class AutomationApiController {
 
     public record SubmitBody(String url, String spec, List<RunCombination> run) { }
 
-    public record SpecResource(long id, String namespace, String title, String submitter,
+    public record SpecResource(String id, String namespace, String title, String submitter,
             String source, String sourceUrl, String updatedAt, Map<String, String> links) { }
 
     public record LevelOutcome(String criterion, String source, boolean met) { }
@@ -117,18 +117,18 @@ public class AutomationApiController {
         return specs.stream().map(AutomationApiController::toResource).toList();
     }
 
-    @GetMapping("/namespaces/{namespace}/specs/{id}")
-    public SpecResource getSpec(@PathVariable String namespace, @PathVariable long id) {
-        return toResource(require(namespace, id));
+    @GetMapping("/namespaces/{namespace}/specs/{ref}")
+    public SpecResource getSpec(@PathVariable String namespace, @PathVariable String ref) {
+        return toResource(require(namespace, ref));
     }
 
-    @GetMapping("/namespaces/{namespace}/specs/{id}/validation")
-    public ResponseEntity<?> lastValidation(@PathVariable String namespace, @PathVariable long id,
+    @GetMapping("/namespaces/{namespace}/specs/{ref}/validation")
+    public ResponseEntity<?> lastValidation(@PathVariable String namespace, @PathVariable String ref,
             @RequestParam(required = false) String format) {
-        SpecEntity spec = require(namespace, id);
+        SpecEntity spec = require(namespace, ref);
         var cached = results.findForSpec(spec.getId());
         if (cached.isEmpty()) {
-            throw new ApiException(HttpStatus.NOT_FOUND, "no validation has been run for spec " + id);
+            throw new ApiException(HttpStatus.NOT_FOUND, "no validation has been run for spec " + ref);
         }
         AggregatedValidationResult r = cached.get().result();
         List<Finding> findings = findings(r);
@@ -145,9 +145,9 @@ public class AutomationApiController {
         return ResponseEntity.ok(out);
     }
 
-    @DeleteMapping("/namespaces/{namespace}/specs/{id}")
-    public ResponseEntity<Void> deleteSpec(@PathVariable String namespace, @PathVariable long id) {
-        SpecEntity spec = require(namespace, id);
+    @DeleteMapping("/namespaces/{namespace}/specs/{ref}")
+    public ResponseEntity<Void> deleteSpec(@PathVariable String namespace, @PathVariable String ref) {
+        SpecEntity spec = require(namespace, ref);
         storage.deleteById(spec.getId());
         results.deleteForSpec(spec.getId());
         return ResponseEntity.noContent().build();
@@ -197,8 +197,52 @@ public class AutomationApiController {
                 ? storage.saveOrReplaceFromUrl(ns, submitter, title, rawSpec, json.url().trim())
                 : storage.saveOrReplace(ns, submitter, title, rawSpec);
 
-        ScoreLevel forcedLevel = "policy".equalsIgnoreCase(failOn) ? null : ScoreLevel.parse(failOn);
+        ScoredRun run = runCombos(rawSpec, combos, failOn);
+        persist(saved.getId(), rawSpec, run.forPersistence());
 
+        if ("sarif".equalsIgnoreCase(format)) {
+            List<Finding> all = run.results().stream().flatMap(c -> c.findings().stream()).toList();
+            return status(run.ok(), httpStatusOnFail, isNew).body(SarifRenderer.render(all));
+        }
+        return status(run.ok(), httpStatusOnFail, isNew)
+                .body(new SubmitResponse(toResource(saved), run.ok(), run.verdict(), run.results()));
+    }
+
+    /** Re-score an already-stored spec by its UUID — the flow a CI plugin uses after an earlier submit. */
+    @PostMapping("/specs/{ref}/validate")
+    public ResponseEntity<?> revalidate(@PathVariable String ref,
+            @RequestHeader(name = "Content-Type", required = false) String contentType,
+            @RequestParam(name = "run", required = false) List<String> runParams,
+            @RequestParam(name = "failOn", defaultValue = "policy") String failOn,
+            @RequestParam(name = "format", required = false) String format,
+            @RequestParam(name = "httpStatusOnFail", required = false) Integer httpStatusOnFail,
+            @RequestBody(required = false) byte[] body) {
+        SpecEntity spec = storage.findByRef(ref)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "no spec '" + ref + "'"));
+        SubmitBody json = body != null && contentType != null && contentType.toLowerCase().contains("json")
+                ? parseJson(body) : null;
+        List<RunCombination> combos = combinations(runParams, json);
+        if (combos.isEmpty()) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "name at least one validator/policy combination");
+        }
+        String rawSpec = spec.getRawContent();
+        ScoredRun run = runCombos(rawSpec, combos, failOn);
+        persist(spec.getId(), rawSpec, run.forPersistence());
+        if ("sarif".equalsIgnoreCase(format)) {
+            return status(run.ok(), httpStatusOnFail, false)
+                    .body(SarifRenderer.render(run.results().stream().flatMap(c -> c.findings().stream()).toList()));
+        }
+        return status(run.ok(), httpStatusOnFail, false)
+                .body(new SubmitResponse(toResource(spec), run.ok(), run.verdict(), run.results()));
+    }
+
+    // --- helpers ------------------------------------------------------
+
+    private record ScoredRun(boolean ok, String verdict, List<CombinationResult> results,
+            List<PluginRunRequest> forPersistence) { }
+
+    private ScoredRun runCombos(String rawSpec, List<RunCombination> combos, String failOn) {
+        ScoreLevel forcedLevel = "policy".equalsIgnoreCase(failOn) ? null : ScoreLevel.parse(failOn);
         List<CombinationResult> comboResults = new ArrayList<>();
         List<PluginRunRequest> forPersistence = new ArrayList<>();
         boolean ok = true;
@@ -208,13 +252,13 @@ public class AutomationApiController {
                 throw new ApiException(HttpStatus.UNPROCESSABLE_ENTITY,
                         "unknown or disabled validator '" + combo.validator() + "'");
             }
-            String policy = combo.policy() == null || combo.policy().isBlank()
-                    ? SpecValidationPlugin.DEFAULT_RULE_SET : combo.policy();
+            // Accept a policy slug ("enterprise-grade") or the exact name.
+            String policy = net.dublinux.arete.web.RuleSets.resolve(safeRuleSets(plugin), combo.policy());
             AggregatedValidationResult r = validation.validateOne(rawSpec, plugin.getId(), policy);
             forPersistence.add(new PluginRunRequest(plugin.getId(), policy));
 
             ResolvedLevel level = resolveLevel(forcedLevel, plugin, policy);
-            boolean failed = statusOf(r).equals("SUCCESS") ? level.level().failedBy(r) : true;
+            boolean failed = !statusOf(r).equals("SUCCESS") || level.level().failedBy(r);
             ok &= !failed;
             comboResults.add(new CombinationResult(
                     plugin.getId(), policy, statusOf(r), errorOf(r),
@@ -222,26 +266,26 @@ public class AutomationApiController {
                     new LevelOutcome(level.level().describe(), level.source(), !failed),
                     severityCounts(r), Math.max(0, r.rulesEvaluatedCount()), findings(r)));
         }
-
-        // Persist a combined result so the UI's spec view has something to show.
-        try {
-            AggregatedValidationResult combined = validation.validateMany(rawSpec, forPersistence);
-            results.save(saved.getId(), SpecValidationResultService.contentHashOf(rawSpec),
-                    combined, forPersistence.stream().map(PluginRunRequest::pluginId).distinct().toList());
-        } catch (RuntimeException e) {
-            log.warn("Could not persist combined validation for spec {}: {}", saved.getId(), e.toString());
-        }
-
-        String verdict = ok ? "PASS" : "FAIL";
-        if ("sarif".equalsIgnoreCase(format)) {
-            List<Finding> all = comboResults.stream().flatMap(c -> c.findings().stream()).toList();
-            return status(ok, httpStatusOnFail, isNew).body(SarifRenderer.render(all));
-        }
-        SubmitResponse response = new SubmitResponse(toResource(saved), ok, verdict, comboResults);
-        return status(ok, httpStatusOnFail, isNew).body(response);
+        return new ScoredRun(ok, ok ? "PASS" : "FAIL", comboResults, forPersistence);
     }
 
-    // --- helpers ------------------------------------------------------
+    private void persist(long specId, String rawSpec, List<PluginRunRequest> requests) {
+        try {
+            AggregatedValidationResult combined = validation.validateMany(rawSpec, requests);
+            results.save(specId, SpecValidationResultService.contentHashOf(rawSpec),
+                    combined, requests.stream().map(PluginRunRequest::pluginId).distinct().toList());
+        } catch (RuntimeException e) {
+            log.warn("Could not persist combined validation for spec {}: {}", specId, e.toString());
+        }
+    }
+
+    private List<String> safeRuleSets(SpecValidationPlugin plugin) {
+        try {
+            return List.copyOf(plugin.getRuleSets());
+        } catch (Throwable t) {
+            return List.of(SpecValidationPlugin.DEFAULT_RULE_SET);
+        }
+    }
 
     private record ResolvedLevel(ScoreLevel level, String source) { }
 
@@ -332,10 +376,20 @@ public class AutomationApiController {
         return new String(body, java.nio.charset.StandardCharsets.UTF_8);
     }
 
-    private SpecEntity require(String namespace, long id) {
-        return storage.findByIdInNamespace(id, namespaceKey(namespace))
+    private SpecEntity require(String namespace, String ref) {
+        String key = namespaceKey(namespace);
+        return storage.findByRef(ref)
+                .filter(s -> s.getNamespace().equals(key))
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND,
-                        "no spec " + id + " in namespace '" + namespace + "'"));
+                        "no spec '" + ref + "' in namespace '" + namespace + "'"));
+    }
+
+    private SubmitBody parseJson(byte[] body) {
+        try {
+            return Json.MAPPER.readValue(body, SubmitBody.class);
+        } catch (Exception e) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "invalid JSON body: " + e.getMessage());
+        }
     }
 
     /** Path namespace → its lower-cased key, 404 if it does not exist (reads never auto-create). */
@@ -366,11 +420,12 @@ public class AutomationApiController {
     }
 
     private static SpecResource toResource(SpecEntity s) {
-        String base = "/api/v1/namespaces/" + s.getNamespace() + "/specs/" + s.getId();
-        return new SpecResource(s.getId(), s.getNamespace(), s.getTitle(), s.getSubmitter(),
+        return new SpecResource(s.getRef(), s.getNamespace(), s.getTitle(), s.getSubmitter(),
                 s.getSource().name(), s.getSourceUrl(),
                 s.getUpdatedAt() == null ? null : s.getUpdatedAt().toString(),
-                Map.of("self", base, "ui", "/spec/" + s.getId()));
+                Map.of("self", "/api/v1/namespaces/" + s.getNamespace() + "/specs/" + s.getRef(),
+                        "validate", "/api/v1/specs/" + s.getRef() + "/validate",
+                        "ui", "/spec/" + s.getRef()));
     }
 
     private static String statusOf(AggregatedValidationResult r) {

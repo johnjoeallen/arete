@@ -139,6 +139,11 @@ public class SpecStorageService {
         return repository.findById(id);
     }
 
+    /** By the public UUID — the only identifier that appears in URLs and the API. */
+    public Optional<SpecEntity> findByRef(String ref) {
+        return ref == null ? Optional.empty() : repository.findByRef(ref.trim());
+    }
+
     public Optional<SpecEntity> findByIdInNamespace(Long id, String namespace) {
         return repository.findByIdAndNamespace(id, namespace);
     }

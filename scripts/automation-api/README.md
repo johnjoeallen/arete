@@ -16,7 +16,7 @@ Every script sources `_common.sh`, which reads these from the environment:
 | `ARETE_URL` | `http://localhost:6809` | base URL |
 | `ARETE_NAMESPACE` | `default` | namespace slug |
 | `ARETE_SUBMITTER` | `curl-test` | submitter label, sent as the `arete_submitter` cookie |
-| `ARETE_RUN` | `generic-policy/Enterprise Grade` | comma-separated `<validator>/<policy>` combinations |
+| `ARETE_RUN` | `generic-policy/enterprise-grade` | comma-separated `<validator>/<policy>` combinations |
 | `ARETE_FAIL_ON` | `policy` | `policy` \| `never` \| `error` \| `blocker` \| `score<NN` |
 
 `jq`, if installed, is used to pretty-print responses.
@@ -24,15 +24,16 @@ Every script sources `_common.sh`, which reads these from the environment:
 ```bash
 export ARETE_NAMESPACE=payments
 export ARETE_SUBMITTER=payments-ci
-export ARETE_RUN='generic-policy/Enterprise Grade,generic-policy/Zalando'
+export ARETE_RUN='generic-policy/enterprise-grade,generic-policy/Zalando'
 ```
 
 ## Scripts
 
 | script | what it does |
 |---|---|
-| `submit-inline.sh [spec.yaml]` | POST a raw YAML spec + run the combinations |
+| `submit-inline.sh [spec.yaml]` | POST a raw YAML spec + run the combinations; the response `spec.id` is a UUID |
 | `submit-url.sh <url>` | POST `{ url, run }` — server fetches the spec |
+| `revalidate.sh <uuid>` | re-score an already-submitted spec by its UUID (no re-upload) |
 | `sarif.sh [spec.yaml]` | submit, get the result as SARIF 2.1.0 |
 | `ci-gate.sh [spec.yaml]` | submit with `failOn` + `httpStatusOnFail=422`; exit non-zero on FAIL |
 | `list.sh [namespaces \| specs [submitter]]` | list namespaces, or specs in the current one |

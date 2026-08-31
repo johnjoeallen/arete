@@ -27,14 +27,13 @@
                 <button type="submit">set</button>
             </form>
         </div>
-        <a href="/settings#namespaces" class="namespace-manage-link">Manage namespaces →</a>
     </div>
     <ul class="spec-list">
         <li th:each="spec : ${specs}" class="spec-list-item">
-            <a th:href="@{/spec/{id}(id=${spec.id})}"
-               th:classappend="${activeId != null and activeId.equals(spec.id)} ? 'active'"
+            <a th:href="@{/spec/{ref}(ref=${spec.ref})}"
+               th:classappend="${activeId != null and activeId.equals(spec.ref)} ? 'active'"
                th:text="${spec.title}">Spec title</a>
-            <form method="post" th:action="@{/api/specs/{id}/delete(id=${spec.id})}" class="delete-form">
+            <form method="post" th:action="@{/api/specs/{ref}/delete(ref=${spec.ref})}" class="delete-form">
                 <button type="submit" class="delete-btn" title="Delete">&times;</button>
             </form>
         </li>
