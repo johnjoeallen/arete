@@ -161,9 +161,12 @@ Groovy it replaced offered none of Java's speed and none of Distill's safety.
     recursion, or unbounded iteration. It is a narrow data-pipeline processor
     and can be nothing else. That is why a new matcher needs no new release,
     why user [policy files](../configuration.md) can already load from outside
-    the jar, and why a matcher **delivered from a remote source over the
-    internet** could be run without trusting its author with the host JVM.
-    Hand-written Java forecloses that entirely. A few milliseconds of
+    the jar, and why a matcher **delivered from a remote source** could be run
+    without trusting its author with the host JVM — from an internal artifact
+    repository (Nexus, Artifactory), a Git repository or release asset (GitHub,
+    GitLab, an internal host), a plain HTTPS URL or object store (S3, GCS), an
+    OCI registry alongside container images, or a shared policy service a team
+    subscribes to. Hand-written Java forecloses that entirely. A few milliseconds of
     interpreter overhead per spec is the price of keeping it open, and it is
     one worth paying.
 
