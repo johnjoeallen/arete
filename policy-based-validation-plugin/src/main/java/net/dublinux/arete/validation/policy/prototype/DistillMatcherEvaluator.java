@@ -115,35 +115,65 @@ public final class DistillMatcherEvaluator {
             default -> throw new IllegalArgumentException("unknown string operation: " + name);
         };
         if (receiver instanceof Iterable<?> iterable) {
-            List<Object> values = new ArrayList<>();
-            iterable.forEach(values::add);
+            List<Object> values = iterableOf(iterable);
             Closure closure = args.isEmpty() ? null : (Closure) args.get(0);
-            return switch (name) {
-                case "map" -> values.stream().map(closure::apply).toList();
-                case "filter", "match" -> values.stream().filter(value -> truthy(closure.apply(value))).toList();
-                case "expand" -> values.stream().flatMap(value -> iterableOf(closure.apply(value)).stream()).toList();
-                case "any" -> values.stream().anyMatch(value -> truthy(closure.apply(value)));
-                case "all" -> values.stream().allMatch(value -> truthy(closure.apply(value)));
-                case "find" -> values.stream().filter(value -> truthy(closure.apply(value))).findFirst().orElse(null);
-                case "count" -> values.stream().filter(value -> truthy(closure.apply(value))).count();
-                case "group" -> {
+            switch (name) {
+                case "map": {
+                    List<Object> result = new ArrayList<>(values.size());
+                    for (Object value : values) result.add(closure.apply(value));
+                    return result;
+                }
+                case "filter": case "match": {
+                    List<Object> result = new ArrayList<>();
+                    for (Object value : values) if (truthy(closure.apply(value))) result.add(value);
+                    return result;
+                }
+                case "expand": {
+                    List<Object> result = new ArrayList<>();
+                    for (Object value : values) result.addAll(iterableOf(closure.apply(value)));
+                    return result;
+                }
+                case "any":
+                    for (Object value : values) if (truthy(closure.apply(value))) return true;
+                    return false;
+                case "all":
+                    for (Object value : values) if (!truthy(closure.apply(value))) return false;
+                    return true;
+                case "find":
+                    for (Object value : values) if (truthy(closure.apply(value))) return value;
+                    return null;
+                case "count": {
+                    long matched = 0;
+                    for (Object value : values) if (truthy(closure.apply(value))) matched++;
+                    return matched;
+                }
+                case "group": {
                     // key -> items with that key, in first-seen key order. Keys are
                     // compared by string value, matching distinct().
                     Map<String, List<Object>> groups = new LinkedHashMap<>();
                     for (Object value : values) {
                         groups.computeIfAbsent(String.valueOf(closure.apply(value)), k -> new ArrayList<>()).add(value);
                     }
-                    yield groups;
+                    return groups;
                 }
-                case "toList" -> List.copyOf(values);
-                default -> throw new IllegalArgumentException("unknown sequence operation: " + name);
-            };
+                case "toList":
+                    return List.copyOf(values);
+                default:
+                    throw new IllegalArgumentException("unknown sequence operation: " + name);
+            }
         }
         throw new IllegalArgumentException("cannot call " + name + " on " + receiver);
     }
 
+    /**
+     * A read-only {@code List} view of an iterable value. Distill has no
+     * mutation, so returning the underlying {@code List} unchanged is safe and
+     * avoids a copy per traversal.
+     */
+    @SuppressWarnings("unchecked")
     private static List<Object> iterableOf(Object value) {
         if (value == null) return List.of();
+        if (value instanceof List<?> list) return (List<Object>) list;
         if (value instanceof Iterable<?> iterable) { List<Object> result = new ArrayList<>(); iterable.forEach(result::add); return result; }
         throw new IllegalArgumentException("expand closure must return a collection");
     }
@@ -170,9 +200,14 @@ public final class DistillMatcherEvaluator {
 
     private static String patternOf(Object value) { return value instanceof Regex regex ? regex.pattern() : String.valueOf(value); }
 
-    private static boolean regexSearch(Object pattern, Object text) { return Pattern.compile(patternOf(pattern)).matcher(String.valueOf(text)).find(); }
+    /** Compiled regexes, keyed by pattern string. Patterns recur across a spec (one literal, reused per element). */
+    private static final Map<String, Pattern> PATTERNS = new ConcurrentHashMap<>();
 
-    private static boolean regexFullMatch(Object pattern, Object text) { return Pattern.compile(patternOf(pattern)).matches(String.valueOf(text)); }
+    private static Pattern pattern(Object value) { return PATTERNS.computeIfAbsent(patternOf(value), Pattern::compile); }
+
+    private static boolean regexSearch(Object pattern, Object text) { return pattern(pattern).matcher(String.valueOf(text)).find(); }
+
+    private static boolean regexFullMatch(Object pattern, Object text) { return pattern(pattern).matches(String.valueOf(text)); }
 
     private static Object function(String name, List<Object> args) {
         return switch (name) {
@@ -399,7 +434,12 @@ public final class DistillMatcherEvaluator {
         private ParsedClosure closure() { expect("{"); String parameter = expectId(); expect("->"); Expr body = expression(); expect("}"); return new ParsedClosure(parameter, body); }
         private List<Expr> arguments() { List<Expr> result = new ArrayList<>(); if (!accept(")")) { do result.add(expression()); while (accept(",")); expect(")"); } return result; }
         private Expr binary(Expr left, Expr right, String op) { return env -> { Object a = left.eval(env), b = right.eval(env); return switch (op) { case "==" -> equalValue(a, b); case "!=" -> !equalValue(a, b); case "==~" -> regexFullMatch(b, a); case "=~" -> regexSearch(b, a); case "<" -> compare(a, b) < 0; case "<=" -> compare(a, b) <= 0; case ">" -> compare(a, b) > 0; case ">=" -> compare(a, b) >= 0; case "&&" -> truthy(a) && truthy(b); case "||" -> truthy(a) || truthy(b); default -> throw new IllegalStateException(op); }; }; }
-        private static Map<String, Object> with(Map<String, Object> env, String key, Object value) { Map<String, Object> result = new LinkedHashMap<>(env); result.put(key, value); return result; }
+        /**
+         * Binds {@code key} in a child scope without copying {@code env}: closure
+         * bodies only ever read bindings ({@code env.get(name)}), and a full map
+         * copy per iterated element dominated evaluation allocation.
+         */
+        private static Map<String, Object> with(Map<String, Object> env, String key, Object value) { return new Scope(env, key, value); }
         /** True when the current token is the keyword/operator {@code text} — never a string or regex literal that happens to read the same. */
         private boolean at(String text) { return token.kind() != Kind.STRING && token.kind() != Kind.REGEX && token.text().equals(text); }
         private boolean accept(String text) { if (at(text)) { advance(); return true; } return false; }
@@ -407,6 +447,25 @@ public final class DistillMatcherEvaluator {
         private String expectId() { expectKind(Kind.ID); String result = token.text(); advance(); return result; }
         private void expectKind(Kind kind) { if (token.kind() != kind) throw new IllegalArgumentException("expected " + kind + ", got " + token.text()); }
         private void advance() { token = lookahead; lookahead = lexer.next(); }
+    }
+
+    /**
+     * A single {@code key -> value} binding layered over a parent environment,
+     * used for closure parameters. Closure bodies only read bindings, so this
+     * avoids copying the whole environment map for every iterated element.
+     */
+    private static final class Scope extends java.util.AbstractMap<String, Object> {
+        private final Map<String, Object> parent;
+        private final String key;
+        private final Object value;
+        Scope(Map<String, Object> parent, String key, Object value) { this.parent = parent; this.key = key; this.value = value; }
+        @Override public Object get(Object k) { return key.equals(k) ? value : parent.get(k); }
+        @Override public boolean containsKey(Object k) { return key.equals(k) || parent.containsKey(k); }
+        @Override public Set<Entry<String, Object>> entrySet() {
+            Map<String, Object> flat = new LinkedHashMap<>(parent);
+            flat.put(key, value);
+            return flat.entrySet();
+        }
     }
 
     private static final Set<String> KNOWN_FUNCTIONS = Set.of(

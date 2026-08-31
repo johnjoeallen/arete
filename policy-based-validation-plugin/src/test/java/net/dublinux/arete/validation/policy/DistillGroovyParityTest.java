@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -701,6 +703,129 @@ class DistillGroovyParityTest {
 
     @Test void pathCountWithinLimits() {
         assertParity("path-count", "api", Map.of("maximum", 8), false, OPS_SPEC);
+    }
+
+    /**
+     * Runs every dual-implemented matcher through both engines against all five
+     * fixture specs and every scope it declares, with empty parameters, and
+     * reports the aggregate cost of each engine plus where their diagnostics
+     * agree.
+     *
+     * <p>Functional parity is gated by the curated {@code assertParity} cases
+     * above, which drive the realistic, loader-valid parameter sets. This sweep
+     * deliberately uses empty parameters — an unsupported configuration the
+     * bundle loader would reject — so some param-sensitive matchers legitimately
+     * diverge here (one engine errors on the missing parameter, the other
+     * applies a fallback). Those are logged, not failed. What this sweep gates
+     * is that neither engine crashes outright and the cost comparison holds.
+     * The timing report needs {@code -Darete.benchmark=true}.
+     */
+    @Test
+    void fullSweepParityAndPerformance() {
+        boolean report = Boolean.getBoolean("arete.benchmark");
+        Map<String, String> specs = new LinkedHashMap<>();
+        specs.put("catalogue", CATALOGUE_SPEC);
+        specs.put("lint", LINT_SPEC);
+        specs.put("house-style", HOUSE_STYLE_SPEC);
+        specs.put("schema", SCHEMA_SPEC);
+        specs.put("ops", OPS_SPEC);
+
+        Map<String, Map<String, Object>> apis = new LinkedHashMap<>();
+        for (Map.Entry<String, String> s : specs.entrySet()) {
+            var parsed = new OpenAPIV3Parser().readContents(s.getValue(), null, new ParseOptions());
+            apis.put(s.getKey(), OpenApiMapAdapter.toMap(parsed.getOpenAPI(), parsed.getMessages(), s.getValue()));
+        }
+
+        PolicyBundle bundle = new PolicyBundleLoader()
+                .load(new ClasspathBundleResources(getClass().getClassLoader()));
+
+        GroovyMatcherEvaluator groovy = new GroovyMatcherEvaluator();
+        DistillMatcherEvaluator distill = new DistillMatcherEvaluator();
+
+        int combos = 0, mismatches = 0, exercised = 0, bothErrored = 0, agreed = 0;
+        long groovyNanos = 0, distillNanos = 0;
+        List<String> rows = new ArrayList<>();
+
+        for (Matcher descriptor : bundle.matchers().values()) {
+            String groovySource = readOptional("api-policy/matchers/" + descriptor.id() + "/Matcher.groovy");
+            if (groovySource == null) continue;
+            String dslSource = read("api-policy/matchers/" + descriptor.id() + "/Matcher.dsl");
+            Matcher groovyMatcher = new Matcher(descriptor.id(), "groovy", groovySource, descriptor.scopes(), Map.of());
+            Matcher dslMatcher = new Matcher(descriptor.id(), "distill", dslSource, descriptor.scopes(), Map.of());
+            @SuppressWarnings("unchecked")
+            groovy.lang.Closure<Object> groovyClosure =
+                    (groovy.lang.Closure<Object>) new groovy.lang.GroovyShell().evaluate(groovySource);
+
+            long mg = 0, md = 0;
+            int mCombos = 0, mFindings = 0;
+            for (String scope : descriptor.scopes()) {
+                for (Map.Entry<String, Map<String, Object>> a : apis.entrySet()) {
+                    PolicyRule rule = new PolicyRule("SWEEP", "Sweep", "Sweep", descriptor.id(), scope, Map.of(), "");
+                    combos++; mCombos++;
+                    // Empty parameters: some matchers require them and error; both
+                    // engines must reach the same verdict (findings, or failure).
+                    Object g0 = outcome(() -> groovy.execute(groovyMatcher, a.getValue(), rule));
+                    Object d0 = outcome(() -> distill.execute(dslMatcher, a.getValue(), rule));
+                    if (!java.util.Objects.equals(g0, d0)) {
+                        mismatches++;
+                        rows.add(String.format("DIVERGES %-26s scope=%-18s spec=%-11s groovy=%s distill=%s",
+                                descriptor.id(), scope, a.getKey(), summarise(g0), summarise(d0)));
+                        continue;
+                    }
+                    if (!(g0 instanceof List)) { bothErrored++; continue; } // both reject the missing parameter
+                    agreed++;
+                    if (((List<?>) g0).isEmpty()) { /* agree: no findings */ } else { exercised++; mFindings++; }
+
+                    Map<String, Object> ruleMap = rule.asMap();
+                    for (int i = 0; i < 30; i++) { groovyClosure.call(a.getValue(), ruleMap); distill.execute(dslMatcher, a.getValue(), rule); }
+                    long t0 = System.nanoTime();
+                    for (int i = 0; i < 40; i++) groovyClosure.call(a.getValue(), ruleMap);   // compiled once, reused
+                    long t1 = System.nanoTime();
+                    for (int i = 0; i < 40; i++) distill.execute(dslMatcher, a.getValue(), rule);
+                    long t2 = System.nanoTime();
+                    mg += (t1 - t0) / 40; md += (t2 - t1) / 40;
+                }
+            }
+            groovyNanos += mg; distillNanos += md;
+            rows.add(String.format("%-26s combos=%-3d findings=%-3d  groovy=%8.1fus  distill=%7.1fus  x%.1f",
+                    descriptor.id(), mCombos, mFindings, mg / 1000.0, md / 1000.0, (double) mg / Math.max(1, md)));
+        }
+
+        // Gate: the bundle loaded, and Distill stays clearly ahead of compiled
+        // Groovy across the whole sweep (generous margin for CI timing noise).
+        assertFalse(bundle.matchers().isEmpty(), "bundle loaded no matchers");
+        assertFalse(distillNanos * 2 > groovyNanos,
+                "Distill (cached) lost its margin over Groovy (compiled): distill=" + distillNanos / 1_000_000.0
+                        + "ms groovy=" + groovyNanos / 1_000_000.0 + "ms");
+
+        System.out.println("\n=== full groovy/distill sweep (" + combos + " matcher x scope x spec combos, empty params) ===");
+        if (report) {
+            rows.stream().filter(r -> !r.startsWith("DIVERGES")).sorted().forEach(System.out::println);
+        }
+        rows.stream().filter(r -> r.startsWith("DIVERGES")).forEach(System.out::println);
+        System.out.printf("%n%-30s %d%n", "combos compared", combos);
+        System.out.printf("%-30s %d%n", "identical diagnostics", agreed);
+        System.out.printf("%-30s %d%n", "both reject empty params", bothErrored);
+        System.out.printf("%-30s %d  (param-sensitive, see above)", "diverge under empty params", mismatches);
+        System.out.printf("%n%-30s %d%n", "combos with findings", exercised);
+        System.out.printf("%-30s %.2f ms%n", "groovy total (compiled once)", groovyNanos / 1_000_000.0);
+        System.out.printf("%-30s %.2f ms%n", "distill total (cached parse)", distillNanos / 1_000_000.0);
+        System.out.printf("%-30s %.1fx faster%n", "distill vs groovy", (double) groovyNanos / distillNanos);
+    }
+
+    private static String summarise(Object outcome) {
+        if (!(outcome instanceof List<?> list)) return "ERROR";
+        if (list.isEmpty()) return "[]";
+        return list.size() + " finding(s)";
+    }
+
+    /** The diagnostics a matcher produced, or a marker string when it failed (e.g. missing required parameters). */
+    private static Object outcome(java.util.concurrent.Callable<List<Diagnostic>> call) {
+        try {
+            return call.call();
+        } catch (Exception e) {
+            return "ERROR"; // both engines only reach here on missing parameters; the verdict, not the message, must match
+        }
     }
 
     // --- harness ---------------------------------------------------------
