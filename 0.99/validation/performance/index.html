@@ -1108,11 +1108,11 @@ no user-defined functions, and no other result type; the interpreter grants
 no I/O, reflection, recursion, or unbounded iteration. It is a narrow
 data-pipeline processor — <code>.map</code> / <code>.filter</code> / <code>.expand</code>, slashy regex
 literals, a fixed builtin set — and can be nothing else.</p>
-<p>That narrowness is what makes a matcher <strong>data rather than a program to be
-trusted</strong>: it can be loaded from anywhere and run without vetting its author,
-because the worst it can do is inspect the spec and hand back a list. The cost
-is interpreter overhead — a tree-walk instead of compiled bytecode — which the
-rest of this page quantifies.</p>
+<p>That narrowness is what lets a matcher <strong>run without trusting its author</strong>: it
+can be loaded from anywhere — a directory, an artifact repository, a URL — and
+executed unvetted, because the worst it can do is read the spec and return a
+list. The cost is interpreter overhead — a tree-walk instead of compiled
+bytecode — which the rest of this page quantifies.</p>
 <h2 id="plugins-are-a-separate-trust-tier">Plugins are a separate trust tier<a class="headerlink" href="#plugins-are-a-separate-trust-tier" title="Permanent link">&para;</a></h2>
 <p>None of this replaces Areté's plugin facility. A validation plugin is
 arbitrary compiled Java loaded through the SPI and a child-first classloader;
