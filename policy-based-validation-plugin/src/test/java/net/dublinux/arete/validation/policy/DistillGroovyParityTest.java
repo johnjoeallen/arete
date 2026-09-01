@@ -435,22 +435,21 @@ class DistillGroovyParityTest {
         assertParity("text-style", "operation-summary", Map.of("maximum-word-length", 12), false);
     }
 
+    private static final List<String> ACTION_VERBS = List.of(
+            "Get", "List", "Create", "Update", "Delete", "Replace", "Search", "Find", "Cancel", "Activate", "Deactivate");
+
     @Test void textStyleNonActionOriented() {
+        // The loader delivers action-prefixes as a list; test with that form.
         assertParity("text-style", "operation-summary",
-                Map.of("match", "non-action-oriented",
-                        "action-prefixes", "Get,List,Create,Update,Delete,Replace,Search,Find,Cancel,Activate,Deactivate"),
-                true);
+                Map.of("match", "non-action-oriented", "action-prefixes", ACTION_VERBS), true);
     }
 
-    /** action-prefixes drives startsWithAny; accepted as a comma string or a list. */
+    /** action-prefixes drives summary.trim().startsWith(list). */
     @Test void textStyleNonActionOrientedCustomPrefixes() {
-        assertParity("text-style", "operation-summary",
-                Map.of("match", "non-action-oriented", "action-prefixes", "Fetch, Remove"), true);
         assertParity("text-style", "operation-summary",
                 Map.of("match", "non-action-oriented", "action-prefixes", List.of("Fetch", "Remove")), true);
         assertParity("text-style", "operation-summary",
-                Map.of("match", "non-action-oriented", "action-prefixes", "Get,List,Create,Update,Delete,Replace,Search,Find,Cancel,Activate,Deactivate"),
-                true, HOUSE_STYLE_SPEC);
+                Map.of("match", "non-action-oriented", "action-prefixes", ACTION_VERBS), true, HOUSE_STYLE_SPEC);
     }
 
     @Test void apiTitleHouseStyle() {

@@ -109,9 +109,9 @@ public final class DistillMatcherEvaluator {
         if (receiver instanceof String text) return switch (name) {
             case "lower" -> text.toLowerCase();
             case "trim" -> text.trim();
-            case "contains" -> text.contains(String.valueOf(args.get(0)));
-            case "startsWith" -> text.startsWith(String.valueOf(args.get(0)));
-            case "endsWith" -> text.endsWith(String.valueOf(args.get(0)));
+            case "contains" -> stringPredicate(text, args.get(0), String::contains);
+            case "startsWith" -> stringPredicate(text, args.get(0), String::startsWith);
+            case "endsWith" -> stringPredicate(text, args.get(0), String::endsWith);
             default -> throw new IllegalArgumentException("unknown string operation: " + name);
         };
         if (receiver instanceof Iterable<?> iterable) {
@@ -229,21 +229,15 @@ public final class DistillMatcherEvaluator {
     }
 
     /**
-     * True when {@code text}, with leading/trailing whitespace ignored, begins
-     * with one of {@code prefixes} as a whole first word — it equals the prefix
-     * or the prefix is followed by a space. {@code prefixes} is a list, or a
-     * comma-separated string.
+     * {@code s.contains(x)} / {@code startsWith} / {@code endsWith}: {@code x}
+     * is a string, or a list — true when the test holds for any element.
      */
-    private static boolean startsWithAny(Object text, Object prefixes) {
-        String trimmed = text == null ? "" : String.valueOf(text).trim();
-        List<Object> list = prefixes instanceof String csv
-                ? new ArrayList<>(List.of(csv.split(",")))
-                : iterableOf(prefixes);
-        for (Object candidate : list) {
-            String prefix = String.valueOf(candidate).trim();
-            if (!prefix.isEmpty() && (trimmed.equals(prefix) || trimmed.startsWith(prefix + " "))) return true;
+    private static boolean stringPredicate(String text, Object argument, java.util.function.BiPredicate<String, String> test) {
+        if (argument instanceof Iterable<?> options) {
+            for (Object option : options) if (test.test(text, String.valueOf(option))) return true;
+            return false;
         }
-        return false;
+        return test.test(text, String.valueOf(argument));
     }
 
     private static Object function(String name, List<Object> args) {
@@ -252,7 +246,6 @@ public final class DistillMatcherEvaluator {
             case "regexFullMatch" -> regexFullMatch(args.get(0), args.get(1));
             case "tokenize" -> List.of(String.valueOf(args.get(1)).split(java.util.regex.Pattern.quote(String.valueOf(args.get(0)))));
             case "words" -> words(args.get(0));
-            case "startsWithAny" -> startsWithAny(args.get(0), args.get(1));
             case "last" -> { List<Object> values = iterableOf(args.get(0)); yield values.isEmpty() ? "" : values.get(values.size() - 1); }
             case "count" -> (long) iterableOf(args.get(0)).size();
             case "distinct" -> {
@@ -620,7 +613,7 @@ public final class DistillMatcherEvaluator {
     }
 
     private static final Set<String> KNOWN_FUNCTIONS = Set.of(
-            "regexSearch", "regexFullMatch", "tokenize", "words", "startsWithAny", "last", "count", "checks", "distinct", "join", "strip",
+            "regexSearch", "regexFullMatch", "tokenize", "words", "last", "count", "checks", "distinct", "join", "strip",
             "urlHost", "parseInt", "truthy", "pathSegments", "enumerate", "type", "occurrence",
             "operationMessage");
 

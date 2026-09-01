@@ -48,7 +48,8 @@ message.
 - `rule` is `{ id, scope, parameters }`. Rule configuration is
   `rule.parameters` — e.g. `rule.parameters["max-items"]` or, for a key that
   is a plain identifier, `rule.parameters.suffix`. A `list`-typed parameter
-  arrives as a `List<String>` (use `.any { }` / `startsWithAny`), everything
+  arrives as a `List<String>` (use `.any { }`, or pass it to
+  `s.startsWith` / `s.contains`), everything
   else as a string, number, or boolean.
 
 There are no comments.
@@ -147,9 +148,9 @@ Notes:
 |---|---|
 | `s.lower()` | lower-cased copy |
 | `s.trim()` | whitespace-trimmed copy |
-| `s.contains(t)` | boolean |
-| `s.startsWith(t)` | boolean |
-| `s.endsWith(t)` | boolean |
+| `s.contains(t)` | boolean; `t` is a string, or a list — true if any element matches |
+| `s.startsWith(t)` | boolean; `t` is a string, or a list — true if `s` starts with any element |
+| `s.endsWith(t)` | boolean; `t` is a string, or a list — true if `s` ends with any element |
 | `s.length` | length (a member, not a call) |
 
 ### Sequence methods
@@ -221,7 +222,6 @@ call these and nothing else.
 | `regexSearch(pattern, text)` | match anywhere in `text` |
 | `tokenize(delim, text)` | split `text` on the **literal string** `delim`; empty tokens are kept (pair with `.filter { t -> t != "" }`) |
 | `words(text)` | substantive words of `text`: whitespace-separated tokens, leading/trailing punctuation stripped, keeping only those that still contain a letter. Count is `count(words(text))`; per-word length is `w.length` inside `.any` / `.all` / `.filter` |
-| `startsWithAny(text, prefixes)` | `text` (trimmed) begins with one of `prefixes` as a whole first word — it equals the prefix or the prefix is followed by a space. `prefixes` is a list or a comma-separated string |
 | `count(list)` | element count (an integer). For a filtered count use the sequence form `list.count { x -> ... }`. |
 | `distinct(list)` | de-duplicated list — drops `null`, keeps first-seen order, compares by string value |
 | `parseInt(text)` / `parseInt(text, fallback)` | base-10 integer after trimming; `fallback` (default `-1`) on failure |
