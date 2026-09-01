@@ -21,7 +21,10 @@ jobs:
           cache: maven
 
       - name: Set version from tag
-        run: mvn --no-transfer-progress versions:set -DnewVersion=${GITHUB_REF_NAME#v} -DgenerateBackupPoms=false -DprocessAllModules=true
+        # No -DprocessAllModules: that would also rewrite the arete-ci-gate-*
+        # modules, which version independently (1.x, ci-gate-v* tags). Without
+        # it, versions:set only touches modules sharing the old version.
+        run: mvn --no-transfer-progress versions:set -DnewVersion=${GITHUB_REF_NAME#v} -DgenerateBackupPoms=false
 
       - name: Build
         run: mvn --no-transfer-progress verify

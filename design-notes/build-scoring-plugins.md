@@ -1,6 +1,10 @@
 # Areté CI Gate — Maven & Gradle build-gate plugins
 
-> **Proposal — for review. Nothing here is implemented.**
+> **v1 implemented.** Modules `arete-ci-gate-core`,
+> `arete-ci-gate-maven-plugin`, `arete-ci-gate-gradle-plugin` are in the
+> reactor. Still to do: the `ci-gate-it.yml` integration job (real Areté +
+> TestKit) and the first `ci-gate-v1.0.0` publish. This document remains the
+> design of record.
 >
 > The plugins are thin clients of Areté's existing
 > [Automation API](../docs/automation-api.md). Scoring stays entirely

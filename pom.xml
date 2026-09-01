@@ -16,6 +16,13 @@
         <module>arete-scoring-spi</module>
         <module>arete-policy-plugin</module>
         <module>arete-app</module>
+        <!-- Build-gate plugins. In the reactor so one checkout builds and
+             integration-tests them against a freshly-built Areté, but they
+             version and release independently (own version, ci-gate-v* tags) —
+             see design-notes/build-scoring-plugins.md. -->
+        <module>arete-ci-gate-core</module>
+        <module>arete-ci-gate-maven-plugin</module>
+        <module>arete-ci-gate-gradle-plugin</module>
     </modules>
 
 </project>
