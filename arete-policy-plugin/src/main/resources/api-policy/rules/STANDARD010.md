@@ -13,7 +13,7 @@ parameters: { allowed: "3.0,3.1" }
 The API document should declare an OpenAPI version supported by the active
 policy. The default policy accepts OpenAPI 3.0 and 3.1 documents.
 
-The parser performs structural validation before this rule runs. This rule
+The parser performs structural scoring before this rule runs. This rule
 only checks the declared version against the policy's comma-separated
 `allowed` prefixes; it does not reimplement the OpenAPI schema validator.
 
@@ -48,7 +48,7 @@ parameters: { allowed: "3.0,3.1" }
 The rule reads the declared OpenAPI version and accepts it when it equals
 one of the comma-separated allowed tokens or starts with an allowed token plus
 `.`. A missing or unsupported version produces one finding at `/info` with the
-declared value (or `none`). The parser performs structural validation before
+declared value (or `none`). The parser performs structural scoring before
 the rule runs.
 
 ## Configuration and limitations

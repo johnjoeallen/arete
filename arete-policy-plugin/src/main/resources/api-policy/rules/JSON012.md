@@ -11,7 +11,7 @@ parameters: { format: absent }
 ## Intent
 
 Integer and number properties should declare an appropriate format when the
-API’s tooling or consumers use format metadata to choose storage, validation,
+API’s tooling or consumers use format metadata to choose storage, scoring,
 or generated language types. The desired format is domain-specific, so this
 rule is a policy review aid.
 

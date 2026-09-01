@@ -47,7 +47,7 @@ jobs:
             --title "$GITHUB_REF_NAME" \
             --generate-notes
 
-      # Publishing arete-validation-spi to Maven Central is NOT part of
+      # Publishing arete-scoring-spi to Maven Central is NOT part of
       # this workflow — it doesn't belong on every tag push. See
       # publish-spi.yml, triggered by hand from the Actions tab against a
       # specific tag once that release is ready to be published externally.

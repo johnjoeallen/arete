@@ -42,7 +42,7 @@
 
         <dependency>
             <groupId>net.dublinux.arete</groupId>
-            <artifactId>arete-validation-spi</artifactId>
+            <artifactId>arete-scoring-spi</artifactId>
             <version>0.1.0-SNAPSHOT</version>
         </dependency>
 

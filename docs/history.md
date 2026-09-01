@@ -31,11 +31,11 @@ browser, Apple touch, and application icons.
 ## Architecture
 
 The single-purpose viewer was restructured into a **multi-module Maven build**
-with a pluggable validation layer and a file watcher that reloads an open spec
+with a pluggable scoring layer and a file watcher that reloads an open spec
 on body-only edits (and lets it reappear if a deleted file returns).
 
-Validation is delivered through a published SPI,
-`arete-validation-spi` (formerly `speculate-validation-spi`), whose Java
+Scoring is delivered through a published SPI,
+`arete-scoring-spi` (formerly `speculate-scoring-spi`), whose Java
 package was renamed to match its Maven coordinates and which is published to
 Maven Central by a manually-triggered workflow rather than on every release.
 Plugins are loaded through a **child-first `URLClassLoader`** so a plugin's
@@ -43,7 +43,7 @@ dependencies cannot collide with the host's, and the bundled plugin jar ships
 unversioned to match the application jar.
 
 A plugin can declare several named check sets, chosen per spec; these were
-first called "validation types" and then renamed **RuleSet** across the SPI.
+first called "scoring types" and then renamed **RuleSet** across the SPI.
 Plugin rule sets are ordered, and the UI submits a rule set by position rather
 than name. A plugin may also supply its own severity vocabulary and optional
 scoring fields (an overall score, and a per-finding score improvement), and a
@@ -53,9 +53,9 @@ view.
 The first bundled plugin wrapped **Zally**, Zalando's OpenAPI linter, as the
 default validator. It was later replaced wholesale by the policy engine below.
 
-## The validation user interface
+## The scoring user interface
 
-Validation moved from running automatically when a spec was added to an
+Scoring moved from running automatically when a spec was added to an
 **explicit, on-demand action** on the spec view. That action was named
 "Refresh", then "Analyse", and is now **Score**; it also backs the
 empty-state action that starts scoring. Results are persisted and reloaded
@@ -74,7 +74,7 @@ shown as percentages, and a zero or uncomputed impact is hidden.
 ## From Zally rules to the policy engine
 
 The bundled validator became a **generic policy engine**
-(`arete-policy-plugin`, entry point `PolicyBasedValidationPlugin`).
+(`arete-policy-plugin`, entry point `PolicyScoringPlugin`).
 Instead of hard-coded Java checks it ships a **policy bundle**: a tree of
 Markdown + YAML files defining matchers (programs that inspect the normalised
 API model and return occurrences), rules (a matcher plus a scope and
@@ -170,7 +170,7 @@ store (S3, GCS), an OCI registry alongside container images, or a shared
 "policy service" that a team's Areté instances subscribe to. Because a matcher
 can only inspect the spec and hand back occurrences, the trust needed to run
 one is the trust that its *rules* are sensible — not that its code is safe.
-See [The case for Distill](validation/performance.md) for the measured
+See [The case for Distill](scoring/performance.md) for the measured
 trade-off.
 
 Several bundled matchers apply a handful of unrelated checks to one collection
@@ -219,7 +219,7 @@ become rule parameters (issues #144–#154).
 ## Runtime execution model
 
 Distill matcher sources are parsed once when the bundle loads and the compiled
-programs are reused for every validation, rather than reparsed and discarded
+programs are reused for every scoring, rather than reparsed and discarded
 per rule. The interpreter was then reworked to remove avoidable work in the
 evaluation loop: compiled regular expressions are cached rather than
 recompiled per match, closure parameters are bound through a layered scope
@@ -246,7 +246,7 @@ self-asserted, neither checked; uniqueness moved from a global spec title to
 required to sit behind a protected boundary. Each policy can declare a
 passing score and grade bands (`passingScore:` / `grades:`, or a non-numeric
 `scoring: blocker | error`); the score, grade, and pass/fail against that bar
-are reported on every validation, and the automation-API verdict honours the
+are reported on every scoring, and the automation-API verdict honours the
 bar unless the caller overrides it. Grading was later made universal — a
 policy with no `grades:` block derives bands from its `passingScore`, or falls
 back to a default `A ≥ 90 … D ≥ 60` — and a `+`/`-` is appended for the top or

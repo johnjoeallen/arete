@@ -23,4 +23,4 @@ mkdir -p "$DIR/scripts/plugins"
 # the same id.
 rm -f "$DIR"/scripts/plugins/*.jar
 cp "$POLICY_BASED_PLUGIN_JAR" "$DIR/scripts/plugins/arete-policy-plugin.jar"
-echo "Built: scripts/arete.jar (+ bundled validation plugins)"
+echo "Built: scripts/arete.jar (+ bundled scoring plugins)"

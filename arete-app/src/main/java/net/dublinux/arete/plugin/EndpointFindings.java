@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Groups validation findings by the endpoint (HTTP method + path) their
+ * Groups scoring findings by the endpoint (HTTP method + path) their
  * JSON Pointer location falls under: severity-badge counts for the
  * collapsed endpoint header, and the full finding list for when it's
  * expanded, instead of one long itemized list up front.
@@ -27,7 +27,7 @@ public final class EndpointFindings {
      * matching {@code EndpointView.method() + " " + EndpointView.path()}. A
      * diagnostic is attributed to every endpoint it names — its {@code
      * pointer}'s own operation, if any, plus every entry in {@link
-     * net.dublinux.arete.validation.spi.Diagnostic#getPaths()} — so a
+     * net.dublinux.arete.scoring.spi.Diagnostic#getPaths()} — so a
      * rule a plugin reports once but flags as affecting several endpoints
      * (via {@code paths}, rather than emitting one {@code Diagnostic} per
      * endpoint) shows up on all of them, not just the one its {@code
@@ -49,7 +49,7 @@ public final class EndpointFindings {
     }
 
     /** Every endpoint key a diagnostic is attributable to — see {@link #byEndpoint}. */
-    private static Set<String> endpointKeys(net.dublinux.arete.validation.spi.Diagnostic diagnostic) {
+    private static Set<String> endpointKeys(net.dublinux.arete.scoring.spi.Diagnostic diagnostic) {
         Set<String> keys = new LinkedHashSet<>();
         String pointerKey = endpointKey(diagnostic.getPointer());
         if (pointerKey != null) {

@@ -5,12 +5,12 @@ The SPI is now published under these coordinates:
 ```xml
 <dependency>
   <groupId>net.dublinux.arete</groupId>
-  <artifactId>arete-validation-spi</artifactId>
+  <artifactId>arete-scoring-spi</artifactId>
   <version>VERSION</version>
 </dependency>
 ```
 
-The previous coordinates, `net.dublinux.speculate:speculate-validation-spi`,
+The previous coordinates, `net.dublinux.speculate:speculate-scoring-spi`,
 are a different Maven artifact. Maven Central does not rename artifacts, so
 existing consumers must migrate explicitly.
 
@@ -33,7 +33,7 @@ existing consumers must migrate explicitly.
    - `GPG_PASSPHRASE`
 
 The `release` profile in
-[`arete-validation-spi/pom.xml`](https://github.com/johnjoeallen/arete/blob/main/arete-validation-spi/pom.xml)
+[`arete-scoring-spi/pom.xml`](https://github.com/johnjoeallen/arete/blob/main/arete-scoring-spi/pom.xml)
 creates the sources and Javadoc jars, signs all artifacts, and uploads them
 through the Central Publishing Portal.
 
@@ -68,7 +68,7 @@ SPI automatically.
    version by removing the leading `v`, imports the GPG key, and runs:
 
    ```bash
-   mvn --no-transfer-progress -pl arete-validation-spi -Prelease deploy
+   mvn --no-transfer-progress -pl arete-scoring-spi -Prelease deploy
    ```
 
 5. Open [Central Portal deployments](https://central.sonatype.com/publishing/deployments),
@@ -83,14 +83,14 @@ Replace the old dependency:
 
 ```xml
 <groupId>net.dublinux.speculate</groupId>
-<artifactId>speculate-validation-spi</artifactId>
+<artifactId>speculate-scoring-spi</artifactId>
 ```
 
 with:
 
 ```xml
 <groupId>net.dublinux.arete</groupId>
-<artifactId>arete-validation-spi</artifactId>
+<artifactId>arete-scoring-spi</artifactId>
 ```
 
 Consumers that import SPI classes must also change Java package imports from

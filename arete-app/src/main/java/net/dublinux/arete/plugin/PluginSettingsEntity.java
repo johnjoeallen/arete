@@ -7,7 +7,7 @@ import jakarta.persistence.Table;
 
 /**
  * Persisted enabled/disabled flag for a validator plugin, keyed by
- * {@link net.dublinux.arete.validation.spi.SpecValidationPlugin#getId()} —
+ * {@link net.dublinux.arete.scoring.spi.SpecScoringPlugin#getId()} —
  * not by instance, since plugin instances don't survive a restart but IDs
  * do.
  */

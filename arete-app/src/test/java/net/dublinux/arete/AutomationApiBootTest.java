@@ -50,7 +50,7 @@ class AutomationApiBootTest {
                 .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.detail").value(org.hamcrest.Matchers.containsString("validator")));
 
-        // the spec itself was stored before validation was attempted
+        // the spec itself was stored before scoring was attempted
         mvc.perform(get("/api/v1/namespaces/" + ns + "/specs"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].title").value("Boot IT API"))

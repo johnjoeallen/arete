@@ -25,11 +25,11 @@ import java.net.URLClassLoader;
  *
  * <p>The SPI classes themselves are the deliberate exception, and don't need
  * special-casing here to remain one: plugins declare
- * {@code arete-validation-spi} as a {@code provided} (compile-only)
+ * {@code arete-scoring-spi} as a {@code provided} (compile-only)
  * dependency specifically so it's never shaded into their jar, so
  * {@code findClass} below can never find them — every lookup for an SPI type
  * falls through to the parent, which is exactly the identity the host's
- * {@code ServiceLoader.load(SpecValidationPlugin.class, ...)} call needs.
+ * {@code ServiceLoader.load(SpecScoringPlugin.class, ...)} call needs.
  */
 final class ChildFirstClassLoader extends URLClassLoader {
 

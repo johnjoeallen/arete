@@ -21,4 +21,4 @@ if "%POLICY_BASED_PLUGIN_JAR%"=="" (
 copy /y "%JAR%" "%~dp0scripts\arete.jar" >nul
 if not exist "%~dp0scripts\plugins" mkdir "%~dp0scripts\plugins"
 copy /y "%POLICY_BASED_PLUGIN_JAR%" "%~dp0scripts\plugins\arete-policy-plugin.jar" >nul
-echo Built: scripts\arete.jar (+ bundled validation plugins)
+echo Built: scripts\arete.jar (+ bundled scoring plugins)

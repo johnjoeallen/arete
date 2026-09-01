@@ -11,7 +11,7 @@ Areté — the pursuit of API excellence.
 Areté is a local-first API explorer for OpenAPI/Swagger specs. Paste a
 spec, or point Areté at one on disk, and get instant browsable docs —
 endpoints, parameters, schemas, request/response examples, and pluggable
-policy-driven validation — with search, multi-spec tabs, and light/dark
+policy-driven scoring — with search, multi-spec tabs, and light/dark
 themes. No cloud, no build step for the reader, no account: it's a single
 runnable jar that keeps its data under `~/.arete` on your machine.
 
@@ -46,10 +46,10 @@ respects `JAVA_HOME`. See
 [Configuration](https://johnjoeallen.github.io/arete/configuration/) for
 the full list.
 
-## Validation
+## Scoring
 
-Validation is on-demand: open a spec, pick a plugin and rule set in the
-**Validation** panel, and click **Score**. Findings are merged per
+Scoring is on-demand: open a spec, pick a plugin and rule set in the
+**Scoring** panel, and click **Score**. Findings are merged per
 endpoint with severity badges, JSON Pointer locations, and links to rule
 docs.
 
@@ -66,18 +66,18 @@ pass/fail verdict (JSON or SARIF). No authentication — put it behind a
 protected boundary.
 
 - [Automation API](https://johnjoeallen.github.io/arete/automation-api/)
-- [Validation overview](https://johnjoeallen.github.io/arete/validation/)
-- [Policy engine](https://johnjoeallen.github.io/arete/validation/policy-engine/)
-- [Distill reference](https://johnjoeallen.github.io/arete/validation/distill/)
-- [Rule catalogue](https://johnjoeallen.github.io/arete/validation/rules/)
-  and [policies](https://johnjoeallen.github.io/arete/validation/policies/)
-- [Writing a plugin](https://johnjoeallen.github.io/arete/validation/writing-a-plugin/)
+- [Scoring overview](https://johnjoeallen.github.io/arete/scoring/)
+- [Policy engine](https://johnjoeallen.github.io/arete/scoring/policy-engine/)
+- [Distill reference](https://johnjoeallen.github.io/arete/scoring/distill/)
+- [Rule catalogue](https://johnjoeallen.github.io/arete/scoring/rules/)
+  and [policies](https://johnjoeallen.github.io/arete/scoring/policies/)
+- [Writing a plugin](https://johnjoeallen.github.io/arete/scoring/writing-a-plugin/)
 
 ## Modules
 
 | Module | Purpose |
 |---|---|
-| `arete-validation-spi` | Plugin SPI, published to Maven Central (`net.dublinux.arete:arete-validation-spi`). |
+| `arete-scoring-spi` | Plugin SPI, published to Maven Central (`net.dublinux.arete:arete-scoring-spi`). |
 | `arete-policy-plugin` | The bundled Areté Policy Engine. |
 | `arete-app` | The Spring Boot application. |
 

@@ -12,7 +12,7 @@ parameters: { enum-type: consistent }
 
 Enum values should use the declared schema property type consistently. A
 contract that declares a string property but supplies numeric enum values, for
-example, can cause validation failures or incompatible generated clients.
+example, can cause scoring failures or incompatible generated clients.
 
 ## Detection and scope
 

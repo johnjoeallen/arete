@@ -1,6 +1,6 @@
 package net.dublinux.arete.plugin;
 
-import net.dublinux.arete.validation.spi.Severity;
+import net.dublinux.arete.scoring.spi.Severity;
 
 import java.util.EnumMap;
 import java.util.List;

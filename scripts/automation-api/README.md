@@ -33,11 +33,11 @@ export ARETE_RUN='generic-policy/enterprise-grade,generic-policy/Zalando'
 |---|---|
 | `submit-inline.sh [spec.yaml]` | POST a raw YAML spec + run the combinations; the response `spec.id` is a UUID |
 | `submit-url.sh <url>` | POST `{ url, run }` — server fetches the spec |
-| `revalidate.sh <uuid>` | re-score an already-submitted spec by its UUID (no re-upload) |
+| `rescore.sh <uuid>` | re-score an already-submitted spec by its UUID (no re-upload) |
 | `sarif.sh [spec.yaml]` | submit, get the result as SARIF 2.1.0 |
 | `ci-gate.sh [spec.yaml]` | submit with `failOn` + `httpStatusOnFail=422`; exit non-zero on FAIL |
 | `list.sh [namespaces \| specs [submitter]]` | list namespaces, or specs in the current one |
-| `spec.sh <id> [validation [sarif] \| delete]` | read or delete one stored spec |
+| `spec.sh <id> [scoring [sarif] \| delete]` | read or delete one stored spec |
 | `no-submitter.sh` | negative test — POST without a submitter must be `400` |
 | `smoke.sh` | full walk-through in a throwaway namespace |
 

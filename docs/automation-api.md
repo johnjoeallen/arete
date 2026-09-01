@@ -127,7 +127,7 @@ score it whenever.
 GET    /api/v1/namespaces                                → [{ "slug", "name", "specCount" }]
 GET    /api/v1/namespaces/{namespace}/specs              → spec summaries; ?submitter= to filter
 GET    /api/v1/namespaces/{namespace}/specs/{uuid}       → one spec resource
-GET    /api/v1/namespaces/{namespace}/specs/{uuid}/validation   → last validation result; ?format=sarif
+GET    /api/v1/namespaces/{namespace}/specs/{uuid}/scoring   → last scoring result; ?format=sarif
 DELETE /api/v1/namespaces/{namespace}/specs/{uuid}       → 204
 ```
 

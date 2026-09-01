@@ -10,7 +10,7 @@ Areté — the pursuit of API excellence.
 Areté is a **local-first API explorer** for OpenAPI/Swagger specs. Paste a
 spec, or point Areté at one on disk, and get instant browsable docs —
 endpoints, parameters, schemas, request/response examples — plus pluggable,
-policy-driven validation, with search, multi-spec tabs, and light/dark themes.
+policy-driven scoring, with search, multi-spec tabs, and light/dark themes.
 
 No cloud, no build step for the reader, no account: it's a single runnable jar
 that keeps its data on your machine under `~/.arete`.
@@ -59,17 +59,17 @@ between several open specs without losing your place; closing a tab just drops
 it from the bar — the saved spec itself is untouched until you explicitly
 delete it.
 
-### Validation
+### Scoring
 
-Validation is **on-demand and pluggable**. Areté ships the
-[Areté Policy Engine](validation/policy-engine.md) — a policy-driven plugin
+Scoring is **on-demand and pluggable**. Areté ships the
+[Areté Policy Engine](scoring/policy-engine.md) — a policy-driven plugin
 that lints a spec against a bundle of text-defined rules and policies
 (Enterprise Grade, Zalando, Zalando Extended) — and you can drop in your own
-validation plugins alongside it. See
-[Validation overview](validation/index.md).
+scoring plugins alongside it. See
+[Scoring overview](scoring/index.md).
 
 ## Next steps
 
 - [Getting Started](getting-started.md) — install a release or build from source.
 - [Configuration](configuration.md) — ports, data locations, launcher flags.
-- [Validation overview](validation/index.md) — run validation and add plugins.
+- [Scoring overview](scoring/index.md) — run scoring and add plugins.

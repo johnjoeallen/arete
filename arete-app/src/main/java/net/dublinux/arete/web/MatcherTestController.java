@@ -5,9 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import net.dublinux.arete.plugin.PluginRegistry;
 import net.dublinux.arete.service.SpecStorageService;
 import net.dublinux.arete.web.dto.SpecSummary;
-import net.dublinux.arete.validation.spi.MatcherTestProvider;
-import net.dublinux.arete.validation.spi.MatcherTestRequest;
-import net.dublinux.arete.validation.spi.ValidationResult;
+import net.dublinux.arete.scoring.spi.MatcherTestProvider;
+import net.dublinux.arete.scoring.spi.MatcherTestRequest;
+import net.dublinux.arete.scoring.spi.ScoringResult;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -116,9 +116,9 @@ public class MatcherTestController {
         }
 
         try {
-            ValidationResult result = provider.testMatcher(new MatcherTestRequest("distill", matcherId, matcherSource,
+            ScoringResult result = provider.testMatcher(new MatcherTestRequest("distill", matcherId, matcherSource,
                     scope, parsedParameters, spec));
-            if (result.getStatus() == ValidationResult.Status.SUCCESS) {
+            if (result.getStatus() == ScoringResult.Status.SUCCESS) {
                 model.addAttribute("diagnostics", result.getDiagnostics());
             } else {
                 model.addAttribute("testError", result.getErrorMessage());

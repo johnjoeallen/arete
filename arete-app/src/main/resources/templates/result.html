@@ -56,9 +56,9 @@
                 </div>
 
                 <div class="tab-panel" th:classappend="${activateScore} ? ' active'">
-                    <div th:if="${pluginChoices != null and !pluginChoices.isEmpty() and specRef != null}" class="validation-picker-wrapper">
-                        <h2>Validation</h2>
-                        <form method="post" th:action="@{/spec/{ref}/score(ref=${specRef})}" class="validation-picker" id="validation-picker-form">
+                    <div th:if="${pluginChoices != null and !pluginChoices.isEmpty() and specRef != null}" class="scoring-picker-wrapper">
+                        <h2>Scoring</h2>
+                        <form method="post" th:action="@{/spec/{ref}/score(ref=${specRef})}" class="scoring-picker" id="scoring-picker-form">
                             <table class="plugin-picker-table">
                                 <thead>
                                     <tr><th></th><th>Plugin</th><th>Rule set</th></tr>
@@ -83,29 +83,29 @@
                     <div class="score-lower-panel">
                         <div th:if="${!hasBeenScored}" class="score-empty-state" role="img" aria-label="No analysis results">
                             <span class="score-empty-icon">&#128683;</span>
-                            <p>Score this to see validation results.</p>
+                            <p>Score this to see scoring results.</p>
                         </div>
 
                         <div th:if="${hasBeenScored}">
-                            <div class="validation-results">
-                                <p th:if="${resultFromCache}" class="validation-summary-line validation-cached-note">Showing results from the last Score run.</p>
-                                <p th:if="${validation.rulesEvaluatedCount() >= 0}" class="validation-summary-line"
-                                   th:text="${validation.rulesEvaluatedCount()} + ' rule(s) checked across ' + ${validation.pluginSummaries().size()} + ' validator(s).'"></p>
-                                <p th:if="${!T(java.lang.Double).isNaN(validation.overallScore())}" class="validation-summary-line validation-score-line">
-                                    Score: <span th:text="${#numbers.formatDecimal(validation.overallScore(), 1, 1)}"></span>%
-                                    <span th:if="${validation.grade() != null}" class="validation-grade"
-                                          th:text="'&nbsp;Grade ' + ${validation.grade()}"></span>
-                                    <span th:if="${!T(java.lang.Double).isNaN(validation.passingScore())}"
-                                          th:classappend="${validation.meetsPassingScore()} ? ' validation-pass' : ' validation-fail'"
-                                          th:text="${validation.meetsPassingScore()}
-                                              ? '&nbsp;— passes (≥ ' + ${#numbers.formatDecimal(validation.passingScore(),0,0)} + ')'
-                                              : '&nbsp;— below passing score of ' + ${#numbers.formatDecimal(validation.passingScore(),0,0)}"></span>
-                                    <span th:if="${!T(java.lang.Double).isNaN(validation.overallScoreWithoutBlockers()) and validation.overallScore() != validation.overallScoreWithoutBlockers()}"
-                                          th:text="' (' + ${#numbers.formatDecimal(validation.overallScoreWithoutBlockers(), 1, 1)} + '% without blockers)'"></span>
+                            <div class="scoring-results">
+                                <p th:if="${resultFromCache}" class="scoring-summary-line scoring-cached-note">Showing results from the last Score run.</p>
+                                <p th:if="${scoring.rulesEvaluatedCount() >= 0}" class="scoring-summary-line"
+                                   th:text="${scoring.rulesEvaluatedCount()} + ' rule(s) checked across ' + ${scoring.pluginSummaries().size()} + ' validator(s).'"></p>
+                                <p th:if="${!T(java.lang.Double).isNaN(scoring.overallScore())}" class="scoring-summary-line scoring-score-line">
+                                    Score: <span th:text="${#numbers.formatDecimal(scoring.overallScore(), 1, 1)}"></span>%
+                                    <span th:if="${scoring.grade() != null}" class="scoring-grade"
+                                          th:text="'&nbsp;Grade ' + ${scoring.grade()}"></span>
+                                    <span th:if="${!T(java.lang.Double).isNaN(scoring.passingScore())}"
+                                          th:classappend="${scoring.meetsPassingScore()} ? ' scoring-pass' : ' scoring-fail'"
+                                          th:text="${scoring.meetsPassingScore()}
+                                              ? '&nbsp;— passes (≥ ' + ${#numbers.formatDecimal(scoring.passingScore(),0,0)} + ')'
+                                              : '&nbsp;— below passing score of ' + ${#numbers.formatDecimal(scoring.passingScore(),0,0)}"></span>
+                                    <span th:if="${!T(java.lang.Double).isNaN(scoring.overallScoreWithoutBlockers()) and scoring.overallScore() != scoring.overallScoreWithoutBlockers()}"
+                                          th:text="' (' + ${#numbers.formatDecimal(scoring.overallScoreWithoutBlockers(), 1, 1)} + '% without blockers)'"></span>
                                 </p>
-                                <p th:if="${validation.diagnostics().isEmpty()}" class="validation-summary-line validation-clean-note">No issues found.</p>
+                                <p th:if="${scoring.diagnostics().isEmpty()}" class="scoring-summary-line scoring-clean-note">No issues found.</p>
                                 <ul class="plugin-outcomes">
-                                    <li th:each="s : ${validation.pluginSummaries()}">
+                                    <li th:each="s : ${scoring.pluginSummaries()}">
                                         <span th:text="${s.pluginName()}"></span>:
                                         <span th:if="${s.status() == 'SUCCESS'}" th:text="${s.diagnosticCount()} + ' diagnostic(s)'"></span>
                                         <span th:unless="${s.status() == 'SUCCESS'}" class="plugin-error" th:text="${s.status()} + ' - ' + ${s.errorMessage()}"></span>
@@ -116,7 +116,7 @@
                                         <input type="checkbox" class="severity-filter-all" checked>
                                         All
                                     </label>
-                                    <label class="severity-filter-item" th:each="sev : ${T(net.dublinux.arete.validation.spi.Severity).values()}">
+                                    <label class="severity-filter-item" th:each="sev : ${T(net.dublinux.arete.scoring.spi.Severity).values()}">
                                         <input type="checkbox" class="severity-filter-value" th:value="${sev.name()}" checked>
                                         <span th:text="${severityLabels.get(sev.name())}">Error</span>
                                         <th:block th:if="${severityScoreImpact != null and severityScoreImpact.containsKey(sev.name())}"

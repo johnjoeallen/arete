@@ -26,8 +26,8 @@ you launch from:
 |---|---|
 | `~/.arete/data` | The embedded H2 database. |
 | `~/.arete/specs` | Drop spec files here to have them loaded and watched automatically. |
-| `~/.arete/plugins` | Drop extra validation plugin jars here — see [Writing a Plugin](validation/writing-a-plugin.md). |
-| `~/.arete/policies` | Drop extra `*.md` policy files here to add them to the bundled [Areté Policy Engine](validation/policy-engine.md#user-policies). |
+| `~/.arete/plugins` | Drop extra scoring plugin jars here — see [Writing a Plugin](scoring/writing-a-plugin.md). |
+| `~/.arete/policies` | Drop extra `*.md` policy files here to add them to the bundled [Areté Policy Engine](scoring/policy-engine.md#user-policies). |
 
 ### Automation API settings
 

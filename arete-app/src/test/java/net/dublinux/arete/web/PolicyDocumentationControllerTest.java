@@ -2,12 +2,12 @@ package net.dublinux.arete.web;
 
 import net.dublinux.arete.plugin.PluginRegistry;
 import net.dublinux.arete.service.MarkdownRenderer;
-import net.dublinux.arete.validation.spi.RuleDocumentation;
-import net.dublinux.arete.validation.spi.RuleDocumentationProvider;
-import net.dublinux.arete.validation.spi.SpecFormat;
-import net.dublinux.arete.validation.spi.SpecInput;
-import net.dublinux.arete.validation.spi.SpecValidationPlugin;
-import net.dublinux.arete.validation.spi.ValidationResult;
+import net.dublinux.arete.scoring.spi.RuleDocumentation;
+import net.dublinux.arete.scoring.spi.RuleDocumentationProvider;
+import net.dublinux.arete.scoring.spi.SpecFormat;
+import net.dublinux.arete.scoring.spi.SpecInput;
+import net.dublinux.arete.scoring.spi.SpecScoringPlugin;
+import net.dublinux.arete.scoring.spi.ScoringResult;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -49,13 +49,13 @@ class PolicyDocumentationControllerTest {
                 .andExpect(status().isNotFound());
     }
 
-    private static final class DocumentedPlugin implements SpecValidationPlugin, RuleDocumentationProvider {
+    private static final class DocumentedPlugin implements SpecScoringPlugin, RuleDocumentationProvider {
         @Override public String getId() { return "generic-policy"; }
         @Override public String getName() { return "Test"; }
         @Override public String getVersion() { return "1"; }
         @Override public Set<SpecFormat> getSupportedFormats() { return Set.of(SpecFormat.OPENAPI3); }
         @Override public void configure(Map<String, String> config) { }
-        @Override public ValidationResult validate(SpecInput input) { return ValidationResult.success(List.of(), 0); }
+        @Override public ScoringResult score(SpecInput input) { return ScoringResult.success(List.of(), 0); }
         @Override public Optional<RuleDocumentation> getRuleDocumentation(String ruleId) {
             return "REST001".equals(ruleId) ? Optional.of(new RuleDocumentation("REST001", "# REST001\n\nRule text.")) : Optional.empty();
         }

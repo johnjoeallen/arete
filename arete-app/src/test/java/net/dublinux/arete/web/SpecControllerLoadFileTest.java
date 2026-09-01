@@ -3,9 +3,9 @@ package net.dublinux.arete.web;
 import net.dublinux.arete.domain.SpecEntity;
 import net.dublinux.arete.plugin.PluginRegistry;
 import net.dublinux.arete.plugin.PluginSettingsService;
-import net.dublinux.arete.plugin.PluginValidationService;
+import net.dublinux.arete.plugin.PluginScoringService;
 import net.dublinux.arete.plugin.SpecPluginSettingsService;
-import net.dublinux.arete.plugin.SpecValidationResultService;
+import net.dublinux.arete.plugin.SpecScoringResultService;
 import net.dublinux.arete.service.ParsedSpec;
 import net.dublinux.arete.service.SpecFileWatcher;
 import net.dublinux.arete.service.SpecParserService;
@@ -46,7 +46,7 @@ class SpecControllerLoadFileTest {
     private SpecStorageService specStorageService;
 
     @MockitoBean
-    private PluginValidationService pluginValidationService;
+    private PluginScoringService pluginScoringService;
 
     @MockitoBean
     private SpecFileWatcher specFileWatcher;
@@ -64,7 +64,7 @@ class SpecControllerLoadFileTest {
     private SpecPluginSettingsService specPluginSettingsService;
 
     @MockitoBean
-    private SpecValidationResultService specValidationResultService;
+    private SpecScoringResultService specScoringResultService;
 
     @MockitoBean
     private net.dublinux.arete.service.NamespaceService namespaceService;
@@ -115,10 +115,10 @@ class SpecControllerLoadFileTest {
         when(specParserService.parse("openapi: 3.0.0"))
                 .thenReturn(new ParsedSpec(new OpenAPI().info(new Info().title("Graded API").version("1.0.0")), List.of()));
 
-        var result = new net.dublinux.arete.plugin.AggregatedValidationResult(
+        var result = new net.dublinux.arete.plugin.AggregatedScoringResult(
                 List.of(), List.of(), 111, 92.5, 92.5, "B-", 90.0);   // passes: 92.5 >= 90
-        when(specValidationResultService.findForSpec(7L)).thenReturn(java.util.Optional.of(
-                new net.dublinux.arete.plugin.CachedValidationResult(result, List.of("generic-policy"))));
+        when(specScoringResultService.findForSpec(7L)).thenReturn(java.util.Optional.of(
+                new net.dublinux.arete.plugin.CachedScoringResult(result, List.of("generic-policy"))));
 
         mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/spec/graded-1"))
                 .andExpect(status().isOk())

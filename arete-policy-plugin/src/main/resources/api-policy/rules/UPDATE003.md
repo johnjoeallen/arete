@@ -28,7 +28,7 @@ scope: operation
 ```
 
 It has no parameters. The manual rule intentionally returns no automated
-diagnostics for any OpenAPI document. Consequently, running validation does
+diagnostics for any OpenAPI document. Consequently, running scoring does
 not create an UPDATE003 finding at an operation pointer, even when an
 operation looks like an update of a nested concept. The rule remains in the
 policy catalogue as guidance for a reviewer who is assessing update design.

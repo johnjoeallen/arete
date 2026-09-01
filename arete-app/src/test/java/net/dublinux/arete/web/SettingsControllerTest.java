@@ -8,8 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import net.dublinux.arete.validation.spi.SpecFormat;
-import net.dublinux.arete.validation.spi.SpecValidationPlugin;
+import net.dublinux.arete.scoring.spi.SpecFormat;
+import net.dublinux.arete.scoring.spi.SpecScoringPlugin;
 
 import java.nio.file.Path;
 import java.util.Map;
@@ -72,8 +72,8 @@ class SettingsControllerTest {
         verify(pluginSettingsService).setEnabled(eq("noop"), eq(false));
     }
 
-    private static SpecValidationPlugin stubPlugin(String id, String name) {
-        return new SpecValidationPlugin() {
+    private static SpecScoringPlugin stubPlugin(String id, String name) {
+        return new SpecScoringPlugin() {
             @Override
             public String getId() {
                 return id;
@@ -99,7 +99,7 @@ class SettingsControllerTest {
             }
 
             @Override
-            public net.dublinux.arete.validation.spi.ValidationResult validate(net.dublinux.arete.validation.spi.SpecInput input) {
+            public net.dublinux.arete.scoring.spi.ScoringResult score(net.dublinux.arete.scoring.spi.SpecInput input) {
                 throw new UnsupportedOperationException();
             }
         };

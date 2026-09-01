@@ -9,7 +9,7 @@ Usage:
   ARETE_URL=http://localhost:6809 python3 scripts/docs/gen-screenshots.py
 
 It pastes scripts/docs/bookstore-demo.yaml, runs the bundled Areté Policy
-Engine, and captures: screenshot.png (Explore), screenshot-validation.png,
+Engine, and captures: screenshot.png (Explore), screenshot-scoring.png,
 screenshot-model.png, screenshot-general.png, screenshot-settings.png.
 Best run against a throwaway instance (isolated $HOME) so it doesn't touch a
 real spec collection.
@@ -76,14 +76,14 @@ def main():
         shot(pg, "screenshot.png")
 
         click_tab(pg, "Score")
-        pg.locator("#validation-picker-form").get_by_role("button", name="Score", exact=True).click()
+        pg.locator("#scoring-picker-form").get_by_role("button", name="Score", exact=True).click()
         pg.wait_for_load_state("networkidle")
         pg.wait_for_timeout(800)
         click_tab(pg, "Score")
 
         click_subtab(pg, "Interface")
         expand_books_get(pg)
-        shot(pg, "screenshot-validation.png")
+        shot(pg, "screenshot-scoring.png")
 
         click_subtab(pg, "Model")
         shot(pg, "screenshot-model.png")

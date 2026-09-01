@@ -1,6 +1,6 @@
 package net.dublinux.arete.plugin;
 
-import net.dublinux.arete.validation.spi.Severity;
+import net.dublinux.arete.scoring.spi.Severity;
 
 /**
  * A pass level for automated gating, in the fixed grammar
@@ -50,7 +50,7 @@ public record ScoreLevel(Kind kind, double minScore) {
     }
 
     /** True when this level is not met by the given result — i.e. the combination FAILS. */
-    public boolean failedBy(AggregatedValidationResult result) {
+    public boolean failedBy(AggregatedScoringResult result) {
         return switch (kind) {
             case NEVER -> false;
             case ERROR -> countAtLeastOne(result, Severity.ERROR);
@@ -59,7 +59,7 @@ public record ScoreLevel(Kind kind, double minScore) {
         };
     }
 
-    private static boolean countAtLeastOne(AggregatedValidationResult result, Severity severity) {
+    private static boolean countAtLeastOne(AggregatedScoringResult result, Severity severity) {
         return result.diagnostics().stream().anyMatch(d -> d.diagnostic().getSeverity() == severity);
     }
 
@@ -68,7 +68,7 @@ public record ScoreLevel(Kind kind, double minScore) {
      * (something reduced it to zero); if scores weren't computed, fall back to
      * "any error-severity finding".
      */
-    private static boolean blockerFired(AggregatedValidationResult result) {
+    private static boolean blockerFired(AggregatedScoringResult result) {
         double score = result.overallScore();
         double withoutBlockers = result.overallScoreWithoutBlockers();
         if (!Double.isNaN(score) && !Double.isNaN(withoutBlockers)) {

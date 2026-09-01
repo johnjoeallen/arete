@@ -1,7 +1,7 @@
 package net.dublinux.arete.plugin;
 
-import net.dublinux.arete.validation.spi.Diagnostic;
-import net.dublinux.arete.validation.spi.Severity;
+import net.dublinux.arete.scoring.spi.Diagnostic;
+import net.dublinux.arete.scoring.spi.Severity;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -25,10 +25,10 @@ class ScoreLevelTest {
 
     @Test
     void evaluatesAgainstAResult() {
-        AggregatedValidationResult clean = result(95.0, 95.0, null);
-        AggregatedValidationResult warned = result(88.0, 88.0, Severity.WARNING);
-        AggregatedValidationResult errored = result(70.0, 70.0, Severity.ERROR);
-        AggregatedValidationResult blocked = result(0.0, 60.0, Severity.ERROR);
+        AggregatedScoringResult clean = result(95.0, 95.0, null);
+        AggregatedScoringResult warned = result(88.0, 88.0, Severity.WARNING);
+        AggregatedScoringResult errored = result(70.0, 70.0, Severity.ERROR);
+        AggregatedScoringResult blocked = result(0.0, 60.0, Severity.ERROR);
 
         assertThat(ScoreLevel.NEVER.failedBy(errored)).isFalse();
 
@@ -42,10 +42,10 @@ class ScoreLevelTest {
         assertThat(ScoreLevel.parse("score<90").failedBy(warned)).isTrue();
     }
 
-    private static AggregatedValidationResult result(double score, double withoutBlockers, Severity severity) {
+    private static AggregatedScoringResult result(double score, double withoutBlockers, Severity severity) {
         List<AttributedDiagnostic> diags = severity == null ? List.of()
                 : List.of(new AttributedDiagnostic("p", "P",
                         Diagnostic.builder().ruleId("R").title("t").description("m").severity(severity).build()));
-        return new AggregatedValidationResult(List.of(), diags, 1, score, withoutBlockers);
+        return new AggregatedScoringResult(List.of(), diags, 1, score, withoutBlockers);
     }
 }

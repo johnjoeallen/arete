@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regenerate docs/validation/rules.md and policies.md from the policy bundle.
+"""Regenerate docs/scoring/rules.md and policies.md from the policy bundle.
 
 Run from anywhere:  python3 scripts/docs/gen-policy-docs.py
 Requires: pyyaml  (pip install pyyaml)
@@ -10,7 +10,7 @@ import yaml
 
 REPO = pathlib.Path(__file__).resolve().parents[2]
 BUNDLE = REPO / "arete-policy-plugin/src/main/resources/api-policy"
-OUT = REPO / "docs/validation"
+OUT = REPO / "docs/scoring"
 
 manifest = yaml.safe_load((BUNDLE / "PolicyBundle.yaml").read_text())
 
@@ -120,7 +120,7 @@ lines = [
     "",
     "A **policy** is the deployable rule set: the list of active [rules](rules.md)",
     "and what each one costs. The Areté Policy Engine exposes one rule set per",
-    "policy in the bundle; pick one in the validation picker. The first policy",
+    "policy in the bundle; pick one in the scoring picker. The first policy",
     "listed here is the default when an unknown rule set is requested.",
     "",
     "```",

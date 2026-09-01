@@ -52,7 +52,7 @@
 
         <h3>Validator plugins</h3>
         <p th:if="${pluginRows.isEmpty()}" class="muted">
-            No validation plugins are loaded. Drop a plugin jar into <code th:text="${installPluginsDir}"></code>
+            No scoring plugins are loaded. Drop a plugin jar into <code th:text="${installPluginsDir}"></code>
             or <code th:text="${userPluginsDir}"></code> and restart.
         </p>
         <table class="plugin-settings" th:if="${!pluginRows.isEmpty()}">

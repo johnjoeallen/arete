@@ -29,8 +29,8 @@ the API **must sit behind a protected boundary** — see "Trust model".
 - `SpecSource` enum: `PASTED`, `FILE`. No URL source.
 - Sidebar and `GET /api/specs` list `specStorageService.findAll()` — a flat
   global list.
-- Validation is on-demand: `PluginValidationService.validateMany(rawSpec,
-  List<PluginRunRequest>)` → `AggregatedValidationResult`. Results are
+- Scoring is on-demand: `PluginScoringService.scoreMany(rawSpec,
+  List<PluginRunRequest>)` → `AggregatedScoringResult`. Results are
   persisted per spec id + content hash in `spec_validation_result`.
 - Existing `/api/*` routes (`/api/paste`, `/api/load-file`) return Thymeleaf
   views, not JSON. Only `/api/specs` returns JSON.
@@ -185,7 +185,7 @@ Re-validating is re-POSTing.
 GET    /api/v1/namespaces                             → [{ slug, specCount }]
 GET    /api/v1/namespaces/{namespace}/specs           → [spec summary]; ?submitter= filter
 GET    /api/v1/namespaces/{namespace}/specs/{id}      → spec resource
-GET    /api/v1/namespaces/{namespace}/specs/{id}/validation → last validation result (?format=sarif)
+GET    /api/v1/namespaces/{namespace}/specs/{id}/scoring → last scoring result (?format=sarif)
 DELETE /api/v1/namespaces/{namespace}/specs/{id}
 ```
 
@@ -291,7 +291,7 @@ new dependency. Adopt Flyway if/when a second migration appears.
 
 1. **Schema** — `specs` columns (`namespace`, `submitter`, `source_url`),
    `SpecSource.URL`, the startup constraint swap.
-2. **Namespace + submitter resolution** — slug validation; a
+2. **Namespace + submitter resolution** — slug scoring; a
    `HandlerMethodArgumentResolver` reading the `arete_submitter` cookie
    (or `X-Arete-Submitter` header) and `?submitter=` for reads; `400` when a
    POST has no submitter.
@@ -308,7 +308,7 @@ new dependency. Adopt Flyway if/when a second migration appears.
    returns its parsed value. A shared `ScoreLevel` parser/evaluator
    (`blocker` | `error` | `score<NN`) used by both the plugin and the API.
 6. **API controller** — `AutomationApiController` under `/api/v1`: submit
-   (= store + run the requested `run` combinations), list, read, validation,
+   (= store + run the requested `run` combinations), list, read, scoring,
    delete. Request/response DTOs, result → JSON + SARIF mappers, per-combination
    level evaluation and the overall verdict, problem+json errors, `400` on a
    missing `run` list.
@@ -324,7 +324,7 @@ new dependency. Adopt Flyway if/when a second migration appears.
    required `run` list, `failOn=policy` vs override, SARIF, `400` on missing
    submitter / missing `run`, problem responses); `ScoreLevel` parse/eval;
    policy `scoring:` load; storage-service namespace uniqueness; SSRF-guard
-   unit tests; namespace/submitter validation; cookie defaults.
+   unit tests; namespace/submitter scoring; cookie defaults.
 
 ## Explicit non-goals (v1)
 

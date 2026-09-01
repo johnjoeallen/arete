@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.system.ApplicationHome;
 import org.springframework.stereotype.Component;
-import net.dublinux.arete.validation.spi.SpecValidationPlugin;
+import net.dublinux.arete.scoring.spi.SpecScoringPlugin;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,7 +23,7 @@ import java.util.ServiceLoader;
 import java.util.stream.Collectors;
 
 /**
- * Discovers and loads every {@link SpecValidationPlugin} jar found in either
+ * Discovers and loads every {@link SpecScoringPlugin} jar found in either
  * of two {@code plugins/} folders:
  *
  * <ul>
@@ -41,12 +41,12 @@ import java.util.stream.Collectors;
  *
  * Each jar gets its own isolated, <em>child-first</em> {@link URLClassLoader}
  * (see {@link ChildFirstClassLoader}), parented on the classloader that
- * loaded {@link SpecValidationPlugin} itself, per the interface's
+ * loaded {@link SpecScoringPlugin} itself, per the interface's
  * classloading contract.
  *
  * <p>This is the minimal loader described for the discovery-pipeline proof:
  * one instance per plugin jar, loaded once at startup and reused for every
- * subsequent {@code validate()} call. Concurrency/error-handling hardening
+ * subsequent {@code score()} call. Concurrency/error-handling hardening
  * beyond the defensive {@code catch (Throwable)} below is intentionally out
  * of scope here.
  */
@@ -58,7 +58,7 @@ public class PluginRegistry {
     private final Path installPluginsDir;
     private final Path userPluginsDir;
     private final PluginSettingsService pluginSettingsService;
-    private List<SpecValidationPlugin> plugins = List.of();
+    private List<SpecScoringPlugin> plugins = List.of();
 
     @Autowired
     public PluginRegistry(
@@ -80,18 +80,18 @@ public class PluginRegistry {
         jars.addAll(listJars(installPluginsDir, false));
         jars.addAll(listJars(userPluginsDir, true));
 
-        List<SpecValidationPlugin> loaded = new ArrayList<>();
+        List<SpecScoringPlugin> loaded = new ArrayList<>();
         for (File jar : jars) {
             try {
                 URLClassLoader isolated = new ChildFirstClassLoader(
                         new URL[] {jar.toURI().toURL()},
-                        SpecValidationPlugin.class.getClassLoader());
-                ServiceLoader<SpecValidationPlugin> serviceLoader =
-                        ServiceLoader.load(SpecValidationPlugin.class, isolated);
-                for (SpecValidationPlugin plugin : serviceLoader) {
+                        SpecScoringPlugin.class.getClassLoader());
+                ServiceLoader<SpecScoringPlugin> serviceLoader =
+                        ServiceLoader.load(SpecScoringPlugin.class, isolated);
+                for (SpecScoringPlugin plugin : serviceLoader) {
                     plugin.configure(Map.of());
                     loaded.add(plugin);
-                    log.info("Loaded validation plugin '{}' ({}) from {}",
+                    log.info("Loaded scoring plugin '{}' ({}) from {}",
                             plugin.getId(), plugin.getName(), jar.getAbsolutePath());
                 }
             } catch (Throwable t) {
@@ -101,13 +101,13 @@ public class PluginRegistry {
                 // Pass the throwable itself (not t.toString()) so the cause chain
                 // actually reaches the log — a bare summary line has repeatedly not
                 // been enough to diagnose real plugin-loading failures.
-                log.warn("Failed to load validation plugin from {}", jar.getName(), t);
+                log.warn("Failed to load scoring plugin from {}", jar.getName(), t);
             }
         }
 
         this.plugins = Collections.unmodifiableList(loaded);
         pluginSettingsService.ensureDefaults(
-                loaded.stream().map(SpecValidationPlugin::getId).collect(Collectors.toList()));
+                loaded.stream().map(SpecScoringPlugin::getId).collect(Collectors.toList()));
     }
 
     /** Lists the jars in {@code dir}; creates it first if {@code createIfMissing}, otherwise skips a missing dir silently. */
@@ -133,7 +133,7 @@ public class PluginRegistry {
         return List.of(jars);
     }
 
-    public List<SpecValidationPlugin> getPlugins() {
+    public List<SpecScoringPlugin> getPlugins() {
         return plugins;
     }
 

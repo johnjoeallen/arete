@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# End-to-end walk-through: submit, list, read back, re-validate, delete.
+# End-to-end walk-through: submit, list, read back, re-score, delete.
 # Uses a throwaway namespace so it doesn't disturb real data.
 source "$(dirname "$0")/_common.sh"
 
@@ -24,10 +24,10 @@ areq "${NS_BASE}/specs" | show
 banner "4. read spec ${id}"
 areq "${NS_BASE}/specs/${id}" | show
 
-banner "5. last validation for spec ${id}"
-areq "${NS_BASE}/specs/${id}/validation" | show
+banner "5. last scoring for spec ${id}"
+areq "${NS_BASE}/specs/${id}/scoring" | show
 
-banner "6. re-validate (re-POST the same spec)"
+banner "6. re-score (re-POST the same spec)"
 areq -X POST "${NS_BASE}/specs?$(run_query)" \
   -H 'Content-Type: application/yaml' --data-binary "@${SAMPLE_SPEC}" | show
 

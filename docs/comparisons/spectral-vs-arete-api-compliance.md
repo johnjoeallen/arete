@@ -11,9 +11,9 @@ For this comparison, Areté is assumed to be available as:
 - Maven and Gradle plugins.
 
 These deployment modes are architectural assumptions for this document. They are
-not all implemented in the current repository. The current validation design is
-described in [Validation](/home/jallen/git/arete/docs/validation/index.md) and
-the [Policy Engine](/home/jallen/git/arete/docs/validation/policy-engine.md).
+not all implemented in the current repository. The current scoring design is
+described in [Scoring](/home/jallen/git/arete/docs/scoring/index.md) and
+the [Policy Engine](/home/jallen/git/arete/docs/scoring/policy-engine.md).
 
 ## Executive conclusion
 
@@ -204,7 +204,7 @@ the linter.
 
 ### Areté
 
-Areté treats scoring as part of validation. A policy can assign deductions to
+Areté treats scoring as part of scoring. A policy can assign deductions to
 rules and mark a rule as `PROHIBITED`. Results can include both the overall score
 and the points associated with individual findings.
 
@@ -401,7 +401,7 @@ should be:
 
 That proposition depends on five capabilities being consistent everywhere:
 
-1. **One policy identity** — local and central validation identify the same policy
+1. **One policy identity** — local and central scoring identify the same policy
    and version.
 2. **One rule semantics** — CLI, Maven, Gradle, Git, and service results agree on
    what a rule means.
@@ -424,7 +424,7 @@ scoring, lifecycle enforcement, breaking-change governance, and evidence.
 - [Spectral custom functions](https://github.com/stoplightio/spectral/blob/develop/docs/guides/5-custom-functions.md)
 - [Spectral CLI and output formats](https://github.com/stoplightio/spectral/blob/develop/docs/guides/2-cli.md)
 - [Spectral overrides](https://github.com/stoplightio/spectral/blob/develop/docs/guides/4d-overrides.md)
-- [Areté validation overview](/home/jallen/git/arete/docs/validation/index.md)
-- [Areté Policy Engine](/home/jallen/git/arete/docs/validation/policy-engine.md)
-- [Areté Distill reference](/home/jallen/git/arete/docs/validation/distill.md)
-- [Writing an Areté plugin](/home/jallen/git/arete/docs/validation/writing-a-plugin.md)
+- [Areté scoring overview](/home/jallen/git/arete/docs/scoring/index.md)
+- [Areté Policy Engine](/home/jallen/git/arete/docs/scoring/policy-engine.md)
+- [Areté Distill reference](/home/jallen/git/arete/docs/scoring/distill.md)
+- [Writing an Areté plugin](/home/jallen/git/arete/docs/scoring/writing-a-plugin.md)

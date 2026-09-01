@@ -11,8 +11,8 @@
     <span class="finding-badge finding-badge-hint" th:if="${findings.counts().hintCount() > 0}"
           th:text="'💡 ' + ${findings.counts().hintCount()}" th:title="${findings.counts().hintCount()} + ' hint(s)'"></span>
 </span>
-<div th:fragment="findingsTable(findings, severityLabels)" th:if="${findings != null and !findings.diagnostics().isEmpty()}" class="section validation-findings-section">
-    <h3>Validation findings</h3>
+<div th:fragment="findingsTable(findings, severityLabels)" th:if="${findings != null and !findings.diagnostics().isEmpty()}" class="section scoring-findings-section">
+    <h3>Scoring findings</h3>
     <table class="endpoint-findings">
         <thead>
             <tr><th>Severity</th><th>Rule</th><th>Finding</th><th>Location</th><th>Source</th></tr>

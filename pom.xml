@@ -10,10 +10,10 @@
     <packaging>pom</packaging>
 
     <name>arete-parent</name>
-    <description>Reactor build for Areté and its validation plugin modules</description>
+    <description>Reactor build for Areté and its scoring plugin modules</description>
 
     <modules>
-        <module>arete-validation-spi</module>
+        <module>arete-scoring-spi</module>
         <module>arete-policy-plugin</module>
         <module>arete-app</module>
     </modules>

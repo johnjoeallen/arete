@@ -2,8 +2,8 @@ package net.dublinux.arete.web;
 
 import net.dublinux.arete.plugin.PluginRegistry;
 import net.dublinux.arete.service.MarkdownRenderer;
-import net.dublinux.arete.validation.spi.RuleDocumentation;
-import net.dublinux.arete.validation.spi.RuleDocumentationProvider;
+import net.dublinux.arete.scoring.spi.RuleDocumentation;
+import net.dublinux.arete.scoring.spi.RuleDocumentationProvider;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

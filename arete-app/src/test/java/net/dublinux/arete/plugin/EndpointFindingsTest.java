@@ -1,8 +1,8 @@
 package net.dublinux.arete.plugin;
 
 import org.junit.jupiter.api.Test;
-import net.dublinux.arete.validation.spi.Severity;
-import net.dublinux.arete.validation.spi.Diagnostic;
+import net.dublinux.arete.scoring.spi.Severity;
+import net.dublinux.arete.scoring.spi.Diagnostic;
 
 import java.util.List;
 import java.util.Map;

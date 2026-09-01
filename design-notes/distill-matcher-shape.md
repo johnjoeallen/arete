@@ -1,7 +1,7 @@
 # A clearer shape for Distill matchers
 
 > **Status: implemented** (Option 0 below). See the
-> [Distill reference](../docs/validation/distill.md#repeatable-filtermap-checks)
+> [Distill reference](../docs/scoring/distill.md#repeatable-filtermap-checks)
 > for the shipped feature and [History](../docs/history.md#the-matcher-language)
 > for the rationale in context. This note is kept for the design trail.
 

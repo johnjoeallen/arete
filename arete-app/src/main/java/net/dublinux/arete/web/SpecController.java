@@ -2,17 +2,17 @@ package net.dublinux.arete.web;
 
 import net.dublinux.arete.domain.SpecEntity;
 import net.dublinux.arete.domain.SpecSource;
-import net.dublinux.arete.plugin.AggregatedValidationResult;
-import net.dublinux.arete.plugin.CachedValidationResult;
+import net.dublinux.arete.plugin.AggregatedScoringResult;
+import net.dublinux.arete.plugin.CachedScoringResult;
 import net.dublinux.arete.plugin.ComponentFindings;
 import net.dublinux.arete.plugin.EndpointFindings;
 import net.dublinux.arete.plugin.GeneralFindings;
 import net.dublinux.arete.plugin.PluginRegistry;
 import net.dublinux.arete.plugin.PluginRunRequest;
 import net.dublinux.arete.plugin.PluginSettingsService;
-import net.dublinux.arete.plugin.PluginValidationService;
+import net.dublinux.arete.plugin.PluginScoringService;
 import net.dublinux.arete.plugin.SpecPluginSettingsService;
-import net.dublinux.arete.plugin.SpecValidationResultService;
+import net.dublinux.arete.plugin.SpecScoringResultService;
 import net.dublinux.arete.service.EndpointGrouper;
 import net.dublinux.arete.service.ParsedSpec;
 import net.dublinux.arete.service.SpecFileWatcher;
@@ -24,8 +24,8 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
-import net.dublinux.arete.validation.spi.Severity;
-import net.dublinux.arete.validation.spi.SpecValidationPlugin;
+import net.dublinux.arete.scoring.spi.Severity;
+import net.dublinux.arete.scoring.spi.SpecScoringPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -58,29 +58,29 @@ public class SpecController {
 
     private final SpecParserService specParserService;
     private final SpecStorageService specStorageService;
-    private final PluginValidationService pluginValidationService;
+    private final PluginScoringService pluginScoringService;
     private final SpecFileWatcher specFileWatcher;
     private final PluginRegistry pluginRegistry;
     private final PluginSettingsService pluginSettingsService;
     private final SpecPluginSettingsService specPluginSettingsService;
-    private final SpecValidationResultService specValidationResultService;
+    private final SpecScoringResultService specScoringResultService;
     private final net.dublinux.arete.web.api.DeploymentMode deploymentMode;
     private final net.dublinux.arete.service.NamespaceService namespaceService;
 
     public SpecController(SpecParserService specParserService, SpecStorageService specStorageService,
-            PluginValidationService pluginValidationService, SpecFileWatcher specFileWatcher,
+            PluginScoringService pluginScoringService, SpecFileWatcher specFileWatcher,
             PluginRegistry pluginRegistry, PluginSettingsService pluginSettingsService,
-            SpecPluginSettingsService specPluginSettingsService, SpecValidationResultService specValidationResultService,
+            SpecPluginSettingsService specPluginSettingsService, SpecScoringResultService specScoringResultService,
             net.dublinux.arete.web.api.DeploymentMode deploymentMode,
             net.dublinux.arete.service.NamespaceService namespaceService) {
         this.specParserService = specParserService;
         this.specStorageService = specStorageService;
-        this.pluginValidationService = pluginValidationService;
+        this.pluginScoringService = pluginScoringService;
         this.specFileWatcher = specFileWatcher;
         this.pluginRegistry = pluginRegistry;
         this.pluginSettingsService = pluginSettingsService;
         this.specPluginSettingsService = specPluginSettingsService;
-        this.specValidationResultService = specValidationResultService;
+        this.specScoringResultService = specScoringResultService;
         this.deploymentMode = deploymentMode;
         this.namespaceService = namespaceService;
     }
@@ -192,10 +192,10 @@ public class SpecController {
     }
 
     /**
-     * Renders a spec's docs. Validation is on-demand, not automatic — see
-     * {@link PluginValidationService} — so {@code ran} is absent on a plain
+     * Renders a spec's docs. Scoring is on-demand, not automatic — see
+     * {@link PluginScoringService} — so {@code ran} is absent on a plain
      * open (nothing runs; instead the last Score run's result, if any, is
-     * reloaded from {@link SpecValidationResultService} so it doesn't just
+     * reloaded from {@link SpecScoringResultService} so it doesn't just
      * vanish when the page is left) and present when the Score form
      * resubmits here. {@code plugin} is the checked plugin ids from that
      * form — a plugin present in {@code allParams} (i.e. rendered as a
@@ -234,7 +234,7 @@ public class SpecController {
         model.addAttribute("specFilePath", entity.getFilePath());
 
         model.addAttribute("activateScore", scored != null);
-        populateCachedValidation(model, entity.getId());
+        populateCachedScoring(model, entity.getId());
         populateSidebar(model, q, entity, NamespaceContext.from(request));
         model.addAttribute("pluginChoices", pluginChoices(entity.getId(), Map.of()));
         return "result";
@@ -253,7 +253,7 @@ public class SpecController {
         long id = entity.getId();
         Set<String> checkedPluginIds = plugin == null ? Set.of() : Set.copyOf(plugin);
         List<PluginRunRequest> requests = new ArrayList<>();
-        for (SpecValidationPlugin candidate : pluginRegistry.getPlugins()) {
+        for (SpecScoringPlugin candidate : pluginRegistry.getPlugins()) {
             if (!pluginSettingsService.isEnabled(candidate.getId())) {
                 continue;
             }
@@ -267,18 +267,18 @@ public class SpecController {
             }
         }
         if (requests.isEmpty()) {
-            specValidationResultService.deleteForSpec(id);
+            specScoringResultService.deleteForSpec(id);
         } else {
-            AggregatedValidationResult validation = pluginValidationService.validateMany(entity.getRawContent(), requests);
-            specValidationResultService.save(id, SpecValidationResultService.contentHashOf(entity.getRawContent()),
-                    validation, requests.stream().map(PluginRunRequest::pluginId).toList());
+            AggregatedScoringResult scoring = pluginScoringService.scoreMany(entity.getRawContent(), requests);
+            specScoringResultService.save(id, SpecScoringResultService.contentHashOf(entity.getRawContent()),
+                    scoring, requests.stream().map(PluginRunRequest::pluginId).toList());
         }
         return "redirect:/spec/" + ref + "?scored";
     }
 
     /** The position of {@code ruleSetName} in its plugin's rule sets, or null if unknown — for the persisted picker choice. */
     private Integer ruleSetIndex(String pluginId, String ruleSetName) {
-        SpecValidationPlugin plugin = findEnabledPlugin(pluginId);
+        SpecScoringPlugin plugin = findEnabledPlugin(pluginId);
         if (plugin == null) {
             return null;
         }
@@ -292,24 +292,24 @@ public class SpecController {
      * (a plain reopen, or right after saving a pasted/loaded spec whose
      * title reused an existing row's id).
      */
-    private void populateCachedValidation(Model model, Long specId) {
+    private void populateCachedScoring(Model model, Long specId) {
         model.addAttribute("hasBeenScored", false);
-        specValidationResultService.findForSpec(specId).ifPresent(cached -> {
-            populateValidationModel(model, cached.result(), cached.activePluginIds());
+        specScoringResultService.findForSpec(specId).ifPresent(cached -> {
+            populateScoringModel(model, cached.result(), cached.activePluginIds());
             model.addAttribute("resultFromCache", true);
         });
     }
 
-    private void populateValidationModel(Model model, AggregatedValidationResult validation, List<String> activePluginIds) {
+    private void populateScoringModel(Model model, AggregatedScoringResult scoring, List<String> activePluginIds) {
         model.addAttribute("hasBeenScored", true);
-        model.addAttribute("validation", validation);
-        model.addAttribute("endpointFindings", EndpointFindings.byEndpoint(validation.diagnostics()));
-        model.addAttribute("schemaFindings", ComponentFindings.byComponent("schemas", validation.diagnostics()));
-        model.addAttribute("requestBodyFindings", ComponentFindings.byComponent("requestBodies", validation.diagnostics()));
-        model.addAttribute("responseFindings", ComponentFindings.byComponent("responses", validation.diagnostics()));
-        model.addAttribute("generalFindings", GeneralFindings.unattributed(validation.diagnostics()));
+        model.addAttribute("scoring", scoring);
+        model.addAttribute("endpointFindings", EndpointFindings.byEndpoint(scoring.diagnostics()));
+        model.addAttribute("schemaFindings", ComponentFindings.byComponent("schemas", scoring.diagnostics()));
+        model.addAttribute("requestBodyFindings", ComponentFindings.byComponent("requestBodies", scoring.diagnostics()));
+        model.addAttribute("responseFindings", ComponentFindings.byComponent("responses", scoring.diagnostics()));
+        model.addAttribute("generalFindings", GeneralFindings.unattributed(scoring.diagnostics()));
         model.addAttribute("severityLabels", severityLabelsOf(activePluginIds));
-        model.addAttribute("severityScoreImpact", severityScoreImpactOf(validation));
+        model.addAttribute("severityScoreImpact", severityScoreImpactOf(scoring));
     }
 
     /**
@@ -327,7 +327,7 @@ public class SpecController {
         long id = entity.getId();
         specStorageService.deleteById(id);
         specPluginSettingsService.deleteAllForSpec(id);
-        specValidationResultService.deleteForSpec(id);
+        specScoringResultService.deleteForSpec(id);
         if (entity.getSource() == SpecSource.FILE && entity.getFilePath() != null) {
             Path path = Path.of(entity.getFilePath());
             if (Files.isRegularFile(path)) {
@@ -347,7 +347,7 @@ public class SpecController {
 
     /**
      * Shared parse/save flow for the paste and load-file entry points.
-     * {@code filePath == null} means pasted text. Never runs validation
+     * {@code filePath == null} means pasted text. Never runs scoring
      * itself — scoring is only ever triggered from {@link #score}.
      */
     private SaveOutcome parseAndSave(String content, String filePath, NamespaceContext ctx) {
@@ -444,7 +444,7 @@ public class SpecController {
      */
     private List<SpecPluginRunChoice> pluginChoices(Long specId, Map<String, String> ignored) {
         List<SpecPluginRunChoice> choices = new ArrayList<>();
-        for (SpecValidationPlugin plugin : pluginRegistry.getPlugins()) {
+        for (SpecScoringPlugin plugin : pluginRegistry.getPlugins()) {
             if (!pluginSettingsService.isEnabled(plugin.getId())) {
                 continue;
             }
@@ -463,25 +463,25 @@ public class SpecController {
     }
 
     /** Defensive: a plugin is untrusted, dynamically loaded code. Preserves its declared rule-set order. */
-    private List<String> safeRuleSets(SpecValidationPlugin plugin) {
+    private List<String> safeRuleSets(SpecScoringPlugin plugin) {
         try {
             return List.copyOf(plugin.getRuleSets());
         } catch (Throwable t) {
-            log.warn("Validation plugin '{}' threw from getRuleSets(): {}", plugin.getId(), t.toString());
-            return List.of(SpecValidationPlugin.DEFAULT_RULE_SET);
+            log.warn("Scoring plugin '{}' threw from getRuleSets(): {}", plugin.getId(), t.toString());
+            return List.of(SpecScoringPlugin.DEFAULT_RULE_SET);
         }
     }
 
     /** The picker submits {@code ruleSet_<pluginId>} = a rule-set slug; map it back to the plugin's real name. */
     private String resolveRuleSet(String pluginId, String slugOrName) {
-        SpecValidationPlugin plugin = findEnabledPlugin(pluginId);
+        SpecScoringPlugin plugin = findEnabledPlugin(pluginId);
         return plugin == null
-                ? SpecValidationPlugin.DEFAULT_RULE_SET
+                ? SpecScoringPlugin.DEFAULT_RULE_SET
                 : RuleSets.resolve(safeRuleSets(plugin), slugOrName);
     }
 
-    private SpecValidationPlugin findEnabledPlugin(String pluginId) {
-        for (SpecValidationPlugin plugin : pluginRegistry.getPlugins()) {
+    private SpecScoringPlugin findEnabledPlugin(String pluginId) {
+        for (SpecScoringPlugin plugin : pluginRegistry.getPlugins()) {
             if (plugin.getId().equals(pluginId) && pluginSettingsService.isEnabled(plugin.getId())) {
                 return plugin;
             }
@@ -493,14 +493,14 @@ public class SpecController {
      * Display text for each of the four {@link Severity} levels. With
      * exactly one active plugin, uses that plugin's own vocabulary (e.g.
      * zally-core's Must/Should/May/Hint) — see {@link
-     * SpecValidationPlugin#getSeverityLabel}. With zero or several active
+     * SpecScoringPlugin#getSeverityLabel}. With zero or several active
      * plugins there's no single vocabulary to prefer (two plugins may label
      * the same {@link Severity} differently), so this falls back to the
      * SPI's own default labels, same as for an absent/unknown/disabled
      * plugin or one that throws.
      */
     private Map<String, String> severityLabelsOf(List<String> activePluginIds) {
-        SpecValidationPlugin plugin = activePluginIds.size() == 1 ? findEnabledPlugin(activePluginIds.get(0)) : null;
+        SpecScoringPlugin plugin = activePluginIds.size() == 1 ? findEnabledPlugin(activePluginIds.get(0)) : null;
         Map<String, String> labels = new LinkedHashMap<>();
         for (Severity severity : Severity.values()) {
             labels.put(severity.name(), safeSeverityLabel(plugin, severity));
@@ -508,19 +508,19 @@ public class SpecController {
         return labels;
     }
 
-    /** {@link AggregatedValidationResult#severityScoreImpact()}, keyed by {@link Severity#name()} for template lookup. */
-    private static Map<String, Double> severityScoreImpactOf(AggregatedValidationResult validation) {
+    /** {@link AggregatedScoringResult#severityScoreImpact()}, keyed by {@link Severity#name()} for template lookup. */
+    private static Map<String, Double> severityScoreImpactOf(AggregatedScoringResult scoring) {
         Map<String, Double> impact = new LinkedHashMap<>();
-        validation.severityScoreImpact().forEach((severity, points) -> impact.put(severity.name(), points));
+        scoring.severityScoreImpact().forEach((severity, points) -> impact.put(severity.name(), points));
         return impact;
     }
 
-    private String safeSeverityLabel(SpecValidationPlugin plugin, Severity severity) {
+    private String safeSeverityLabel(SpecScoringPlugin plugin, Severity severity) {
         if (plugin != null) {
             try {
                 return plugin.getSeverityLabel(severity);
             } catch (Throwable t) {
-                log.warn("Validation plugin '{}' threw from getSeverityLabel({}): {}", plugin.getId(), severity, t.toString());
+                log.warn("Scoring plugin '{}' threw from getSeverityLabel({}): {}", plugin.getId(), severity, t.toString());
             }
         }
         return switch (severity) {

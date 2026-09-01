@@ -13,5 +13,5 @@ parameters:
 
 Checks the declared OpenAPI or Swagger document version against a
 comma-separated list of supported major/minor versions. Parsing and structural
-schema validation remain the responsibility of the host parser; this rule
+schema scoring remain the responsibility of the host parser; this rule
 reports a missing or unsupported version declaration from the stable model.

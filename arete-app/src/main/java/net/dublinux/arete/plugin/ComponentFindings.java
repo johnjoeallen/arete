@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Groups validation findings by the top-level {@code components} entry
+ * Groups scoring findings by the top-level {@code components} entry
  * their JSON Pointer location falls under, mirroring {@link
  * EndpointFindings} but for the Model tab's reusable definitions —
  * {@code /components/schemas/<name>}, {@code /components/requestBodies/<name>},

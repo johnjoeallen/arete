@@ -22,7 +22,7 @@ Then open <http://localhost:6809>.
 
 The release zip contains `arete.jar`, both launcher scripts, and a
 `plugins/` folder holding the bundled
-[Areté Policy Engine](validation/policy-engine.md).
+[Areté Policy Engine](scoring/policy-engine.md).
 
 ## Build from source
 

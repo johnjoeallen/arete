@@ -1,20 +1,20 @@
 package net.dublinux.arete.web.api;
 
-import net.dublinux.arete.plugin.AggregatedValidationResult;
+import net.dublinux.arete.plugin.AggregatedScoringResult;
 import net.dublinux.arete.plugin.AttributedDiagnostic;
 import net.dublinux.arete.plugin.PluginRegistry;
 import net.dublinux.arete.plugin.PluginSettingsService;
-import net.dublinux.arete.plugin.PluginValidationService;
-import net.dublinux.arete.plugin.SpecValidationResultService;
-import net.dublinux.arete.plugin.ValidationSummary;
+import net.dublinux.arete.plugin.PluginScoringService;
+import net.dublinux.arete.plugin.SpecScoringResultService;
+import net.dublinux.arete.plugin.ScoringSummary;
 import net.dublinux.arete.service.ParsedSpec;
 import net.dublinux.arete.service.SpecParserService;
 import net.dublinux.arete.service.SpecStorageService;
 import net.dublinux.arete.domain.SpecEntity;
 import net.dublinux.arete.domain.SpecSource;
-import net.dublinux.arete.validation.spi.Diagnostic;
-import net.dublinux.arete.validation.spi.Severity;
-import net.dublinux.arete.validation.spi.SpecValidationPlugin;
+import net.dublinux.arete.scoring.spi.Diagnostic;
+import net.dublinux.arete.scoring.spi.Severity;
+import net.dublinux.arete.scoring.spi.SpecScoringPlugin;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,10 +49,10 @@ class AutomationApiControllerTest {
 
     @MockitoBean SpecParserService parser;
     @MockitoBean SpecStorageService storage;
-    @MockitoBean PluginValidationService validation;
+    @MockitoBean PluginScoringService scoring;
     @MockitoBean PluginRegistry pluginRegistry;
     @MockitoBean PluginSettingsService pluginSettings;
-    @MockitoBean SpecValidationResultService results;
+    @MockitoBean SpecScoringResultService results;
     @MockitoBean RemoteSpecFetcher fetcher;
     @MockitoBean DeploymentMode deploymentMode;
     @MockitoBean net.dublinux.arete.service.NamespaceService namespaceService;
@@ -68,7 +68,7 @@ class AutomationApiControllerTest {
         OpenAPI openApi = new OpenAPI().info(new Info().title("Widget API").version("1.0.0"));
         lenient().when(parser.parse(anyString())).thenReturn(new ParsedSpec(openApi, List.of()));
 
-        SpecValidationPlugin plugin = org.mockito.Mockito.mock(SpecValidationPlugin.class);
+        SpecScoringPlugin plugin = org.mockito.Mockito.mock(SpecScoringPlugin.class);
         lenient().when(plugin.getId()).thenReturn("generic-policy");
         lenient().when(plugin.getSuggestedScoreLevel(anyString())).thenReturn(Optional.of("score<90"));
         lenient().when(plugin.getPassingScore(anyString())).thenReturn(java.util.OptionalDouble.of(90.0));
@@ -82,9 +82,9 @@ class AutomationApiControllerTest {
         lenient().when(storage.namespaces()).thenReturn(List.of("default", "payments"));
         lenient().when(storage.countInNamespace(anyString())).thenReturn(3L);
 
-        lenient().when(validation.validateOne(anyString(), eq("generic-policy"), anyString()))
+        lenient().when(scoring.scoreOne(anyString(), eq("generic-policy"), anyString()))
                 .thenReturn(resultWith(85.0, Severity.WARNING));
-        lenient().when(validation.validateMany(anyString(), any()))
+        lenient().when(scoring.scoreMany(anyString(), any()))
                 .thenReturn(resultWith(85.0, Severity.WARNING));
         lenient().when(results.findForSpec(any())).thenReturn(Optional.empty());
     }
@@ -177,11 +177,11 @@ class AutomationApiControllerTest {
         return e;
     }
 
-    private static AggregatedValidationResult resultWith(double score, Severity severity) {
+    private static AggregatedScoringResult resultWith(double score, Severity severity) {
         Diagnostic d = Diagnostic.builder().ruleId("REST001").title("t").description("m")
                 .severity(severity).pointer("/paths").build();
-        return new AggregatedValidationResult(
-                List.of(new ValidationSummary("generic-policy", "SUCCESS", 1, null)),
+        return new AggregatedScoringResult(
+                List.of(new ScoringSummary("generic-policy", "SUCCESS", 1, null)),
                 List.of(new AttributedDiagnostic("generic-policy", "Areté Policy Engine", d)),
                 155, score, 100.0, score >= 90 ? "B" : "F", 90.0);
     }

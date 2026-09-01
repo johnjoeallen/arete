@@ -26,7 +26,7 @@ plugin), and publishes it as a GitHub release.
 
 ## Publishing the SPI to Maven Central
 
-Publishing `arete-validation-spi` to Maven Central is **not** part of the
+Publishing `arete-scoring-spi` to Maven Central is **not** part of the
 release workflow — it doesn't belong on every tag push. It runs from
 [`.github/workflows/publish-spi.yml`](https://github.com/johnjoeallen/arete/blob/main/.github/workflows/publish-spi.yml),
 triggered by hand from the Actions tab against a specific tag once that release

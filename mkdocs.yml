@@ -1,5 +1,5 @@
 site_name: Areté
-site_description: Local-first API explorer for OpenAPI/Swagger specs with pluggable, policy-driven validation.
+site_description: Local-first API explorer for OpenAPI/Swagger specs with pluggable, policy-driven scoring.
 site_url: https://johnjoeallen.github.io/arete/
 repo_url: https://github.com/johnjoeallen/arete
 repo_name: johnjoeallen/arete
@@ -66,13 +66,13 @@ nav:
   - Configuration: configuration.md
   - Automation API: automation-api.md
   - History: history.md
-  - Validation:
-      - Overview: validation/index.md
-      - Areté Policy Engine: validation/policy-engine.md
-      - The case for Distill: validation/performance.md
-      - Distill reference: validation/distill.md
-      - Rule Catalogue: validation/rules.md
-      - Policies: validation/policies.md
-      - Writing a Plugin: validation/writing-a-plugin.md
+  - Scoring:
+      - Overview: scoring/index.md
+      - Areté Policy Engine: scoring/policy-engine.md
+      - The case for Distill: scoring/performance.md
+      - Distill reference: scoring/distill.md
+      - Rule Catalogue: scoring/rules.md
+      - Policies: scoring/policies.md
+      - Writing a Plugin: scoring/writing-a-plugin.md
   - Releasing: releasing.md
   - Publishing the SPI: publishing-spi.md

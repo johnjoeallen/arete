@@ -2,20 +2,20 @@ package net.dublinux.arete.web.api;
 
 import net.dublinux.arete.domain.SpecEntity;
 import net.dublinux.arete.domain.SpecSource;
-import net.dublinux.arete.plugin.AggregatedValidationResult;
+import net.dublinux.arete.plugin.AggregatedScoringResult;
 import net.dublinux.arete.plugin.AttributedDiagnostic;
 import net.dublinux.arete.plugin.PluginRegistry;
 import net.dublinux.arete.plugin.PluginRunRequest;
 import net.dublinux.arete.plugin.PluginSettingsService;
-import net.dublinux.arete.plugin.PluginValidationService;
+import net.dublinux.arete.plugin.PluginScoringService;
 import net.dublinux.arete.plugin.ScoreLevel;
-import net.dublinux.arete.plugin.SpecValidationResultService;
-import net.dublinux.arete.plugin.ValidationSummary;
+import net.dublinux.arete.plugin.SpecScoringResultService;
+import net.dublinux.arete.plugin.ScoringSummary;
 import net.dublinux.arete.service.ParsedSpec;
 import net.dublinux.arete.service.SpecParserService;
 import net.dublinux.arete.service.SpecStorageService;
-import net.dublinux.arete.validation.spi.Severity;
-import net.dublinux.arete.validation.spi.SpecValidationPlugin;
+import net.dublinux.arete.scoring.spi.Severity;
+import net.dublinux.arete.scoring.spi.SpecScoringPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -52,22 +52,22 @@ public class AutomationApiController {
 
     private final SpecParserService parser;
     private final SpecStorageService storage;
-    private final PluginValidationService validation;
+    private final PluginScoringService scoring;
     private final PluginRegistry pluginRegistry;
     private final PluginSettingsService pluginSettings;
-    private final SpecValidationResultService results;
+    private final SpecScoringResultService results;
     private final RemoteSpecFetcher fetcher;
     private final DeploymentMode deploymentMode;
     private final net.dublinux.arete.service.NamespaceService namespaces;
 
     public AutomationApiController(SpecParserService parser, SpecStorageService storage,
-            PluginValidationService validation, PluginRegistry pluginRegistry,
-            PluginSettingsService pluginSettings, SpecValidationResultService results,
+            PluginScoringService scoring, PluginRegistry pluginRegistry,
+            PluginSettingsService pluginSettings, SpecScoringResultService results,
             RemoteSpecFetcher fetcher, DeploymentMode deploymentMode,
             net.dublinux.arete.service.NamespaceService namespaces) {
         this.parser = parser;
         this.storage = storage;
-        this.validation = validation;
+        this.scoring = scoring;
         this.pluginRegistry = pluginRegistry;
         this.pluginSettings = pluginSettings;
         this.results = results;
@@ -122,15 +122,15 @@ public class AutomationApiController {
         return toResource(require(namespace, ref));
     }
 
-    @GetMapping("/namespaces/{namespace}/specs/{ref}/validation")
-    public ResponseEntity<?> lastValidation(@PathVariable String namespace, @PathVariable String ref,
+    @GetMapping("/namespaces/{namespace}/specs/{ref}/scoring")
+    public ResponseEntity<?> lastScoring(@PathVariable String namespace, @PathVariable String ref,
             @RequestParam(required = false) String format) {
         SpecEntity spec = require(namespace, ref);
         var cached = results.findForSpec(spec.getId());
         if (cached.isEmpty()) {
-            throw new ApiException(HttpStatus.NOT_FOUND, "no validation has been run for spec " + ref);
+            throw new ApiException(HttpStatus.NOT_FOUND, "no scoring has been run for spec " + ref);
         }
-        AggregatedValidationResult r = cached.get().result();
+        AggregatedScoringResult r = cached.get().result();
         List<Finding> findings = findings(r);
         if ("sarif".equalsIgnoreCase(format)) {
             return ResponseEntity.ok(SarifRenderer.render(findings));
@@ -209,8 +209,8 @@ public class AutomationApiController {
     }
 
     /** Re-score an already-stored spec by its UUID — the flow a CI plugin uses after an earlier submit. */
-    @PostMapping("/specs/{ref}/validate")
-    public ResponseEntity<?> revalidate(@PathVariable String ref,
+    @PostMapping("/specs/{ref}/score")
+    public ResponseEntity<?> rescore(@PathVariable String ref,
             @RequestHeader(name = "Content-Type", required = false) String contentType,
             @RequestParam(name = "run", required = false) List<String> runParams,
             @RequestParam(name = "failOn", defaultValue = "policy") String failOn,
@@ -247,14 +247,14 @@ public class AutomationApiController {
         List<PluginRunRequest> forPersistence = new ArrayList<>();
         boolean ok = true;
         for (RunCombination combo : combos) {
-            SpecValidationPlugin plugin = enabledPlugin(combo.validator());
+            SpecScoringPlugin plugin = enabledPlugin(combo.validator());
             if (plugin == null) {
                 throw new ApiException(HttpStatus.UNPROCESSABLE_ENTITY,
                         "unknown or disabled validator '" + combo.validator() + "'");
             }
             // Accept a policy slug ("enterprise-grade") or the exact name.
             String policy = net.dublinux.arete.web.RuleSets.resolve(safeRuleSets(plugin), combo.policy());
-            AggregatedValidationResult r = validation.validateOne(rawSpec, plugin.getId(), policy);
+            AggregatedScoringResult r = scoring.scoreOne(rawSpec, plugin.getId(), policy);
             forPersistence.add(new PluginRunRequest(plugin.getId(), policy));
 
             ResolvedLevel level = resolveLevel(forcedLevel, plugin, policy);
@@ -271,25 +271,25 @@ public class AutomationApiController {
 
     private void persist(long specId, String rawSpec, List<PluginRunRequest> requests) {
         try {
-            AggregatedValidationResult combined = validation.validateMany(rawSpec, requests);
-            results.save(specId, SpecValidationResultService.contentHashOf(rawSpec),
+            AggregatedScoringResult combined = scoring.scoreMany(rawSpec, requests);
+            results.save(specId, SpecScoringResultService.contentHashOf(rawSpec),
                     combined, requests.stream().map(PluginRunRequest::pluginId).distinct().toList());
         } catch (RuntimeException e) {
-            log.warn("Could not persist combined validation for spec {}: {}", specId, e.toString());
+            log.warn("Could not persist combined scoring for spec {}: {}", specId, e.toString());
         }
     }
 
-    private List<String> safeRuleSets(SpecValidationPlugin plugin) {
+    private List<String> safeRuleSets(SpecScoringPlugin plugin) {
         try {
             return List.copyOf(plugin.getRuleSets());
         } catch (Throwable t) {
-            return List.of(SpecValidationPlugin.DEFAULT_RULE_SET);
+            return List.of(SpecScoringPlugin.DEFAULT_RULE_SET);
         }
     }
 
     private record ResolvedLevel(ScoreLevel level, String source) { }
 
-    private ResolvedLevel resolveLevel(ScoreLevel forced, SpecValidationPlugin plugin, String policy) {
+    private ResolvedLevel resolveLevel(ScoreLevel forced, SpecScoringPlugin plugin, String policy) {
         if (forced != null) {
             return new ResolvedLevel(forced, "request");
         }
@@ -304,7 +304,7 @@ public class AutomationApiController {
         return new ResolvedLevel(ScoreLevel.BLOCKER, "default");
     }
 
-    private static Optional<String> safeSuggestedLevel(SpecValidationPlugin plugin, String policy) {
+    private static Optional<String> safeSuggestedLevel(SpecScoringPlugin plugin, String policy) {
         try {
             return plugin.getSuggestedScoreLevel(policy);
         } catch (Throwable t) {
@@ -343,7 +343,7 @@ public class AutomationApiController {
             for (String p : runParams) {
                 int slash = p.indexOf('/');
                 out.add(slash < 0
-                        ? new RunCombination(p.trim(), SpecValidationPlugin.DEFAULT_RULE_SET)
+                        ? new RunCombination(p.trim(), SpecScoringPlugin.DEFAULT_RULE_SET)
                         : new RunCombination(p.substring(0, slash).trim(), p.substring(slash + 1).trim()));
             }
         }
@@ -400,11 +400,11 @@ public class AutomationApiController {
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "no namespace '" + namespace + "'"));
     }
 
-    private SpecValidationPlugin enabledPlugin(String id) {
+    private SpecScoringPlugin enabledPlugin(String id) {
         if (id == null) {
             return null;
         }
-        for (SpecValidationPlugin plugin : pluginRegistry.getPlugins()) {
+        for (SpecScoringPlugin plugin : pluginRegistry.getPlugins()) {
             if (plugin.getId().equals(id.trim()) && pluginSettings.isEnabled(plugin.getId())) {
                 return plugin;
             }
@@ -424,19 +424,19 @@ public class AutomationApiController {
                 s.getSource().name(), s.getSourceUrl(),
                 s.getUpdatedAt() == null ? null : s.getUpdatedAt().toString(),
                 Map.of("self", "/api/v1/namespaces/" + s.getNamespace() + "/specs/" + s.getRef(),
-                        "validate", "/api/v1/specs/" + s.getRef() + "/validate",
+                        "score", "/api/v1/specs/" + s.getRef() + "/score",
                         "ui", "/spec/" + s.getRef()));
     }
 
-    private static String statusOf(AggregatedValidationResult r) {
-        return r.pluginSummaries().stream().findFirst().map(ValidationSummary::status).orElse("PLUGIN_ERROR");
+    private static String statusOf(AggregatedScoringResult r) {
+        return r.pluginSummaries().stream().findFirst().map(ScoringSummary::status).orElse("PLUGIN_ERROR");
     }
 
-    private static String errorOf(AggregatedValidationResult r) {
-        return r.pluginSummaries().stream().findFirst().map(ValidationSummary::errorMessage).orElse(null);
+    private static String errorOf(AggregatedScoringResult r) {
+        return r.pluginSummaries().stream().findFirst().map(ScoringSummary::errorMessage).orElse(null);
     }
 
-    private static Map<String, Long> severityCounts(AggregatedValidationResult r) {
+    private static Map<String, Long> severityCounts(AggregatedScoringResult r) {
         Map<String, Long> counts = new LinkedHashMap<>();
         for (Severity severity : Severity.values()) {
             counts.put(severity.name().toLowerCase(), 0L);
@@ -447,7 +447,7 @@ public class AutomationApiController {
         return counts;
     }
 
-    private static List<Finding> findings(AggregatedValidationResult r) {
+    private static List<Finding> findings(AggregatedScoringResult r) {
         List<Finding> out = new ArrayList<>();
         for (AttributedDiagnostic ad : r.diagnostics()) {
             var d = ad.diagnostic();

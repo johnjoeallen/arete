@@ -235,10 +235,10 @@ a:hover { color: var(--link-hover); }
     .matcher-test-editors { grid-template-columns: 1fr; }
 }
 
-.validation-picker { display: flex; flex-direction: column; align-items: flex-start; gap: 0.8em; }
-.validation-picker button { padding: 0.4em 0.9em; border: 1px solid var(--link); border-radius: 4px; background: var(--link); color: #fff; cursor: pointer; }
-.validation-picker button:hover:not(:disabled) { background: var(--link-hover); border-color: var(--link-hover); }
-.validation-picker button:disabled { background: var(--surface-alt); border-color: var(--border); color: var(--muted-fg); cursor: not-allowed; }
+.scoring-picker { display: flex; flex-direction: column; align-items: flex-start; gap: 0.8em; }
+.scoring-picker button { padding: 0.4em 0.9em; border: 1px solid var(--link); border-radius: 4px; background: var(--link); color: #fff; cursor: pointer; }
+.scoring-picker button:hover:not(:disabled) { background: var(--link-hover); border-color: var(--link-hover); }
+.scoring-picker button:disabled { background: var(--surface-alt); border-color: var(--border); color: var(--muted-fg); cursor: not-allowed; }
 .plugin-picker-table { border-collapse: collapse; font-size: 0.9em; }
 .plugin-picker-table th { text-align: left; color: var(--muted-fg); font-weight: 600; padding: 0.2em 0.8em 0.2em 0; }
 .plugin-picker-table td { padding: 0.25em 0.8em 0.25em 0; vertical-align: middle; }
@@ -325,16 +325,16 @@ th { background: var(--surface); font-family: var(--font-heading); font-weight: 
 .plugin-toggle-btn.is-disabled:hover { border-color: var(--link); color: var(--link); }
 .plugin-toggle-btn.is-enabled:hover { opacity: 0.85; }
 
-.validation-picker-wrapper { margin-bottom: 1em; }
-.validation-picker-wrapper h2 { margin-bottom: 0.5em; }
-.validation-results { margin-bottom: 1.5em; }
-.validation-summary-line { color: var(--muted-fg); margin-top: 0; }
-.validation-score-line { font-weight: 600; }
-.validation-grade { font-weight: 700; }
-.validation-pass { color: var(--success); font-weight: 600; }
-.validation-fail { color: #c0392b; font-weight: 600; }
-.validation-cached-note { font-style: italic; }
-.validation-clean-note { color: var(--success); font-weight: 600; }
+.scoring-picker-wrapper { margin-bottom: 1em; }
+.scoring-picker-wrapper h2 { margin-bottom: 0.5em; }
+.scoring-results { margin-bottom: 1.5em; }
+.scoring-summary-line { color: var(--muted-fg); margin-top: 0; }
+.scoring-score-line { font-weight: 600; }
+.scoring-grade { font-weight: 700; }
+.scoring-pass { color: var(--success); font-weight: 600; }
+.scoring-fail { color: #c0392b; font-weight: 600; }
+.scoring-cached-note { font-style: italic; }
+.scoring-clean-note { color: var(--success); font-weight: 600; }
 .plugin-outcomes { list-style: none; padding: 0; margin: 0 0 0.8em; font-size: 0.92em; }
 .plugin-outcomes .plugin-error { color: var(--danger); }
 
@@ -392,7 +392,7 @@ table.endpoint-findings { width: 100%; }
    suppresses that decoration here, at the container level rather than on
    each indicator element individually. */
 [data-view-mode="viewer"] .finding-badges,
-[data-view-mode="viewer"] .validation-findings-section,
+[data-view-mode="viewer"] .scoring-findings-section,
 [data-view-mode="viewer"] .general-tab-btn,
 [data-view-mode="viewer"] .general-tab-panel { display: none; }
 

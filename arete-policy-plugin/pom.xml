@@ -10,7 +10,7 @@
     <packaging>jar</packaging>
 
     <name>arete-policy-plugin</name>
-    <description>Generic API policy validation plugin for Areté</description>
+    <description>Generic API policy scoring plugin for Areté</description>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -31,7 +31,7 @@
         <!-- The host supplies this shared interface through the parent classloader. -->
         <dependency>
             <groupId>net.dublinux.arete</groupId>
-            <artifactId>arete-validation-spi</artifactId>
+            <artifactId>arete-scoring-spi</artifactId>
             <version>0.1.0-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
