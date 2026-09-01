@@ -1620,9 +1620,9 @@ costs.</p>
   threshold first. A score at or above a threshold earns that label; within a
   band wide enough to divide, the top third adds a <code>+</code> and the bottom third a
   <code>-</code>; below the lowest band the grade is <code>F</code>. Reported alongside the numeric
-  score. If omitted while <code>passingScore</code> is set, bands are derived from it
-  (<code>C</code> = the pass mark, <code>A</code>/<code>B</code> evenly above, <code>D</code> below), so a passing score
-  always earns a grade.</li>
+  score. <strong>Every policy is graded</strong>: if <code>grades:</code> is omitted, bands are derived
+  from <code>passingScore</code> (<code>C</code> = the pass mark, <code>A</code>/<code>B</code> above, <code>D</code> below) when it is
+  set, otherwise the default <code>A ≥ 90, B ≥ 80, C ≥ 70, D ≥ 60</code> applies.</li>
 <li><code>scoring:</code> (optional) — a non-numeric gate, <code>blocker</code> or <code>error</code>, for a
   policy that gates on findings rather than a score. <code>passingScore</code> wins if
   both are set; with neither, the API gate defaults to <code>blocker</code>.</li>
