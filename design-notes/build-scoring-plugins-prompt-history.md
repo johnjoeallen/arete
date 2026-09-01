@@ -18,7 +18,7 @@ project's "distribution / build integration" page (Apache-2.0).
 **Decision:** Use it as a skeleton only. Speculate's page assumed an
 SPI-plugin model where scoring logic ships inside the build plugin. Areté
 already has a running server with an Automation API, so the rewrite had to
-target that instead.
+target that instead. Landed as **Areté CI Gate** (see step 8).
 
 ## 2. Thin client, not a framework
 
@@ -77,8 +77,8 @@ POST — no second request. Gated by `<sarif>true</sarif>` (Maven) /
 typo).
 
 **Decision:** groupId `net.dublinux.arete`; Gradle plugin id
-`net.dublinux.arete.gate`; modules `arete-gate-core`,
-`arete-gate-maven-plugin`, `arete-gate-gradle-plugin`.
+`net.dublinux.arete.ci-gate`; modules `arete-ci-gate-core`,
+`arete-ci-gate-maven-plugin`, `arete-ci-gate-gradle-plugin`.
 
 ## 6. Separate repo, its own CI
 
@@ -111,12 +111,15 @@ relevant section instead:
 | Caching / up-to-date? | Gradle declares the spec as a task input, so an unchanged spec skips the task. Maven re-runs every time in v1. |
 | Reactor aggregation? | Non-goal. Each module gates itself. |
 
-## Still open
+## 8. The name
 
-One item is deliberately unresolved in the design:
+**Prompt:** *"arete-ci-gate"*.
 
-- **The name "Areté Gate"** (and the `arete-gate-*` artifact ids). Marked
-  *"needs sign-off"* inline. Everything else in the document is a decision.
+**Decision:** settled. The subsystem is **Areté CI Gate**; artifacts
+`arete-ci-gate-core`, `arete-ci-gate-maven-plugin`,
+`arete-ci-gate-gradle-plugin`; Gradle plugin id `net.dublinux.arete.ci-gate`;
+Gradle extension `areteCiGate { }`, task `areteCiGateCheck`. The doc no longer
+carries an open name question.
 
 ## The shape of the decisions
 

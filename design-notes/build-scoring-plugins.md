@@ -1,4 +1,4 @@
-# Areté Gate — Maven & Gradle build-gate plugins
+# Areté CI Gate — Maven & Gradle build-gate plugins
 
 > **Proposal — for review. Nothing here is implemented.**
 >
@@ -100,12 +100,12 @@ path, and one `run`.
   that.
 - **`optional`** omitted ⇒ the combination gates.
 
-### Maven — `arete-gate-maven-plugin`, goal `check`, phase `verify`
+### Maven — `arete-ci-gate-maven-plugin`, goal `check`, phase `verify`
 
 ```xml
 <plugin>
   <groupId>net.dublinux.arete</groupId>
-  <artifactId>arete-gate-maven-plugin</artifactId>
+  <artifactId>arete-ci-gate-maven-plugin</artifactId>
   <configuration>
     <areteUrl>${arete.url}</areteUrl>          <!-- from a profile, see below -->
     <namespace>${project.groupId}</namespace>
@@ -136,13 +136,13 @@ path, and one `run`.
   build-wide `<failOn>` (`error` | `blocker` | `score<NN`) is accepted as an
   advanced override for holding a **stricter** bar than the policy; it is
   passed straight through on the one API call.
-- Report to the log **and** `${project.build.directory}/arete-gate/report.txt`
+- Report to the log **and** `${project.build.directory}/arete-ci-gate/report.txt`
   (+ `report.json`, + `arete.sarif` when `<sarif>true</sarif>`).
 
-### Gradle — plugin id `net.dublinux.arete.gate`
+### Gradle — plugin id `net.dublinux.arete.ci-gate`
 
 ```kotlin
-areteGate {
+areteCiGate {
     url = providers.gradleProperty("arete.url").orElse("http://localhost:6809")
     namespace = project.group.toString()
     submitter = "gradle"
@@ -153,12 +153,12 @@ areteGate {
 }
 ```
 
-- Registers `areteGateCheck`, wires `check.dependsOn(areteGateCheck)`.
+- Registers `areteCiGateCheck`, wires `check.dependsOn(areteCiGateCheck)`.
 - Failing non-optional verdict → task throws through Gradle's normal
   verification-failure path (`VerificationException`).
 - The spec file(s) are declared as task inputs, so an unchanged spec skips the
   task via Gradle's up-to-date checking. (Maven re-runs every time in v1.)
-- Report to `${layout.buildDirectory}/reports/arete-gate/report.txt`
+- Report to `${layout.buildDirectory}/reports/arete-ci-gate/report.txt`
   (+ `.json`, + SARIF).
 - `build.gradle` and `build.gradle.kts` both supported.
 
@@ -217,7 +217,7 @@ equivalent and the plugin documents the three override points.)
 Lives in the shared core module so Maven and Gradle logs read the same:
 
 ```
-Areté Gate — module: my-service   (arete: http://localhost:6809)
+Areté CI Gate — module: my-service   (arete: http://localhost:6809)
 
   COMBINATION                        SCORE   GRADE  GATE          RESULT   GATING
   generic-policy/Enterprise Grade    93.5    B+     score<90      PASS     yes
@@ -236,9 +236,9 @@ Three:
 
 | Module | Purpose |
 |---|---|
-| `arete-gate-core` | HTTP client for the Automation API + the report formatter. No Maven/Gradle types. Unit-testable against a stub server. |
-| `arete-gate-maven-plugin` | `check` goal → `verify`, delegates to core. |
-| `arete-gate-gradle-plugin` | `areteGateCheck` task → `check`, delegates to core. |
+| `arete-ci-gate-core` | HTTP client for the Automation API + the report formatter. No Maven/Gradle types. Unit-testable against a stub server. |
+| `arete-ci-gate-maven-plugin` | `check` goal → `verify`, delegates to core. |
+| `arete-ci-gate-gradle-plugin` | `areteCiGateCheck` task → `check`, delegates to core. |
 
 ## Non-goals
 
@@ -279,12 +279,12 @@ The new repo's CI (GitHub Actions):
   instance started in the workflow** — pull the published `arete-<version>`
   release zip, run it on `localhost:6809`, point the plugins at it via the
   `arete-ci` profile / `-Parete.url`;
-- on a tag, publishes `arete-gate-core` + `arete-gate-maven-plugin` to
-  Maven Central and `arete-gate-gradle-plugin` to the Gradle Plugin Portal.
+- on a tag, publishes `arete-ci-gate-core` + `arete-ci-gate-maven-plugin` to
+  Maven Central and `arete-ci-gate-gradle-plugin` to the Gradle Plugin Portal.
 
 ## Suggested build order (checkpoint each with review)
 
-1. `arete-gate-core` — API client + report formatter, tested against a
+1. `arete-ci-gate-core` — API client + report formatter, tested against a
    stub HTTP server. No build-tool code.
 2. Maven plugin — `check` goal, tested against a sample `pom.xml` and a real
    local Areté; the `arete-local` / `arete-ci` profile pattern.
