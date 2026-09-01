@@ -1177,15 +1177,15 @@ full Distill expression spliced in at evaluation time, with quotes and <code>/</
 inside it no longer treated as the enclosing delimiter — for the cases that
 genuinely build part of a pattern or message from a rule parameter.</p>
 <p>For the common "is this one of a configured set" case a <code>list</code> parameter type
-was added; <code>s.startsWith</code> / <code>s.endsWith</code> / <code>s.contains</code> were overloaded to take
-a list (raw match, true if any element matches); and a <code>startsWithAny(text,
-prefixes)</code> builtin does the word-aware variant — trimmed text that equals a
-prefix or is followed by a space, so <code>"Listing"</code> does not count as starting
-with <code>"List"</code>. The loader turns a comma string or YAML list into a
-<code>List&lt;String&gt;</code> once. <code>text-style</code>'s <code>non-action-oriented</code> check moved from a
-hardcoded verb regex to <code>startsWithAny(summary, action-prefixes)</code>, with
-<code>DOC009</code> supplying the list — the first of several matchers whose baked-in
-policy vocabulary should become rule parameters (issues #144–#154).</p>
+was added, and the string predicates learned to take a list (true if any
+element matches): <code>s.startsWith</code> / <code>s.endsWith</code> / <code>s.contains</code> are Java's, and
+<code>s.startsWithWord</code> / <code>s.endsWithWord</code> are the word-aware pair — <code>t</code> must land on
+a word boundary, so <code>"Listing"</code> does not start with the word <code>"List"</code>. The
+loader turns a comma string or YAML list into a <code>List&lt;String&gt;</code> once.
+<code>text-style</code>'s <code>non-action-oriented</code> check moved from a hardcoded verb regex to
+<code>summary.trim().startsWithWord(action-prefixes)</code>, with <code>DOC009</code> supplying the
+list — the first of several matchers whose baked-in policy vocabulary should
+become rule parameters (issues #144–#154).</p>
 <h2 id="runtime-execution-model">Runtime execution model<a class="headerlink" href="#runtime-execution-model" title="Permanent link">&para;</a></h2>
 <p>Distill matcher sources are parsed once when the bundle loads and the compiled
 programs are reused for every validation, rather than reparsed and discarded

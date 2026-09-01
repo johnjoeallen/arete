@@ -1254,8 +1254,8 @@ message.</p>
 <li><code>rule</code> is <code>{ id, scope, parameters }</code>. Rule configuration is
   <code>rule.parameters</code> — e.g. <code>rule.parameters["max-items"]</code> or, for a key that
   is a plain identifier, <code>rule.parameters.suffix</code>. A <code>list</code>-typed parameter
-  arrives as a <code>List&lt;String&gt;</code> (use <code>.any { }</code>, <code>startsWithAny</code>, or pass it to
-  <code>s.startsWith</code> / <code>s.contains</code>), everything
+  arrives as a <code>List&lt;String&gt;</code> (use <code>.any { }</code>, or pass it to
+  <code>s.startsWith</code> / <code>s.startsWithWord</code> / <code>s.contains</code>), everything
   else as a string, number, or boolean.</li>
 </ul>
 <p>There are no comments.</p>
@@ -1416,11 +1416,19 @@ relying on emptiness, and use <code>truthy(x)</code> when you need the boolean i
 </tr>
 <tr>
 <td><code>s.startsWith(t)</code></td>
-<td>Java <code>String.startsWith</code>, extended: <code>t</code> may be a list — true if <code>s</code> starts with any element</td>
+<td>Java <code>String.startsWith</code>, extended: <code>t</code> may be a list. <strong>Not word-aware</strong> — <code>"Listing".startsWith("List")</code> is true</td>
 </tr>
 <tr>
 <td><code>s.endsWith(t)</code></td>
-<td>Java <code>String.endsWith</code>, extended: <code>t</code> may be a list — true if <code>s</code> ends with any element</td>
+<td>Java <code>String.endsWith</code>, extended: <code>t</code> may be a list</td>
+</tr>
+<tr>
+<td><code>s.startsWithWord(t)</code></td>
+<td>like <code>startsWith</code>, but <code>t</code> must land on a word boundary: <code>s</code> equals <code>t</code>, or begins with <code>t</code> followed by a non-alphanumeric character. <code>"List customers"</code> / <code>"List."</code> match <code>"List"</code>; <code>"Listing"</code> does not. <code>t</code> may be a list</td>
+</tr>
+<tr>
+<td><code>s.endsWithWord(t)</code></td>
+<td>the mirror of <code>startsWithWord</code></td>
 </tr>
 <tr>
 <td><code>s.length</code></td>
@@ -1540,10 +1548,6 @@ call these and nothing else.</p>
 <tr>
 <td><code>words(text)</code></td>
 <td>substantive words of <code>text</code>: whitespace-separated tokens, leading/trailing punctuation stripped, keeping only those that still contain a letter. Count is <code>count(words(text))</code>; per-word length is <code>w.length</code> inside <code>.any</code> / <code>.all</code> / <code>.filter</code></td>
-</tr>
-<tr>
-<td><code>startsWithAny(text, prefixes)</code></td>
-<td><code>text</code> <strong>trimmed</strong> begins with one of <code>prefixes</code> as a whole first word — it equals the prefix or the prefix is followed by a space, so <code>"Listing"</code> does <em>not</em> match <code>"List"</code>. <code>prefixes</code> is a list or a comma-separated string. For a raw prefix test use <code>text.startsWith(prefixes)</code> instead</td>
 </tr>
 <tr>
 <td><code>count(list)</code></td>
