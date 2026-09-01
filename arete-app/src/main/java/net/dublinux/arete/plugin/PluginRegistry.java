@@ -17,9 +17,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.ServiceLoader;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -81,7 +84,20 @@ public class PluginRegistry {
         jars.addAll(listJars(userPluginsDir, true));
 
         List<SpecScoringPlugin> loaded = new ArrayList<>();
+        Set<String> seenJars = new HashSet<>();
+        Map<String, String> loadedIds = new HashMap<>();
         for (File jar : jars) {
+            // The install and user plugins dirs can resolve to the same place, or
+            // point at each other — don't load the same jar file twice.
+            String canonicalJar;
+            try {
+                canonicalJar = jar.getCanonicalPath();
+            } catch (IOException e) {
+                canonicalJar = jar.getAbsolutePath();
+            }
+            if (!seenJars.add(canonicalJar)) {
+                continue;
+            }
             try {
                 URLClassLoader isolated = new ChildFirstClassLoader(
                         new URL[] {jar.toURI().toURL()},
@@ -89,6 +105,17 @@ public class PluginRegistry {
                 ServiceLoader<SpecScoringPlugin> serviceLoader =
                         ServiceLoader.load(SpecScoringPlugin.class, isolated);
                 for (SpecScoringPlugin plugin : serviceLoader) {
+                    String existing = loadedIds.putIfAbsent(plugin.getId(), canonicalJar);
+                    if (existing != null) {
+                        // A second jar provides a plugin whose id is already loaded.
+                        // Only the first would ever be picked to run, so drop this
+                        // one rather than show a duplicate row in the UI. Usually a
+                        // stale copy left behind after dropping an upgraded jar into
+                        // ~/.arete/plugins without removing the shipped one.
+                        log.warn("Ignoring scoring plugin '{}' from {} — id already loaded from {}",
+                                plugin.getId(), jar.getAbsolutePath(), existing);
+                        continue;
+                    }
                     plugin.configure(Map.of());
                     loaded.add(plugin);
                     log.info("Loaded scoring plugin '{}' ({}) from {}",
