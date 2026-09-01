@@ -1,0 +1,502 @@
+# schema — bundled-rule findings (Distill)
+# regenerate: mvn -pl policy-based-validation-plugin test -Dtest=PolicySnapshotTest -Dsnapshot.update=true
+
+## REST001  (resource-path / path)
+  (no findings)
+
+## DOC001  (operation / operation)
+  /paths/~1widgets/get  |  GET /widgets  |  Operation summary is missing
+  /paths/~1widgets/post  |  POST /widgets  |  Operation summary is missing
+
+## DOC002  (text-style / operation-summary)
+  (no findings)
+
+## DOC003  (text-style / operation-summary)
+  (no findings)
+
+## DOC004  (text-style / operation-summary)
+  (no findings)
+
+## DOC005  (text-style / operation-summary)
+  (no findings)
+
+## DOC006  (metadata / api)
+  /info  |  API  |  API metadata is missing semantic version
+
+## DOC007  (metadata / api)
+  /  |  API  |  API metadata is missing x-api-id
+
+## DOC008  (metadata / api)
+  /  |  API  |  API metadata is missing x-audience
+
+## DOC009  (text-style / operation-summary)
+  (no findings)
+
+## STANDARD001  (hostname / api)
+  /servers  |  /  |  Server hostname is not lowercase hyphenated
+
+## STANDARD002  (resource-path / path)
+  (no findings)
+
+## STANDARD003  (response-header / response)
+  (no findings)
+
+## STANDARD004  (path-count / api)
+  (no findings)
+
+## STANDARD005  (path-count / api)
+  (no findings)
+
+## STANDARD006  (path-count / api)
+  (no findings)
+
+## STANDARD007  (resource-path / path)
+  (no findings)
+
+## STANDARD008  (proprietary-header / header)
+  /paths/~1widgets/post  |  POST /widgets  |  Proprietary response header is not allow-listed: X-Widget-Token
+
+## STANDARD009  (query-collection / query-parameter)
+  (no findings)
+
+## SECURITY001  (security / operation)
+  /paths/~1widgets/get  |  GET /widgets  |  Operation does not require security scheme bearerAuth
+
+## SECURITY002  (security / operation)
+  /paths/~1widgets/get  |  GET /widgets  |  Operation does not require security scheme bearerAuth with scopes read
+  /paths/~1widgets/post  |  POST /widgets  |  Operation does not require security scheme bearerAuth with scopes read
+
+## CASE001  (naming / property)
+  (no findings)
+
+## CASE002  (naming / path-parameter)
+  (no findings)
+
+## CASE003  (naming / query-parameter)
+  (no findings)
+
+## CASE004  (naming / header)
+  (no findings)
+
+## CASE005  (naming / path-segment)
+  (no findings)
+
+## REST002  (naming / path-segment)
+  (no findings)
+
+## REST003  (resource-path / operation)
+  (no findings)
+
+## REST004  (resource-path / operation)
+  (no findings)
+
+## REST005  (naming / schema)
+  (no findings)
+
+## REST006  (naming / schema)
+  (no findings)
+
+## JSON003  (naming / property)
+  (no findings)
+
+## JSON004  (naming / property)
+  (no findings)
+
+## JSON006  (schema / property)
+  (no findings)
+
+## JSON007  (schema / property)
+  /components/schemas/Widget/properties/kind  |  kind  |  Property uses an enum
+  /components/schemas/Widget/properties/status  |  status  |  Property uses an enum
+
+## JSON009  (schema / property)
+  (no findings)
+
+## JSON010  (common-field / property)
+  /components/schemas/Widget/properties/id  |  id  |  Common field has an inconsistent type or format
+
+## JSON011  (date-time-name / property)
+  (no findings)
+
+## JSON012  (schema / property)
+  /components/schemas/Widget/properties/id  |  id  |  Numeric property does not declare a format
+  /components/schemas/Widget/properties/price  |  price  |  Numeric property does not declare a format
+  /components/schemas/Widget/properties/ratio  |  ratio  |  Numeric property does not declare a format
+
+## JSON013  (schema / property)
+  (no findings)
+
+## JSON014  (schema / property)
+  /components/schemas/Widget/properties/status  |  status  |  Enum is not marked extensible
+
+## JSON015  (schema / property)
+  /components/schemas/Widget/properties/status  |  status  |  Enum value is not UPPER_SNAKE_CASE
+
+## JSON016  (response-code / response)
+  (no findings)
+
+## STATUS006  (response-code / response)
+  (no findings)
+
+## STATUS007  (response-header / response)
+  (no findings)
+
+## STANDARD010  (openapi-version / api)
+  (no findings)
+
+## CONTENT001  (media-type / media-type)
+  /paths/~1widgets/get  |  GET /widgets  |  Request body media type absent
+  /paths/~1widgets/post  |  POST /widgets  |  Request body media type absent
+
+## CONTENT002  (media-type / media-type)
+  /paths/~1widgets/get  |  GET /widgets  |  Response 200 media type absent
+  /paths/~1widgets/post  |  POST /widgets  |  Response 201 media type absent
+
+## CONTENT003  (media-type / media-type)
+  (no findings)
+
+## CONTENT004  (media-type / media-type)
+  (no findings)
+
+## ERROR001  (error-response / operation)
+  (no findings)
+
+## ERROR002  (error-response / operation)
+  /paths/~1widgets/get  |  GET /widgets  |  Operation does not document a client-error response
+  /paths/~1widgets/post  |  POST /widgets  |  Operation does not document a client-error response
+
+## ERROR003  (error-response / operation)
+  /paths/~1widgets/get  |  GET /widgets  |  Operation does not document a server-error response
+  /paths/~1widgets/post  |  POST /widgets  |  Operation does not document a server-error response
+
+## ERROR004  (error-response / response)
+  (no findings)
+
+## ERROR005  (error-response / response)
+  (no findings)
+
+## ERROR006  (error-response / response)
+  (no findings)
+
+## ERROR007  (error-response / response)
+  (no findings)
+
+## ERROR008  (authentication-error / operation)
+  /paths/~1widgets/post  |  POST /widgets  |  Secured operation does not document response 401
+
+## ERROR009  (authentication-error / operation)
+  /paths/~1widgets/post  |  POST /widgets  |  Secured operation does not document response 403
+
+## ERROR010  (authentication-error / response)
+  (no findings)
+
+## SEC001  (sensitive-data / property)
+  (no findings)
+
+## SEC002  (sensitive-data / query-parameter)
+  (no findings)
+
+## SEC003  (sensitive-data / path-parameter)
+  (no findings)
+
+## SEC008  (sensitive-data / header)
+  (no findings)
+
+## SEC004  (sensitive-search / query-parameter)
+  (no findings)
+
+## SEC005  (sensitive-search / operation)
+  (no findings)
+
+## SEC006  (identifier / property)
+  /components/schemas/Widget/properties/id  |  id  |  Identifier property should use type string: id
+
+## SEC007  (identifier / property)
+  /components/schemas/Widget/properties/id  |  id  |  Identifier property should declare format uuid: id
+
+## FILTER001  (collection-capability / operation)
+  /paths/~1widgets/get  |  GET /widgets  |  Collection operation lacks the configured query capability
+
+## FILTER002  (collection-capability / query-parameter)
+  (no findings)
+
+## SORT001  (collection-capability / operation)
+  /paths/~1widgets/get  |  GET /widgets  |  Collection operation lacks the configured query capability
+
+## SORT002  (collection-capability / query-parameter)
+  (no findings)
+
+## SORT003  (collection-capability / query-parameter)
+  (no findings)
+
+## SORT004  (collection-capability / query-parameter)
+  (no findings)
+
+## FIELD001  (collection-capability / operation)
+  /paths/~1widgets/get  |  GET /widgets  |  Collection operation lacks the configured query capability
+
+## PAGE001  (pagination / operation)
+  /paths/~1widgets/get  |  GET /widgets  |  Collection operation lacks the configured pagination control
+
+## PAGE002  (pagination / query-parameter)
+  (no findings)
+
+## PAGE003  (pagination / query-parameter)
+  (no findings)
+
+## PAGE004  (pagination / query-parameter)
+  (no findings)
+
+## PAGE005  (pagination / response)
+  /paths/~1widgets/get  |  GET /widgets  |  Successful paginated response lacks a Link header
+
+## PAGE006  (pagination / query-parameter)
+  (no findings)
+
+## HTTP004  (operation / operation)
+  (no findings)
+
+## HTTP005  (operation / operation)
+  (no findings)
+
+## HTTP001  (operation-semantics / operation)
+  (no findings)
+
+## HTTP002  (operation-semantics / operation)
+  (no findings)
+
+## HTTP003  (operation-semantics / operation)
+  (no findings)
+
+## HTTP006  (operation-semantics / operation)
+  (no findings)
+
+## HTTP008  (operation-semantics / path)
+  (no findings)
+
+## UPDATE002  (operation / operation)
+  (no findings)
+
+## UPDATE001  (operation-semantics / operation)
+  (no findings)
+
+## UPDATE003  (manual / operation)
+  (no findings)
+
+## BULK001  (bulk-operation / operation)
+  (no findings)
+
+## BULK002  (schema / property)
+  /components/schemas/Widget/properties/tags  |  tags  |  Array property has no maximum item count
+  /components/schemas/WidgetList/properties/items  |  items  |  Array property has no maximum item count
+
+## BULK003  (bulk-operation / operation)
+  (no findings)
+
+## VERSION001  (versioning / path)
+  (no findings)
+
+## VERSION002  (versioning / header)
+  (no findings)
+
+## VERSION003  (versioning / media-type)
+  (no findings)
+
+## VERSION004  (versioning / api)
+  /paths  |  API  |  Interface has no explicit versioning
+
+## COMPAT001  (compatibility / api)
+  (no findings)
+
+## COMPAT002  (compatibility / schema-property)
+  (no findings)
+
+## COMPAT003  (compatibility / schema-property)
+  (no findings)
+
+## COMPAT004  (compatibility / operation)
+  (no findings)
+
+## COMPAT005  (compatibility / schema-property)
+  (no findings)
+
+## COMPAT006  (compatibility / operation)
+  (no findings)
+
+## STATUS001  (response-code / operation)
+  (no findings)
+
+## STATUS002  (response-header / response)
+  /paths/~1widgets/post  |  POST /widgets  |  Response 201 lacks one or more required headers: Location
+
+## STATUS003  (response-code / response)
+  (no findings)
+
+## STATUS004  (response-code / operation)
+  (no findings)
+
+## STATUS005  (response-code / response)
+  (no findings)
+
+## STANDARD011  (parameter / operation)
+  (no findings)
+
+## STANDARD012  (parameter / parameter)
+  (no findings)
+
+## STANDARD013  (parameter / parameter)
+  (no findings)
+
+## STANDARD014  (parameter / parameter)
+  (no findings)
+
+## STANDARD015  (request-body / operation)
+  (no findings)
+
+## STANDARD016  (path-set / api)
+  (no findings)
+
+## STANDARD017  (header-schema / response)
+  /paths/~1widgets/post  |  POST /widgets 201  |  Response header 'X-Widget-Token' defines neither a schema nor content
+
+## HTTP009  (request-body / operation)
+  (no findings)
+
+## DOC010  (operation-metadata / operation)
+  /paths/~1widgets/get  |  GET /widgets  |  Operation has no operationId
+  /paths/~1widgets/post  |  POST /widgets  |  Operation has no operationId
+
+## DOC011  (operation-metadata / operation)
+  /paths/~1widgets/get  |  GET /widgets  |  Operation is not assigned any tag
+  /paths/~1widgets/post  |  POST /widgets  |  Operation is not assigned any tag
+
+## DOC012  (api-title / api)
+  (no findings)
+
+## CASE006  (schema-name / schema)
+  (no findings)
+
+## JSON017  (enum-values / property)
+  (no findings)
+
+## SEC009  (server-url / api)
+  (no findings)
+
+## STANDARD018  (extensions / api)
+  (no findings)
+
+## STANDARD019  (schema-composition / schema)
+  (no findings)
+
+## STANDARD020  (schema-composition / operation)
+  (no findings)
+
+## STANDARD021  (document-lint / api)
+  (no findings)
+
+## STANDARD022  (document-lint / api)
+  (no findings)
+
+## DOC013  (documentation-completeness / property)
+  /components/schemas/Widget/properties/code  |  Widget.code  |  Widget.code has no description
+  /components/schemas/Widget/properties/count  |  Widget.count  |  Widget.count has no description or example
+  /components/schemas/Widget/properties/id  |  Widget.id  |  Widget.id has no description or example
+  /components/schemas/Widget/properties/kind  |  Widget.kind  |  Widget.kind has no description or example
+  /components/schemas/Widget/properties/name  |  Widget.name  |  Widget.name has no description or example
+  /components/schemas/Widget/properties/price  |  Widget.price  |  Widget.price has no description or example
+  /components/schemas/Widget/properties/ratio  |  Widget.ratio  |  Widget.ratio has no description
+  /components/schemas/Widget/properties/status  |  Widget.status  |  Widget.status has no description or example
+  /components/schemas/Widget/properties/tags  |  Widget.tags  |  Widget.tags has no description or example
+  /components/schemas/WidgetList/properties/items  |  WidgetList.items  |  WidgetList.items has no description or example
+
+## DOC014  (documentation-completeness / parameter)
+  (no findings)
+
+## STATUS008  (status-class / response)
+  (no findings)
+
+## CASE007  (schema-name / schema)
+  (no findings)
+
+## JSON018  (schema / property)
+  /components/schemas/Widget/properties/id  |  id  |  Numeric property does not declare a format
+
+## JSON019  (schema / property)
+  /components/schemas/Widget/properties/price  |  price  |  Numeric property does not declare a format
+  /components/schemas/Widget/properties/ratio  |  ratio  |  Numeric property does not declare a format
+
+## DOC015  (operation / operation)
+  /paths/~1widgets/get  |  GET /widgets  |  Operation description is missing
+  /paths/~1widgets/post  |  POST /widgets  |  Operation description is missing
+
+## JSON020  (example-validity / property)
+  /components/schemas/Widget/properties/code  |  Widget.code  |  Example does not match pattern ^[A-Z]{3}$
+  /components/schemas/Widget/properties/code  |  Widget.code  |  Example is shorter than minLength 3
+  /components/schemas/Widget/properties/ratio  |  Widget.ratio  |  Example exceeds maximum 10.0
+
+## DOC016  (example-validity / schema)
+  /components/schemas/Widget  |  Widget  |  Schema example omits the required field 'name'
+
+## ERROR011  (response-example / operation)
+  (no findings)
+
+## STANDARD023  (server-url / api)
+  /servers  |  /  |  Server URL does not match the approved pattern https://[a-z0-9-]+(\.[a-z0-9-]+)+(:[0-9]+)?(/[^\s]*)?
+
+## JSON021  (schema / property)
+  /components/schemas/Widget/properties/count  |  count  |  Numeric property does not declare both a minimum and a maximum
+  /components/schemas/Widget/properties/id  |  id  |  Numeric property does not declare both a minimum and a maximum
+  /components/schemas/Widget/properties/price  |  price  |  Numeric property does not declare both a minimum and a maximum
+
+## JSON022  (schema / property)
+  /components/schemas/Widget/properties/kind  |  kind  |  String property does not declare a maximum length
+  /components/schemas/Widget/properties/name  |  name  |  String property does not declare a maximum length
+  /components/schemas/Widget/properties/status  |  status  |  String property does not declare a maximum length
+
+## REST007  (path-prefix / api)
+  (no findings)
+
+## CASE008  (tag / api)
+  (no findings)
+
+## DOC017  (tag / api)
+  (no findings)
+
+## DOC018  (tag / api)
+  (no findings)
+
+## STANDARD024  (component-usage / api)
+  /components/schemas/WidgetList  |  WidgetList  |  Component schema 'WidgetList' is defined but never referenced
+
+## JSON023  (array-items / api)
+  (no findings)
+
+## SECURITY003  (security-scheme / api)
+  (no findings)
+
+## SECURITY004  (markdown-safety / api)
+  (no findings)
+
+## STANDARD025  (path-syntax / api)
+  (no findings)
+
+## STANDARD026  (parameter / operation)
+  (no findings)
+
+## STANDARD027  (server-url / api)
+  (no findings)
+
+## STANDARD028  (server-url / api)
+  (no findings)
+
+## DOC019  (tag / api)
+  (no findings)
+
+## DOC020  (metadata / api)
+  /info/license  |  API  |  API metadata does not declare a license
+
+## DOC021  (text-style / operation-summary)
+  (no findings)
+
+## DOC022  (text-style / operation-summary)
+  (no findings)

@@ -1,0 +1,525 @@
+# ops — bundled-rule findings (Distill)
+# regenerate: mvn -pl policy-based-validation-plugin test -Dtest=PolicySnapshotTest -Dsnapshot.update=true
+
+## REST001  (resource-path / path)
+  (no findings)
+
+## DOC001  (operation / operation)
+  /paths/~1customers/get  |  GET /customers  |  Operation summary is missing
+  /paths/~1invoices/get  |  GET /invoices  |  Operation summary is missing
+  /paths/~1orders/get  |  GET /orders  |  Operation summary is missing
+  /paths/~1orders/post  |  POST /orders  |  Operation summary is missing
+  /paths/~1orders~1{id}~1items~1{itemId}~1tags/get  |  GET /orders/{id}/items/{itemId}/tags  |  Operation summary is missing
+
+## DOC002  (text-style / operation-summary)
+  (no findings)
+
+## DOC003  (text-style / operation-summary)
+  (no findings)
+
+## DOC004  (text-style / operation-summary)
+  (no findings)
+
+## DOC005  (text-style / operation-summary)
+  (no findings)
+
+## DOC006  (metadata / api)
+  /info  |  API  |  API metadata is missing contact email
+  /info  |  API  |  API metadata is missing contact name
+  /info  |  API  |  API metadata is missing description
+  /info  |  API  |  API metadata is missing semantic version
+
+## DOC007  (metadata / api)
+  /  |  API  |  API metadata is missing x-api-id
+
+## DOC008  (metadata / api)
+  /  |  API  |  API metadata is missing x-audience
+
+## DOC009  (text-style / operation-summary)
+  (no findings)
+
+## STANDARD001  (hostname / api)
+  /servers  |  /  |  Server hostname is not lowercase hyphenated
+
+## STANDARD002  (resource-path / path)
+  (no findings)
+
+## STANDARD003  (response-header / response)
+  (no findings)
+
+## STANDARD004  (path-count / api)
+  (no findings)
+
+## STANDARD005  (path-count / api)
+  /paths/~1orders~1{id}~1items~1{itemId}~1tags  |  /orders/{id}/items/{itemId}/tags  |  Resource path exceeds the maximum nesting depth
+
+## STANDARD006  (path-count / api)
+  /paths/~1orders~1{id}~1items~1{itemId}~1tags  |  /orders/{id}/items/{itemId}/tags  |  Nested resource type is not exposed as a root resource
+
+## STANDARD007  (resource-path / path)
+  (no findings)
+
+## STANDARD008  (proprietary-header / header)
+  (no findings)
+
+## STANDARD009  (query-collection / query-parameter)
+  (no findings)
+
+## SECURITY001  (security / operation)
+  /paths/~1customers/get  |  GET /customers  |  Operation does not require security scheme bearerAuth
+  /paths/~1invoices/get  |  GET /invoices  |  Operation does not require security scheme bearerAuth
+  /paths/~1orders/get  |  GET /orders  |  Operation does not require security scheme bearerAuth
+  /paths/~1orders/post  |  POST /orders  |  Operation does not require security scheme bearerAuth
+  /paths/~1orders~1{id}~1items~1{itemId}~1tags/get  |  GET /orders/{id}/items/{itemId}/tags  |  Operation does not require security scheme bearerAuth
+
+## SECURITY002  (security / operation)
+  /paths/~1customers/get  |  GET /customers  |  Operation does not require security scheme bearerAuth with scopes read
+  /paths/~1invoices/get  |  GET /invoices  |  Operation does not require security scheme bearerAuth with scopes read
+  /paths/~1orders/get  |  GET /orders  |  Operation does not require security scheme bearerAuth with scopes read
+  /paths/~1orders/post  |  POST /orders  |  Operation does not require security scheme bearerAuth with scopes read
+  /paths/~1orders~1{id}~1items~1{itemId}~1tags/get  |  GET /orders/{id}/items/{itemId}/tags  |  Operation does not require security scheme bearerAuth with scopes read
+
+## CASE001  (naming / property)
+  (no findings)
+
+## CASE002  (naming / path-parameter)
+  (no findings)
+
+## CASE003  (naming / query-parameter)
+  (no findings)
+
+## CASE004  (naming / header)
+  (no findings)
+
+## CASE005  (naming / path-segment)
+  (no findings)
+
+## REST002  (naming / path-segment)
+  (no findings)
+
+## REST003  (resource-path / operation)
+  (no findings)
+
+## REST004  (resource-path / operation)
+  (no findings)
+
+## REST005  (naming / schema)
+  (no findings)
+
+## REST006  (naming / schema)
+  (no findings)
+
+## JSON003  (naming / property)
+  (no findings)
+
+## JSON004  (naming / property)
+  (no findings)
+
+## JSON006  (schema / property)
+  (no findings)
+
+## JSON007  (schema / property)
+  (no findings)
+
+## JSON009  (schema / property)
+  (no findings)
+
+## JSON010  (common-field / property)
+  (no findings)
+
+## JSON011  (date-time-name / property)
+  (no findings)
+
+## JSON012  (schema / property)
+  (no findings)
+
+## JSON013  (schema / property)
+  (no findings)
+
+## JSON014  (schema / property)
+  (no findings)
+
+## JSON015  (schema / property)
+  (no findings)
+
+## JSON016  (response-code / response)
+  (no findings)
+
+## STATUS006  (response-code / response)
+  /paths/~1orders~1{id}~1items~1{itemId}~1tags  |  GET /orders/{id}/items/{itemId}/tags  |  Error response does not declare application/problem+json
+  /paths/~1orders~1{id}~1items~1{itemId}~1tags  |  GET /orders/{id}/items/{itemId}/tags  |  Error response does not declare application/problem+json
+
+## STATUS007  (response-header / response)
+  (no findings)
+
+## STANDARD010  (openapi-version / api)
+  (no findings)
+
+## CONTENT001  (media-type / media-type)
+  /paths/~1customers/get  |  GET /customers  |  Request body media type absent
+  /paths/~1invoices/get  |  GET /invoices  |  Request body media type absent
+  /paths/~1orders/get  |  GET /orders  |  Request body media type absent
+  /paths/~1orders/post  |  POST /orders  |  Request body media type absent
+  /paths/~1orders~1{id}~1items~1{itemId}~1tags/get  |  GET /orders/{id}/items/{itemId}/tags  |  Request body media type absent
+
+## CONTENT002  (media-type / media-type)
+  /paths/~1customers/get  |  GET /customers  |  Response 200 media type absent
+  /paths/~1invoices/get  |  GET /invoices  |  Response 200 media type absent
+  /paths/~1orders/get  |  GET /orders  |  Response 200 media type absent
+  /paths/~1orders/post  |  POST /orders  |  Response 200 media type absent
+  /paths/~1orders~1{id}~1items~1{itemId}~1tags/get  |  GET /orders/{id}/items/{itemId}/tags  |  Response 200 media type absent
+
+## CONTENT003  (media-type / media-type)
+  (no findings)
+
+## CONTENT004  (media-type / media-type)
+  (no findings)
+
+## ERROR001  (error-response / operation)
+  (no findings)
+
+## ERROR002  (error-response / operation)
+  /paths/~1customers/get  |  GET /customers  |  Operation does not document a client-error response
+  /paths/~1invoices/get  |  GET /invoices  |  Operation does not document a client-error response
+  /paths/~1orders/get  |  GET /orders  |  Operation does not document a client-error response
+  /paths/~1orders/post  |  POST /orders  |  Operation does not document a client-error response
+
+## ERROR003  (error-response / operation)
+  /paths/~1customers/get  |  GET /customers  |  Operation does not document a server-error response
+  /paths/~1invoices/get  |  GET /invoices  |  Operation does not document a server-error response
+  /paths/~1orders/get  |  GET /orders  |  Operation does not document a server-error response
+  /paths/~1orders/post  |  POST /orders  |  Operation does not document a server-error response
+  /paths/~1orders~1{id}~1items~1{itemId}~1tags/get  |  GET /orders/{id}/items/{itemId}/tags  |  Operation does not document a server-error response
+
+## ERROR004  (error-response / response)
+  (no findings)
+
+## ERROR005  (error-response / response)
+  /paths/~1orders~1{id}~1items~1{itemId}~1tags/get  |  GET /orders/{id}/items/{itemId}/tags  |  Error response does not declare application/problem+json
+  /paths/~1orders~1{id}~1items~1{itemId}~1tags/get  |  GET /orders/{id}/items/{itemId}/tags  |  Error response does not declare application/problem+json
+
+## ERROR006  (error-response / response)
+  (no findings)
+
+## ERROR007  (error-response / response)
+  (no findings)
+
+## ERROR008  (authentication-error / operation)
+  (no findings)
+
+## ERROR009  (authentication-error / operation)
+  (no findings)
+
+## ERROR010  (authentication-error / response)
+  (no findings)
+
+## SEC001  (sensitive-data / property)
+  (no findings)
+
+## SEC002  (sensitive-data / query-parameter)
+  (no findings)
+
+## SEC003  (sensitive-data / path-parameter)
+  (no findings)
+
+## SEC008  (sensitive-data / header)
+  (no findings)
+
+## SEC004  (sensitive-search / query-parameter)
+  (no findings)
+
+## SEC005  (sensitive-search / operation)
+  (no findings)
+
+## SEC006  (identifier / property)
+  (no findings)
+
+## SEC007  (identifier / property)
+  (no findings)
+
+## FILTER001  (collection-capability / operation)
+  /paths/~1customers/get  |  GET /customers  |  Collection operation lacks the configured query capability
+  /paths/~1invoices/get  |  GET /invoices  |  Collection operation lacks the configured query capability
+  /paths/~1orders/get  |  GET /orders  |  Collection operation lacks the configured query capability
+
+## FILTER002  (collection-capability / query-parameter)
+  (no findings)
+
+## SORT001  (collection-capability / operation)
+  /paths/~1customers/get  |  GET /customers  |  Collection operation lacks the configured query capability
+  /paths/~1invoices/get  |  GET /invoices  |  Collection operation lacks the configured query capability
+  /paths/~1orders/get  |  GET /orders  |  Collection operation lacks the configured query capability
+
+## SORT002  (collection-capability / query-parameter)
+  (no findings)
+
+## SORT003  (collection-capability / query-parameter)
+  (no findings)
+
+## SORT004  (collection-capability / query-parameter)
+  (no findings)
+
+## FIELD001  (collection-capability / operation)
+  /paths/~1customers/get  |  GET /customers  |  Collection operation lacks the configured query capability
+  /paths/~1invoices/get  |  GET /invoices  |  Collection operation lacks the configured query capability
+  /paths/~1orders/get  |  GET /orders  |  Collection operation lacks the configured query capability
+
+## PAGE001  (pagination / operation)
+  /paths/~1customers/get  |  GET /customers  |  Collection operation lacks the configured pagination control
+  /paths/~1invoices/get  |  GET /invoices  |  Collection operation lacks the configured pagination control
+  /paths/~1orders/get  |  GET /orders  |  Collection operation lacks the configured pagination control
+
+## PAGE002  (pagination / query-parameter)
+  (no findings)
+
+## PAGE003  (pagination / query-parameter)
+  (no findings)
+
+## PAGE004  (pagination / query-parameter)
+  (no findings)
+
+## PAGE005  (pagination / response)
+  /paths/~1customers/get  |  GET /customers  |  Successful paginated response lacks a Link header
+  /paths/~1invoices/get  |  GET /invoices  |  Successful paginated response lacks a Link header
+  /paths/~1orders/get  |  GET /orders  |  Successful paginated response lacks a Link header
+
+## PAGE006  (pagination / query-parameter)
+  (no findings)
+
+## HTTP004  (operation / operation)
+  (no findings)
+
+## HTTP005  (operation / operation)
+  (no findings)
+
+## HTTP001  (operation-semantics / operation)
+  (no findings)
+
+## HTTP002  (operation-semantics / operation)
+  (no findings)
+
+## HTTP003  (operation-semantics / operation)
+  (no findings)
+
+## HTTP006  (operation-semantics / operation)
+  (no findings)
+
+## HTTP008  (operation-semantics / path)
+  (no findings)
+
+## UPDATE002  (operation / operation)
+  (no findings)
+
+## UPDATE001  (operation-semantics / operation)
+  (no findings)
+
+## UPDATE003  (manual / operation)
+  (no findings)
+
+## BULK001  (bulk-operation / operation)
+  (no findings)
+
+## BULK002  (schema / property)
+  (no findings)
+
+## BULK003  (bulk-operation / operation)
+  (no findings)
+
+## VERSION001  (versioning / path)
+  (no findings)
+
+## VERSION002  (versioning / header)
+  (no findings)
+
+## VERSION003  (versioning / media-type)
+  (no findings)
+
+## VERSION004  (versioning / api)
+  /paths  |  API  |  Interface has no explicit versioning
+
+## COMPAT001  (compatibility / api)
+  (no findings)
+
+## COMPAT002  (compatibility / schema-property)
+  (no findings)
+
+## COMPAT003  (compatibility / schema-property)
+  (no findings)
+
+## COMPAT004  (compatibility / operation)
+  (no findings)
+
+## COMPAT005  (compatibility / schema-property)
+  (no findings)
+
+## COMPAT006  (compatibility / operation)
+  (no findings)
+
+## STATUS001  (response-code / operation)
+  /paths/~1orders/post  |  POST /orders  |  Operation lacks the required documented status
+
+## STATUS002  (response-header / response)
+  (no findings)
+
+## STATUS003  (response-code / response)
+  (no findings)
+
+## STATUS004  (response-code / operation)
+  /paths/~1orders~1{id}~1items~1{itemId}~1tags/get  |  GET /orders/{id}/items/{itemId}/tags  |  Operation lacks the required documented status
+
+## STATUS005  (response-code / response)
+  (no findings)
+
+## STANDARD011  (parameter / operation)
+  (no findings)
+
+## STANDARD012  (parameter / parameter)
+  (no findings)
+
+## STANDARD013  (parameter / parameter)
+  /paths/~1orders~1{id}~1items~1{itemId}~1tags/get  |  GET /orders/{id}/items/{itemId}/tags  |  Path template placeholder '{id}' has no matching path parameter
+  /paths/~1orders~1{id}~1items~1{itemId}~1tags/get  |  GET /orders/{id}/items/{itemId}/tags  |  Path template placeholder '{itemId}' has no matching path parameter
+
+## STANDARD014  (parameter / parameter)
+  (no findings)
+
+## STANDARD015  (request-body / operation)
+  (no findings)
+
+## STANDARD016  (path-set / api)
+  (no findings)
+
+## STANDARD017  (header-schema / response)
+  (no findings)
+
+## HTTP009  (request-body / operation)
+  (no findings)
+
+## DOC010  (operation-metadata / operation)
+  /paths/~1customers/get  |  GET /customers  |  Operation has no operationId
+  /paths/~1invoices/get  |  GET /invoices  |  Operation has no operationId
+  /paths/~1orders/post  |  POST /orders  |  operationId 'listOrders' is also used by GET /orders
+  /paths/~1orders~1{id}~1items~1{itemId}~1tags/get  |  GET /orders/{id}/items/{itemId}/tags  |  Operation has no operationId
+
+## DOC011  (operation-metadata / operation)
+  /paths/~1customers/get  |  GET /customers  |  Operation is not assigned any tag
+  /paths/~1invoices/get  |  GET /invoices  |  Operation is not assigned any tag
+  /paths/~1orders~1{id}~1items~1{itemId}~1tags/get  |  GET /orders/{id}/items/{itemId}/tags  |  Operation is not assigned any tag
+
+## DOC012  (api-title / api)
+  /info/title  |  T  |  API title does not end with 'API'
+
+## CASE006  (schema-name / schema)
+  (no findings)
+
+## JSON017  (enum-values / property)
+  (no findings)
+
+## SEC009  (server-url / api)
+  (no findings)
+
+## STANDARD018  (extensions / api)
+  (no findings)
+
+## STANDARD019  (schema-composition / schema)
+  (no findings)
+
+## STANDARD020  (schema-composition / operation)
+  (no findings)
+
+## STANDARD021  (document-lint / api)
+  (no findings)
+
+## STANDARD022  (document-lint / api)
+  (no findings)
+
+## DOC013  (documentation-completeness / property)
+  (no findings)
+
+## DOC014  (documentation-completeness / parameter)
+  (no findings)
+
+## STATUS008  (status-class / response)
+  (no findings)
+
+## CASE007  (schema-name / schema)
+  (no findings)
+
+## JSON018  (schema / property)
+  (no findings)
+
+## JSON019  (schema / property)
+  (no findings)
+
+## DOC015  (operation / operation)
+  /paths/~1customers/get  |  GET /customers  |  Operation description is missing
+  /paths/~1invoices/get  |  GET /invoices  |  Operation description is missing
+  /paths/~1orders/get  |  GET /orders  |  Operation description is missing
+  /paths/~1orders/post  |  POST /orders  |  Operation description is missing
+  /paths/~1orders~1{id}~1items~1{itemId}~1tags/get  |  GET /orders/{id}/items/{itemId}/tags  |  Operation description is missing
+
+## JSON020  (example-validity / property)
+  (no findings)
+
+## DOC016  (example-validity / schema)
+  (no findings)
+
+## ERROR011  (response-example / operation)
+  /paths/~1orders~1{id}~1items~1{itemId}~1tags/get  |  GET /orders/{id}/items/{itemId}/tags  |  Error responses 400 and 422 share an identical example payload
+
+## STANDARD023  (server-url / api)
+  /servers  |  /  |  Server URL does not match the approved pattern https://[a-z0-9-]+(\.[a-z0-9-]+)+(:[0-9]+)?(/[^\s]*)?
+
+## JSON021  (schema / property)
+  (no findings)
+
+## JSON022  (schema / property)
+  (no findings)
+
+## REST007  (path-prefix / api)
+  (no findings)
+
+## CASE008  (tag / api)
+  (no findings)
+
+## DOC017  (tag / api)
+  (no findings)
+
+## DOC018  (tag / api)
+  /tags  |  orders  |  Operation tag 'orders' is not declared in the top-level tags list
+
+## STANDARD024  (component-usage / api)
+  (no findings)
+
+## JSON023  (array-items / api)
+  (no findings)
+
+## SECURITY003  (security-scheme / api)
+  (no findings)
+
+## SECURITY004  (markdown-safety / api)
+  (no findings)
+
+## STANDARD025  (path-syntax / api)
+  (no findings)
+
+## STANDARD026  (parameter / operation)
+  (no findings)
+
+## STANDARD027  (server-url / api)
+  (no findings)
+
+## STANDARD028  (server-url / api)
+  (no findings)
+
+## DOC019  (tag / api)
+  (no findings)
+
+## DOC020  (metadata / api)
+  /info/license  |  API  |  API metadata does not declare a license
+
+## DOC021  (text-style / operation-summary)
+  (no findings)
+
+## DOC022  (text-style / operation-summary)
+  (no findings)

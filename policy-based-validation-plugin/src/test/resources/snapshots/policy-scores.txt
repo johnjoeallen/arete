@@ -1,0 +1,37 @@
+# policy score by fixture spec
+# regenerate: mvn -pl policy-based-validation-plugin test -Dtest=PolicySnapshotTest -Dsnapshot.update=true
+
+## Enterprise Grade
+  catalogue    status=SUCCESS  score=79.5   noBlockers=79.5   grade=D    findings=103
+  lint         status=SUCCESS  score=91.5   noBlockers=91.5   grade=B    findings=20
+  house-style  status=SUCCESS  score=87     noBlockers=87     grade=C    findings=33
+  schema       status=SUCCESS  score=87     noBlockers=87     grade=C    findings=47
+  ops          status=SUCCESS  score=90     noBlockers=90     grade=B    findings=46
+
+## Lenient
+  catalogue    status=SUCCESS  score=96     noBlockers=96     grade=-    findings=102
+  lint         status=SUCCESS  score=98.4   noBlockers=98.4   grade=-    findings=19
+  house-style  status=SUCCESS  score=97.5   noBlockers=97.5   grade=-    findings=32
+  schema       status=SUCCESS  score=97.5   noBlockers=97.5   grade=-    findings=46
+  ops          status=SUCCESS  score=98.1   noBlockers=98.1   grade=-    findings=45
+
+## Pedantic
+  catalogue    status=SUCCESS  score=0      noBlockers=24     grade=-    findings=102
+  lint         status=SUCCESS  score=0      noBlockers=72     grade=-    findings=19
+  house-style  status=SUCCESS  score=0      noBlockers=56     grade=-    findings=32
+  schema       status=SUCCESS  score=0      noBlockers=54     grade=-    findings=46
+  ops          status=SUCCESS  score=0      noBlockers=66     grade=-    findings=45
+
+## Zalando
+  catalogue    status=SUCCESS  score=91.5   noBlockers=91.5   grade=-    findings=42
+  lint         status=SUCCESS  score=96     noBlockers=96     grade=-    findings=11
+  house-style  status=SUCCESS  score=93     noBlockers=93     grade=-    findings=18
+  schema       status=SUCCESS  score=94     noBlockers=94     grade=-    findings=15
+  ops          status=SUCCESS  score=94.5   noBlockers=94.5   grade=-    findings=23
+
+## Zalando Extended
+  catalogue    status=SUCCESS  score=87     noBlockers=87     grade=-    findings=64
+  lint         status=SUCCESS  score=94.5   noBlockers=94.5   grade=-    findings=14
+  house-style  status=SUCCESS  score=92     noBlockers=92     grade=-    findings=20
+  schema       status=SUCCESS  score=91     noBlockers=91     grade=-    findings=26
+  ops          status=SUCCESS  score=92     noBlockers=92     grade=-    findings=31

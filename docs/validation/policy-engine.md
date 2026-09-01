@@ -423,6 +423,19 @@ The result reports `overallScore` (`effectiveScore`) and
 2. Add `<id>: matchers/<id>/Matcher.md` to `PolicyBundle.yaml` under
    `matchers:`.
 3. Add rules that use it.
+4. Regenerate the behaviour snapshots and review the diff:
+   `mvn -pl policy-based-validation-plugin test -Dtest=PolicySnapshotTest -Dsnapshot.update=true`.
+
+### Behaviour snapshots
+
+`PolicySnapshotTest` runs every bundled rule against the shared fixture specs
+and checks the findings — and each policy's end-to-end score — against golden
+files under `src/test/resources/snapshots/`. Any change to a matcher, rule
+parameters, or the scoring model surfaces as a diff there. After an intended
+change, regenerate with `-Dsnapshot.update=true` and review what moved before
+committing the updated snapshots. (`Matcher.groovy` parity checks still run for
+matchers that have one, but they compare two implementations of the current
+behaviour, not against a frozen baseline — the snapshots are the baseline.)
 
 ### A new policy
 

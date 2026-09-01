@@ -1,0 +1,561 @@
+# catalogue — bundled-rule findings (Distill)
+# regenerate: mvn -pl policy-based-validation-plugin test -Dtest=PolicySnapshotTest -Dsnapshot.update=true
+
+## REST001  (resource-path / path)
+  (no findings)
+
+## DOC001  (operation / operation)
+  /paths/~1orders/delete  |  DELETE /orders  |  Operation summary is missing
+  /paths/~1orders/post  |  POST /orders  |  Operation summary is missing
+  /paths/~1orders~1{orderId}/get  |  GET /orders/{orderId}  |  Operation summary is missing
+  /paths/~1reports/get  |  GET /reports  |  Operation summary is missing
+  /paths/~1things~1{thingKey}/get  |  GET /things/{thingKey}  |  Operation summary is missing
+
+## DOC002  (text-style / operation-summary)
+  (no findings)
+
+## DOC003  (text-style / operation-summary)
+  (no findings)
+
+## DOC004  (text-style / operation-summary)
+  (no findings)
+
+## DOC005  (text-style / operation-summary)
+  (no findings)
+
+## DOC006  (metadata / api)
+  /info  |  API  |  API metadata is missing contact email
+  /info  |  API  |  API metadata is missing contact name
+  /info  |  API  |  API metadata is missing description
+  /info  |  API  |  API metadata is missing semantic version
+
+## DOC007  (metadata / api)
+  /  |  API  |  API metadata is missing x-api-id
+
+## DOC008  (metadata / api)
+  /  |  API  |  API metadata is missing x-audience
+
+## DOC009  (text-style / operation-summary)
+  /paths/~1bulk-create~1orders~1{batchId}/post  |  POST /bulk-create/orders/{batchId}  |  Operation summary is not action-oriented
+
+## STANDARD001  (hostname / api)
+  /servers  |  https://api.example.com/v1  |  Server hostname is not lowercase hyphenated
+
+## STANDARD002  (resource-path / path)
+  (no findings)
+
+## STANDARD003  (response-header / response)
+  (no findings)
+
+## STANDARD004  (path-count / api)
+  (no findings)
+
+## STANDARD005  (path-count / api)
+  (no findings)
+
+## STANDARD006  (path-count / api)
+  /paths/~1catalog~1searchByName  |  /catalog/searchByName  |  Nested resource type is not exposed as a root resource
+
+## STANDARD007  (resource-path / path)
+  (no findings)
+
+## STANDARD008  (proprietary-header / header)
+  /paths/~1orders/post  |  POST /orders  |  Proprietary response header is not allow-listed: X-Count
+  /paths/~1orders/post  |  POST /orders  |  Proprietary response header is not allow-listed: X-Trace
+  /paths/~1orders~1{orderId}/get/parameters/2  |  GET /orders/{orderId}  |  Proprietary request header is not allow-listed: X-SSN
+
+## STANDARD009  (query-collection / query-parameter)
+  (no findings)
+
+## SECURITY001  (security / operation)
+  /paths/~1bulk-create~1orders~1{batchId}/post  |  POST /bulk-create/orders/{batchId}  |  Operation does not require security scheme bearerAuth
+  /paths/~1catalog~1searchByName/put  |  PUT /catalog/searchByName  |  Operation does not require security scheme bearerAuth
+  /paths/~1orders/delete  |  DELETE /orders  |  Operation does not require security scheme bearerAuth
+  /paths/~1orders/post  |  POST /orders  |  Operation does not require security scheme bearerAuth
+  /paths/~1orders~1{orderId}/get  |  GET /orders/{orderId}  |  Operation does not require security scheme bearerAuth
+  /paths/~1reports/get  |  GET /reports  |  Operation does not require security scheme bearerAuth
+  /paths/~1things~1{thingKey}/get  |  GET /things/{thingKey}  |  Operation does not require security scheme bearerAuth
+
+## SECURITY002  (security / operation)
+  /paths/~1bulk-create~1orders~1{batchId}/post  |  POST /bulk-create/orders/{batchId}  |  Operation does not require security scheme bearerAuth with scopes read
+  /paths/~1catalog~1searchByName/put  |  PUT /catalog/searchByName  |  Operation does not require security scheme bearerAuth with scopes read
+  /paths/~1orders/delete  |  DELETE /orders  |  Operation does not require security scheme bearerAuth with scopes read
+  /paths/~1orders/post  |  POST /orders  |  Operation does not require security scheme bearerAuth with scopes read
+  /paths/~1orders~1{orderId}/get  |  GET /orders/{orderId}  |  Operation does not require security scheme bearerAuth with scopes read
+  /paths/~1reports/get  |  GET /reports  |  Operation does not require security scheme bearerAuth with scopes read
+  /paths/~1things~1{thingKey}/get  |  GET /things/{thingKey}  |  Operation does not require security scheme bearerAuth with scopes read
+
+## CASE001  (naming / property)
+  (no findings)
+
+## CASE002  (naming / path-parameter)
+  /paths/~1orders~1{orderId}/get/parameters/0  |  orderId  |  Name does not use the configured convention
+  /paths/~1things~1{thingKey}/get/parameters/0  |  thingId  |  Name does not use the configured convention
+
+## CASE003  (naming / query-parameter)
+  (no findings)
+
+## CASE004  (naming / header)
+  (no findings)
+
+## CASE005  (naming / path-segment)
+  /paths/~1catalog~1searchByName  |  searchByName  |  Name does not use the configured convention
+
+## REST002  (naming / path-segment)
+  /paths/~1bulk-create~1orders~1{batchId}  |  bulk-create  |  Collection name is singular
+  /paths/~1catalog~1searchByName  |  catalog  |  Collection name is singular
+  /paths/~1catalog~1searchByName  |  searchByName  |  Collection name is singular
+
+## REST003  (resource-path / operation)
+  (no findings)
+
+## REST004  (resource-path / operation)
+  (no findings)
+
+## REST005  (naming / schema)
+  /components/schemas/CreateOrderRequest  |  CreateOrderRequest  |  Name has prohibited suffix Request
+
+## REST006  (naming / schema)
+  (no findings)
+
+## JSON003  (naming / property)
+  (no findings)
+
+## JSON004  (naming / property)
+  (no findings)
+
+## JSON006  (schema / property)
+  (no findings)
+
+## JSON007  (schema / property)
+  (no findings)
+
+## JSON009  (schema / property)
+  (no findings)
+
+## JSON010  (common-field / property)
+  /components/schemas/CreateOrderRequest/properties/created  |  created  |  Common field has an inconsistent type or format
+  /components/schemas/CreateOrderRequest/properties/id  |  id  |  Common field has an inconsistent type or format
+
+## JSON011  (date-time-name / property)
+  /components/schemas/CreateOrderRequest/properties/expiresAt  |  expiresAt  |  Date-time property name does not end with _at
+  /components/schemas/CreateOrderRequest/properties/startTime  |  startTime  |  Date-time property name does not end with _at
+  /components/schemas/order_response/properties/modified  |  modified  |  Date-time property name does not end with _at
+
+## JSON012  (schema / property)
+  /components/schemas/CreateOrderRequest/properties/id  |  id  |  Numeric property does not declare a format
+
+## JSON013  (schema / property)
+  (no findings)
+
+## JSON014  (schema / property)
+  (no findings)
+
+## JSON015  (schema / property)
+  (no findings)
+
+## JSON016  (response-code / response)
+  /paths/~1orders~1{orderId}  |  GET /orders/{orderId}  |  Successful response is not a JSON object
+
+## STATUS006  (response-code / response)
+  /paths/~1things~1{thingKey}  |  GET /things/{thingKey}  |  Error response does not declare application/problem+json
+
+## STATUS007  (response-header / response)
+  (no findings)
+
+## STANDARD010  (openapi-version / api)
+  (no findings)
+
+## CONTENT001  (media-type / media-type)
+  /paths/~1bulk-create~1orders~1{batchId}/post  |  POST /bulk-create/orders/{batchId}  |  Request body media type absent
+  /paths/~1catalog~1searchByName/put  |  PUT /catalog/searchByName  |  Request body media type absent
+  /paths/~1orders/post  |  POST /orders  |  Request body media type absent
+  /paths/~1orders~1{orderId}/get  |  GET /orders/{orderId}  |  Request body media type absent
+  /paths/~1reports/get  |  GET /reports  |  Request body media type absent
+  /paths/~1things~1{thingKey}/get  |  GET /things/{thingKey}  |  Request body media type absent
+
+## CONTENT002  (media-type / media-type)
+  /paths/~1bulk-create~1orders~1{batchId}/post  |  POST /bulk-create/orders/{batchId}  |  Response 200 media type absent
+  /paths/~1catalog~1searchByName/put  |  PUT /catalog/searchByName  |  Response 200 media type absent
+  /paths/~1orders/delete  |  DELETE /orders  |  Response 204 media type absent
+  /paths/~1orders/post  |  POST /orders  |  Response 200 media type absent
+  /paths/~1reports/get  |  GET /reports  |  Response 200 media type absent
+  /paths/~1things~1{thingKey}/get  |  GET /things/{thingKey}  |  Response 500 media type absent
+
+## CONTENT003  (media-type / media-type)
+  /paths/~1orders~1{orderId}/get  |  GET /orders/{orderId}  |  Response 200 media type wildcard
+
+## CONTENT004  (media-type / media-type)
+  /paths/~1orders~1{orderId}/get  |  GET /orders/{orderId}  |  Response 200 media type not-allowed
+
+## ERROR001  (error-response / operation)
+  (no findings)
+
+## ERROR002  (error-response / operation)
+  /paths/~1bulk-create~1orders~1{batchId}/post  |  POST /bulk-create/orders/{batchId}  |  Operation does not document a client-error response
+  /paths/~1catalog~1searchByName/put  |  PUT /catalog/searchByName  |  Operation does not document a client-error response
+  /paths/~1orders/delete  |  DELETE /orders  |  Operation does not document a client-error response
+  /paths/~1orders/post  |  POST /orders  |  Operation does not document a client-error response
+  /paths/~1orders~1{orderId}/get  |  GET /orders/{orderId}  |  Operation does not document a client-error response
+  /paths/~1reports/get  |  GET /reports  |  Operation does not document a client-error response
+  /paths/~1things~1{thingKey}/get  |  GET /things/{thingKey}  |  Operation does not document a client-error response
+
+## ERROR003  (error-response / operation)
+  /paths/~1bulk-create~1orders~1{batchId}/post  |  POST /bulk-create/orders/{batchId}  |  Operation does not document a server-error response
+  /paths/~1catalog~1searchByName/put  |  PUT /catalog/searchByName  |  Operation does not document a server-error response
+  /paths/~1orders/delete  |  DELETE /orders  |  Operation does not document a server-error response
+  /paths/~1orders/post  |  POST /orders  |  Operation does not document a server-error response
+  /paths/~1orders~1{orderId}/get  |  GET /orders/{orderId}  |  Operation does not document a server-error response
+  /paths/~1reports/get  |  GET /reports  |  Operation does not document a server-error response
+
+## ERROR004  (error-response / response)
+  (no findings)
+
+## ERROR005  (error-response / response)
+  /paths/~1things~1{thingKey}/get  |  GET /things/{thingKey}  |  Error response does not declare application/problem+json
+
+## ERROR006  (error-response / response)
+  (no findings)
+
+## ERROR007  (error-response / response)
+  (no findings)
+
+## ERROR008  (authentication-error / operation)
+  (no findings)
+
+## ERROR009  (authentication-error / operation)
+  (no findings)
+
+## ERROR010  (authentication-error / response)
+  (no findings)
+
+## SEC001  (sensitive-data / property)
+  /components/schemas/CreateOrderRequest/properties/password  |  password  |  Schema property name may contain sensitive data: password
+
+## SEC002  (sensitive-data / query-parameter)
+  /paths/~1orders~1{orderId}/get/parameters/1  |  GET /orders/{orderId}  |  Parameter name may expose sensitive data: api_key
+
+## SEC003  (sensitive-data / path-parameter)
+  (no findings)
+
+## SEC008  (sensitive-data / header)
+  /paths/~1orders~1{orderId}/get/parameters/2  |  GET /orders/{orderId}  |  Parameter name may expose sensitive data: X-SSN
+
+## SEC004  (sensitive-search / query-parameter)
+  /paths/~1reports/get/parameters/0  |  GET /reports  |  Search query parameter may carry sensitive data: search
+
+## SEC005  (sensitive-search / operation)
+  (no findings)
+
+## SEC006  (identifier / property)
+  /components/schemas/CreateOrderRequest/properties/id  |  id  |  Identifier property should use type string: id
+
+## SEC007  (identifier / property)
+  /components/schemas/CreateOrderRequest/properties/id  |  id  |  Identifier property should declare format uuid: id
+
+## FILTER001  (collection-capability / operation)
+  /paths/~1reports/get  |  GET /reports  |  Collection operation lacks the configured query capability
+
+## FILTER002  (collection-capability / query-parameter)
+  (no findings)
+
+## SORT001  (collection-capability / operation)
+  /paths/~1reports/get  |  GET /reports  |  Collection operation lacks the configured query capability
+
+## SORT002  (collection-capability / query-parameter)
+  (no findings)
+
+## SORT003  (collection-capability / query-parameter)
+  (no findings)
+
+## SORT004  (collection-capability / query-parameter)
+  (no findings)
+
+## FIELD001  (collection-capability / operation)
+  (no findings)
+
+## PAGE001  (pagination / operation)
+  /paths/~1reports/get  |  GET /reports  |  Collection operation lacks the configured pagination control
+
+## PAGE002  (pagination / query-parameter)
+  (no findings)
+
+## PAGE003  (pagination / query-parameter)
+  (no findings)
+
+## PAGE004  (pagination / query-parameter)
+  (no findings)
+
+## PAGE005  (pagination / response)
+  /paths/~1reports/get  |  GET /reports  |  Successful paginated response lacks a Link header
+
+## PAGE006  (pagination / query-parameter)
+  (no findings)
+
+## HTTP004  (operation / operation)
+  /paths/~1orders/delete  |  DELETE /orders  |  Operation has a request body
+
+## HTTP005  (operation / operation)
+  (no findings)
+
+## HTTP001  (operation-semantics / operation)
+  (no findings)
+
+## HTTP002  (operation-semantics / operation)
+  (no findings)
+
+## HTTP003  (operation-semantics / operation)
+  (no findings)
+
+## HTTP006  (operation-semantics / operation)
+  (no findings)
+
+## HTTP008  (operation-semantics / path)
+  (no findings)
+
+## UPDATE002  (operation / operation)
+  (no findings)
+
+## UPDATE001  (operation-semantics / operation)
+  (no findings)
+
+## UPDATE003  (manual / operation)
+  (no findings)
+
+## BULK001  (bulk-operation / operation)
+  /paths/~1bulk-create~1orders~1{batchId}/post  |  POST /bulk-create/orders/{batchId}  |  Bulk creation is not POSTed to a collection
+
+## BULK002  (schema / property)
+  (no findings)
+
+## BULK003  (bulk-operation / operation)
+  /paths/~1catalog~1searchByName/put  |  PUT /catalog/searchByName  |  Bulk mutation uses search criteria
+
+## VERSION001  (versioning / path)
+  (no findings)
+
+## VERSION002  (versioning / header)
+  (no findings)
+
+## VERSION003  (versioning / media-type)
+  (no findings)
+
+## VERSION004  (versioning / api)
+  /paths  |  API  |  Interface has no explicit versioning
+
+## COMPAT001  (compatibility / api)
+  (no findings)
+
+## COMPAT002  (compatibility / schema-property)
+  (no findings)
+
+## COMPAT003  (compatibility / schema-property)
+  (no findings)
+
+## COMPAT004  (compatibility / operation)
+  (no findings)
+
+## COMPAT005  (compatibility / schema-property)
+  (no findings)
+
+## COMPAT006  (compatibility / operation)
+  (no findings)
+
+## STATUS001  (response-code / operation)
+  /paths/~1bulk-create~1orders~1{batchId}/post  |  POST /bulk-create/orders/{batchId}  |  Operation lacks the required documented status
+  /paths/~1catalog~1searchByName/put  |  PUT /catalog/searchByName  |  Operation lacks the required documented status
+  /paths/~1orders/post  |  POST /orders  |  Operation lacks the required documented status
+
+## STATUS002  (response-header / response)
+  (no findings)
+
+## STATUS003  (response-code / response)
+  (no findings)
+
+## STATUS004  (response-code / operation)
+  /paths/~1orders~1{orderId}/get  |  GET /orders/{orderId}  |  Operation lacks the required documented status
+  /paths/~1things~1{thingKey}/get  |  GET /things/{thingKey}  |  Operation lacks the required documented status
+
+## STATUS005  (response-code / response)
+  (no findings)
+
+## STANDARD011  (parameter / operation)
+  (no findings)
+
+## STANDARD012  (parameter / parameter)
+  /paths/~1things~1{thingKey}/get/parameters/0  |  GET /things/{thingKey} thingId  |  Path parameter 'thingId' is not marked required
+
+## STANDARD013  (parameter / parameter)
+  /paths/~1bulk-create~1orders~1{batchId}/post  |  POST /bulk-create/orders/{batchId}  |  Path template placeholder '{batchId}' has no matching path parameter
+  /paths/~1things~1{thingKey}/get  |  GET /things/{thingKey}  |  Path parameter 'thingId' has no matching {placeholder} in the path template
+  /paths/~1things~1{thingKey}/get  |  GET /things/{thingKey}  |  Path template placeholder '{thingKey}' has no matching path parameter
+
+## STANDARD014  (parameter / parameter)
+  /paths/~1things~1{thingKey}/get/parameters/1  |  GET /things/{thingKey} verbose  |  Parameter 'verbose' defines neither a schema nor content
+
+## STANDARD015  (request-body / operation)
+  /paths/~1orders/delete  |  DELETE /orders  |  Request body is present but not marked required: true
+
+## STANDARD016  (path-set / api)
+  (no findings)
+
+## STANDARD017  (header-schema / response)
+  /paths/~1orders/post  |  POST /orders 200  |  Response header 'X-Trace' defines neither a schema nor content
+
+## HTTP009  (request-body / operation)
+  /paths/~1orders/delete  |  DELETE /orders  |  DELETE operation declares a request body
+
+## DOC010  (operation-metadata / operation)
+  /paths/~1bulk-create~1orders~1{batchId}/post  |  POST /bulk-create/orders/{batchId}  |  Operation has no operationId
+  /paths/~1catalog~1searchByName/put  |  PUT /catalog/searchByName  |  Operation has no operationId
+  /paths/~1orders/delete  |  DELETE /orders  |  Operation has no operationId
+  /paths/~1orders/post  |  POST /orders  |  Operation has no operationId
+  /paths/~1orders~1{orderId}/get  |  GET /orders/{orderId}  |  Operation has no operationId
+  /paths/~1reports/get  |  GET /reports  |  Operation has no operationId
+  /paths/~1things~1{thingKey}/get  |  GET /things/{thingKey}  |  Operation has no operationId
+
+## DOC011  (operation-metadata / operation)
+  /paths/~1bulk-create~1orders~1{batchId}/post  |  POST /bulk-create/orders/{batchId}  |  Operation is not assigned any tag
+  /paths/~1catalog~1searchByName/put  |  PUT /catalog/searchByName  |  Operation is not assigned any tag
+  /paths/~1orders/delete  |  DELETE /orders  |  Operation is not assigned any tag
+  /paths/~1orders/post  |  POST /orders  |  Operation is not assigned any tag
+  /paths/~1orders~1{orderId}/get  |  GET /orders/{orderId}  |  Operation is not assigned any tag
+  /paths/~1reports/get  |  GET /reports  |  Operation is not assigned any tag
+  /paths/~1things~1{thingKey}/get  |  GET /things/{thingKey}  |  Operation is not assigned any tag
+
+## DOC012  (api-title / api)
+  (no findings)
+
+## CASE006  (schema-name / schema)
+  (no findings)
+
+## JSON017  (enum-values / property)
+  (no findings)
+
+## SEC009  (server-url / api)
+  (no findings)
+
+## STANDARD018  (extensions / api)
+  (no findings)
+
+## STANDARD019  (schema-composition / schema)
+  /components/schemas/Composed  |  Composed  |  Composed uses allOf with inline members instead of $ref
+
+## STANDARD020  (schema-composition / operation)
+  /paths/~1orders/delete  |  DELETE /orders  |  Request body declares an inline object schema instead of a $ref
+  /paths/~1things~1{thingKey}/get  |  GET /things/{thingKey} 200  |  Response 200 declares an inline object schema instead of a $ref
+
+## STANDARD021  (document-lint / api)
+  (no findings)
+
+## STANDARD022  (document-lint / api)
+  (no findings)
+
+## DOC013  (documentation-completeness / property)
+  /components/schemas/CreateOrderRequest/properties/created  |  CreateOrderRequest.created  |  CreateOrderRequest.created has no description or example
+  /components/schemas/CreateOrderRequest/properties/expiresAt  |  CreateOrderRequest.expiresAt  |  CreateOrderRequest.expiresAt has no description or example
+  /components/schemas/CreateOrderRequest/properties/id  |  CreateOrderRequest.id  |  CreateOrderRequest.id has no description or example
+  /components/schemas/CreateOrderRequest/properties/password  |  CreateOrderRequest.password  |  CreateOrderRequest.password has no description or example
+  /components/schemas/CreateOrderRequest/properties/startTime  |  CreateOrderRequest.startTime  |  CreateOrderRequest.startTime has no description or example
+  /components/schemas/order_response/properties/modified  |  order_response.modified  |  order_response.modified has no description or example
+
+## DOC014  (documentation-completeness / parameter)
+  /paths/~1orders~1{orderId}/get/parameters/0  |  GET /orders/{orderId} orderId  |  GET /orders/{orderId} orderId has no description or example
+  /paths/~1orders~1{orderId}/get/parameters/1  |  GET /orders/{orderId} api_key  |  GET /orders/{orderId} api_key has no description or example
+  /paths/~1orders~1{orderId}/get/parameters/2  |  GET /orders/{orderId} X-SSN  |  GET /orders/{orderId} X-SSN has no description or example
+  /paths/~1reports/get/parameters/0  |  GET /reports search  |  GET /reports search has no description or example
+  /paths/~1reports/get/parameters/1  |  GET /reports fields  |  GET /reports fields has no description or example
+  /paths/~1things~1{thingKey}/get/parameters/0  |  GET /things/{thingKey} thingId  |  GET /things/{thingKey} thingId has no description or example
+  /paths/~1things~1{thingKey}/get/parameters/1  |  GET /things/{thingKey} verbose  |  GET /things/{thingKey} verbose has no description or example
+
+## STATUS008  (status-class / response)
+  /paths/~1things~1{thingKey}/get  |  GET /things/{thingKey} 500  |  Documents a server-error (500) response; these should be omitted from the contract
+
+## CASE007  (schema-name / schema)
+  /components/schemas/order_response  |  order_response  |  Schema name 'order_response' is a request/response object but is not PascalCase
+
+## JSON018  (schema / property)
+  /components/schemas/CreateOrderRequest/properties/id  |  id  |  Numeric property does not declare a format
+
+## JSON019  (schema / property)
+  (no findings)
+
+## DOC015  (operation / operation)
+  /paths/~1bulk-create~1orders~1{batchId}/post  |  POST /bulk-create/orders/{batchId}  |  Operation description is missing
+  /paths/~1catalog~1searchByName/put  |  PUT /catalog/searchByName  |  Operation description is missing
+  /paths/~1orders/delete  |  DELETE /orders  |  Operation description is missing
+  /paths/~1orders/post  |  POST /orders  |  Operation description is missing
+  /paths/~1orders~1{orderId}/get  |  GET /orders/{orderId}  |  Operation description is missing
+  /paths/~1reports/get  |  GET /reports  |  Operation description is missing
+  /paths/~1things~1{thingKey}/get  |  GET /things/{thingKey}  |  Operation description is missing
+
+## JSON020  (example-validity / property)
+  (no findings)
+
+## DOC016  (example-validity / schema)
+  (no findings)
+
+## ERROR011  (response-example / operation)
+  (no findings)
+
+## STANDARD023  (server-url / api)
+  (no findings)
+
+## JSON021  (schema / property)
+  /components/schemas/CreateOrderRequest/properties/id  |  id  |  Numeric property does not declare both a minimum and a maximum
+
+## JSON022  (schema / property)
+  /components/schemas/CreateOrderRequest/properties/created  |  created  |  String property does not declare a maximum length
+  /components/schemas/CreateOrderRequest/properties/expiresAt  |  expiresAt  |  String property does not declare a maximum length
+  /components/schemas/CreateOrderRequest/properties/password  |  password  |  String property does not declare a maximum length
+  /components/schemas/CreateOrderRequest/properties/startTime  |  startTime  |  String property does not declare a maximum length
+  /components/schemas/order_response/properties/modified  |  modified  |  String property does not declare a maximum length
+
+## REST007  (path-prefix / api)
+  (no findings)
+
+## CASE008  (tag / api)
+  (no findings)
+
+## DOC017  (tag / api)
+  (no findings)
+
+## DOC018  (tag / api)
+  (no findings)
+
+## STANDARD024  (component-usage / api)
+  /components/schemas/Composed  |  Composed  |  Component schema 'Composed' is defined but never referenced
+  /components/schemas/CreateOrderRequest  |  CreateOrderRequest  |  Component schema 'CreateOrderRequest' is defined but never referenced
+
+## JSON023  (array-items / api)
+  (no findings)
+
+## SECURITY003  (security-scheme / api)
+  (no findings)
+
+## SECURITY004  (markdown-safety / api)
+  (no findings)
+
+## STANDARD025  (path-syntax / api)
+  (no findings)
+
+## STANDARD026  (parameter / operation)
+  (no findings)
+
+## STANDARD027  (server-url / api)
+  (no findings)
+
+## STANDARD028  (server-url / api)
+  /servers  |  https://api.example.com/v1  |  Server URL uses the documentation placeholder host api.example.com
+
+## DOC019  (tag / api)
+  (no findings)
+
+## DOC020  (metadata / api)
+  /info/license  |  API  |  API metadata does not declare a license
+
+## DOC021  (text-style / operation-summary)
+  (no findings)
+
+## DOC022  (text-style / operation-summary)
+  (no findings)
