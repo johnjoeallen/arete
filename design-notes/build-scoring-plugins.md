@@ -46,10 +46,15 @@ POST {areteUrl}/api/v1/namespaces/{namespace}/specs
      Content-Type: application/yaml
      <spec body>
 
-201  (all gating combinations passed)   body: SubmitResponse  (or SARIF)
-422  (a combination failed its policy)  body: SubmitResponse  (or SARIF)
-4xx/5xx other                           body: Problem Details {status,title,detail}
+201   spec was scored, every combination passed its policy   body: SubmitResponse (or SARIF)
+422   spec was scored, at least one combination failed        body: SubmitResponse (or SARIF)
+4xx   the request was rejected (bad spec, unknown validator/policy, bad namespace)
+5xx   Areté error
 ```
+
+**`422` means one thing: a scoring failure.** Request rejections use other
+`4xx` codes (`400` / `404`), so the plugin never has to disambiguate a `422`.
+*(Areté API change — see follow-up.)*
 
 `SubmitResponse` (JSON form):
 
@@ -66,17 +71,16 @@ POST {areteUrl}/api/v1/namespaces/{namespace}/specs
 
 How the plugin reads it:
 
-- **`201` → build passes.** No combination failed. Save the SARIF if requested;
-  print the report from `results[]`.
-- **`422` with a `results[]` body → a scoring failure.** Parse `results[]`,
-  build the report, and compute the **build** verdict as
-  *AND of `level.met` over the non-`optional` combinations* — so a `422`
-  caused only by an `optional` combination is downgraded to a **build pass**
-  (still shown in the report, marked non-gating). SARIF, if requested, is
-  saved regardless.
-- **Any other status, or `422` without `results[]` (Problem Details body) →
-  build error** — unreachable Areté, unknown validator/policy, bad spec.
-  Surface `title` / `detail`; do not treat as a scoring failure.
+- **`201`** — the spec was scored, everything passed. Save the SARIF if
+  requested; print the report from `results[]`.
+- **`422`** — the spec was scored, something failed. Parse `results[]`, build
+  the report, and compute the **build** verdict as *AND of `level.met` over
+  the non-`optional` combinations* — so a `422` caused only by an `optional`
+  combination is still a **build pass** (shown in the report, marked
+  non-gating). Save the SARIF regardless.
+- **Any other non-2xx** — the request was rejected or Areté errored. **Build
+  error** (`MojoExecutionException` / `GradleException`), surfacing the
+  Problem Details `title` / `detail`. Never treated as a scoring failure.
 - The policy already owns pass/fail (`passingScore`, or `scoring: blocker |
   error`); `level.met` reflects that. The plugin passes **no `failOn`** in the
   normal case — see below.
@@ -245,9 +249,24 @@ Three:
 | 4 | **Namespace default** | Default to the module's group (`${project.groupId}` / `project.group`), overridable. Per-branch namespaces are set via config by whoever wants them, not defaulted. |
 | 5 | **Submitter default** | `"maven"` / `"gradle"`, **unless** a known CI actor var is set (`GITHUB_ACTOR`, `GITLAB_USER_LOGIN`, `BUILD_USER_ID`) — then use that. Overridable. |
 | 6 | **Per-combination `failOn`** | **Dropped.** One optional **build-wide** `failOn` override, so the plugin always makes a single API call. The "stricter than the policy" case is build-wide anyway. |
-| 7 | **`422` overloading** (policy failure vs bad request) | Plugin side: a scoring failure is `application/json` with `results[]`; a request error is `application/problem+json` — the plugin branches on the media type. **Areté follow-up:** confirm errors use `application/problem+json` so this is a clean content-type check, not body-sniffing. |
+| 7 | **`422` overloading** (policy failure vs bad request) | **`422` = scoring failure only.** The plugin treats every non-2xx that isn't `422` as a build error. **Areté API change:** move request rejections (unknown validator/policy, bad namespace, unparseable spec) off `422` onto `400` / `404` with `application/problem+json`. |
 | 8 | **SARIF** | **Opt-in** (`<sarif>true</sarif>` / `sarif = true`). Generating a file nothing uploads is noise. |
 | 9 | **Caching** | No plugin-side result cache — the API is already content-hash-cached and one round-trip is cheap. **Gradle:** declare the spec file(s) as task inputs so an unchanged spec skips the task via normal up-to-date checking. **Maven:** re-run every time in v1. |
+
+## Areté API change (prerequisite)
+
+`POST /api/v1/namespaces/{namespace}/specs` currently returns `422` for
+*request rejections* too — an unknown validator/policy, an unresolvable
+namespace, an unparseable spec. Before the plugins are useful, `422` must mean
+**only** "the spec was scored and failed its policy":
+
+- request rejections → `400` (bad input) or `404` (no such namespace), body
+  `application/problem+json`;
+- `422` reserved for a scored-but-failing result when `httpStatusOnFail=422`.
+
+The same applies to `POST /api/v1/specs/{ref}/score`. This is a small,
+backward-tolerant change to `AutomationApiController` (the error bodies are
+already Problem-Details-shaped; only the status codes move).
 
 ## Repo & CI
 
