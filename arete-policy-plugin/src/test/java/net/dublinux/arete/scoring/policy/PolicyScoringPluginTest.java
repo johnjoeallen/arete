@@ -958,8 +958,8 @@ class PolicyScoringPluginTest {
         return input(content, "Enterprise Grade");
     }
 
-    private static SpecInput input(String content, String ruleSet) {
-        return SpecInput.builder().content(content).format(SpecFormat.OPENAPI3).ruleSet(ruleSet).build();
+    private static SpecInput input(String content, String policy) {
+        return SpecInput.builder().content(content).format(SpecFormat.OPENAPI3).policy(policy).build();
     }
 
     private static Map<String, String> bundledResources() {
@@ -1108,7 +1108,7 @@ class PolicyScoringPluginTest {
         PolicyScoringPlugin plugin = new PolicyScoringPlugin();
         plugin.configure(Map.of("policies-dir", dir.toString()));
 
-        assertTrue(plugin.getRuleSets().contains("Lenient"));
+        assertTrue(plugin.getPolicies().contains("Lenient"));
 
         ScoringResult lenient = plugin.score(input(ACTION_PATH_SPEC, "Lenient"));
         ScoringResult enterprise = plugin.score(input(ACTION_PATH_SPEC, "Enterprise Grade"));
@@ -1122,7 +1122,7 @@ class PolicyScoringPluginTest {
     void ignoresAMissingUserPolicyDirectory() {
         PolicyScoringPlugin plugin = new PolicyScoringPlugin();
         plugin.configure(Map.of("policies-dir", "/no/such/arete/policies"));
-        assertTrue(plugin.getRuleSets().contains("Enterprise Grade"));
+        assertTrue(plugin.getPolicies().contains("Enterprise Grade"));
     }
 
     /** Bundle pinned to the Distill runtime for tests that drive it directly. */

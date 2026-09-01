@@ -14,7 +14,7 @@ organisation-specific plugin such as a breaking-changes checker.
 ## Running scoring
 
 A **Scoring** picker on the spec's page lists every globally enabled plugin
-as its own row — a checkbox plus that plugin's own rule-set dropdown — so more
+as its own row — a checkbox plus that plugin's own policy dropdown — so more
 than one plugin can run at once. Click **Score** to run every checked plugin;
 nothing runs until you do.
 
@@ -52,22 +52,22 @@ and in the findings table) comes from the plugin's `getSeverityLabel(Severity)`,
 so a plugin can surface its own vocabulary (e.g. `Must` / `Should` / `May` /
 `Hint`). The default simply title-cases the enum name.
 
-## Rule sets
+## Policies
 
-A plugin can declare more than one named rule set — e.g. an
+A plugin can declare more than one named policy — e.g. an
 `internal` / `external` split for an organisation that lints differently by API
 audience. Every enabled plugin gets its own row in the picker with its own
-rule-set dropdown; a plugin with only the implicit default set just has one
+policy dropdown; a plugin with only the implicit default set just has one
 entry.
 
-A rule set is a **plugin-chosen name**, not an engine-specific concept. The
-Areté Policy Engine exposes one rule set per bundled [policy](policies.md):
+A policy is a **plugin-chosen name**, not an engine-specific concept. The
+Areté Policy Engine exposes one policy per bundled [policy](policies.md):
 **Enterprise Grade** (the default), **Zalando**, and **Zalando Extended**.
 
-!!! note "`getRuleSets()` returns a `List`, not a `Set`"
-    The picker submits a rule set's **position** in the returned list, and the
+!!! note "`getPolicies()` returns a `List`, not a `Set`"
+    The picker submits a policy's **position** in the returned list, and the
     UI shows them in that order (preferred default first). A `Set.of(...)` with
-    two or more elements has no iteration-order guarantee in Java, so rule sets
+    two or more elements has no iteration-order guarantee in Java, so policies
     would reshuffle on every restart. Keep the order stable across releases.
 
 ## Where plugins come from
@@ -98,6 +98,6 @@ a narrower, additional switch layered on top of the global setting.
   matchers, rules, and policies work, and how to extend the bundle.
 - [Rule Catalogue](rules.md) — every rule in the bundle and which policies use it.
 - [Policies](policies.md) — the bundled Enterprise Grade, Zalando, and Zalando
-  Extended rule sets.
+  Extended policies.
 - [Writing a Plugin](writing-a-plugin.md) — implement the `SpecScoringPlugin`
   SPI.

@@ -48,7 +48,7 @@ the full list.
 
 ## Scoring
 
-Scoring is on-demand: open a spec, pick a plugin and rule set in the
+Scoring is on-demand: open a spec, pick a plugin and policy in the
 **Scoring** panel, and click **Score**. Findings are merged per
 endpoint with severity badges, JSON Pointer locations, and links to rule
 docs.

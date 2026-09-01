@@ -13,9 +13,9 @@ as text files without changing the host application code.
 ## How it works
 
 On first use the plugin loads its **policy bundle** from the classpath
-(`api-policy/` inside the jar) and validates every file in it. `getRuleSets()`
+(`api-policy/` inside the jar) and validates every file in it. `getPolicies()`
 then returns one entry per policy in the bundle — these appear in the
-Areté UI as selectable rule sets.
+Areté UI as selectable policies.
 
 When scoring runs, the plugin resolves the requested policy. If the name is
 unknown, the **first policy declared** in the bundle manifest is used as the
@@ -369,7 +369,7 @@ Prose describing the policy's intent.
 - Every rule id must exist in the bundle.
 - **Declaration order is report order** in the findings table.
 - The first policy in `PolicyBundle.yaml` is the fallback when a caller
-  requests an unknown rule set.
+  requests an unknown policy.
 
 Bundled policies: `Enterprise Grade` (the default), `Zalando`, and
 `Zalando Extended` — see [Policies](policies.md). Every rule they can reference

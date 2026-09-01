@@ -120,7 +120,7 @@ public final class ScoringResult {
 
     /**
      * A grade label for {@link #getOverallScore()} — {@code "A"}, {@code "B"},
-     * a band name, whatever the engine's rule set defines — or {@code null} if
+     * a band name, whatever the engine's policy defines — or {@code null} if
      * the engine has no grading concept for this run. Purely a presentation
      * label over the numeric score; callers that gate on a threshold should
      * still use the number.

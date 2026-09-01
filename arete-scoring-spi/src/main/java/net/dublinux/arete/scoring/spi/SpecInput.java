@@ -20,12 +20,12 @@ import java.util.Objects;
  * <p>{@code baseUri} is optional and used by plugins that need to resolve
  * relative {@code $ref}s or want a filename for reporting purposes.
  *
- * <p>{@code ruleSet} is one of the values the plugin itself declared via
- * {@link SpecScoringPlugin#getRuleSets()} (or {@link
- * SpecScoringPlugin#DEFAULT_RULE_SET} if nothing was explicitly
+ * <p>{@code policy} is one of the values the plugin itself declared via
+ * {@link SpecScoringPlugin#getPolicies()} (or {@link
+ * SpecScoringPlugin#DEFAULT_POLICY} if nothing was explicitly
  * selected) — see that method's javadoc for the full contract, including
  * why this is a plain name rather than a typed concept. Defaults to
- * {@code DEFAULT_RULE_SET} so existing callers that never set it (host code
+ * {@code DEFAULT_POLICY} so existing callers that never set it (host code
  * predating this concept, or a test) keep working unchanged.
  */
 public final class SpecInput {
@@ -33,13 +33,13 @@ public final class SpecInput {
     private final String content;
     private final SpecFormat format;
     private final String baseUri;
-    private final String ruleSet;
+    private final String policy;
 
     private SpecInput(Builder b) {
         this.content = Objects.requireNonNull(b.content, "content must not be null");
         this.format = Objects.requireNonNull(b.format, "format must not be null");
         this.baseUri = b.baseUri;
-        this.ruleSet = Objects.requireNonNull(b.ruleSet, "ruleSet must not be null");
+        this.policy = Objects.requireNonNull(b.policy, "policy must not be null");
     }
 
     public String getContent() {
@@ -56,8 +56,8 @@ public final class SpecInput {
     }
 
     /** Never null; see the class-level doc. */
-    public String getRuleSet() {
-        return ruleSet;
+    public String getPolicy() {
+        return policy;
     }
 
     public static Builder builder() {
@@ -68,7 +68,7 @@ public final class SpecInput {
         private String content;
         private SpecFormat format;
         private String baseUri;
-        private String ruleSet = SpecScoringPlugin.DEFAULT_RULE_SET;
+        private String policy = SpecScoringPlugin.DEFAULT_POLICY;
 
         public Builder content(String content) {
             this.content = content;
@@ -85,8 +85,8 @@ public final class SpecInput {
             return this;
         }
 
-        public Builder ruleSet(String ruleSet) {
-            this.ruleSet = ruleSet;
+        public Builder policy(String policy) {
+            this.policy = policy;
             return this;
         }
 

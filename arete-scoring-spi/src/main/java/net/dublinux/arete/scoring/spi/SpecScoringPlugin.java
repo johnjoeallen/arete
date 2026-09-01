@@ -65,17 +65,17 @@ public interface SpecScoringPlugin {
     int INTERFACE_VERSION = 1;
 
     /**
-     * Placeholder the host passes via {@link SpecInput#getRuleSet()} when
+     * Placeholder the host passes via {@link SpecInput#getPolicy()} when
      * nothing has been explicitly selected for a given plugin/spec pair
      * (e.g. every spec saved before this concept existed, or a plugin whose
-     * {@link #getRuleSets()} never grew past the implicit single set). A
-     * plugin with more than one real rule set whose own names don't happen
+     * {@link #getPolicies()} never grew past the implicit single set). A
+     * plugin with more than one real policy whose own names don't happen
      * to include this string should treat it — or any value it doesn't
      * recognize — as "use your own default behavior", the same way an
      * unrecognized key in {@link #configure(Map)} would be ignored rather
      * than rejected.
      */
-    String DEFAULT_RULE_SET = "default";
+    String DEFAULT_POLICY = "default";
 
     /** Stable unique identifier for this plugin, e.g. {@code "zally"}. */
     String getId();
@@ -93,7 +93,7 @@ public interface SpecScoringPlugin {
     Set<SpecFormat> getSupportedFormats();
 
     /**
-     * Named rule-set variants this plugin can apply, e.g. {@code ["internal",
+     * Named policy variants this plugin can apply, e.g. {@code ["internal",
      * "external"]} for an organization that lints differently depending on
      * API audience. Engine-agnostic by design — Areté isn't locked to
      * any one linting engine's own vocabulary, so this is deliberately just
@@ -112,26 +112,26 @@ public interface SpecScoringPlugin {
      * restart.
      *
      * <p>The host surfaces these as a picker on the spec's view page —
-     * choose a plugin, choose one of its rule sets, click Score — and
-     * threads the selection through via {@link SpecInput#getRuleSet()} for
+     * choose a plugin, choose one of its policies, click Score — and
+     * threads the selection through via {@link SpecInput#getPolicy()} for
      * that one on-demand {@link #score(SpecInput)} call. Scoring is
      * never automatic or persisted between runs: nothing runs until the
-     * user explicitly picks a plugin and rule set and clicks Score, and
+     * user explicitly picks a plugin and policy and clicks Score, and
      * every click is a fresh choice.
      *
-     * <p>A default method returning just {@link #DEFAULT_RULE_SET} keeps
+     * <p>A default method returning just {@link #DEFAULT_POLICY} keeps
      * every existing single-set plugin (including zally-core) working
      * unchanged: such plugins never have a real choice to offer, so the
      * host shows no picker for them at all — a picker only appears once
      * this returns more than one entry. Never null or empty; no duplicate
      * entries.
      */
-    default List<String> getRuleSets() {
-        return List.of(DEFAULT_RULE_SET);
+    default List<String> getPolicies() {
+        return List.of(DEFAULT_POLICY);
     }
 
     /**
-     * The pass level this rule set suggests for automated gating — the bar a
+     * The pass level this policy suggests for automated gating — the bar a
      * spec should clear when validated under it. Returned in a small fixed
      * grammar the host understands: {@code "blocker"} (fail only on a
      * prohibited/blocking finding), {@code "error"} (fail on any error-severity
@@ -139,25 +139,25 @@ public interface SpecScoringPlugin {
      * {@code "score<90"}).
      *
      * <p>A plugin that has no opinion returns {@link Optional#empty()}; the
-     * host then treats the rule set as {@code "blocker"}. The value is
+     * host then treats the policy as {@code "blocker"}. The value is
      * advisory: a caller can always override it with an explicit level.
      *
-     * @param ruleSet one of {@link #getRuleSets()}, or {@link #DEFAULT_RULE_SET}
+     * @param policy one of {@link #getPolicies()}, or {@link #DEFAULT_POLICY}
      */
-    default Optional<String> getSuggestedScoreLevel(String ruleSet) {
+    default Optional<String> getSuggestedScoreLevel(String policy) {
         return Optional.empty();
     }
 
     /**
-     * The minimum {@link ScoringResult#getOverallScore()} this rule set
+     * The minimum {@link ScoringResult#getOverallScore()} this policy
      * considers a pass, or {@link java.util.OptionalDouble#empty()} if it has
      * no numeric pass mark. When present, {@link #getSuggestedScoreLevel} for
-     * the same rule set should report the matching {@code "score<NN"} so a
+     * the same policy should report the matching {@code "score<NN"} so a
      * generic gating caller needs to consult only one of the two.
      *
-     * @param ruleSet one of {@link #getRuleSets()}, or {@link #DEFAULT_RULE_SET}
+     * @param policy one of {@link #getPolicies()}, or {@link #DEFAULT_POLICY}
      */
-    default java.util.OptionalDouble getPassingScore(String ruleSet) {
+    default java.util.OptionalDouble getPassingScore(String policy) {
         return java.util.OptionalDouble.empty();
     }
 
@@ -208,7 +208,7 @@ public interface SpecScoringPlugin {
      *
      * <p>Open question #4: config is a flat {@code Map<String,String>}
      * rather than plugin-specific typed config, kept deliberately generic
-     * — e.g. an adapter might read a {@code "rulesetPath"} key. Typed
+     * — e.g. an adapter might read a {@code "policyPath"} key. Typed
      * config was rejected because a typed config object is exactly the
      * kind of engine-specific type constraint #4 forbids across the
      * classloader boundary; a plugin that needs structured config can

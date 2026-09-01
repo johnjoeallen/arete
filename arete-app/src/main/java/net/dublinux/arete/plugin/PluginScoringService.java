@@ -17,7 +17,7 @@ import java.util.List;
  * against a raw spec. Scoring is on-demand and single-plugin by design:
  * the host never runs anything automatically, and never aggregates more
  * than one plugin's results into a single view — the caller (the spec view
- * page's Refresh control) picks exactly one plugin and rule set per run.
+ * page's Refresh control) picks exactly one plugin and policy per run.
  * Disabled plugins are never selectable in the first place (see
  * {@link PluginRegistry}), but this still refuses to run one defensively.
  */
@@ -40,14 +40,14 @@ public class PluginScoringService {
      *                  (no summaries, no diagnostics) rather than an error —
      *                  there's nothing meaningful to report about a plugin
      *                  the caller couldn't legitimately have selected
-     * @param ruleSet   one of that plugin's {@link SpecScoringPlugin#getRuleSets()}
-     *                  values, or {@link SpecScoringPlugin#DEFAULT_RULE_SET}
+     * @param policy   one of that plugin's {@link SpecScoringPlugin#getPolicies()}
+     *                  values, or {@link SpecScoringPlugin#DEFAULT_POLICY}
      */
-    public AggregatedScoringResult scoreOne(String rawSpec, String pluginId, String ruleSet) {
+    public AggregatedScoringResult scoreOne(String rawSpec, String pluginId, String policy) {
         if (pluginId == null || pluginId.isBlank()) {
             return new AggregatedScoringResult(List.of(), List.of(), -1, Double.NaN, Double.NaN);
         }
-        return scoreMany(rawSpec, List.of(new PluginRunRequest(pluginId, ruleSet)));
+        return scoreMany(rawSpec, List.of(new PluginRunRequest(pluginId, policy)));
     }
 
     /**
@@ -81,9 +81,9 @@ public class PluginScoringService {
             if (plugin == null) {
                 continue;
             }
-            String ruleSet = request.ruleSet();
-            String resolvedRuleSet = ruleSet == null || ruleSet.isBlank() ? SpecScoringPlugin.DEFAULT_RULE_SET : ruleSet;
-            SpecInput input = SpecInput.builder().content(rawSpec).format(format).ruleSet(resolvedRuleSet).build();
+            String policy = request.policy();
+            String resolvedPolicy = policy == null || policy.isBlank() ? SpecScoringPlugin.DEFAULT_POLICY : policy;
+            SpecInput input = SpecInput.builder().content(rawSpec).format(format).policy(resolvedPolicy).build();
             ScoringResult result = runOne(plugin, input);
             summaries.add(toSummary(plugin, result));
             if (result.getStatus() == ScoringResult.Status.SUCCESS) {
@@ -94,7 +94,7 @@ public class PluginScoringService {
                 if (requests.size() == 1) {
                     grade = result.getGrade();
                     try {
-                        passingScore = plugin.getPassingScore(resolvedRuleSet).orElse(Double.NaN);
+                        passingScore = plugin.getPassingScore(resolvedPolicy).orElse(Double.NaN);
                     } catch (Throwable ignored) {
                         // a plugin can't be trusted to behave; leave passingScore NaN
                     }

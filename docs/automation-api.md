@@ -152,7 +152,7 @@ the combination is judged against its own policy's bar (`level.source` =
 (`level.source` = `"request"`).
 
 Plugins other than the policy engine can expose a bar via the SPI methods
-`getPassingScore(ruleSet)` and `getSuggestedScoreLevel(ruleSet)`.
+`getPassingScore(policy)` and `getSuggestedScoreLevel(policy)`.
 
 ## Remote fetch
 

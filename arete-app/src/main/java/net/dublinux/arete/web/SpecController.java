@@ -202,14 +202,14 @@ public class SpecController {
      * picker row) but absent from {@code plugin} was unchecked, per HTML's
      * normal "an unchecked checkbox submits nothing" behaviour.
      *
-     * <p>Every candidate plugin's per-spec enabled state and rule-set choice
+     * <p>Every candidate plugin's per-spec enabled state and policy choice
      * is persisted from the submitted form before running anything, so both
      * survive a later plain reopen of this page — see {@link
      * #pluginChoices}.
      *
-     * <p>Each row's rule set is submitted as {@code ruleSet_<pluginId>},
-     * valued by its <em>position</em> in that plugin's rule sets (e.g.
-     * {@code "0"}), not its name — see {@link #resolveRuleSet}.
+     * <p>Each row's policy is submitted as {@code policy_<pluginId>},
+     * valued by its <em>position</em> in that plugin's policies (e.g.
+     * {@code "0"}), not its name — see {@link #resolvePolicy}.
      */
     @GetMapping("/spec/{ref}")
     public String open(@PathVariable String ref, @RequestParam(required = false) String q,
@@ -241,7 +241,7 @@ public class SpecController {
     }
 
     /**
-     * Runs the picker's chosen validator/rule-set combinations, persists both
+     * Runs the picker's chosen validator/policy combinations, persists both
      * the choice and the result, and redirects back to the clean spec URL —
      * the run parameters never appear in the address bar.
      */
@@ -258,12 +258,12 @@ public class SpecController {
                 continue;
             }
             boolean enabledForSpec = checkedPluginIds.contains(candidate.getId());
-            String submitted = allParams.get("ruleSet_" + candidate.getId());
-            String ruleSetName = resolveRuleSet(candidate.getId(), submitted);
+            String submitted = allParams.get("policy_" + candidate.getId());
+            String policyName = resolvePolicy(candidate.getId(), submitted);
             specPluginSettingsService.setSelection(id, candidate.getId(), enabledForSpec,
-                    ruleSetIndex(candidate.getId(), ruleSetName));
+                    policyIndex(candidate.getId(), policyName));
             if (enabledForSpec) {
-                requests.add(new PluginRunRequest(candidate.getId(), ruleSetName));
+                requests.add(new PluginRunRequest(candidate.getId(), policyName));
             }
         }
         if (requests.isEmpty()) {
@@ -276,13 +276,13 @@ public class SpecController {
         return "redirect:/spec/" + ref + "?scored";
     }
 
-    /** The position of {@code ruleSetName} in its plugin's rule sets, or null if unknown — for the persisted picker choice. */
-    private Integer ruleSetIndex(String pluginId, String ruleSetName) {
+    /** The position of {@code policyName} in its plugin's policies, or null if unknown — for the persisted picker choice. */
+    private Integer policyIndex(String pluginId, String policyName) {
         SpecScoringPlugin plugin = findEnabledPlugin(pluginId);
         if (plugin == null) {
             return null;
         }
-        int i = safeRuleSets(plugin).indexOf(ruleSetName);
+        int i = safePolicies(plugin).indexOf(policyName);
         return i >= 0 ? i : null;
     }
 
@@ -435,9 +435,9 @@ public class SpecController {
     }
 
     /**
-     * Every globally-enabled plugin for the view page's picker: its rule sets
+     * Every globally-enabled plugin for the view page's picker: its policies
      * (each with a URL-safe slug), whether it's checked for this spec, and the
-     * currently selected rule-set slug.
+     * currently selected policy slug.
      *
      * @param specId nullable — no spec context (e.g. the index sidebar) means
      *               every row defaults to checked.
@@ -448,36 +448,36 @@ public class SpecController {
             if (!pluginSettingsService.isEnabled(plugin.getId())) {
                 continue;
             }
-            List<String> ruleSets = safeRuleSets(plugin);
-            List<SpecPluginRunChoice.RuleSet> options = ruleSets.stream()
-                    .map(name -> new SpecPluginRunChoice.RuleSet(name, RuleSets.slug(name)))
+            List<String> policies = safePolicies(plugin);
+            List<SpecPluginRunChoice.Policy> options = policies.stream()
+                    .map(name -> new SpecPluginRunChoice.Policy(name, Policies.slug(name)))
                     .toList();
             boolean enabledForSpec = specId == null || specPluginSettingsService.isEnabledForSpec(specId, plugin.getId());
-            Integer persistedIndex = specId == null ? null : specPluginSettingsService.ruleSetIndexForSpec(specId, plugin.getId());
-            int selected = persistedIndex != null && persistedIndex >= 0 && persistedIndex < ruleSets.size() ? persistedIndex : 0;
-            String selectedSlug = ruleSets.isEmpty() ? "" : RuleSets.slug(ruleSets.get(selected));
+            Integer persistedIndex = specId == null ? null : specPluginSettingsService.policyIndexForSpec(specId, plugin.getId());
+            int selected = persistedIndex != null && persistedIndex >= 0 && persistedIndex < policies.size() ? persistedIndex : 0;
+            String selectedSlug = policies.isEmpty() ? "" : Policies.slug(policies.get(selected));
             choices.add(new SpecPluginRunChoice(plugin.getId(), plugin.getName(), options, enabledForSpec, selectedSlug));
         }
         choices.sort(Comparator.comparing(SpecPluginRunChoice::pluginName, String.CASE_INSENSITIVE_ORDER));
         return choices;
     }
 
-    /** Defensive: a plugin is untrusted, dynamically loaded code. Preserves its declared rule-set order. */
-    private List<String> safeRuleSets(SpecScoringPlugin plugin) {
+    /** Defensive: a plugin is untrusted, dynamically loaded code. Preserves its declared policy order. */
+    private List<String> safePolicies(SpecScoringPlugin plugin) {
         try {
-            return List.copyOf(plugin.getRuleSets());
+            return List.copyOf(plugin.getPolicies());
         } catch (Throwable t) {
-            log.warn("Scoring plugin '{}' threw from getRuleSets(): {}", plugin.getId(), t.toString());
-            return List.of(SpecScoringPlugin.DEFAULT_RULE_SET);
+            log.warn("Scoring plugin '{}' threw from getPolicies(): {}", plugin.getId(), t.toString());
+            return List.of(SpecScoringPlugin.DEFAULT_POLICY);
         }
     }
 
-    /** The picker submits {@code ruleSet_<pluginId>} = a rule-set slug; map it back to the plugin's real name. */
-    private String resolveRuleSet(String pluginId, String slugOrName) {
+    /** The picker submits {@code policy_<pluginId>} = a policy slug; map it back to the plugin's real name. */
+    private String resolvePolicy(String pluginId, String slugOrName) {
         SpecScoringPlugin plugin = findEnabledPlugin(pluginId);
         return plugin == null
-                ? SpecScoringPlugin.DEFAULT_RULE_SET
-                : RuleSets.resolve(safeRuleSets(plugin), slugOrName);
+                ? SpecScoringPlugin.DEFAULT_POLICY
+                : Policies.resolve(safePolicies(plugin), slugOrName);
     }
 
     private SpecScoringPlugin findEnabledPlugin(String pluginId) {

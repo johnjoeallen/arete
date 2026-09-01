@@ -43,8 +43,8 @@ dependencies cannot collide with the host's, and the bundled plugin jar ships
 unversioned to match the application jar.
 
 A plugin can declare several named check sets, chosen per spec; these were
-first called "scoring types" and then renamed **RuleSet** across the SPI.
-Plugin rule sets are ordered, and the UI submits a rule set by position rather
+first called "scoring types" and then renamed **Policy** across the SPI.
+Plugin policies are ordered, and the UI submits a policy by position rather
 than name. A plugin may also supply its own severity vocabulary and optional
 scoring fields (an overall score, and a per-finding score improvement), and a
 single spec can run several plugins at once with the results merged into one
@@ -193,7 +193,7 @@ The same pass audited every matcher against one rule: **an occurrence is a
 violation** — a matcher emits one only for a subject that breaks the rule, and
 a compliant subject yields nothing. A few matchers carried parameter modes
 (`operation` `summary: present`, `schema` `max-items: present`, `text-style`
-with no parameters) that were declared but unused and, had a rule set them,
+with no parameters) that were declared but unused and, had a policy them,
 would have flagged compliant subjects with a "matches the configured rule"
 message; those modes were removed from the matchers and their descriptors.
 `schema` findings that had fallen through to "Property matches the configured

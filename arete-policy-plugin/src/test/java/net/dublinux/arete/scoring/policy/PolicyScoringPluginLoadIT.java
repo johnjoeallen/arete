@@ -40,7 +40,7 @@ class PolicyScoringPluginLoadIT {
                                 '200': { description: OK }
                         """)
                 .format(SpecFormat.OPENAPI3)
-                .ruleSet("Enterprise Grade")
+                .policy("Enterprise Grade")
                 .build());
 
         assertEquals(ScoringResult.Status.SUCCESS, result.getStatus());

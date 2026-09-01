@@ -27,14 +27,14 @@ public class SpecPluginSettingsService {
     }
 
     /** {@code null} — "never chosen, default to index 0" — when no override row exists. */
-    public Integer ruleSetIndexForSpec(Long specId, String pluginId) {
+    public Integer policyIndexForSpec(Long specId, String pluginId) {
         return repository.findBySpecIdAndPluginId(specId, pluginId)
-                .map(SpecPluginSettingsEntity::getRuleSetIndex)
+                .map(SpecPluginSettingsEntity::getPolicyIndex)
                 .orElse(null);
     }
 
     @Transactional
-    public void setSelection(Long specId, String pluginId, boolean enabled, Integer ruleSetIndex) {
+    public void setSelection(Long specId, String pluginId, boolean enabled, Integer policyIndex) {
         SpecPluginSettingsEntity entity = repository.findBySpecIdAndPluginId(specId, pluginId)
                 .orElseGet(() -> {
                     SpecPluginSettingsEntity created = new SpecPluginSettingsEntity();
@@ -43,7 +43,7 @@ public class SpecPluginSettingsService {
                     return created;
                 });
         entity.setEnabled(enabled);
-        entity.setRuleSetIndex(ruleSetIndex);
+        entity.setPolicyIndex(policyIndex);
         repository.save(entity);
     }
 

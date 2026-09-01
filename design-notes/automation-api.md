@@ -209,7 +209,7 @@ This needs a small change either side of the SPI:
   Absent → `blocker` (a policy with no opinion fails only on a hard blocker).
   `PolicyBundleLoader.parsePolicy` reads it onto the `Policy` record.
 - **SPI** — a new default method
-  `default Optional<String> getSuggestedScoreLevel(String ruleSet) { return Optional.empty(); }`.
+  `default Optional<String> getSuggestedScoreLevel(String policy) { return Optional.empty(); }`.
   The policy plugin returns its parsed `scoring:` value; other plugins inherit
   the empty default and fall back to `blocker`.
 
@@ -304,7 +304,7 @@ new dependency. Adopt Flyway if/when a second migration appears.
    drop-folder watcher, and `allow-private` on `local` mode. Tests for each.
 5. **Scoring level** — `scoring:` in policy `.md` front matter →
    `PolicyBundleLoader` / `Policy` record; SPI
-   `getSuggestedScoreLevel(String ruleSet)` default method; the policy plugin
+   `getSuggestedScoreLevel(String policy)` default method; the policy plugin
    returns its parsed value. A shared `ScoreLevel` parser/evaluator
    (`blocker` | `error` | `score<NN`) used by both the plugin and the API.
 6. **API controller** — `AutomationApiController` under `/api/v1`: submit

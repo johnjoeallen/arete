@@ -54,13 +54,13 @@ public final class PolicyScoringPlugin implements SpecScoringPlugin, RuleDocumen
     }
 
     @Override
-    public List<String> getRuleSets() {
+    public List<String> getPolicies() {
         return activeBundle().policies().keySet().stream().toList();
     }
 
     @Override
-    public Optional<String> getSuggestedScoreLevel(String ruleSet) {
-        Policy policy = activeBundle().policies().get(ruleSet);
+    public Optional<String> getSuggestedScoreLevel(String policyName) {
+        Policy policy = activeBundle().policies().get(policyName);
         if (policy == null) {
             return Optional.empty();
         }
@@ -72,8 +72,8 @@ public final class PolicyScoringPlugin implements SpecScoringPlugin, RuleDocumen
     }
 
     @Override
-    public java.util.OptionalDouble getPassingScore(String ruleSet) {
-        Policy policy = activeBundle().policies().get(ruleSet);
+    public java.util.OptionalDouble getPassingScore(String policyName) {
+        Policy policy = activeBundle().policies().get(policyName);
         return policy == null || policy.passingScore() == null
                 ? java.util.OptionalDouble.empty()
                 : java.util.OptionalDouble.of(policy.passingScore());
@@ -139,7 +139,7 @@ public final class PolicyScoringPlugin implements SpecScoringPlugin, RuleDocumen
             return ScoringResult.parseError("OpenAPI parsing failed: " + detail);
         }
 
-        Policy policy = currentBundle.policyOrDefault(input.getRuleSet());
+        Policy policy = currentBundle.policyOrDefault(input.getPolicy());
         Map<String, Object> api = OpenApiMapAdapter.toMap(parsed.getOpenAPI(), parsed.getMessages(), input.getContent());
         List<net.dublinux.arete.scoring.spi.Diagnostic> diagnostics = new ArrayList<>();
         double deductions = 0;

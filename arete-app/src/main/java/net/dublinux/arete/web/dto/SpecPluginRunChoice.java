@@ -5,12 +5,12 @@ import java.util.List;
 /**
  * One globally-enabled plugin as it renders in a spec view's picker: its rule
  * sets (each with a URL-safe slug), whether it's enabled for this spec, and
- * which rule set is selected (by slug — the form submits {@code ruleSet_<pluginId>}
+ * which policy is selected (by slug — the form submits {@code policy_<pluginId>}
  * = slug, not a positional index).
  */
-public record SpecPluginRunChoice(String pluginId, String pluginName, List<RuleSet> ruleSets,
+public record SpecPluginRunChoice(String pluginId, String pluginName, List<Policy> policies,
         boolean enabled, String selectedSlug) {
 
-    public record RuleSet(String name, String slug) {
+    public record Policy(String name, String slug) {
     }
 }

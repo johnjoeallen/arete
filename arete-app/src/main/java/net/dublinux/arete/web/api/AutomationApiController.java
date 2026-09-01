@@ -253,7 +253,7 @@ public class AutomationApiController {
                         "unknown or disabled validator '" + combo.validator() + "'");
             }
             // Accept a policy slug ("enterprise-grade") or the exact name.
-            String policy = net.dublinux.arete.web.RuleSets.resolve(safeRuleSets(plugin), combo.policy());
+            String policy = net.dublinux.arete.web.Policies.resolve(safePolicies(plugin), combo.policy());
             AggregatedScoringResult r = scoring.scoreOne(rawSpec, plugin.getId(), policy);
             forPersistence.add(new PluginRunRequest(plugin.getId(), policy));
 
@@ -279,11 +279,11 @@ public class AutomationApiController {
         }
     }
 
-    private List<String> safeRuleSets(SpecScoringPlugin plugin) {
+    private List<String> safePolicies(SpecScoringPlugin plugin) {
         try {
-            return List.copyOf(plugin.getRuleSets());
+            return List.copyOf(plugin.getPolicies());
         } catch (Throwable t) {
-            return List.of(SpecScoringPlugin.DEFAULT_RULE_SET);
+            return List.of(SpecScoringPlugin.DEFAULT_POLICY);
         }
     }
 
@@ -343,7 +343,7 @@ public class AutomationApiController {
             for (String p : runParams) {
                 int slash = p.indexOf('/');
                 out.add(slash < 0
-                        ? new RunCombination(p.trim(), SpecScoringPlugin.DEFAULT_RULE_SET)
+                        ? new RunCombination(p.trim(), SpecScoringPlugin.DEFAULT_POLICY)
                         : new RunCombination(p.substring(0, slash).trim(), p.substring(slash + 1).trim()));
             }
         }

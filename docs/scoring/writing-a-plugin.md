@@ -42,7 +42,7 @@ step, not something every tagged release does.
 | `getName()` | Human-readable display name. |
 | `getVersion()` | Engine/plugin version string, for diagnostics. |
 | `getSupportedFormats()` | `Set<SpecFormat>` — never null or empty. |
-| `getRuleSets()` | `List<String>` of named rule-set variants (default: one entry, `"default"`). Order is significant. |
+| `getPolicies()` | `List<String>` of named policy variants (default: one entry, `"default"`). Order is significant. |
 | `getSeverityLabel(Severity)` | Display label for one of the four fixed severities (default: title-cased enum name). |
 | `configure(Map<String,String>)` | Called exactly once, before any `validate` call. |
 | `validate(SpecInput)` | Validates one spec; returns a `ScoringResult`. Must not throw for expected failures — return `ScoringResult.pluginError(...)` instead. |
@@ -109,5 +109,5 @@ between plugins — and between a plugin and Areté itself — never collide.
 The bundled
 [`arete-policy-plugin`](https://github.com/johnjoeallen/arete/tree/main/arete-policy-plugin)
 is a complete, shaded `SpecScoringPlugin` — its `pom.xml`, `META-INF/services`
-registration, `getRuleSets()` implementation, and packaging are the best
+registration, `getPolicies()` implementation, and packaging are the best
 starting point for your own.

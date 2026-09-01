@@ -98,15 +98,15 @@ class PolicySnapshotTest {
         // Bundled policies only — ignore any ~/.arete/policies on the dev machine
         // so the snapshot is identical here and in CI.
         plugin.configure(Map.of("policies-dir", "target/no-such-policies-dir"));
-        List<String> ruleSets = new ArrayList<>(plugin.getRuleSets());
-        ruleSets.sort(String::compareTo);
+        List<String> policies = new ArrayList<>(plugin.getPolicies());
+        policies.sort(String::compareTo);
 
         StringBuilder out = new StringBuilder("# policy score by fixture spec\n").append(REGEN).append('\n');
-        for (String ruleSet : ruleSets) {
-            out.append('\n').append("## ").append(ruleSet).append('\n');
+        for (String policy : policies) {
+            out.append('\n').append("## ").append(policy).append('\n');
             for (Fixture fixture : FIXTURES) {
                 ScoringResult r = plugin.score(SpecInput.builder()
-                        .content(fixture.spec()).format(SpecFormat.OPENAPI3).ruleSet(ruleSet).build());
+                        .content(fixture.spec()).format(SpecFormat.OPENAPI3).policy(policy).build());
                 out.append(String.format("  %-12s status=%-8s score=%-6s noBlockers=%-6s grade=%-4s findings=%d%n",
                         fixture.name(), r.getStatus(),
                         num(r.getOverallScore()), num(r.getOverallScoreWithoutBlockers()),

@@ -7,7 +7,7 @@ by category. A rule is only evaluated when a [policy](policies.md) references
 it. See [the policy engine](policy-engine.md) for how matchers, rules, and
 policies fit together.
 
-There are **155 rules** across **20 categories**, built on
+There are **157 rules** across **20 categories**, built on
 **52 matchers**.
 
 !!! note "Reading the policy columns"
@@ -17,7 +17,7 @@ There are **155 rules** across **20 categories**, built on
 
 ## Authentication errors
 
-| Rule | Title | Rule | Enterprise | Zalando | Zal. Ext. |
+| Rule | Title | Matcher | Enterprise | Zalando | Zal. Ext. |
 |---|---|---|---|---|---|
 | `ERROR008` | Secured operation lacks an authentication failure response | `authentication-error` |  |  |  |
 | `ERROR009` | Secured operation lacks an authorization failure response | `authentication-error` |  |  |  |
@@ -25,7 +25,7 @@ There are **155 rules** across **20 categories**, built on
 
 ## Bulk operations
 
-| Rule | Title | Rule | Enterprise | Zalando | Zal. Ext. |
+| Rule | Title | Matcher | Enterprise | Zalando | Zal. Ext. |
 |---|---|---|---|---|---|
 | `BULK001` | Bulk creation is not represented as POST of a collection | `bulk-operation` | 0.5 |  |  |
 | `BULK002` | Bulk request array has no maximum size | `schema` | 0.5 |  |  |
@@ -33,7 +33,7 @@ There are **155 rules** across **20 categories**, built on
 
 ## Collection capabilities
 
-| Rule | Title | Rule | Enterprise | Zalando | Zal. Ext. |
+| Rule | Title | Matcher | Enterprise | Zalando | Zal. Ext. |
 |---|---|---|---|---|---|
 | `FIELD001` | Collection lacks a field-selection capability | `collection-capability` |  |  |  |
 | `FILTER001` | Collection lacks a filter capability | `collection-capability` |  |  |  |
@@ -45,7 +45,7 @@ There are **155 rules** across **20 categories**, built on
 
 ## Compatibility
 
-| Rule | Title | Rule | Enterprise | Zalando | Zal. Ext. |
+| Rule | Title | Matcher | Enterprise | Zalando | Zal. Ext. |
 |---|---|---|---|---|---|
 | `COMPAT001` | Existing service or interface is removed | `compatibility` | 0.5 |  |  |
 | `COMPAT002` | Existing field is removed | `compatibility` | 0.5 |  |  |
@@ -56,7 +56,7 @@ There are **155 rules** across **20 categories**, built on
 
 ## Content
 
-| Rule | Title | Rule | Enterprise | Zalando | Zal. Ext. |
+| Rule | Title | Matcher | Enterprise | Zalando | Zal. Ext. |
 |---|---|---|---|---|---|
 | `CONTENT001` | Request body has no documented media type | `media-type` |  |  |  |
 | `CONTENT002` | Response has no documented media type | `media-type` |  |  |  |
@@ -65,7 +65,7 @@ There are **155 rules** across **20 categories**, built on
 
 ## Documentation
 
-| Rule | Title | Rule | Enterprise | Zalando | Zal. Ext. |
+| Rule | Title | Matcher | Enterprise | Zalando | Zal. Ext. |
 |---|---|---|---|---|---|
 | `DOC001` | Operation summary is missing | `operation` | 0.5 |  |  |
 | `DOC002` | Operation summary does not begin with a capital letter | `text-style` | 0.5 |  |  |
@@ -92,7 +92,7 @@ There are **155 rules** across **20 categories**, built on
 
 ## Error responses
 
-| Rule | Title | Rule | Enterprise | Zalando | Zal. Ext. |
+| Rule | Title | Matcher | Enterprise | Zalando | Zal. Ext. |
 |---|---|---|---|---|---|
 | `ERROR001` | Operation lacks a success response | `error-response` |  |  |  |
 | `ERROR002` | Operation lacks a client-error response | `error-response` |  |  |  |
@@ -105,7 +105,7 @@ There are **155 rules** across **20 categories**, built on
 
 ## HTTP
 
-| Rule | Title | Rule | Enterprise | Zalando | Zal. Ext. |
+| Rule | Title | Matcher | Enterprise | Zalando | Zal. Ext. |
 |---|---|---|---|---|---|
 | `HTTP001` | GET operation appears to mutate state | `operation-semantics` | 0.5 |  |  |
 | `HTTP002` | POST is used for complete resource replacement | `operation-semantics` | 0.5 |  |  |
@@ -118,7 +118,7 @@ There are **155 rules** across **20 categories**, built on
 
 ## HTTP status
 
-| Rule | Title | Rule | Enterprise | Zalando | Zal. Ext. |
+| Rule | Title | Matcher | Enterprise | Zalando | Zal. Ext. |
 |---|---|---|---|---|---|
 | `STATUS001` | Creation operation lacks an appropriate success status | `response-code` | 0.5 | 0.5 | 0.5 |
 | `STATUS002` | Created resource response lacks location information | `response-header` | 0.5 | 0.5 | 0.5 |
@@ -130,14 +130,14 @@ There are **155 rules** across **20 categories**, built on
 
 ## Identifiers
 
-| Rule | Title | Rule | Enterprise | Zalando | Zal. Ext. |
+| Rule | Title | Matcher | Enterprise | Zalando | Zal. Ext. |
 |---|---|---|---|---|---|
 | `SEC006` | Identifier property is not a string | `identifier` |  |  |  |
 | `SEC007` | Identifier property lacks the required format | `identifier` |  |  |  |
 
 ## JSON
 
-| Rule | Title | Rule | Enterprise | Zalando | Zal. Ext. |
+| Rule | Title | Matcher | Enterprise | Zalando | Zal. Ext. |
 |---|---|---|---|---|---|
 | `JSON003` | Property name contains unsupported characters | `naming` | 0.5 | 0.5 | 0.5 |
 | `JSON004` | Array property has a singular name | `naming` | 0.5 | 0.5 | 0.5 |
@@ -161,7 +161,7 @@ There are **155 rules** across **20 categories**, built on
 
 ## Naming
 
-| Rule | Title | Rule | Enterprise | Zalando | Zal. Ext. |
+| Rule | Title | Matcher | Enterprise | Zalando | Zal. Ext. |
 |---|---|---|---|---|---|
 | `CASE001` | JSON property is not camelCase | `naming` | 0.5 | 0.5 | 0.5 |
 | `CASE002` | Path parameter is not snake_case | `naming` | 0.5 |  |  |
@@ -174,7 +174,7 @@ There are **155 rules** across **20 categories**, built on
 
 ## Pagination
 
-| Rule | Title | Rule | Enterprise | Zalando | Zal. Ext. |
+| Rule | Title | Matcher | Enterprise | Zalando | Zal. Ext. |
 |---|---|---|---|---|---|
 | `PAGE001` | Collection lacks a pagination control | `pagination` |  |  |  |
 | `PAGE002` | Page or offset parameter is not an integer | `pagination` |  |  |  |
@@ -185,7 +185,7 @@ There are **155 rules** across **20 categories**, built on
 
 ## Resource design
 
-| Rule | Title | Rule | Enterprise | Zalando | Zal. Ext. |
+| Rule | Title | Matcher | Enterprise | Zalando | Zal. Ext. |
 |---|---|---|---|---|---|
 | `REST001` | Resource path contains an operation verb | `resource-path` | 0.5 |  |  |
 | `REST002` | Collection resource uses a singular noun | `naming` | 0.5 | 0.5 | 0.5 |
@@ -197,7 +197,7 @@ There are **155 rules** across **20 categories**, built on
 
 ## Security
 
-| Rule | Title | Rule | Enterprise | Zalando | Zal. Ext. |
+| Rule | Title | Matcher | Enterprise | Zalando | Zal. Ext. |
 |---|---|---|---|---|---|
 | `SECURITY001` | Operation does not require the configured security scheme | `security` | 0.5 | 0.5 | 0.5 |
 | `SECURITY002` | Operation security requirement lacks the configured scopes | `security` | 0.5 | 0.5 | 0.5 |
@@ -206,7 +206,7 @@ There are **155 rules** across **20 categories**, built on
 
 ## Sensitive data
 
-| Rule | Title | Rule | Enterprise | Zalando | Zal. Ext. |
+| Rule | Title | Matcher | Enterprise | Zalando | Zal. Ext. |
 |---|---|---|---|---|---|
 | `SEC001` | Sensitive schema property is exposed by name | `sensitive-data` |  |  |  |
 | `SEC002` | Sensitive data is accepted in a query parameter | `sensitive-data` |  |  |  |
@@ -218,7 +218,7 @@ There are **155 rules** across **20 categories**, built on
 
 ## Standards
 
-| Rule | Title | Rule | Enterprise | Zalando | Zal. Ext. |
+| Rule | Title | Matcher | Enterprise | Zalando | Zal. Ext. |
 |---|---|---|---|---|---|
 | `STANDARD001` | Server hostname is not functionally named | `hostname` | 0.5 | 0.5 | 0.5 |
 | `STANDARD002` | Resource path has a trailing slash | `resource-path` | 0.5 | 0.5 | 0.5 |
@@ -251,13 +251,13 @@ There are **155 rules** across **20 categories**, built on
 
 ## Status codes
 
-| Rule | Title | Rule | Enterprise | Zalando | Zal. Ext. |
+| Rule | Title | Matcher | Enterprise | Zalando | Zal. Ext. |
 |---|---|---|---|---|---|
 | `STATUS006` | Error response lacks Problem Details | `response-code` | 0.5 | 0.5 | 0.5 |
 
 ## Update semantics
 
-| Rule | Title | Rule | Enterprise | Zalando | Zal. Ext. |
+| Rule | Title | Matcher | Enterprise | Zalando | Zal. Ext. |
 |---|---|---|---|---|---|
 | `UPDATE001` | PUT appears to perform a partial update | `operation-semantics` | 0.5 |  |  |
 | `UPDATE002` | PATCH is used | `operation` | 0.5 |  |  |
@@ -265,7 +265,7 @@ There are **155 rules** across **20 categories**, built on
 
 ## Versioning
 
-| Rule | Title | Rule | Enterprise | Zalando | Zal. Ext. |
+| Rule | Title | Matcher | Enterprise | Zalando | Zal. Ext. |
 |---|---|---|---|---|---|
 | `VERSION001` | Version appears in the URI | `versioning` | 0.5 | 0.5 | 0.5 |
 | `VERSION002` | Version appears in a header | `versioning` | 0.5 |  |  |

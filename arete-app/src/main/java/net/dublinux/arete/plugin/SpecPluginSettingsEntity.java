@@ -31,13 +31,13 @@ public class SpecPluginSettingsEntity {
     private boolean enabled;
 
     /**
-     * The rule-set picker's last-submitted position (see {@code
-     * SpecController#resolveRuleSet}) for this plugin on this spec; {@code
+     * The policy picker's last-submitted position (see {@code
+     * SpecController#resolvePolicy}) for this plugin on this spec; {@code
      * null} means "never chosen, default to index 0" — same convention as
      * an absent row entirely.
      */
     @Column(name = "rule_set_index")
-    private Integer ruleSetIndex;
+    private Integer policyIndex;
 
     public Long getSpecId() {
         return specId;
@@ -63,12 +63,12 @@ public class SpecPluginSettingsEntity {
         this.enabled = enabled;
     }
 
-    public Integer getRuleSetIndex() {
-        return ruleSetIndex;
+    public Integer getPolicyIndex() {
+        return policyIndex;
     }
 
-    public void setRuleSetIndex(Integer ruleSetIndex) {
-        this.ruleSetIndex = ruleSetIndex;
+    public void setPolicyIndex(Integer policyIndex) {
+        this.policyIndex = policyIndex;
     }
 
 }

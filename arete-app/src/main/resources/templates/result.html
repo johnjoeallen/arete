@@ -61,15 +61,15 @@
                         <form method="post" th:action="@{/spec/{ref}/score(ref=${specRef})}" class="scoring-picker" id="scoring-picker-form">
                             <table class="plugin-picker-table">
                                 <thead>
-                                    <tr><th></th><th>Plugin</th><th>Rule set</th></tr>
+                                    <tr><th></th><th>Plugin</th><th>Policy</th></tr>
                                 </thead>
                                 <tbody>
                                     <tr th:each="pc : ${pluginChoices}">
                                         <td><input type="checkbox" name="plugin" th:value="${pc.pluginId()}" th:checked="${pc.enabled()}"></td>
                                         <td th:text="${pc.pluginName()}"></td>
                                         <td>
-                                            <select th:name="'ruleSet_' + ${pc.pluginId()}">
-                                                <option th:each="rs : ${pc.ruleSets()}" th:value="${rs.slug()}" th:text="${rs.name()}"
+                                            <select th:name="'policy_' + ${pc.pluginId()}">
+                                                <option th:each="rs : ${pc.policies()}" th:value="${rs.slug()}" th:text="${rs.name()}"
                                                         th:selected="${rs.slug() == pc.selectedSlug()}"></option>
                                             </select>
                                         </td>

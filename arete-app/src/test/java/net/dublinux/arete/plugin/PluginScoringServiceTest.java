@@ -68,7 +68,7 @@ class PluginScoringServiceTest {
     }
 
     @Test
-    void aBlankRuleSetFallsBackToTheDefaultRuleSetConstant() {
+    void aBlankPolicyFallsBackToTheDefaultPolicyConstant() {
         SpecScoringPlugin plugin = stubPlugin("a", "A");
         when(plugin.score(any())).thenReturn(ScoringResult.success(List.of(), 1));
         when(pluginRegistry.getPlugins()).thenReturn(List.of(plugin));
@@ -78,11 +78,11 @@ class PluginScoringServiceTest {
 
         org.mockito.ArgumentCaptor<SpecInput> captor = org.mockito.ArgumentCaptor.forClass(SpecInput.class);
         verify(plugin).score(captor.capture());
-        assertThat(captor.getValue().getRuleSet()).isEqualTo(SpecScoringPlugin.DEFAULT_RULE_SET);
+        assertThat(captor.getValue().getPolicy()).isEqualTo(SpecScoringPlugin.DEFAULT_POLICY);
     }
 
     @Test
-    void anExplicitRuleSetIsPassedThroughUnchanged() {
+    void anExplicitPolicyIsPassedThroughUnchanged() {
         SpecScoringPlugin plugin = stubPlugin("a", "A");
         when(plugin.score(any())).thenReturn(ScoringResult.success(List.of(), 1));
         when(pluginRegistry.getPlugins()).thenReturn(List.of(plugin));
@@ -92,7 +92,7 @@ class PluginScoringServiceTest {
 
         org.mockito.ArgumentCaptor<SpecInput> captor = org.mockito.ArgumentCaptor.forClass(SpecInput.class);
         verify(plugin).score(captor.capture());
-        assertThat(captor.getValue().getRuleSet()).isEqualTo("lenient");
+        assertThat(captor.getValue().getPolicy()).isEqualTo("lenient");
     }
 
     @Test
