@@ -1394,6 +1394,9 @@ relying on emptiness, and use <code>truthy(x)</code> when you need the boolean i
 </ul>
 <h2 id="methods">Methods<a class="headerlink" href="#methods" title="Permanent link">&para;</a></h2>
 <h3 id="string-methods">String methods<a class="headerlink" href="#string-methods" title="Permanent link">&para;</a></h3>
+<p>In <code>contains</code> / <code>startsWith</code> / <code>endsWith</code> / <code>startsWithWord</code> / <code>endsWithWord</code>,
+<strong><code>t</code> is a string <em>or</em> a list of strings</strong>; a list means "any element"
+(<code>s.startsWith(["a", "b"])</code> is <code>s.startsWith("a") || s.startsWith("b")</code>).</p>
 <table>
 <thead>
 <tr>
@@ -1412,23 +1415,23 @@ relying on emptiness, and use <code>truthy(x)</code> when you need the boolean i
 </tr>
 <tr>
 <td><code>s.contains(t)</code></td>
-<td>Java <code>String.contains</code>, extended: <code>t</code> may be a list — true if any element is contained</td>
+<td>Java <code>String.contains</code> — <code>s</code> contains <code>t</code> (or any element of the list)</td>
 </tr>
 <tr>
 <td><code>s.startsWith(t)</code></td>
-<td>Java <code>String.startsWith</code>, extended: <code>t</code> may be a list. <strong>Not word-aware</strong> — <code>"Listing".startsWith("List")</code> is true</td>
+<td>Java <code>String.startsWith</code>. <strong>Not word-aware</strong>: <code>"Listing".startsWith("List")</code> is <code>true</code></td>
 </tr>
 <tr>
 <td><code>s.endsWith(t)</code></td>
-<td>Java <code>String.endsWith</code>, extended: <code>t</code> may be a list</td>
+<td>Java <code>String.endsWith</code></td>
 </tr>
 <tr>
 <td><code>s.startsWithWord(t)</code></td>
-<td>like <code>startsWith</code>, but <code>t</code> must land on a word boundary: <code>s</code> equals <code>t</code>, or begins with <code>t</code> followed by a non-alphanumeric character. <code>"List customers"</code> / <code>"List."</code> match <code>"List"</code>; <code>"Listing"</code> does not. <code>t</code> may be a list</td>
+<td>word-aware <code>startsWith</code>: <code>s</code> equals <code>t</code>, or begins with <code>t</code> followed by a non-alphanumeric character. <code>"List customers"</code> and <code>"List."</code> match <code>"List"</code>; <code>"Listing"</code> does not</td>
 </tr>
 <tr>
 <td><code>s.endsWithWord(t)</code></td>
-<td>the mirror of <code>startsWithWord</code></td>
+<td>word-aware <code>endsWith</code> — the mirror of <code>startsWithWord</code></td>
 </tr>
 <tr>
 <td><code>s.length</code></td>
