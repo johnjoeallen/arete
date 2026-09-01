@@ -1059,7 +1059,7 @@ plugin's own severity vocabulary. Score impact is broken down by severity and
 shown as percentages, and a zero or uncomputed impact is hidden.</p>
 <h2 id="from-zally-rules-to-the-policy-engine">From Zally rules to the policy engine<a class="headerlink" href="#from-zally-rules-to-the-policy-engine" title="Permanent link">&para;</a></h2>
 <p>The bundled validator became a <strong>generic policy engine</strong>
-(<code>policy-based-validation-plugin</code>, entry point <code>PolicyBasedValidationPlugin</code>).
+(<code>arete-policy-plugin</code>, entry point <code>PolicyBasedValidationPlugin</code>).
 Instead of hard-coded Java checks it ships a <strong>policy bundle</strong>: a tree of
 Markdown + YAML files defining matchers (programs that inspect the normalised
 API model and return occurrences), rules (a matcher plus a scope and

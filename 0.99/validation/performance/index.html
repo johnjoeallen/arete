@@ -1116,7 +1116,7 @@ bytecode — which the rest of this page quantifies.</p>
 <h2 id="plugins-are-a-separate-trust-tier">Plugins are a separate trust tier<a class="headerlink" href="#plugins-are-a-separate-trust-tier" title="Permanent link">&para;</a></h2>
 <p>None of this replaces Areté's plugin facility. A validation plugin is
 arbitrary compiled Java loaded through the SPI and a child-first classloader;
-<code>policy-based-validation-plugin</code> is itself one. A plugin runs with full
+<code>arete-policy-plugin</code> is itself one. A plugin runs with full
 application privileges, so <strong>installing one is a trust decision</strong> — and
 building it from source does not remove that boundary, it only moves the
 audit to you: the plugin's own code, its transitive dependencies, and its
@@ -1606,7 +1606,7 @@ from any source — instead of ~40 lines of null-checked Java per matcher, in a
 language where a rule change means a release and a matcher can never leave the
 jar.</p>
 <h2 id="reproducing">Reproducing<a class="headerlink" href="#reproducing" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>mvn<span class="w"> </span>-pl<span class="w"> </span>policy-based-validation-plugin<span class="w"> </span><span class="nb">test</span><span class="w"> </span><span class="se">\</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>mvn<span class="w"> </span>-pl<span class="w"> </span>arete-policy-plugin<span class="w"> </span><span class="nb">test</span><span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span>-Dtest<span class="o">=</span><span class="s1">'DistillGroovyParityTest#fullSweepParityAndPerformance+javaBaselineComparison'</span><span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span>-Darete.benchmark<span class="o">=</span><span class="nb">true</span>
 </code></pre></div>

@@ -1282,7 +1282,7 @@
 
 
 <h1 id="arete-policy-engine">Areté Policy Engine<a class="headerlink" href="#arete-policy-engine" title="Permanent link">&para;</a></h1>
-<p>The <strong>Areté Policy Engine</strong> (<code>policy-based-validation-plugin</code>, plugin id
+<p>The <strong>Areté Policy Engine</strong> (<code>arete-policy-plugin</code>, plugin id
 <code>generic-policy</code>) is the built-in, policy-driven validation plugin. Instead of
 hard-coding checks in Java, it ships a <strong>policy bundle</strong>: a tree of Markdown +
 YAML files defining <strong>matchers</strong> (Distill programs that inspect the normalised
@@ -1319,7 +1319,7 @@ they are not part of the deployed matcher runtime. See
 <a href="../performance/">The case for Distill</a> for how the engines compare.</p>
 <hr />
 <h2 id="the-policy-bundle">The policy bundle<a class="headerlink" href="#the-policy-bundle" title="Permanent link">&para;</a></h2>
-<p>Everything lives under <code>policy-based-validation-plugin/src/main/resources/api-policy/</code>:</p>
+<p>Everything lives under <code>arete-policy-plugin/src/main/resources/api-policy/</code>:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>api-policy/
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>├── PolicyBundle.yaml            # manifest: id → file for every matcher, rule, policy
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>├── matchers/
@@ -1680,7 +1680,7 @@ rule, 2.0 each, security rules <code>PROHIBITED</code>), make good starting poin
    <code>matchers:</code>.</li>
 <li>Add rules that use it.</li>
 <li>Regenerate the behaviour snapshots and review the diff:
-   <code>mvn -pl policy-based-validation-plugin test -Dtest=PolicySnapshotTest -Dsnapshot.update=true</code>.</li>
+   <code>mvn -pl arete-policy-plugin test -Dtest=PolicySnapshotTest -Dsnapshot.update=true</code>.</li>
 </ol>
 <h3 id="behaviour-snapshots">Behaviour snapshots<a class="headerlink" href="#behaviour-snapshots" title="Permanent link">&para;</a></h3>
 <p><code>PolicySnapshotTest</code> runs every bundled rule against the shared fixture specs
@@ -1709,8 +1709,8 @@ validated against the rule descriptor at bundle load time; unknown or
 incorrectly typed overrides fail fast. The shorthand remains equivalent to a
 declaration with no overrides.</p>
 <h3 id="build-install">Build &amp; install<a class="headerlink" href="#build-install" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>mvn<span class="w"> </span>-q<span class="w"> </span>-pl<span class="w"> </span>policy-based-validation-plugin<span class="w"> </span>-am<span class="w"> </span>package<span class="w"> </span>-DskipTests
-<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>cp<span class="w"> </span>policy-based-validation-plugin/target/policy-based-validation-plugin-*.jar<span class="w"> </span><span class="se">\</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>mvn<span class="w"> </span>-q<span class="w"> </span>-pl<span class="w"> </span>arete-policy-plugin<span class="w"> </span>-am<span class="w"> </span>package<span class="w"> </span>-DskipTests
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>cp<span class="w"> </span>arete-policy-plugin/target/arete-policy-plugin-*.jar<span class="w"> </span><span class="se">\</span>
 <a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">   </span>~/.arete/plugins/
 </code></pre></div>
 <p><code>PolicyBasedValidationPluginTest</code> / <code>...LoadIT</code> load the real bundle and will
