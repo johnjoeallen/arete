@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Local-first API explorer for OpenAPI/Swagger specs with pluggable, policy-driven validation.">
+        <meta name="description" content="Local-first API explorer for OpenAPI/Swagger specs with pluggable, policy-driven scoring.">
       
       
       
@@ -422,7 +422,7 @@
   <span class="md-ellipsis">
     
   
-    Validation
+    Scoring
   
 
     
@@ -438,7 +438,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Validation
+    Scoring
   
 
           </label>
@@ -451,7 +451,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../validation/" class="md-nav__link">
+      <a href="../scoring/" class="md-nav__link">
         
   
   
@@ -479,7 +479,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../validation/policy-engine/" class="md-nav__link">
+      <a href="../scoring/policy-engine/" class="md-nav__link">
         
   
   
@@ -507,7 +507,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../validation/performance/" class="md-nav__link">
+      <a href="../scoring/performance/" class="md-nav__link">
         
   
   
@@ -535,7 +535,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../validation/distill/" class="md-nav__link">
+      <a href="../scoring/distill/" class="md-nav__link">
         
   
   
@@ -563,7 +563,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../validation/rules/" class="md-nav__link">
+      <a href="../scoring/rules/" class="md-nav__link">
         
   
   
@@ -591,7 +591,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../validation/policies/" class="md-nav__link">
+      <a href="../scoring/policies/" class="md-nav__link">
         
   
   
@@ -619,7 +619,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../validation/writing-a-plugin/" class="md-nav__link">
+      <a href="../scoring/writing-a-plugin/" class="md-nav__link">
         
   
   
@@ -913,11 +913,11 @@
 <p>The SPI is now published under these coordinates:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">&lt;dependency&gt;</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="nt">&lt;groupId&gt;</span>net.dublinux.arete<span class="nt">&lt;/groupId&gt;</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="nt">&lt;artifactId&gt;</span>arete-validation-spi<span class="nt">&lt;/artifactId&gt;</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="nt">&lt;artifactId&gt;</span>arete-scoring-spi<span class="nt">&lt;/artifactId&gt;</span>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span><span class="nt">&lt;version&gt;</span>VERSION<span class="nt">&lt;/version&gt;</span>
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="nt">&lt;/dependency&gt;</span>
 </code></pre></div>
-<p>The previous coordinates, <code>net.dublinux.speculate:speculate-validation-spi</code>,
+<p>The previous coordinates, <code>net.dublinux.speculate:speculate-scoring-spi</code>,
 are a different Maven artifact. Maven Central does not rename artifacts, so
 existing consumers must migrate explicitly.</p>
 <h2 id="one-time-setup">One-time setup<a class="headerlink" href="#one-time-setup" title="Permanent link">&para;</a></h2>
@@ -942,7 +942,7 @@ existing consumers must migrate explicitly.</p>
 <li><code>GPG_PASSPHRASE</code></li>
 </ol>
 <p>The <code>release</code> profile in
-<a href="https://github.com/johnjoeallen/arete/blob/main/arete-validation-spi/pom.xml"><code>arete-validation-spi/pom.xml</code></a>
+<a href="https://github.com/johnjoeallen/arete/blob/main/arete-scoring-spi/pom.xml"><code>arete-scoring-spi/pom.xml</code></a>
 creates the sources and Javadoc jars, signs all artifacts, and uploads them
 through the Central Publishing Portal.</p>
 <h2 id="prepare-a-release">Prepare a release<a class="headerlink" href="#prepare-a-release" title="Permanent link">&para;</a></h2>
@@ -971,7 +971,7 @@ SPI automatically.</p>
 <li>Wait for the workflow to finish. It checks out that tag, derives the Maven
    version by removing the leading <code>v</code>, imports the GPG key, and runs:</li>
 </ol>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>mvn<span class="w"> </span>--no-transfer-progress<span class="w"> </span>-pl<span class="w"> </span>arete-validation-spi<span class="w"> </span>-Prelease<span class="w"> </span>deploy
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>mvn<span class="w"> </span>--no-transfer-progress<span class="w"> </span>-pl<span class="w"> </span>arete-scoring-spi<span class="w"> </span>-Prelease<span class="w"> </span>deploy
 </code></pre></div>
 <ol>
 <li>Open <a href="https://central.sonatype.com/publishing/deployments">Central Portal deployments</a>,
@@ -983,11 +983,11 @@ SPI automatically.</p>
 <h2 id="migrating-consumers">Migrating consumers<a class="headerlink" href="#migrating-consumers" title="Permanent link">&para;</a></h2>
 <p>Replace the old dependency:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nt">&lt;groupId&gt;</span>net.dublinux.speculate<span class="nt">&lt;/groupId&gt;</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="nt">&lt;artifactId&gt;</span>speculate-validation-spi<span class="nt">&lt;/artifactId&gt;</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="nt">&lt;artifactId&gt;</span>speculate-scoring-spi<span class="nt">&lt;/artifactId&gt;</span>
 </code></pre></div>
 <p>with:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nt">&lt;groupId&gt;</span>net.dublinux.arete<span class="nt">&lt;/groupId&gt;</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nt">&lt;artifactId&gt;</span>arete-validation-spi<span class="nt">&lt;/artifactId&gt;</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nt">&lt;artifactId&gt;</span>arete-scoring-spi<span class="nt">&lt;/artifactId&gt;</span>
 </code></pre></div>
 <p>Consumers that import SPI classes must also change Java package imports from
 <code>net.dublinux.speculate...</code> to <code>net.dublinux.arete...</code>. Existing releases under

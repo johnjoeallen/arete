@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Local-first API explorer for OpenAPI/Swagger specs with pluggable, policy-driven validation.">
+        <meta name="description" content="Local-first API explorer for OpenAPI/Swagger specs with pluggable, policy-driven scoring.">
       
       
       
@@ -16,7 +16,7 @@
         <link rel="prev" href="../automation-api/">
       
       
-        <link rel="next" href="../validation/">
+        <link rel="next" href="../scoring/">
       
       
         
@@ -467,10 +467,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#the-validation-user-interface" class="md-nav__link">
+  <a href="#the-scoring-user-interface" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The validation user interface
+        The scoring user interface
       
     </span>
   </a>
@@ -570,7 +570,7 @@
   <span class="md-ellipsis">
     
   
-    Validation
+    Scoring
   
 
     
@@ -586,7 +586,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Validation
+    Scoring
   
 
           </label>
@@ -599,7 +599,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../validation/" class="md-nav__link">
+      <a href="../scoring/" class="md-nav__link">
         
   
   
@@ -627,7 +627,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../validation/policy-engine/" class="md-nav__link">
+      <a href="../scoring/policy-engine/" class="md-nav__link">
         
   
   
@@ -655,7 +655,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../validation/performance/" class="md-nav__link">
+      <a href="../scoring/performance/" class="md-nav__link">
         
   
   
@@ -683,7 +683,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../validation/distill/" class="md-nav__link">
+      <a href="../scoring/distill/" class="md-nav__link">
         
   
   
@@ -711,7 +711,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../validation/rules/" class="md-nav__link">
+      <a href="../scoring/rules/" class="md-nav__link">
         
   
   
@@ -739,7 +739,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../validation/policies/" class="md-nav__link">
+      <a href="../scoring/policies/" class="md-nav__link">
         
   
   
@@ -767,7 +767,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../validation/writing-a-plugin/" class="md-nav__link">
+      <a href="../scoring/writing-a-plugin/" class="md-nav__link">
         
   
   
@@ -909,10 +909,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#the-validation-user-interface" class="md-nav__link">
+  <a href="#the-scoring-user-interface" class="md-nav__link">
     <span class="md-ellipsis">
       
-        The validation user interface
+        The scoring user interface
       
     </span>
   </a>
@@ -1024,17 +1024,17 @@ badge and was restyled as a twin-peak mountain "A", with raster exports for
 browser, Apple touch, and application icons.</p>
 <h2 id="architecture">Architecture<a class="headerlink" href="#architecture" title="Permanent link">&para;</a></h2>
 <p>The single-purpose viewer was restructured into a <strong>multi-module Maven build</strong>
-with a pluggable validation layer and a file watcher that reloads an open spec
+with a pluggable scoring layer and a file watcher that reloads an open spec
 on body-only edits (and lets it reappear if a deleted file returns).</p>
-<p>Validation is delivered through a published SPI,
-<code>arete-validation-spi</code> (formerly <code>speculate-validation-spi</code>), whose Java
+<p>Scoring is delivered through a published SPI,
+<code>arete-scoring-spi</code> (formerly <code>speculate-scoring-spi</code>), whose Java
 package was renamed to match its Maven coordinates and which is published to
 Maven Central by a manually-triggered workflow rather than on every release.
 Plugins are loaded through a <strong>child-first <code>URLClassLoader</code></strong> so a plugin's
 dependencies cannot collide with the host's, and the bundled plugin jar ships
 unversioned to match the application jar.</p>
 <p>A plugin can declare several named check sets, chosen per spec; these were
-first called "validation types" and then renamed <strong>RuleSet</strong> across the SPI.
+first called "scoring types" and then renamed <strong>RuleSet</strong> across the SPI.
 Plugin rule sets are ordered, and the UI submits a rule set by position rather
 than name. A plugin may also supply its own severity vocabulary and optional
 scoring fields (an overall score, and a per-finding score improvement), and a
@@ -1042,8 +1042,8 @@ single spec can run several plugins at once with the results merged into one
 view.</p>
 <p>The first bundled plugin wrapped <strong>Zally</strong>, Zalando's OpenAPI linter, as the
 default validator. It was later replaced wholesale by the policy engine below.</p>
-<h2 id="the-validation-user-interface">The validation user interface<a class="headerlink" href="#the-validation-user-interface" title="Permanent link">&para;</a></h2>
-<p>Validation moved from running automatically when a spec was added to an
+<h2 id="the-scoring-user-interface">The scoring user interface<a class="headerlink" href="#the-scoring-user-interface" title="Permanent link">&para;</a></h2>
+<p>Scoring moved from running automatically when a spec was added to an
 <strong>explicit, on-demand action</strong> on the spec view. That action was named
 "Refresh", then "Analyse", and is now <strong>Score</strong>; it also backs the
 empty-state action that starts scoring. Results are persisted and reloaded
@@ -1059,7 +1059,7 @@ plugin's own severity vocabulary. Score impact is broken down by severity and
 shown as percentages, and a zero or uncomputed impact is hidden.</p>
 <h2 id="from-zally-rules-to-the-policy-engine">From Zally rules to the policy engine<a class="headerlink" href="#from-zally-rules-to-the-policy-engine" title="Permanent link">&para;</a></h2>
 <p>The bundled validator became a <strong>generic policy engine</strong>
-(<code>arete-policy-plugin</code>, entry point <code>PolicyBasedValidationPlugin</code>).
+(<code>arete-policy-plugin</code>, entry point <code>PolicyScoringPlugin</code>).
 Instead of hard-coded Java checks it ships a <strong>policy bundle</strong>: a tree of
 Markdown + YAML files defining matchers (programs that inspect the normalised
 API model and return occurrences), rules (a matcher plus a scope and
@@ -1145,7 +1145,7 @@ store (S3, GCS), an OCI registry alongside container images, or a shared
 "policy service" that a team's Areté instances subscribe to. Because a matcher
 can only inspect the spec and hand back occurrences, the trust needed to run
 one is the trust that its <em>rules</em> are sensible — not that its code is safe.
-See <a href="../validation/performance/">The case for Distill</a> for the measured
+See <a href="../scoring/performance/">The case for Distill</a> for the measured
 trade-off.</p>
 <p>Several bundled matchers apply a handful of unrelated checks to one collection
 — an operation summary, a schema property — selected per rule by a parameter.
@@ -1188,7 +1188,7 @@ list — the first of several matchers whose baked-in policy vocabulary should
 become rule parameters (issues #144–#154).</p>
 <h2 id="runtime-execution-model">Runtime execution model<a class="headerlink" href="#runtime-execution-model" title="Permanent link">&para;</a></h2>
 <p>Distill matcher sources are parsed once when the bundle loads and the compiled
-programs are reused for every validation, rather than reparsed and discarded
+programs are reused for every scoring, rather than reparsed and discarded
 per rule. The interpreter was then reworked to remove avoidable work in the
 evaluation loop: compiled regular expressions are cached rather than
 recompiled per match, closure parameters are bound through a layered scope
@@ -1211,7 +1211,7 @@ self-asserted, neither checked; uniqueness moved from a global spec title to
 required to sit behind a protected boundary. Each policy can declare a
 passing score and grade bands (<code>passingScore:</code> / <code>grades:</code>, or a non-numeric
 <code>scoring: blocker | error</code>); the score, grade, and pass/fail against that bar
-are reported on every validation, and the automation-API verdict honours the
+are reported on every scoring, and the automation-API verdict honours the
 bar unless the caller overrides it. Grading was later made universal — a
 policy with no <code>grades:</code> block derives bands from its <code>passingScore</code>, or falls
 back to a default <code>A ≥ 90 … D ≥ 60</code> — and a <code>+</code>/<code>-</code> is appended for the top or

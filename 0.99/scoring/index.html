@@ -6,11 +6,11 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Local-first API explorer for OpenAPI/Swagger specs with pluggable, policy-driven validation.">
+        <meta name="description" content="Local-first API explorer for OpenAPI/Swagger specs with pluggable, policy-driven scoring.">
       
       
       
-        <link rel="canonical" href="https://johnjoeallen.github.io/arete/0.99/validation/">
+        <link rel="canonical" href="https://johnjoeallen.github.io/arete/0.99/scoring/">
       
       
         <link rel="prev" href="../history/">
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#validation" class="md-skip">
+        <a href="#scoring" class="md-skip">
           Skip to content
         </a>
       
@@ -426,7 +426,7 @@
   <span class="md-ellipsis">
     
   
-    Validation
+    Scoring
   
 
     
@@ -442,7 +442,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Validation
+    Scoring
   
 
           </label>
@@ -515,10 +515,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#running-validation" class="md-nav__link">
+  <a href="#running-scoring" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Running validation
+        Running scoring
       
     </span>
   </a>
@@ -862,10 +862,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#running-validation" class="md-nav__link">
+  <a href="#running-scoring" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Running validation
+        Running scoring
       
     </span>
   </a>
@@ -961,7 +961,7 @@
 
 
   
-    <a href="https://github.com/johnjoeallen/arete/edit/main/docs/validation/index.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/johnjoeallen/arete/edit/main/docs/scoring/index.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -969,17 +969,17 @@
   
 
 
-<h1 id="validation">Validation<a class="headerlink" href="#validation" title="Permanent link">&para;</a></h1>
-<p>Validation in Areté is <strong>on-demand and pluggable</strong>. Opening a spec doesn't
+<h1 id="scoring">Scoring<a class="headerlink" href="#scoring" title="Permanent link">&para;</a></h1>
+<p>Scoring in Areté is <strong>on-demand and pluggable</strong>. Opening a spec doesn't
 run anything by itself — you choose what runs and when.</p>
 <p>Areté ships one bundled plugin, the
 <a href="policy-engine/"><strong>Areté Policy Engine</strong></a> (<code>generic-policy</code>), and
 discovers any additional plugin jars you drop in. Multiple plugins can run
 together — for example a general API-guidelines linter alongside a specialised,
 organisation-specific plugin such as a breaking-changes checker.</p>
-<p><img alt="The validation picker and findings" src="../assets/screenshot-validation.png" /></p>
-<h2 id="running-validation">Running validation<a class="headerlink" href="#running-validation" title="Permanent link">&para;</a></h2>
-<p>A <strong>Validation</strong> picker on the spec's page lists every globally enabled plugin
+<p><img alt="The scoring picker and findings" src="../assets/screenshot-scoring.png" /></p>
+<h2 id="running-scoring">Running scoring<a class="headerlink" href="#running-scoring" title="Permanent link">&para;</a></h2>
+<p>A <strong>Scoring</strong> picker on the spec's page lists every globally enabled plugin
 as its own row — a checkbox plus that plugin's own rule-set dropdown — so more
 than one plugin can run at once. Click <strong>Score</strong> to run every checked plugin;
 nothing runs until you do.</p>
@@ -1030,7 +1030,7 @@ would reshuffle on every restart. Keep the order stable across releases.</p>
 <h2 id="where-plugins-come-from">Where plugins come from<a class="headerlink" href="#where-plugins-come-from" title="Permanent link">&para;</a></h2>
 <p>The core engine discovers each plugin from its shaded jar using Java's
 <code>ServiceLoader</code>. A plugin registers an implementation through
-<code>META-INF/services/net.dublinux.arete.validation.spi.SpecValidationPlugin</code> and
+<code>META-INF/services/net.dublinux.arete.scoring.spi.SpecScoringPlugin</code> and
 is loaded in an isolated classloader. This is the common plugin lifecycle; the
 Policy Engine is not special in this respect.</p>
 <p>Plugin <code>.jar</code> files are discovered from two folders at startup:</p>
@@ -1044,7 +1044,7 @@ Policy Engine is not special in this respect.</p>
 </ul>
 <p>Enable or disable individual plugins globally from <strong>Settings</strong>. A disabled
 plugin stays loaded but never appears in a spec's picker and is skipped during
-validation, so re-enabling it doesn't need a restart. The per-spec checkbox is
+scoring, so re-enabling it doesn't need a restart. The per-spec checkbox is
 a narrower, additional switch layered on top of the global setting.</p>
 <h2 id="next">Next<a class="headerlink" href="#next" title="Permanent link">&para;</a></h2>
 <ul>
@@ -1053,7 +1053,7 @@ a narrower, additional switch layered on top of the global setting.</p>
 <li><a href="rules/">Rule Catalogue</a> — every rule in the bundle and which policies use it.</li>
 <li><a href="policies/">Policies</a> — the bundled Enterprise Grade, Zalando, and Zalando
   Extended rule sets.</li>
-<li><a href="writing-a-plugin/">Writing a Plugin</a> — implement the <code>SpecValidationPlugin</code>
+<li><a href="writing-a-plugin/">Writing a Plugin</a> — implement the <code>SpecScoringPlugin</code>
   SPI.</li>
 </ul>
 

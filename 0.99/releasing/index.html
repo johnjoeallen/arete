@@ -6,14 +6,14 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Local-first API explorer for OpenAPI/Swagger specs with pluggable, policy-driven validation.">
+        <meta name="description" content="Local-first API explorer for OpenAPI/Swagger specs with pluggable, policy-driven scoring.">
       
       
       
         <link rel="canonical" href="https://johnjoeallen.github.io/arete/0.99/releasing/">
       
       
-        <link rel="prev" href="../validation/writing-a-plugin/">
+        <link rel="prev" href="../scoring/writing-a-plugin/">
       
       
         <link rel="next" href="../publishing-spi/">
@@ -424,7 +424,7 @@
   <span class="md-ellipsis">
     
   
-    Validation
+    Scoring
   
 
     
@@ -440,7 +440,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Validation
+    Scoring
   
 
           </label>
@@ -453,7 +453,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../validation/" class="md-nav__link">
+      <a href="../scoring/" class="md-nav__link">
         
   
   
@@ -481,7 +481,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../validation/policy-engine/" class="md-nav__link">
+      <a href="../scoring/policy-engine/" class="md-nav__link">
         
   
   
@@ -509,7 +509,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../validation/performance/" class="md-nav__link">
+      <a href="../scoring/performance/" class="md-nav__link">
         
   
   
@@ -537,7 +537,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../validation/distill/" class="md-nav__link">
+      <a href="../scoring/distill/" class="md-nav__link">
         
   
   
@@ -565,7 +565,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../validation/rules/" class="md-nav__link">
+      <a href="../scoring/rules/" class="md-nav__link">
         
   
   
@@ -593,7 +593,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../validation/policies/" class="md-nav__link">
+      <a href="../scoring/policies/" class="md-nav__link">
         
   
   
@@ -621,7 +621,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../validation/writing-a-plugin/" class="md-nav__link">
+      <a href="../scoring/writing-a-plugin/" class="md-nav__link">
         
   
   
@@ -921,7 +921,7 @@ which sets the Maven version from the tag, builds, packages a zip
 (<code>arete.jar</code>, both launcher scripts, and <code>plugins/</code> with the bundled
 plugin), and publishes it as a GitHub release.</p>
 <h2 id="publishing-the-spi-to-maven-central">Publishing the SPI to Maven Central<a class="headerlink" href="#publishing-the-spi-to-maven-central" title="Permanent link">&para;</a></h2>
-<p>Publishing <code>arete-validation-spi</code> to Maven Central is <strong>not</strong> part of the
+<p>Publishing <code>arete-scoring-spi</code> to Maven Central is <strong>not</strong> part of the
 release workflow — it doesn't belong on every tag push. It runs from
 <a href="https://github.com/johnjoeallen/arete/blob/main/.github/workflows/publish-spi.yml"><code>.github/workflows/publish-spi.yml</code></a>,
 triggered by hand from the Actions tab against a specific tag once that release

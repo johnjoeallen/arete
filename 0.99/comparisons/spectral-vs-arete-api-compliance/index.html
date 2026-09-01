@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Local-first API explorer for OpenAPI/Swagger specs with pluggable, policy-driven validation.">
+        <meta name="description" content="Local-first API explorer for OpenAPI/Swagger specs with pluggable, policy-driven scoring.">
       
       
       
@@ -420,7 +420,7 @@
   <span class="md-ellipsis">
     
   
-    Validation
+    Scoring
   
 
     
@@ -436,7 +436,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Validation
+    Scoring
   
 
           </label>
@@ -449,7 +449,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../validation/" class="md-nav__link">
+      <a href="../../scoring/" class="md-nav__link">
         
   
   
@@ -477,7 +477,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../validation/policy-engine/" class="md-nav__link">
+      <a href="../../scoring/policy-engine/" class="md-nav__link">
         
   
   
@@ -505,7 +505,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../validation/performance/" class="md-nav__link">
+      <a href="../../scoring/performance/" class="md-nav__link">
         
   
   
@@ -533,7 +533,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../validation/distill/" class="md-nav__link">
+      <a href="../../scoring/distill/" class="md-nav__link">
         
   
   
@@ -561,7 +561,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../validation/rules/" class="md-nav__link">
+      <a href="../../scoring/rules/" class="md-nav__link">
         
   
   
@@ -589,7 +589,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../validation/policies/" class="md-nav__link">
+      <a href="../../scoring/policies/" class="md-nav__link">
         
   
   
@@ -617,7 +617,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../validation/writing-a-plugin/" class="md-nav__link">
+      <a href="../../scoring/writing-a-plugin/" class="md-nav__link">
         
   
   
@@ -1077,9 +1077,9 @@ not as a general product comparison.</p>
 <li>Maven and Gradle plugins.</li>
 </ul>
 <p>These deployment modes are architectural assumptions for this document. They are
-not all implemented in the current repository. The current validation design is
-described in <a href="/home/jallen/git/arete/docs/validation/index.md">Validation</a> and
-the <a href="/home/jallen/git/arete/docs/validation/policy-engine.md">Policy Engine</a>.</p>
+not all implemented in the current repository. The current scoring design is
+described in <a href="/home/jallen/git/arete/docs/scoring/index.md">Scoring</a> and
+the <a href="/home/jallen/git/arete/docs/scoring/policy-engine.md">Policy Engine</a>.</p>
 <h2 id="executive-conclusion">Executive conclusion<a class="headerlink" href="#executive-conclusion" title="Permanent link">&para;</a></h2>
 <p>Spectral is primarily a document linter that can enforce API style and quality
 rules close to the source file. Areté is better modelled as a compliance system:
@@ -1296,7 +1296,7 @@ natural for weighted requirements such as:</p>
 <p>Those policies can be built around Spectral, but they are normally external to
 the linter.</p>
 <h3 id="arete_2">Areté<a class="headerlink" href="#arete_2" title="Permanent link">&para;</a></h3>
-<p>Areté treats scoring as part of validation. A policy can assign deductions to
+<p>Areté treats scoring as part of scoring. A policy can assign deductions to
 rules and mark a rule as <code>PROHIBITED</code>. Results can include both the overall score
 and the points associated with individual findings.</p>
 <p>This makes Areté more suitable for scorecards, release-readiness thresholds,
@@ -1502,7 +1502,7 @@ API lifecycle.</p>
 </blockquote>
 <p>That proposition depends on five capabilities being consistent everywhere:</p>
 <ol>
-<li><strong>One policy identity</strong> — local and central validation identify the same policy
+<li><strong>One policy identity</strong> — local and central scoring identify the same policy
    and version.</li>
 <li><strong>One rule semantics</strong> — CLI, Maven, Gradle, Git, and service results agree on
    what a rule means.</li>
@@ -1524,10 +1524,10 @@ scoring, lifecycle enforcement, breaking-change governance, and evidence.</p>
 <li><a href="https://github.com/stoplightio/spectral/blob/develop/docs/guides/5-custom-functions.md">Spectral custom functions</a></li>
 <li><a href="https://github.com/stoplightio/spectral/blob/develop/docs/guides/2-cli.md">Spectral CLI and output formats</a></li>
 <li><a href="https://github.com/stoplightio/spectral/blob/develop/docs/guides/4d-overrides.md">Spectral overrides</a></li>
-<li><a href="/home/jallen/git/arete/docs/validation/index.md">Areté validation overview</a></li>
-<li><a href="/home/jallen/git/arete/docs/validation/policy-engine.md">Areté Policy Engine</a></li>
-<li><a href="/home/jallen/git/arete/docs/validation/distill.md">Areté Distill reference</a></li>
-<li><a href="/home/jallen/git/arete/docs/validation/writing-a-plugin.md">Writing an Areté plugin</a></li>
+<li><a href="/home/jallen/git/arete/docs/scoring/index.md">Areté scoring overview</a></li>
+<li><a href="/home/jallen/git/arete/docs/scoring/policy-engine.md">Areté Policy Engine</a></li>
+<li><a href="/home/jallen/git/arete/docs/scoring/distill.md">Areté Distill reference</a></li>
+<li><a href="/home/jallen/git/arete/docs/scoring/writing-a-plugin.md">Writing an Areté plugin</a></li>
 </ul>
 
 

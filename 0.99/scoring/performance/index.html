@@ -6,11 +6,11 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Local-first API explorer for OpenAPI/Swagger specs with pluggable, policy-driven validation.">
+        <meta name="description" content="Local-first API explorer for OpenAPI/Swagger specs with pluggable, policy-driven scoring.">
       
       
       
-        <link rel="canonical" href="https://johnjoeallen.github.io/arete/0.99/validation/performance/">
+        <link rel="canonical" href="https://johnjoeallen.github.io/arete/0.99/scoring/performance/">
       
       
         <link rel="prev" href="../policy-engine/">
@@ -426,7 +426,7 @@
   <span class="md-ellipsis">
     
   
-    Validation
+    Scoring
   
 
     
@@ -442,7 +442,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Validation
+    Scoring
   
 
           </label>
@@ -1049,7 +1049,7 @@
 
 
   
-    <a href="https://github.com/johnjoeallen/arete/edit/main/docs/validation/performance.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/johnjoeallen/arete/edit/main/docs/scoring/performance.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -1069,7 +1069,7 @@ argument for that design and shows the measurements behind it.</p>
   source. Running one must not require trusting its author with the host JVM.</li>
 <li><strong>Changeable without a release.</strong> A new or adjusted rule should be an edit
   to a text file, not a recompile-and-redeploy.</li>
-<li><strong>Cheap enough to ignore.</strong> A validation runs ~150 matcher evaluations;
+<li><strong>Cheap enough to ignore.</strong> A scoring runs ~150 matcher evaluations;
   their combined cost must stay small next to the unavoidable OpenAPI parse.</li>
 </ul>
 <p>Distill is the design that delivers all three. The two obvious alternatives
@@ -1114,7 +1114,7 @@ executed unvetted, because the worst it can do is read the spec and return a
 list. The cost is interpreter overhead — a tree-walk instead of compiled
 bytecode — which the rest of this page quantifies.</p>
 <h2 id="plugins-are-a-separate-trust-tier">Plugins are a separate trust tier<a class="headerlink" href="#plugins-are-a-separate-trust-tier" title="Permanent link">&para;</a></h2>
-<p>None of this replaces Areté's plugin facility. A validation plugin is
+<p>None of this replaces Areté's plugin facility. A scoring plugin is
 arbitrary compiled Java loaded through the SPI and a child-first classloader;
 <code>arete-policy-plugin</code> is itself one. A plugin runs with full
 application privileges, so <strong>installing one is a trust decision</strong> — and
@@ -1596,10 +1596,10 @@ complex matchers alike — the price of a tree-walk over compiled bytecode — a
 <strong>5–32× faster than compiled Groovy</strong>. Even on <code>path-set</code>, where Distill trails
 Groovy, hand Java running the same algorithm beats both by 5×.</p>
 <h2 id="what-the-overhead-actually-costs">What the overhead actually costs<a class="headerlink" href="#what-the-overhead-actually-costs" title="Permanent link">&para;</a></h2>
-<p>At 1–11 µs per matcher call and 111 evaluations per validation, the entire
+<p>At 1–11 µs per matcher call and 111 evaluations per scoring, the entire
 matcher phase is <strong>~5 ms</strong> — alongside a ~3 ms OpenAPI parse Areté cannot
 avoid and ~1 ms of model adaptation. Distill's interpreter overhead is real and
-measurable, and it is not where a validation spends its time.</p>
+measurable, and it is not where a scoring spends its time.</p>
 <p>That is the trade in full: a few milliseconds per spec to keep every matcher a
 ~5–15-line sandboxed expression that can be edited without a rebuild and run
 from any source — instead of ~40 lines of null-checked Java per matcher, in a

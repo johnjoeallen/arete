@@ -6,11 +6,11 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Local-first API explorer for OpenAPI/Swagger specs with pluggable, policy-driven validation.">
+        <meta name="description" content="Local-first API explorer for OpenAPI/Swagger specs with pluggable, policy-driven scoring.">
       
       
       
-        <link rel="canonical" href="https://johnjoeallen.github.io/arete/0.99/validation/writing-a-plugin/">
+        <link rel="canonical" href="https://johnjoeallen.github.io/arete/0.99/scoring/writing-a-plugin/">
       
       
         <link rel="prev" href="../policies/">
@@ -426,7 +426,7 @@
   <span class="md-ellipsis">
     
   
-    Validation
+    Scoring
   
 
     
@@ -442,7 +442,7 @@
             <span class="md-nav__icon md-icon"></span>
             
   
-    Validation
+    Scoring
   
 
           </label>
@@ -917,7 +917,7 @@
 
 
   
-    <a href="https://github.com/johnjoeallen/arete/edit/main/docs/validation/writing-a-plugin.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/johnjoeallen/arete/edit/main/docs/scoring/writing-a-plugin.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -926,9 +926,9 @@
 
 
 <h1 id="writing-a-plugin">Writing a Plugin<a class="headerlink" href="#writing-a-plugin" title="Permanent link">&para;</a></h1>
-<p>A validation plugin implements
-<a href="https://github.com/johnjoeallen/arete/blob/main/arete-validation-spi/src/main/java/net/dublinux/arete/validation/spi/SpecValidationPlugin.java"><code>SpecValidationPlugin</code></a>
-from the <code>arete-validation-spi</code> module and registers itself via
+<p>A scoring plugin implements
+<a href="https://github.com/johnjoeallen/arete/blob/main/arete-scoring-spi/src/main/java/net/dublinux/arete/scoring/spi/SpecScoringPlugin.java"><code>SpecScoringPlugin</code></a>
+from the <code>arete-scoring-spi</code> module and registers itself via
 <code>ServiceLoader</code> — no Areté-specific base class or annotations required.</p>
 <div class="admonition tip">
 <p class="admonition-title">Prefer the policy bundle for rule changes</p>
@@ -936,23 +936,23 @@ from the <code>arete-validation-spi</code> module and registers itself via
 at all. The bundled <a href="../policy-engine/">Areté Policy Engine</a> is
 driven entirely by text files — add a rule, matcher, or policy by editing
 Markdown, YAML, and a <a href="../distill/">Distill</a> matcher. Write a
-<code>SpecValidationPlugin</code> only when you need a different <strong>engine</strong>.</p>
+<code>SpecScoringPlugin</code> only when you need a different <strong>engine</strong>.</p>
 </div>
 <h2 id="the-spi">The SPI<a class="headerlink" href="#the-spi" title="Permanent link">&para;</a></h2>
 <p>Add the dependency (published to Maven Central) with <code>provided</code> scope — never
 by copying its source. A copy compiled into your plugin jar is a <em>different</em>
 class from the host's, and <code>ServiceLoader</code> won't recognise it as implementing
-<code>SpecValidationPlugin</code>.</p>
+<code>SpecScoringPlugin</code>.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">&lt;dependency&gt;</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="nt">&lt;groupId&gt;</span>net.dublinux.arete<span class="nt">&lt;/groupId&gt;</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="nt">&lt;artifactId&gt;</span>arete-validation-spi<span class="nt">&lt;/artifactId&gt;</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="nt">&lt;artifactId&gt;</span>arete-scoring-spi<span class="nt">&lt;/artifactId&gt;</span>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="nt">&lt;version&gt;</span>...<span class="nt">&lt;/version&gt;</span>
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="nt">&lt;scope&gt;</span>provided<span class="nt">&lt;/scope&gt;</span>
 <a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="nt">&lt;/dependency&gt;</span>
 </code></pre></div>
 <p>Use the version matching the latest published deployment — check
 <a href="https://central.sonatype.com">central.sonatype.com</a> or search
-<code>net.dublinux.arete:arete-validation-spi</code>. It isn't always the latest
+<code>net.dublinux.arete:arete-scoring-spi</code>. It isn't always the latest
 <code>arete</code> release tag: publishing to Central is a separate, manually-triggered
 step, not something every tagged release does.</p>
 <h3 id="interface-shape">Interface shape<a class="headerlink" href="#interface-shape" title="Permanent link">&para;</a></h3>
@@ -994,7 +994,7 @@ step, not something every tagged release does.</p>
 </tr>
 <tr>
 <td><code>validate(SpecInput)</code></td>
-<td>Validates one spec; returns a <code>ValidationResult</code>. Must not throw for expected failures — return <code>ValidationResult.pluginError(...)</code> instead.</td>
+<td>Validates one spec; returns a <code>ScoringResult</code>. Must not throw for expected failures — return <code>ScoringResult.pluginError(...)</code> instead.</td>
 </tr>
 </tbody>
 </table>
@@ -1010,10 +1010,10 @@ or Kotlin type.</p>
 <h2 id="a-minimal-plugin">A minimal plugin<a class="headerlink" href="#a-minimal-plugin" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">package</span><span class="w"> </span><span class="nn">com.example.myvalidator</span><span class="p">;</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">net.dublinux.arete.validation.spi.*</span><span class="p">;</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">net.dublinux.arete.scoring.spi.*</span><span class="p">;</span>
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="kn">import</span><span class="w"> </span><span class="nn">java.util.*</span><span class="p">;</span>
 <a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="kd">public</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">MyValidatorPlugin</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">SpecValidationPlugin</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="kd">public</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="kd">class</span> <span class="nc">MyValidatorPlugin</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">SpecScoringPlugin</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">    </span><span class="nd">@Override</span><span class="w"> </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">getId</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="s">"my-validator"</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 <a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">    </span><span class="nd">@Override</span><span class="w"> </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">getName</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="s">"My Validator"</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
 <a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">    </span><span class="nd">@Override</span><span class="w"> </span><span class="kd">public</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">getVersion</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="s">"1.0.0"</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
@@ -1022,15 +1022,15 @@ or Kotlin type.</p>
 <a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">    </span><span class="p">}</span>
 <a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">    </span><span class="nd">@Override</span><span class="w"> </span><span class="kd">public</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">configure</span><span class="p">(</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="n">config</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">}</span>
 <a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>
-<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">    </span><span class="nd">@Override</span><span class="w"> </span><span class="kd">public</span><span class="w"> </span><span class="n">ValidationResult</span><span class="w"> </span><span class="nf">validate</span><span class="p">(</span><span class="n">SpecInput</span><span class="w"> </span><span class="n">input</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">    </span><span class="nd">@Override</span><span class="w"> </span><span class="kd">public</span><span class="w"> </span><span class="n">ScoringResult</span><span class="w"> </span><span class="nf">validate</span><span class="p">(</span><span class="n">SpecInput</span><span class="w"> </span><span class="n">input</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="w">        </span><span class="n">List</span><span class="o">&lt;</span><span class="n">Diagnostic</span><span class="o">&gt;</span><span class="w"> </span><span class="n">diagnostics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">ArrayList</span><span class="o">&lt;&gt;</span><span class="p">();</span>
 <a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="w">        </span><span class="c1">// ... run your engine against input.getContent(), append Diagnostics ...</span>
-<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">ValidationResult</span><span class="p">.</span><span class="na">success</span><span class="p">(</span><span class="n">diagnostics</span><span class="p">,</span><span class="w"> </span><span class="cm">/* rules evaluated */</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">ScoringResult</span><span class="p">.</span><span class="na">success</span><span class="p">(</span><span class="n">diagnostics</span><span class="p">,</span><span class="w"> </span><span class="cm">/* rules evaluated */</span><span class="w"> </span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
 <a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="w">    </span><span class="p">}</span>
 <a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="p">}</span>
 </code></pre></div>
 <p>Register it by packaging a jar containing
-<code>META-INF/services/net.dublinux.arete.validation.spi.SpecValidationPlugin</code>
+<code>META-INF/services/net.dublinux.arete.scoring.spi.SpecScoringPlugin</code>
 with the single line:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>com.example.myvalidator.MyValidatorPlugin
 </code></pre></div>
@@ -1046,7 +1046,7 @@ between plugins — and between a plugin and Areté itself — never collide.</p
 <h2 id="a-worked-example">A worked example<a class="headerlink" href="#a-worked-example" title="Permanent link">&para;</a></h2>
 <p>The bundled
 <a href="https://github.com/johnjoeallen/arete/tree/main/arete-policy-plugin"><code>arete-policy-plugin</code></a>
-is a complete, shaded <code>SpecValidationPlugin</code> — its <code>pom.xml</code>, <code>META-INF/services</code>
+is a complete, shaded <code>SpecScoringPlugin</code> — its <code>pom.xml</code>, <code>META-INF/services</code>
 registration, <code>getRuleSets()</code> implementation, and packaging are the best
 starting point for your own.</p>
 
