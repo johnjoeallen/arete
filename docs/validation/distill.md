@@ -148,9 +148,9 @@ Notes:
 |---|---|
 | `s.lower()` | lower-cased copy |
 | `s.trim()` | whitespace-trimmed copy |
-| `s.contains(t)` | boolean; `t` is a string, or a list — true if any element matches |
-| `s.startsWith(t)` | boolean; `t` is a string, or a list — true if `s` starts with any element. Raw prefix: no trim, no word boundary (`"Listing".startsWith("List")` is true). For a word-aware check see [`startsWithAny`](#builtin-functions) |
-| `s.endsWith(t)` | boolean; `t` is a string, or a list — true if `s` ends with any element |
+| `s.contains(t)` | Java `String.contains`, extended: `t` may be a list — true if any element is contained |
+| `s.startsWith(t)` | Java `String.startsWith`, extended: `t` may be a list — true if `s` starts with any element |
+| `s.endsWith(t)` | Java `String.endsWith`, extended: `t` may be a list — true if `s` ends with any element |
 | `s.length` | length (a member, not a call) |
 
 ### Sequence methods
