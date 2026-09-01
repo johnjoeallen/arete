@@ -122,6 +122,23 @@ class PluginValidationServiceTest {
         assertThat(result.pluginSummaries().get(0).status()).isEqualTo("PLUGIN_ERROR");
     }
 
+    @Test
+    void aPluginGradeAndPassingScoreAreCarriedOntoTheAggregatedResult() {
+        SpecValidationPlugin plugin = stubPlugin("g", "Graded");
+        when(plugin.validate(any())).thenReturn(ValidationResult.builder()
+                .status(ValidationResult.Status.SUCCESS).diagnostics(List.of())
+                .overallScore(92.5).overallScoreWithoutBlockers(92.5).grade("B").build());
+        when(plugin.getPassingScore(any())).thenReturn(java.util.OptionalDouble.of(90.0));
+        when(pluginRegistry.getPlugins()).thenReturn(List.of(plugin));
+        when(pluginSettingsService.isEnabled("g")).thenReturn(true);
+
+        AggregatedValidationResult result = service.validateOne("openapi: 3.0.0", "g", "Enterprise Grade");
+
+        assertThat(result.grade()).isEqualTo("B");           // a passing score still carries its grade
+        assertThat(result.passingScore()).isEqualTo(90.0);
+        assertThat(result.meetsPassingScore()).isTrue();
+    }
+
     private static SpecValidationPlugin stubPlugin(String id, String name) {
         SpecValidationPlugin plugin = mock(SpecValidationPlugin.class);
         when(plugin.getId()).thenReturn(id);

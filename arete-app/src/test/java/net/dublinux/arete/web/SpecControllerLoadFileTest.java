@@ -103,6 +103,30 @@ class SpecControllerLoadFileTest {
     }
 
     @Test
+    void aPassingScoreStillRendersItsGrade() throws Exception {
+        SpecEntity spec = new SpecEntity();
+        spec.setId(7L);
+        spec.setRef("graded-1");
+        spec.setTitle("Graded API");
+        spec.setNamespace("default");
+        spec.setSubmitter("anon");
+        spec.setRawContent("openapi: 3.0.0");
+        when(specStorageService.findByRef("graded-1")).thenReturn(java.util.Optional.of(spec));
+        when(specParserService.parse("openapi: 3.0.0"))
+                .thenReturn(new ParsedSpec(new OpenAPI().info(new Info().title("Graded API").version("1.0.0")), List.of()));
+
+        var result = new net.dublinux.arete.plugin.AggregatedValidationResult(
+                List.of(), List.of(), 111, 92.5, 92.5, "B-", 90.0);   // passes: 92.5 >= 90
+        when(specValidationResultService.findForSpec(7L)).thenReturn(java.util.Optional.of(
+                new net.dublinux.arete.plugin.CachedValidationResult(result, List.of("generic-policy"))));
+
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get("/spec/graded-1"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Grade B-")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("passes")));
+    }
+
+    @Test
     void blankPathRedirectsHomeWithAnError() throws Exception {
         mockMvc.perform(post("/api/load-file").param("filePath", "   "))
                 .andExpect(status().is3xxRedirection())
