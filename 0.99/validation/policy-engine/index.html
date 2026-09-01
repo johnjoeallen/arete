@@ -733,6 +733,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#behaviour-snapshots" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Behaviour snapshots
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#a-new-policy" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1197,6 +1208,17 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#behaviour-snapshots" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Behaviour snapshots
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#a-new-policy" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1653,7 +1675,18 @@ rule, 2.0 each, security rules <code>PROHIBITED</code>), make good starting poin
 <li>Add <code>&lt;id&gt;: matchers/&lt;id&gt;/Matcher.md</code> to <code>PolicyBundle.yaml</code> under
    <code>matchers:</code>.</li>
 <li>Add rules that use it.</li>
+<li>Regenerate the behaviour snapshots and review the diff:
+   <code>mvn -pl policy-based-validation-plugin test -Dtest=PolicySnapshotTest -Dsnapshot.update=true</code>.</li>
 </ol>
+<h3 id="behaviour-snapshots">Behaviour snapshots<a class="headerlink" href="#behaviour-snapshots" title="Permanent link">&para;</a></h3>
+<p><code>PolicySnapshotTest</code> runs every bundled rule against the shared fixture specs
+and checks the findings — and each policy's end-to-end score — against golden
+files under <code>src/test/resources/snapshots/</code>. Any change to a matcher, rule
+parameters, or the scoring model surfaces as a diff there. After an intended
+change, regenerate with <code>-Dsnapshot.update=true</code> and review what moved before
+committing the updated snapshots. (<code>Matcher.groovy</code> parity checks still run for
+matchers that have one, but they compare two implementations of the current
+behaviour, not against a frozen baseline — the snapshots are the baseline.)</p>
 <h3 id="a-new-policy">A new policy<a class="headerlink" href="#a-new-policy" title="Permanent link">&para;</a></h3>
 <ol>
 <li>Create <code>policies/&lt;Name&gt;.md</code> with <code>id</code> and a <code>rules:</code> map.</li>
