@@ -100,6 +100,24 @@ class DistillMatcherEvaluatorTest {
     }
 
     @Test
+    void startsWithAnyIsWordAwareUnlikeStartsWith() {
+        Map<String, Object> values = Map.of("values", List.of("  List all", "Listing all", "List"));
+        Map<String, Object> rule = Map.of("parameters", Map.of("p", List.of("List")));
+        // startsWithAny: trims, whole first word — "List all" and "List", not "Listing all"
+        assertEquals(List.of(new Diagnostic("/", "  List all", "x"), new Diagnostic("/", "List", "x")), runtime.execute(
+                "distill(api, rule) { return api.values.filter { v -> startsWithAny(v, rule.parameters[\"p\"]) }.map { v -> occurrence(\"/\", v, \"x\") }; }",
+                values, rule));
+        // startsWith: raw prefix, no trim — "Listing all" matches, leading-space one does not
+        assertEquals(List.of(new Diagnostic("/", "Listing all", "x"), new Diagnostic("/", "List", "x")), runtime.execute(
+                "distill(api, rule) { return api.values.filter { v -> v.startsWith(rule.parameters[\"p\"]) }.map { v -> occurrence(\"/\", v, \"x\") }; }",
+                values, rule));
+        // startsWithAny also accepts a comma string
+        assertEquals(2, runtime.execute(
+                "distill(api, rule) { return api.values.filter { v -> startsWithAny(v, \"List , Get\") }.map { v -> occurrence(\"/\", v, \"x\") }; }",
+                values, Map.of("parameters", Map.of())).size());
+    }
+
+    @Test
     void checksConcatenatesRepeatableFilterMapStanzasOverOneBoundSource() {
         // The source (api.values, blank-filtered) is bound once; each comma-separated
         // stanza is a bare filter{}.map{} rooted at it and using the implicit `it`;

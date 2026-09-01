@@ -50,9 +50,9 @@ than one. A rule that supplies none of the check parameters produces nothing.
 `match: non-action-oriented` also needs `action-prefixes` — a `list` of the
 verbs a summary may start with (`DOC009` supplies `Get, List, Create, …`),
 written as a YAML list or a comma-separated string. The check is
-`summary.trim().startsWith(action-prefixes)` — `startsWith` takes a list and is
-true when the trimmed summary begins with any of the prefixes. The matcher
-carries no built-in default.
+`startsWithAny(summary, action-prefixes)` — the trimmed summary equals one of
+the prefixes or begins with `prefix + " "` (so `"Listing customers"` is *not*
+treated as starting with `List`). The matcher carries no built-in default.
 
 The rule ignores operations without a summary. `DOC001` owns the distinct
 condition that a summary is missing.

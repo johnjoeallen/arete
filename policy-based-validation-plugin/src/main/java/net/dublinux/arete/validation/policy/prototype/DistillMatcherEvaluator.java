@@ -231,6 +231,9 @@ public final class DistillMatcherEvaluator {
     /**
      * {@code s.contains(x)} / {@code startsWith} / {@code endsWith}: {@code x}
      * is a string, or a list — true when the test holds for any element.
+     * A raw character test — no trimming, no word boundary
+     * ({@code "Listing".startsWith("List")} is true). Contrast
+     * {@link #startsWithAny}.
      */
     private static boolean stringPredicate(String text, Object argument, java.util.function.BiPredicate<String, String> test) {
         if (argument instanceof Iterable<?> options) {
@@ -240,12 +243,33 @@ public final class DistillMatcherEvaluator {
         return test.test(text, String.valueOf(argument));
     }
 
+    /**
+     * True when {@code text}, with leading/trailing whitespace ignored, begins
+     * with one of {@code prefixes} as a whole first word — it equals the prefix
+     * or the prefix is followed by a space ({@code "Listing"} does <em>not</em>
+     * start with {@code "List"} here). {@code prefixes} is a list, or a
+     * comma-separated string. Contrast {@code s.startsWith(list)}, which is a
+     * raw prefix test.
+     */
+    private static boolean startsWithAny(Object text, Object prefixes) {
+        String trimmed = text == null ? "" : String.valueOf(text).trim();
+        List<Object> options = prefixes instanceof String csv
+                ? new ArrayList<>(List.of(csv.split(",")))
+                : iterableOf(prefixes);
+        for (Object option : options) {
+            String prefix = String.valueOf(option).trim();
+            if (!prefix.isEmpty() && (trimmed.equals(prefix) || trimmed.startsWith(prefix + " "))) return true;
+        }
+        return false;
+    }
+
     private static Object function(String name, List<Object> args) {
         return switch (name) {
             case "regexSearch" -> regexSearch(args.get(0), args.get(1));
             case "regexFullMatch" -> regexFullMatch(args.get(0), args.get(1));
             case "tokenize" -> List.of(String.valueOf(args.get(1)).split(java.util.regex.Pattern.quote(String.valueOf(args.get(0)))));
             case "words" -> words(args.get(0));
+            case "startsWithAny" -> startsWithAny(args.get(0), args.get(1));
             case "last" -> { List<Object> values = iterableOf(args.get(0)); yield values.isEmpty() ? "" : values.get(values.size() - 1); }
             case "count" -> (long) iterableOf(args.get(0)).size();
             case "distinct" -> {
@@ -613,7 +637,7 @@ public final class DistillMatcherEvaluator {
     }
 
     private static final Set<String> KNOWN_FUNCTIONS = Set.of(
-            "regexSearch", "regexFullMatch", "tokenize", "words", "last", "count", "checks", "distinct", "join", "strip",
+            "regexSearch", "regexFullMatch", "tokenize", "words", "startsWithAny", "last", "count", "checks", "distinct", "join", "strip",
             "urlHost", "parseInt", "truthy", "pathSegments", "enumerate", "type", "occurrence",
             "operationMessage");
 
