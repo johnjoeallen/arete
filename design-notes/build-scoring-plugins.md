@@ -1,4 +1,4 @@
-# Areté Scoring — Maven & Gradle build-gate plugins
+# Areté Gate — Maven & Gradle build-gate plugins
 
 > **Proposal — for review. Nothing here is implemented.**
 >
@@ -87,12 +87,12 @@ How the plugin reads it:
 Both plugins share the same shape. Common case needs only the URL, namespace,
 a spec path, and one `run`:
 
-### Maven — `arete-maven-plugin`, goal `check`, phase `verify`
+### Maven — `arete-gate-maven-plugin`, goal `check`, phase `verify`
 
 ```xml
 <plugin>
   <groupId>net.dublinux.arete</groupId>
-  <artifactId>arete-maven-plugin</artifactId>
+  <artifactId>arete-gate-maven-plugin</artifactId>
   <configuration>
     <areteUrl>${arete.url}</areteUrl>          <!-- from a profile, see below -->
     <namespace>${project.groupId}</namespace>
@@ -119,17 +119,18 @@ a spec path, and one `run`:
 - Non-scoring failure (unreachable, `4xx` other than the scoring `422`,
   unknown validator/policy) → **`MojoExecutionException`** by default;
   `<failOnUnavailable>false</failOnUnavailable>` downgrades an unreachable
-  Areté to a warning (see open questions).
-- `<failOn>` is accepted per combination but omitted from the normal case —
-  an advanced override, passed straight through to the API, only for holding a
-  **stricter** bar than the policy (`error`, `blocker`, `score<NN`).
-- Report to the log **and** `${project.build.directory}/arete-scoring/report.txt`
+  Areté to a warning.
+- No `<failOn>` in the normal case — the policy owns pass/fail. A single
+  build-wide `<failOn>` (`error` | `blocker` | `score<NN`) is accepted as an
+  advanced override for holding a **stricter** bar than the policy; it is
+  passed straight through on the one API call.
+- Report to the log **and** `${project.build.directory}/arete-gate/report.txt`
   (+ `report.json`, + `arete.sarif` when `<sarif>true</sarif>`).
 
-### Gradle — plugin id `net.dublinux.arete`
+### Gradle — plugin id `net.dublinux.arete.gate`
 
 ```kotlin
-areteScoring {
+areteGate {
     url = providers.gradleProperty("arete.url").orElse("http://localhost:6809")
     namespace = project.group.toString()
     submitter = "gradle"
@@ -140,10 +141,10 @@ areteScoring {
 }
 ```
 
-- Registers `areteScoringCheck`, wires `check.dependsOn(areteScoringCheck)`.
+- Registers `areteGateCheck`, wires `check.dependsOn(areteGateCheck)`.
 - Failing non-optional verdict → task throws through Gradle's normal
   verification-failure path (`VerificationException`).
-- Report to `${layout.buildDirectory}/reports/arete-scoring/report.txt`
+- Report to `${layout.buildDirectory}/reports/arete-gate/report.txt`
   (+ `.json`, + SARIF).
 - `build.gradle` and `build.gradle.kts` both supported.
 
@@ -202,7 +203,7 @@ equivalent and the plugin documents the three override points.)
 Lives in the shared core module so Maven and Gradle logs read the same:
 
 ```
-Areté Scoring — module: my-service   (arete: http://localhost:6809)
+Areté Gate — module: my-service   (arete: http://localhost:6809)
 
   COMBINATION                        SCORE   GRADE  GATE          RESULT   GATING
   generic-policy/Enterprise Grade    93.5    B+     score<90      PASS     yes
@@ -221,9 +222,9 @@ Three:
 
 | Module | Purpose |
 |---|---|
-| `arete-build-scoring-core` | HTTP client for the Automation API + the report formatter. No Maven/Gradle types. Unit-testable against a stub server. |
-| `arete-maven-plugin` | `check` goal → `verify`, delegates to core. |
-| `arete-gradle-plugin` | `areteScoringCheck` task → `check`, delegates to core. |
+| `arete-gate-core` | HTTP client for the Automation API + the report formatter. No Maven/Gradle types. Unit-testable against a stub server. |
+| `arete-gate-maven-plugin` | `check` goal → `verify`, delegates to core. |
+| `arete-gate-gradle-plugin` | `areteGateCheck` task → `check`, delegates to core. |
 
 ## Non-goals
 
@@ -234,31 +235,20 @@ Three:
   assumes one is reachable at the configured URL.
 - Aggregating verdicts across reactor modules — each module gates itself.
 
-## Open questions for review
+## Decisions
 
-1. **Name** — the artifact names here (`arete-build-scoring-core`,
-   `arete-maven-plugin`, `arete-gradle-plugin`) are provisional. "Areté Gate"
-   is an alternative if "scoring" is too close to existing artifact names.
-2. **Unreachable Areté** — hard-fail the build, or warn-and-skip? Proposed:
-   hard-fail by default (a silent skip defeats the gate), overridable.
-3. **Spec discovery** — a single `<spec>` path, a glob, or auto-detect
-   (`src/main/resources/**/openapi.{yaml,json}`)? Multi-spec modules?
-4. **Namespace default** — `${project.groupId}` / `project.group`, or require
-   it explicitly? Does CI want a per-branch namespace?
-5. **Submitter default** — `"maven"` / `"gradle"`, or derive from CI env
-   (`GITHUB_ACTOR`, `BUILD_USER`, …)?
-6. **Per-combination `failOn` overrides** — the API takes one `failOn` per
-   call, so N combinations each overriding it would need N calls. The normal
-   case sends none (policy owns the gate) and does one call; only a
-   `<failOn>`-carrying combination forces a second call. Acceptable, or drop
-   per-combination `failOn` entirely and support one build-wide override?
-7. **`422` overloading** — Areté returns `422` for both "a combination failed
-   its policy" and "unknown validator / bad request". The plugin distinguishes
-   by body shape (`results[]` present vs Problem Details). Fine, or should the
-   API use a distinct status for the scoring-failure case?
-8. **SARIF** — emit by default, or opt-in?
-9. **Caching** — the API keys results by spec content hash; should the plugin
-   short-circuit when the spec hasn't changed since the last build?
+| # | Question | Resolution |
+|---|---|---|
+| 1 | **Name** — `arete-build-scoring-*` collides with the app's "scoring" vocabulary and `arete-scoring-spi`. | **Areté Gate.** Modules `arete-gate-core`, `arete-gate-maven-plugin`, `arete-gate-gradle-plugin`; Gradle plugin id `net.dublinux.arete.gate`. *("Gate" names what it does; leaves "scoring" for the engine.) — needs sign-off* |
+| 2 | **Unreachable Areté** — fail or skip? | **Hard-fail by default** (`MojoExecutionException` / `GradleException`). `failOnUnavailable = false` downgrades an unreachable Areté to a warning. A silent skip defeats the gate. |
+| 3 | **Spec discovery** — path, glob, or auto-detect? | **Explicit `spec` path, required.** Accepts a **list** for multi-spec modules (each spec × each combination). No glob/auto-detect in v1 — a stray example spec would score the wrong file. |
+| 4 | **Namespace default** | Default to the module's group (`${project.groupId}` / `project.group`), overridable. Per-branch namespaces are set via config by whoever wants them, not defaulted. |
+| 5 | **Submitter default** | `"maven"` / `"gradle"`, **unless** a known CI actor var is set (`GITHUB_ACTOR`, `GITLAB_USER_LOGIN`, `BUILD_USER_ID`) — then use that. Overridable. |
+| 6 | **Per-combination `failOn`** | **Dropped.** One optional **build-wide** `failOn` override, so the plugin always makes a single API call. The "stricter than the policy" case is build-wide anyway. |
+| 7 | **`422` overloading** (policy failure vs bad request) | Plugin side: a scoring failure is `application/json` with `results[]`; a request error is `application/problem+json` — the plugin branches on the media type. **Areté follow-up:** confirm errors use `application/problem+json` so this is a clean content-type check, not body-sniffing. |
+| 8 | **SARIF** | **Opt-in** (`<sarif>true</sarif>` / `sarif = true`). Generating a file nothing uploads is noise. |
+| 9 | **Caching** | No plugin-side result cache — the API is already content-hash-cached and one round-trip is cheap. **Gradle:** declare the spec file(s) as task inputs so an unchanged spec skips the task via normal up-to-date checking. **Maven:** re-run every time in v1. |
+
 ## Repo & CI
 
 **Decided: a separate repository with its own CI**, not modules in the `arete`
@@ -274,12 +264,12 @@ The new repo's CI (GitHub Actions):
   instance started in the workflow** — pull the published `arete-<version>`
   release zip, run it on `localhost:6809`, point the plugins at it via the
   `arete-ci` profile / `-Parete.url`;
-- on a tag, publishes `arete-build-scoring-core` + `arete-maven-plugin` to
-  Maven Central and `arete-gradle-plugin` to the Gradle Plugin Portal.
+- on a tag, publishes `arete-gate-core` + `arete-gate-maven-plugin` to
+  Maven Central and `arete-gate-gradle-plugin` to the Gradle Plugin Portal.
 
 ## Suggested build order (checkpoint each with review)
 
-1. `arete-build-scoring-core` — API client + report formatter, tested against a
+1. `arete-gate-core` — API client + report formatter, tested against a
    stub HTTP server. No build-tool code.
 2. Maven plugin — `check` goal, tested against a sample `pom.xml` and a real
    local Areté; the `arete-local` / `arete-ci` profile pattern.
