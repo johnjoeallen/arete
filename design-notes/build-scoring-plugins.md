@@ -232,13 +232,20 @@ non-gating, so nothing is hidden.
 
 ## Modules
 
-Three:
+Three new modules **in this repository's reactor**, alongside `arete-app`,
+`arete-scoring-spi`, and `arete-policy-plugin`:
 
 | Module | Purpose |
 |---|---|
 | `arete-ci-gate-core` | HTTP client for the Automation API + the report formatter. No Maven/Gradle types. Unit-testable against a stub server. |
 | `arete-ci-gate-maven-plugin` | `check` goal → `verify`, delegates to core. |
 | `arete-ci-gate-gradle-plugin` | `areteCiGateCheck` task → `check`, delegates to core. |
+
+They build with the rest of the project (`mvn -q verify` at the root builds
+them too), but **release on their own cadence and to their own channels** —
+see *Release & CI*. `arete-ci-gate-core` needs only the JDK HTTP client and a
+JSON library; the two plugins add their build-tool APIs. Nothing depends on
+`arete-scoring-spi`, and nothing in `arete-app` depends on these modules.
 
 ## Non-goals
 
@@ -264,26 +271,51 @@ The same applies to `POST /api/v1/specs/{ref}/score`. This is a small,
 backward-tolerant change to `AutomationApiController` (the error bodies are
 already Problem-Details-shaped; only the status codes move).
 
-## Repo & CI
+## Release & CI
 
-**Decided: a separate repository with its own CI**, not modules in the `arete`
-reactor. A Gradle plugin (Gradle Plugin Portal) and a Maven plugin (Maven
-Central) have different release mechanics that don't sit cleanly inside
-`arete`'s existing `release.yml` / mkdocs setup, and this subsystem versions
-independently of the Areté app.
+**Decided: the three modules live in this repository, but version and release
+independently of the Areté app.** Keeping them in-tree means one checkout, one
+reactor build, and the integration tests can start a freshly-built Areté from
+the same tree. Releasing them separately keeps the app's `v*.*.*` tag →
+release-zip + docs pipeline untouched and lets the gate ship a fix without a
+whole Areté release.
 
-The new repo's CI (GitHub Actions):
+- **Own version.** The `arete-ci-gate-*` modules carry their own version
+  property, not the reactor version. `1.0.0` to start; unrelated to the Areté
+  app version. (`release.yml`'s `versions:set -DprocessAllModules` on a
+  `v*.*.*` tag must be scoped to exclude them, or they pin their version in
+  their own POMs.)
+- **Own tag prefix.** `ci-gate-v*` tags mark a gate release; `v*.*.*`
+  continues to mean an Areté app release and never touches the gate.
+- **Channels:** all three artifacts publish to **Maven Central** under
+  `net.dublinux.arete`, and the release is attached to a **GitHub release**
+  for the `ci-gate-v*` tag. Gradle users consume the plugin from Maven Central
+  via `pluginManagement { repositories { mavenCentral() } }`; a Gradle Plugin
+  Portal listing can be added later without changing the artifact.
 
-- builds all three modules and runs the unit + failure-path tests on every push;
-- integration-tests the Maven and Gradle plugins against a **real Areté
-  instance started in the workflow** — pull the published `arete-<version>`
-  release zip, run it on `localhost:6809`, point the plugins at it via the
-  `arete-ci` profile / `-Parete.url`;
-- on a tag, publishes `arete-ci-gate-core` + `arete-ci-gate-maven-plugin` to
-  Maven Central and `arete-ci-gate-gradle-plugin` to the Gradle Plugin Portal.
+CI (GitHub Actions in this repo):
+
+- **Build & test** — `release.yml` already runs `mvn verify` on the whole
+  reactor, so the three modules' unit + failure-path tests run on every app
+  release. (If the repo later adds a push/PR `ci.yml`, they are covered there
+  too, for free.)
+- **Integration test** — a `ci-gate-it.yml` (on PRs touching
+  `arete-ci-gate-*/**`) builds Areté from the same checkout
+  (`mvn -q -pl arete-app -am package`), runs the jar on `localhost:6809`, and
+  exercises both plugins against it via the `arete-local` profile /
+  `-Parete.url`.
+- **Publish** — a `publish-ci-gate.yml`, modelled on the existing
+  `publish-spi.yml`: `workflow_dispatch`-only, pointed at a `ci-gate-v*` tag,
+  runs `mvn -pl arete-ci-gate-core,arete-ci-gate-maven-plugin,arete-ci-gate-gradle-plugin -Prelease deploy`,
+  landing a pending deployment at central.sonatype.com for manual review
+  (autoPublish off, same as the SPI). A small step then creates the GitHub
+  release for the tag.
 
 ## Suggested build order (checkpoint each with review)
 
+0. Add the three modules to the root `pom.xml` `<modules>` with their own
+   version property; wire the `-Prelease` profile (GPG sign, sources + javadoc
+   jars) the way `arete-scoring-spi` already has it.
 1. `arete-ci-gate-core` — API client + report formatter, tested against a
    stub HTTP server. No build-tool code.
 2. Maven plugin — `check` goal, tested against a sample `pom.xml` and a real

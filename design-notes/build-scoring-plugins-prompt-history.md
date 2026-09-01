@@ -80,18 +80,30 @@ typo).
 `net.dublinux.arete.ci-gate`; modules `arete-ci-gate-core`,
 `arete-ci-gate-maven-plugin`, `arete-ci-gate-gradle-plugin`.
 
-## 6. Separate repo, its own CI
+## 6. Where the code lives, and how it ships
 
-**Prompt:** *"use CI for the plugins"* — asked to pin down where the code
-lives and how it ships.
+**Prompt:** *"use CI for the plugins"* → later corrected with *"the Maven and
+Gradle plugins should be modules in this project, and published separately on
+GitHub and Maven Central."*
 
-**Decision:** A **separate repository** with its own GitHub Actions CI, not
-modules in the `arete` reactor. Maven Central and the Gradle Plugin Portal
-have different release mechanics that don't fit `arete`'s `release.yml` /
-mkdocs pipeline, and this subsystem versions independently. CI builds all
-three modules, runs unit + failure-path tests on push, and integration-tests
-both plugins against a **real Areté** started in the workflow from the release
-zip. Tag → publish.
+**Decision (after the correction):** the three `arete-ci-gate-*` modules live
+in **this repository's reactor**, next to `arete-app`, but **version and
+release independently**:
+
+- own version property (start `1.0.0`), not the reactor version;
+- own tag prefix `ci-gate-v*` — `v*.*.*` stays the Areté app release and never
+  publishes the gate;
+- publish to **Maven Central** under `net.dublinux.arete` plus a **GitHub
+  release** per `ci-gate-v*` tag, via a `workflow_dispatch` `publish-ci-gate.yml`
+  modelled on the existing `publish-spi.yml` (manual review at Central, same as
+  the SPI);
+- integration tests build Areté from the same checkout and run both plugins
+  against it — no release-zip download needed, since the source is right there.
+
+The first take was a *separate repository*; that was reversed because one
+checkout / one reactor build is simpler and the integration tests can start a
+freshly-built Areté from the same tree. Independent versioning gives the same
+"ship a gate fix without an Areté release" benefit without the split repo.
 
 ## 7. Fold the open questions into the body
 
