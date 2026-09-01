@@ -259,8 +259,23 @@ Three:
 8. **SARIF** — emit by default, or opt-in?
 9. **Caching** — the API keys results by spec content hash; should the plugin
    short-circuit when the spec hasn't changed since the last build?
-10. **Repo** — new modules here, or a separate repo (Gradle plugin publishing
-    vs the Maven reactor)?
+## Repo & CI
+
+**Decided: a separate repository with its own CI**, not modules in the `arete`
+reactor. A Gradle plugin (Gradle Plugin Portal) and a Maven plugin (Maven
+Central) have different release mechanics that don't sit cleanly inside
+`arete`'s existing `release.yml` / mkdocs setup, and this subsystem versions
+independently of the Areté app.
+
+The new repo's CI (GitHub Actions):
+
+- builds all three modules and runs the unit + failure-path tests on every push;
+- integration-tests the Maven and Gradle plugins against a **real Areté
+  instance started in the workflow** — pull the published `arete-<version>`
+  release zip, run it on `localhost:6809`, point the plugins at it via the
+  `arete-ci` profile / `-Parete.url`;
+- on a tag, publishes `arete-build-scoring-core` + `arete-maven-plugin` to
+  Maven Central and `arete-gradle-plugin` to the Gradle Plugin Portal.
 
 ## Suggested build order (checkpoint each with review)
 
