@@ -144,15 +144,19 @@ Notes:
 
 ### String methods
 
+In `contains` / `startsWith` / `endsWith` / `startsWithWord` / `endsWithWord`,
+**`t` is a string *or* a list of strings**; a list means "any element"
+(`s.startsWith(["a", "b"])` is `s.startsWith("a") || s.startsWith("b")`).
+
 | Call | Result |
 |---|---|
 | `s.lower()` | lower-cased copy |
 | `s.trim()` | whitespace-trimmed copy |
-| `s.contains(t)` | Java `String.contains`, extended: `t` may be a list — true if any element is contained |
-| `s.startsWith(t)` | Java `String.startsWith`, extended: `t` may be a list. **Not word-aware** — `"Listing".startsWith("List")` is true |
-| `s.endsWith(t)` | Java `String.endsWith`, extended: `t` may be a list |
-| `s.startsWithWord(t)` | like `startsWith`, but `t` must land on a word boundary: `s` equals `t`, or begins with `t` followed by a non-alphanumeric character. `"List customers"` / `"List."` match `"List"`; `"Listing"` does not. `t` may be a list |
-| `s.endsWithWord(t)` | the mirror of `startsWithWord` |
+| `s.contains(t)` | Java `String.contains` — `s` contains `t` (or any element of the list) |
+| `s.startsWith(t)` | Java `String.startsWith`. **Not word-aware**: `"Listing".startsWith("List")` is `true` |
+| `s.endsWith(t)` | Java `String.endsWith` |
+| `s.startsWithWord(t)` | word-aware `startsWith`: `s` equals `t`, or begins with `t` followed by a non-alphanumeric character. `"List customers"` and `"List."` match `"List"`; `"Listing"` does not |
+| `s.endsWithWord(t)` | word-aware `endsWith` — the mirror of `startsWithWord` |
 | `s.length` | length (a member, not a call) |
 
 ### Sequence methods
