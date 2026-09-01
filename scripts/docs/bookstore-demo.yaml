@@ -1,10 +1,18 @@
 openapi: 3.0.3
+x-api-id: 6f8b0e2c-2a4d-4b3a-9c1e-8d5f0a7b2c31
+x-audience: external-public
 info:
   title: Bookstore API
   version: 1.2.0
   description: A small demo API for managing a bookstore's catalog and orders.
+  contact:
+    name: Bookstore Platform Team
+    email: bookstore-api@example.com
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
 servers:
-  - url: https://api.example.com/v1
+  - url: https://bookstore.example.com/v1
 tags:
   - name: Books
     description: Browse and manage the catalog.
@@ -14,21 +22,25 @@ paths:
   /books:
     get:
       tags: [Books]
-      summary: List books
+      summary: List all books
+      description: Returns a page of catalogue entries, optionally filtered by author.
       operationId: listBooks
       parameters:
         - name: author
           in: query
           required: false
           description: Filter by author name.
+          example: Ursula K. Le Guin
           schema:
             type: string
         - name: limit
           in: query
           required: false
           description: Maximum number of results to return.
+          example: 25
           schema:
             type: integer
+            format: int32
       responses:
         '200':
           description: A page of books.
@@ -40,8 +52,9 @@ paths:
                   $ref: '#/components/schemas/Book'
     post:
       tags: [Books]
-      summary: Add a book
-      operationId: addBook
+      summary: Create a book
+      description: Adds a new catalogue entry and returns the server-assigned record.
+      operationId: createBook
       requestBody:
         required: true
         content:
@@ -59,12 +72,14 @@ paths:
     get:
       tags: [Books]
       summary: Get a book
+      description: Returns a single catalogue entry by its identifier.
       operationId: getBook
       parameters:
         - name: bookId
           in: path
           required: true
           description: Identifier of the book.
+          example: 3b1e6d9a-7c4f-4e2b-a1d8-0f9c2e5b6a70
           schema:
             type: string
             format: uuid
@@ -80,7 +95,8 @@ paths:
   /orders:
     get:
       tags: [Orders]
-      summary: List orders
+      summary: List all orders
+      description: Returns a page of orders in reverse chronological order.
       operationId: listOrders
       responses:
         '200':
@@ -102,38 +118,54 @@ components:
           type: string
           format: uuid
           description: Server-assigned identifier.
+          example: 3b1e6d9a-7c4f-4e2b-a1d8-0f9c2e5b6a70
         title:
           type: string
           description: Book title.
+          example: The Left Hand of Darkness
         author:
           type: string
           description: Primary author.
+          example: Ursula K. Le Guin
         publishedYear:
           type: integer
+          format: int32
           description: Year of first publication.
+          example: 1969
         listPrice:
           type: number
+          format: double
           description: Retail price in USD.
-        Format:
-          type: integer
-          description: Binding format, 1 = hardback, 2 = paperback.
-          enum: [1, 2]
+          example: 14.99
+        format:
+          type: string
+          description: Binding format.
+          example: PAPERBACK
+          x-extensible-enum: [HARDBACK, PAPERBACK]
     Order:
       type: object
+      description: A customer order for one or more books.
       required: [id, bookIds]
       properties:
         id:
           type: string
           format: uuid
+          description: Server-assigned order identifier.
+          example: 9d2c1f6b-4a8e-4c7d-b3a1-6e0f5c2b7a94
         bookIds:
           type: array
+          description: Identifiers of the books in the order.
+          example: [3b1e6d9a-7c4f-4e2b-a1d8-0f9c2e5b6a70]
           items:
             type: string
             format: uuid
-        placed_at:
+        placedAt:
           type: string
           format: date-time
           description: When the order was placed.
+          example: 2024-05-01T09:30:00Z
         status:
           type: string
-          enum: [pending, shipped, delivered]
+          description: Fulfilment status.
+          example: SHIPPED
+          enum: [PENDING, SHIPPED, DELIVERED]
