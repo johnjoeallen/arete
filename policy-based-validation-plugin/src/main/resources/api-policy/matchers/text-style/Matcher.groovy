@@ -82,7 +82,9 @@
         if (parameters.containsKey('minimum-words') && words(summary).size() >= parameters['minimum-words']) return false
         if (parameters.containsKey('maximum-word-length')
             && words(summary).every { it.length() <= parameters['maximum-word-length'] }) return false
-        if (parameters.match == 'non-action-oriented' && actionVerbs.any { verb -> summary == verb || summary.startsWith(verb + ' ') }) return false
+        if (parameters.match == 'non-action-oriented' && actionVerbs.any { verb ->
+            summary == verb || (summary.startsWith(verb) && summary.length() > verb.length()
+                && !Character.isLetterOrDigit(summary.charAt(verb.length()))) }) return false
         true
     }
 

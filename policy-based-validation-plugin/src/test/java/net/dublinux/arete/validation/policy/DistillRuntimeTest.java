@@ -100,21 +100,27 @@ class DistillMatcherEvaluatorTest {
     }
 
     @Test
-    void startsWithAnyIsWordAwareUnlikeStartsWith() {
-        Map<String, Object> values = Map.of("values", List.of("  List all", "Listing all", "List"));
+    void startsWithWordIsWordAwareUnlikeStartsWith() {
+        Map<String, Object> values = Map.of("values", List.of("List all", "Listing all", "List.", "List"));
         Map<String, Object> rule = Map.of("parameters", Map.of("p", List.of("List")));
-        // startsWithAny: trims, whole first word — "List all" and "List", not "Listing all"
-        assertEquals(List.of(new Diagnostic("/", "  List all", "x"), new Diagnostic("/", "List", "x")), runtime.execute(
-                "distill(api, rule) { return api.values.filter { v -> startsWithAny(v, rule.parameters[\"p\"]) }.map { v -> occurrence(\"/\", v, \"x\") }; }",
-                values, rule));
-        // startsWith: raw prefix, no trim — "Listing all" matches, leading-space one does not
-        assertEquals(List.of(new Diagnostic("/", "Listing all", "x"), new Diagnostic("/", "List", "x")), runtime.execute(
+        // startsWithWord: whole word — "List all", "List.", "List" (not "Listing all")
+        assertEquals(List.of(new Diagnostic("/", "List all", "x"), new Diagnostic("/", "List.", "x"), new Diagnostic("/", "List", "x")),
+                runtime.execute(
+                        "distill(api, rule) { return api.values.filter { v -> v.startsWithWord(rule.parameters[\"p\"]) }.map { v -> occurrence(\"/\", v, \"x\") }; }",
+                        values, rule));
+        // startsWith: raw prefix — "Listing all" also matches
+        assertEquals(4, runtime.execute(
                 "distill(api, rule) { return api.values.filter { v -> v.startsWith(rule.parameters[\"p\"]) }.map { v -> occurrence(\"/\", v, \"x\") }; }",
-                values, rule));
-        // startsWithAny also accepts a comma string
-        assertEquals(2, runtime.execute(
-                "distill(api, rule) { return api.values.filter { v -> startsWithAny(v, \"List , Get\") }.map { v -> occurrence(\"/\", v, \"x\") }; }",
-                values, Map.of("parameters", Map.of())).size());
+                values, rule).size());
+    }
+
+    @Test
+    void endsWithWordIsWordAware() {
+        // "order Id", "order-Id", "the Id" land on a boundary; "orderId" does not.
+        assertEquals(3, runtime.execute(
+                "distill(api, rule) { return api.values.filter { v -> v.endsWithWord([\"Id\"]) }.map { v -> occurrence(\"/\", v, \"x\") }; }",
+                Map.of("values", List.of("order Id", "order-Id", "orderId", "the Id")),
+                Map.of("parameters", Map.of())).size());
     }
 
     @Test

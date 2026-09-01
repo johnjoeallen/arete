@@ -112,6 +112,8 @@ public final class DistillMatcherEvaluator {
             case "contains" -> stringPredicate(text, args.get(0), String::contains);
             case "startsWith" -> stringPredicate(text, args.get(0), String::startsWith);
             case "endsWith" -> stringPredicate(text, args.get(0), String::endsWith);
+            case "startsWithWord" -> stringPredicate(text, args.get(0), DistillMatcherEvaluator::startsWithWord);
+            case "endsWithWord" -> stringPredicate(text, args.get(0), DistillMatcherEvaluator::endsWithWord);
             default -> throw new IllegalArgumentException("unknown string operation: " + name);
         };
         if (receiver instanceof Iterable<?> iterable) {
@@ -229,11 +231,9 @@ public final class DistillMatcherEvaluator {
     }
 
     /**
-     * {@code s.contains(x)} / {@code startsWith} / {@code endsWith}: {@code x}
-     * is a string, or a list — true when the test holds for any element.
-     * A raw character test — no trimming, no word boundary
-     * ({@code "Listing".startsWith("List")} is true). Contrast
-     * {@link #startsWithAny}.
+     * The argument to {@code s.contains} / {@code startsWith} / {@code endsWith}
+     * and their {@code ...Word} variants: a string, or a list — true when the
+     * test holds for any element.
      */
     private static boolean stringPredicate(String text, Object argument, java.util.function.BiPredicate<String, String> test) {
         if (argument instanceof Iterable<?> options) {
@@ -244,23 +244,22 @@ public final class DistillMatcherEvaluator {
     }
 
     /**
-     * True when {@code text}, with leading/trailing whitespace ignored, begins
-     * with one of {@code prefixes} as a whole first word — it equals the prefix
-     * or the prefix is followed by a space ({@code "Listing"} does <em>not</em>
-     * start with {@code "List"} here). {@code prefixes} is a list, or a
-     * comma-separated string. Contrast {@code s.startsWith(list)}, which is a
-     * raw prefix test.
+     * Word-aware {@code startsWith}: {@code s} equals {@code word}, or begins
+     * with it followed by a non-alphanumeric character — so {@code "Listing"}
+     * does <em>not</em> start with the word {@code "List"}, but {@code "List
+     * all"} and {@code "List."} do. Contrast {@code s.startsWith}, a raw prefix.
      */
-    private static boolean startsWithAny(Object text, Object prefixes) {
-        String trimmed = text == null ? "" : String.valueOf(text).trim();
-        List<Object> options = prefixes instanceof String csv
-                ? new ArrayList<>(List.of(csv.split(",")))
-                : iterableOf(prefixes);
-        for (Object option : options) {
-            String prefix = String.valueOf(option).trim();
-            if (!prefix.isEmpty() && (trimmed.equals(prefix) || trimmed.startsWith(prefix + " "))) return true;
-        }
-        return false;
+    private static boolean startsWithWord(String s, String word) {
+        if (word.isEmpty() || s.equals(word)) return s.equals(word);
+        return s.startsWith(word) && s.length() > word.length()
+                && !Character.isLetterOrDigit(s.charAt(word.length()));
+    }
+
+    /** Word-aware {@code endsWith}: the mirror of {@link #startsWithWord}. */
+    private static boolean endsWithWord(String s, String word) {
+        if (word.isEmpty() || s.equals(word)) return s.equals(word);
+        return s.endsWith(word) && s.length() > word.length()
+                && !Character.isLetterOrDigit(s.charAt(s.length() - word.length() - 1));
     }
 
     private static Object function(String name, List<Object> args) {
@@ -269,7 +268,6 @@ public final class DistillMatcherEvaluator {
             case "regexFullMatch" -> regexFullMatch(args.get(0), args.get(1));
             case "tokenize" -> List.of(String.valueOf(args.get(1)).split(java.util.regex.Pattern.quote(String.valueOf(args.get(0)))));
             case "words" -> words(args.get(0));
-            case "startsWithAny" -> startsWithAny(args.get(0), args.get(1));
             case "last" -> { List<Object> values = iterableOf(args.get(0)); yield values.isEmpty() ? "" : values.get(values.size() - 1); }
             case "count" -> (long) iterableOf(args.get(0)).size();
             case "distinct" -> {
@@ -637,13 +635,13 @@ public final class DistillMatcherEvaluator {
     }
 
     private static final Set<String> KNOWN_FUNCTIONS = Set.of(
-            "regexSearch", "regexFullMatch", "tokenize", "words", "startsWithAny", "last", "count", "checks", "distinct", "join", "strip",
+            "regexSearch", "regexFullMatch", "tokenize", "words", "last", "count", "checks", "distinct", "join", "strip",
             "urlHost", "parseInt", "truthy", "pathSegments", "enumerate", "type", "occurrence",
             "operationMessage");
 
     private static final Set<String> KNOWN_MEMBERS = Set.of(
             "all", "allowed", "any", "array", "audience", "case", "check", "components", "compositionKind", "contains",
-            "contactEmail", "contactName", "contactUrl", "count", "description", "descriptions", "distinct", "endsWith",
+            "contactEmail", "contactName", "contactUrl", "count", "description", "descriptions", "distinct", "endsWith", "endsWithWord",
             "enumPresent", "enumValues", "example",
             "examplePresent", "exampleStrings", "exclusiveMaximum", "exclusiveMinimum", "expand", "expected",
             "explode", "extensibleEnum", "extensionKeys", "filter", "find", "forbidden", "format", "group",
@@ -655,6 +653,6 @@ public final class DistillMatcherEvaluator {
             "pattern", "pointer", "properties", "refs", "requestBodyInlineObject", "requestBodyPresent",
             "requestBodyRequired", "requestMediaTypes", "require", "required", "requiredFields", "responses",
             "schemaInlineObject", "schemaMaximum", "schemaPresent", "schemaProperties", "schemaType", "schemaTypes", "schemas",
-            "securitySchemes", "scope", "security", "segments", "servers", "startsWith", "status", "style", "suffix", "summary",
+            "securitySchemes", "scope", "security", "segments", "servers", "startsWith", "startsWithWord", "status", "style", "suffix", "summary",
             "tags", "templateParameters", "text", "title", "toList", "trim", "type", "values");
 }

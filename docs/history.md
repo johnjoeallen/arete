@@ -206,15 +206,15 @@ inside it no longer treated as the enclosing delimiter — for the cases that
 genuinely build part of a pattern or message from a rule parameter.
 
 For the common "is this one of a configured set" case a `list` parameter type
-was added; `s.startsWith` / `s.endsWith` / `s.contains` were overloaded to take
-a list (raw match, true if any element matches); and a `startsWithAny(text,
-prefixes)` builtin does the word-aware variant — trimmed text that equals a
-prefix or is followed by a space, so `"Listing"` does not count as starting
-with `"List"`. The loader turns a comma string or YAML list into a
-`List<String>` once. `text-style`'s `non-action-oriented` check moved from a
-hardcoded verb regex to `startsWithAny(summary, action-prefixes)`, with
-`DOC009` supplying the list — the first of several matchers whose baked-in
-policy vocabulary should become rule parameters (issues #144–#154).
+was added, and the string predicates learned to take a list (true if any
+element matches): `s.startsWith` / `s.endsWith` / `s.contains` are Java's, and
+`s.startsWithWord` / `s.endsWithWord` are the word-aware pair — `t` must land on
+a word boundary, so `"Listing"` does not start with the word `"List"`. The
+loader turns a comma string or YAML list into a `List<String>` once.
+`text-style`'s `non-action-oriented` check moved from a hardcoded verb regex to
+`summary.trim().startsWithWord(action-prefixes)`, with `DOC009` supplying the
+list — the first of several matchers whose baked-in policy vocabulary should
+become rule parameters (issues #144–#154).
 
 ## Runtime execution model
 
