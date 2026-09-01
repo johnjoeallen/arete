@@ -1,284 +1,258 @@
 # Areté Scoring — Maven & Gradle build-gate plugins
 
-> **Proposal — for review. Nothing here is implemented.** This is a new
-> subsystem, separate from the existing web app and its OpenAPI policy engine.
+> **Proposal — for review. Nothing here is implemented.**
+>
+> Revised: there is **no new SPI**. The plugins are thin clients of Areté's
+> existing [Automation API](../docs/automation-api.md). Scoring stays entirely
+> server-side; the build plugin only submits the spec, reads the verdict, and
+> fails the build.
 
 ## Goal
 
-A build-time quality gate. During `mvn verify` / `gradle check`, run one or
-more **independent scoring plugins** against the module and **fail the build
-if any non-optional scorer fails its own policy**.
+A build-time quality gate. During `mvn verify` / `gradle check`, submit the
+module's OpenAPI spec to an Areté instance, run it against one or more
+**validator/policy combinations**, and **fail the build if any non-optional
+combination fails its policy**.
 
 ## Core principle
 
-Each scoring plugin owns **its own scale and its own pass/fail threshold**.
-There is:
+Each **combination** (`<validator>/<policy>`, e.g. `generic-policy/Enterprise
+Grade`) owns its own scale, passing score, and pass/fail logic — all on the
+Areté server. The build plugin does **not**:
 
-- no cross-plugin normalization,
-- no weighting,
-- no merged numeric score,
-- no merge "mode" (quorum, weighted average, …).
+- normalise or merge scores across combinations,
+- weight anything,
+- compute pass/fail itself.
 
-The orchestrator runs every configured scorer and combines their individual
-**verdicts** with a logical **AND**, excluding any scorer marked `optional`
-from that AND. It **never** derives pass/fail from a score and a threshold
-itself — some scorers have non-monotonic or multi-condition pass logic, so the
-verdict the scorer returns is authoritative.
+It takes each combination's server-computed verdict and combines them with a
+logical **AND**, excluding any combination the build declares `optional`.
+
+## Why no SPI
+
+The original sketch had a `Scorer` SPI with local implementations. Dropped:
+Areté already exposes exactly this as a network API, already supports multiple
+independent validator plugins (`generic-policy`, and future ones like a
+breaking-changes checker) each with their own verdict, and already computes
+score/grade/passing-score/verdict per combination. A local SPI would duplicate
+all of that. The build plugin's job shrinks to: **POST the spec, parse
+`results[]`, apply the `optional` flags, fail or pass.**
+
+## The Areté endpoint the plugins call
+
+Submit-and-score in one request (from
+[`docs/automation-api.md`](../docs/automation-api.md)):
+
+```
+POST {areteUrl}/api/v1/namespaces/{namespace}/specs
+       ?run=<validator>/<policy>            # repeatable
+       &failOn=policy                        # per-call default gate
+     Cookie: arete_submitter=<submitter>
+     Content-Type: application/yaml
+     <spec body>
+
+200/201  { "spec": {...}, "ok": true|false, "verdict": "PASS"|"FAIL",
+           "results": [
+             { "validator": "generic-policy", "policy": "Enterprise Grade",
+               "status": "SUCCESS", "score": 93.5, "grade": "B+",
+               "passingScore": 90.0,
+               "level": { "criterion": "score<90", "source": "policy", "met": true },
+               "counts": { "ERROR": 0, "WARNING": 20, ... } },
+             ...
+           ] }
+```
+
+Key facts the plugins rely on:
+
+- The default response is **HTTP 200/201 with the verdict in the body** —
+  `?httpStatusOnFail=422` is opt-in. The plugin reads `results[].level.met`
+  (and `ok` / `verdict`), **not** the HTTP status, so it stays in control of
+  per-combination `optional` handling.
+- `namespace` and `submitter` are self-asserted labels, not credentials.
+- `?format=sarif` is available if the plugin also wants to emit a SARIF file
+  for CI code-scanning upload.
+
+## Configuration
+
+Both plugins share the same shape. Common case needs only the URL, namespace,
+a spec path, and one `run`:
+
+### Maven — `arete-maven-plugin`, goal `check`, phase `verify`
+
+```xml
+<plugin>
+  <groupId>net.dublinx.arete</groupId>
+  <artifactId>arete-maven-plugin</artifactId>
+  <configuration>
+    <areteUrl>${arete.url}</areteUrl>          <!-- from a profile, see below -->
+    <namespace>${project.groupId}</namespace>
+    <submitter>${arete.submitter}</submitter>  <!-- default: "maven" -->
+    <spec>src/main/resources/openapi.yaml</spec>
+    <combinations>
+      <combination>
+        <run>generic-policy/Enterprise Grade</run>
+        <!-- optional omitted => gating -->
+        <failOn>policy</failOn>                <!-- default: policy -->
+      </combination>
+      <combination>
+        <run>generic-policy/Zalando</run>
+        <optional>true</optional>
+      </combination>
+    </combinations>
+  </configuration>
+</plugin>
+```
+
+- No scorer dependencies, no `ServiceLoader`, no classpath work — it is an
+  HTTP call.
+- A failing `verdict` for any **non-optional** combination → **`MojoFailureException`**
+  (a normal build failure).
+- If Areté is unreachable → `MojoExecutionException` by default, or a warning
+  when `<failOnUnavailable>false</failOnUnavailable>` (see open questions).
+- Report to the log **and** `${project.build.directory}/arete-scoring/report.txt`
+  (+ `report.json`, + `arete.sarif` when `<sarif>true</sarif>`).
+
+### Gradle — plugin id `net.dublinx.arete`
+
+```kotlin
+areteScoring {
+    url = providers.gradleProperty("arete.url").orElse("http://localhost:6809")
+    namespace = project.group.toString()
+    submitter = "gradle"
+    spec = layout.projectDirectory.file("src/main/resources/openapi.yaml")
+
+    combination("generic-policy/Enterprise Grade")           // gating
+    combination("generic-policy/Zalando") { optional = true }
+}
+```
+
+- Registers `areteScoringCheck`, wires `check.dependsOn(areteScoringCheck)`.
+- Failing non-optional verdict → task throws through Gradle's normal
+  verification-failure path (`VerificationException`).
+- Report to `${layout.buildDirectory}/reports/arete-scoring/report.txt`
+  (+ `.json`, + SARIF).
+- `build.gradle` and `build.gradle.kts` both supported.
+
+## Profiles — local Areté vs shared/CI Areté
+
+The **URL is the only thing that differs** between "developer runs the build on
+their laptop" and "CI runs the build against the team's Areté". Everything else
+(namespace, combinations) stays the same.
+
+### Maven
+
+Two profiles in the module (or the parent) POM; the plugin config reads
+`${arete.url}`:
+
+```xml
+<profiles>
+  <profile>
+    <id>arete-local</id>
+    <activation><activeByDefault>true</activeByDefault></activation>
+    <properties>
+      <arete.url>http://localhost:6809</arete.url>
+    </properties>
+  </profile>
+  <profile>
+    <id>arete-ci</id>
+    <activation><property><name>env.CI</name></property></activation>
+    <properties>
+      <arete.url>https://arete.internal.example.com</arete.url>
+    </properties>
+  </profile>
+</profiles>
+```
+
+- Local build: nothing to pass — `arete-local` is active by default, points at
+  `localhost:6809` (a developer's locally-installed Areté).
+- CI: the `CI` env var (set by every major CI system) activates `arete-ci`.
+- Either can be forced with `-Parete-ci` / `-Parete-local`, or the URL
+  overridden ad hoc with `-Darete.url=…`.
+
+### Gradle
+
+`arete.url` is a Gradle property with a `localhost:6809` default in the plugin.
+Override per environment:
+
+- `gradle.properties` in the project → committed default (usually left as
+  localhost).
+- `~/.gradle/gradle.properties` → a developer's machine-wide override.
+- CI → `-Parete.url=https://arete.internal.example.com` or
+  `ORG_GRADLE_PROJECT_arete.url` env var.
+
+(Gradle has no first-class "profiles"; property layering is the idiomatic
+equivalent and the plugin documents the three override points.)
+
+## Report format (identical across both build tools)
+
+Lives in the shared core module so Maven and Gradle logs read the same:
+
+```
+Areté Scoring — module: my-service   (arete: http://localhost:6809)
+
+  COMBINATION                        SCORE   GRADE  GATE          RESULT   GATING
+  generic-policy/Enterprise Grade    93.5    B+     score<90      PASS     yes
+  generic-policy/Zalando             91.0    A-     error         PASS     no (optional)
+
+  Overall: PASS
+```
+
+On failure the row shows `FAIL` and the `Overall` line names which non-optional
+combination(s) failed. Optional combinations always appear, labelled
+non-gating, so nothing is hidden.
 
 ## Modules
 
-Four modules, built and checkpointed in this order.
+Now three, not four (no SPI):
 
-### 1. SPI — `arete-build-scoring-spi`
-
-The contract every scorer implements. Small, dependency-free, published to
-Maven Central, versioned additively (new optional fields via builders, never a
-breaking constructor change — same discipline as `arete-scoring-spi`).
-
-```
-interface Scorer {
-    String id();                       // stable, e.g. "openapi", "coverage", "mutation"
-    ScoreResult score(ScoringContext context);
-}
-
-ScoringContext:
-    Path   projectDir            // the module being scored
-    Path   buildOutputDir        // target/ or build/
-    Map<String,Object> config    // this scorer's opaque config block, or empty
-
-ScoreResult (immutable, builder):
-    double  score                // the scorer's own raw number
-    double  threshold            // the threshold the scorer actually used
-    boolean passed               // the scorer's own verdict — trusted verbatim
-    Map<String,Object> details   // free-form diagnostics, may be empty
-```
-
-Notes for review:
-
-- `config` and `details` as `Map<String,Object>` keeps the SPI free of a
-  config-schema dependency and lets the report file serialise `details` as
-  JSON. Alternative: `details` as a plain `String`.
-- The **configured** threshold is passed in via `config` (or a dedicated
-  `ScoringContext.threshold()` — see open questions); the scorer echoes back
-  in `ScoreResult.threshold` whatever it actually applied, which need not
-  match.
-- Java 17 baseline (matches the rest of Areté).
-
-### 2. Orchestrator / core — `arete-build-scoring-core`
-
-Build-tool-agnostic. Both plugins delegate here so behaviour and report
-formatting are identical. No Maven or Gradle types on its classpath; unit
-testable on its own.
-
-```
-record ScorerRequest(String id, double threshold, boolean optional,
-                     Map<String,Object> config)
-
-record ScorerOutcome(String id, boolean optional, ScoreResult result,
-                     Throwable error)      // error != null => treated as a fail
-
-record OverallResult(List<ScorerOutcome> outcomes, boolean passed, String report)
-
-class Orchestrator {
-    // scorers already resolved & instantiated by the caller (the plugin)
-    OverallResult run(List<ScorerRequest> requests, Map<String,Scorer> scorers);
-}
-```
-
-Behaviour:
-
-1. Run every request's scorer, **sequentially, in declared order**, each with a
-   `ScoringContext` built from the module dir + build output dir + its config
-   block. A thrown exception becomes a failing outcome (never aborts the run).
-2. `passed = every non-optional outcome passed`.
-3. Produce the report — see below.
-
-The core does **not** do dependency resolution or classpath work. The plugin
-hands it a `Map<id → Scorer>` it already resolved.
-
-### Report format (identical across both build tools)
-
-Plain text, deterministic, one row per scorer **including optional ones**,
-optional rows clearly marked non-gating. Sketch:
-
-```
-Areté Scoring — module: my-service
-
-  SCORER      SCORE    THRESHOLD   RESULT   GATING
-  openapi     93.5     90.0        PASS     yes
-  coverage    71.2     80.0        FAIL     yes
-  mutation    64.0     60.0        PASS     no (optional)
-
-  Overall: FAIL  (coverage did not pass)
-```
-
-Also written as `report.json` alongside for CI tooling (open question: keep or
-drop the JSON). The exact column widths/wording are fixed in `core` so Maven
-and Gradle logs read identically.
-
-### 3. Reference scorer — `arete-build-scoring-scorer-noop`
-
-A trivial `Scorer` that always passes (`score = threshold, passed = true`,
-empty details). Exists only to prove the SPI + core + both plugins end to end
-before any real scorer is written. Ships in `src/test` fixtures, not published.
-
-### 4a. Maven plugin — `arete-maven-plugin`
-
-- Goal **`check`**, bound by default to **`verify`**.
-- Scorer implementations are declared as **plugin-level `<dependencies>`**.
-- Config:
-
-  ```xml
-  <plugin>
-    <groupId>net.dublinx.arete</groupId>
-    <artifactId>arete-maven-plugin</artifactId>
-    <configuration>
-      <scorers>
-        <scorer>
-          <id>openapi</id>
-          <threshold>90</threshold>
-          <!-- optional omitted => gating -->
-          <config>
-            <policy>Enterprise Grade</policy>
-            <spec>src/main/resources/openapi.yaml</spec>
-          </config>
-        </scorer>
-        <scorer>
-          <id>coverage</id>
-          <threshold>80</threshold>
-        </scorer>
-        <scorer>
-          <id>mutation</id>
-          <threshold>60</threshold>
-          <optional>true</optional>
-        </scorer>
-      </scorers>
-    </configuration>
-    <dependencies>
-      <dependency>
-        <groupId>net.dublinx.arete</groupId>
-        <artifactId>arete-openapi-scorer</artifactId>
-        <version>…</version>
-      </dependency>
-      <!-- … -->
-    </dependencies>
-  </plugin>
-  ```
-
-- **Resolution at execute time**: `ServiceLoader<Scorer>` over the Mojo's own
-  plugin class realm (which already contains the declared `<dependencies>` —
-  this is normal Maven plugin dependency resolution, **not** folder scanning).
-  Every declared `<id>` must map to exactly one loaded `Scorer`; a declared id
-  with no implementation → **`MojoExecutionException`** (fail fast, clear
-  message naming the id and the ids that *are* available).
-- A failing `OverallResult` → **`MojoFailureException`** (a normal build
-  failure, not an internal plugin error).
-- Report written to the log **and** to
-  `${project.build.directory}/arete-scoring/report.txt` (+ `.json`).
-- Per-module: in a reactor, each module runs `check` against its own dir.
-
-### 4b. Gradle plugin — id `net.dublinx.arete`
-
-- Registers a task (e.g. `areteScoringCheck`) and wires `check.dependsOn` it.
-- Extension mirroring the Maven shape:
-
-  ```kotlin
-  areteScoring {
-      scorer("openapi") {
-          threshold = 90.0
-          config = mapOf(
-              "policy" to "Enterprise Grade",
-              "spec" to "src/main/resources/openapi.yaml",
-          )
-      }
-      scorer("coverage") { threshold = 80.0 }          // gating by default
-      scorer("mutation") { threshold = 60.0; optional = true }
-  }
-
-  dependencies {
-      areteScorer("net.dublinx.arete:arete-openapi-scorer:…")
-  }
-  ```
-
-- A **dedicated dependency configuration** `areteScorer`, separate from
-  `compileClasspath` / `runtimeClasspath`, holds the scorer implementation
-  artifacts.
-- Resolution: `ServiceLoader<Scorer>` over a classloader built from the
-  resolved `areteScorer` configuration (standard practice for a Gradle plugin
-  that needs isolated tool dependencies — again, not runtime discovery of
-  arbitrary jars). Same fail-fast rule for an unmatched id.
-- A failing `OverallResult` → the task throws through Gradle's normal
-  verification-failure path (`VerificationException` / `GradleException`), so
-  `--continue` and reporting behave as for any other `check` task.
-- Report to `${layout.buildDirectory}/reports/arete-scoring/report.txt`
-  (+ `.json`), same format string as Maven.
-- Support both `build.gradle` and `build.gradle.kts`.
-
-## Requirements applying to both plugins
-
-- **No boilerplate for the common case** — a scorer needs only an `id` and a
-  `threshold`; `optional` defaults to gating; `config` defaults to empty.
-- **Identical report structure** between the two tools — the format lives in
-  `core`, the plugins only choose where to write it.
-- **Portable scorers** — the same scorer artifact works unmodified under either
-  build tool, because both plugins call the same SPI + core.
-- **No dynamic classloading / runtime plugin discovery** — scorers are ordinary
-  build dependencies resolved by each build tool. `ServiceLoader` over an
-  already-resolved dependency set is fine; scanning a folder for jars is not.
-- **No merge modes** — the only combination is AND-of-non-optional-verdicts.
+| Module | Purpose |
+|---|---|
+| `arete-build-scoring-core` | HTTP client for the Automation API + the report formatter. No Maven/Gradle types. Unit-testable against a stub server. |
+| `arete-maven-plugin` | `check` goal → `verify`, delegates to core. |
+| `arete-gradle-plugin` | `areteScoringCheck` task → `check`, delegates to core. |
 
 ## Non-goals
 
-- A merged/normalised score across scorers.
-- Weighting, quorum, or any configurable combination strategy.
-- Running scorers in a separate JVM / sandbox (they run in the plugin's
-  process; a misbehaving scorer is the user's own declared dependency).
-- Aggregating results across reactor modules into one verdict (each module
-  gates itself).
-
-## Relationship to the existing Areté
-
-This reuses the **brand and the "scoring" vocabulary** but is a distinct
-codebase from the web app. The most obvious first real scorer,
-`arete-openapi-scorer`, wraps the existing policy engine
-(`arete-policy-plugin` / the Automation API) so a project can gate its build on
-its OpenAPI spec's policy score — but the framework itself knows nothing about
-OpenAPI.
+- A local `Scorer` SPI or any local scoring logic.
+- A merged/normalised score across combinations.
+- Weighting, quorum, merge modes.
+- Managing an Areté instance (starting/stopping a local server) — the plugin
+  assumes one is reachable at the configured URL.
+- Aggregating verdicts across reactor modules — each module gates itself.
 
 ## Open questions for review
 
-1. **`net.dublinx.arete`** — the existing project publishes under
-   `net.dublinux.arete` (with a `u`). Is `net.dublinx.arete` a deliberate new
-   groupId or a typo? All artifact names below assume it is intentional.
-2. **Name collision** — `arete-scoring-spi` already exists for OpenAPI *policy*
-   scoring. This proposal uses `arete-build-scoring-spi` / `-core` to
-   disambiguate. Alternatives: a `net.dublinx.arete.build` package split, or
-   renaming this to "Areté Gate".
-3. **Repo** — new modules in this monorepo, or a separate repository? (Gradle
-   plugin publishing and the Maven reactor don't mix cleanly.)
-4. **`details` type** — `Map<String,Object>` (JSON-friendly) vs plain `String`.
-5. **`report.json`** — worth maintaining, or is the text report enough?
-6. **Threshold delivery** — as a well-known key inside `config`, or a
-   first-class `ScoringContext.threshold()` accessor?
-7. **Optional-scorer failure** — logged at `WARN`? Shown with a distinct
-   marker in the report (done above) — anything else?
-8. **Scorer inputs** — is `projectDir` + `buildOutputDir` enough, or do
-   scorers need the resolved dependency classpath, the list of source roots,
-   the module coordinates, etc.? Adding fields later is cheap; better to know
-   now.
-9. **Parallel execution** — sequential is proposed for determinism. Any need
-   for parallel?
-10. **Config typing on the Gradle side** — free-form `Map<String,Object>` vs a
-    typed nested DSL per scorer (the latter needs each scorer to ship a Gradle
-    extension type, which breaks "portable, build-tool-agnostic scorer").
+1. **`net.dublinx.arete`** vs the existing `net.dublinux.arete` (with a `u`) —
+   deliberate new groupId or a typo?
+2. **Name** — `arete-scoring-spi` already exists (OpenAPI policy scoring
+   library). This proposal uses `arete-build-scoring-core` + `arete-maven-plugin`
+   / `arete-gradle-plugin`. OK, or rename to "Areté Gate"?
+3. **Unreachable Areté** — hard-fail the build, or warn-and-skip? Proposed:
+   hard-fail by default (a silent skip defeats the gate), overridable.
+4. **Spec discovery** — a single `<spec>` path, a glob, or auto-detect
+   (`src/main/resources/**/openapi.{yaml,json}`)? Multi-spec modules?
+5. **Namespace default** — `${project.groupId}` / `project.group`, or require
+   it explicitly? Does CI want a per-branch namespace?
+6. **Submitter default** — `"maven"` / `"gradle"`, or derive from CI env
+   (`GITHUB_ACTOR`, `BUILD_USER`, …)?
+7. **`failOn` per combination vs one global** — the API takes one `failOn` per
+   call; N combinations with different `failOn` values need N calls (or the
+   plugin computes the verdict from `level.met` and ignores `failOn`). Prefer
+   the latter — one call, plugin owns the AND.
+8. **SARIF** — emit by default, or opt-in?
+9. **Caching** — the API keys results by spec content hash; should the plugin
+   short-circuit when the spec hasn't changed since the last build?
+10. **Repo** — new modules here, or a separate repo (Gradle plugin publishing
+    vs the Maven reactor)?
 
-## Suggested build order (checkpoint each with review before proceeding)
+## Suggested build order (checkpoint each with review)
 
-1. SPI module alone — no build-tool integration.
-2. Orchestrator/core — unit-tested independently, including report formatting.
-3. `noop` reference scorer — validate SPI + core end to end.
-4. Maven plugin — tested against a sample multi-scorer `pom.xml`.
-5. Gradle plugin — tested against sample `build.gradle` **and**
-   `build.gradle.kts`.
-6. Failure-path tests, both tools: unmatched scorer id; failing required
-   scorer; failing optional scorer (build still passes, report still shows it).
+1. `arete-build-scoring-core` — API client + report formatter, tested against a
+   stub HTTP server. No build-tool code.
+2. Maven plugin — `check` goal, tested against a sample `pom.xml` and a real
+   local Areté; the `arete-local` / `arete-ci` profile pattern.
+3. Gradle plugin — same, `build.gradle` **and** `build.gradle.kts`, the
+   property-layering pattern.
+4. Failure-path tests, both tools: failing gating combination; failing optional
+   combination (build still passes); unreachable Areté; unknown
+   validator/policy (the API returns a 4xx / an error result — surface it
+   clearly).
