@@ -2,10 +2,10 @@
 
 > **Proposal — for review. Nothing here is implemented.**
 >
-> Revised: there is **no new SPI**. The plugins are thin clients of Areté's
-> existing [Automation API](../docs/automation-api.md). Scoring stays entirely
-> server-side; the build plugin only submits the spec, reads the verdict, and
-> fails the build.
+> The plugins are thin clients of Areté's existing
+> [Automation API](../docs/automation-api.md). Scoring stays entirely
+> server-side; a plugin only submits the spec, reads the verdict, and fails the
+> build.
 
 ## Goal
 
@@ -18,58 +18,69 @@ combination fails its policy**.
 
 Each **combination** (`<validator>/<policy>`, e.g. `generic-policy/Enterprise
 Grade`) owns its own scale, passing score, and pass/fail logic — all on the
-Areté server. The build plugin does **not**:
+Areté server, which already supports multiple independent validator plugins
+(`generic-policy`, and future ones like a breaking-changes checker) each with
+their own verdict. The build plugin does **not**:
 
 - normalise or merge scores across combinations,
 - weight anything,
 - compute pass/fail itself.
 
-It takes each combination's server-computed verdict and combines them with a
-logical **AND**, excluding any combination the build declares `optional`.
-
-## Why no SPI
-
-The original sketch had a `Scorer` SPI with local implementations. Dropped:
-Areté already exposes exactly this as a network API, already supports multiple
-independent validator plugins (`generic-policy`, and future ones like a
-breaking-changes checker) each with their own verdict, and already computes
-score/grade/passing-score/verdict per combination. A local SPI would duplicate
-all of that. The build plugin's job shrinks to: **POST the spec, parse
-`results[]`, apply the `optional` flags, fail or pass.**
+Its whole job is: **POST the spec, read each combination's server-computed
+verdict, combine them with a logical AND** — excluding any combination the
+build declares `optional`.
 
 ## The Areté endpoint the plugins call
 
 Submit-and-score in one request (from
-[`docs/automation-api.md`](../docs/automation-api.md)):
+[`docs/automation-api.md`](../docs/automation-api.md)). The plugin **always**
+sends `httpStatusOnFail=422` so the outcome is on the HTTP status line, and —
+when a SARIF file is wanted — `format=sarif` in the *same* call:
 
 ```
 POST {areteUrl}/api/v1/namespaces/{namespace}/specs
        ?run=<validator>/<policy>            # repeatable
-       &failOn=policy                        # per-call default gate
+       &httpStatusOnFail=422                 # always
+       &format=sarif                         # only if a SARIF file is wanted
      Cookie: arete_submitter=<submitter>
      Content-Type: application/yaml
      <spec body>
 
-200/201  { "spec": {...}, "ok": true|false, "verdict": "PASS"|"FAIL",
-           "results": [
-             { "validator": "generic-policy", "policy": "Enterprise Grade",
-               "status": "SUCCESS", "score": 93.5, "grade": "B+",
-               "passingScore": 90.0,
-               "level": { "criterion": "score<90", "source": "policy", "met": true },
-               "counts": { "ERROR": 0, "WARNING": 20, ... } },
-             ...
-           ] }
+201  (all gating combinations passed)   body: SubmitResponse  (or SARIF)
+422  (a combination failed its policy)  body: SubmitResponse  (or SARIF)
+4xx/5xx other                           body: Problem Details {status,title,detail}
 ```
 
-Key facts the plugins rely on:
+`SubmitResponse` (JSON form):
 
-- The default response is **HTTP 200/201 with the verdict in the body** —
-  `?httpStatusOnFail=422` is opt-in. The plugin reads `results[].level.met`
-  (and `ok` / `verdict`), **not** the HTTP status, so it stays in control of
-  per-combination `optional` handling.
+```json
+{ "spec": {...}, "ok": true|false, "verdict": "PASS"|"FAIL",
+  "results": [
+    { "validator": "generic-policy", "policy": "Enterprise Grade",
+      "status": "SUCCESS", "score": 93.5, "grade": "B+", "passingScore": 90.0,
+      "level": { "criterion": "score<90", "source": "policy", "met": true },
+      "counts": { "ERROR": 0, "WARNING": 20 } },
+    ...
+  ] }
+```
+
+How the plugin reads it:
+
+- **`201` → build passes.** No combination failed. Save the SARIF if requested;
+  print the report from `results[]`.
+- **`422` with a `results[]` body → a scoring failure.** Parse `results[]`,
+  build the report, and compute the **build** verdict as
+  *AND of `level.met` over the non-`optional` combinations* — so a `422`
+  caused only by an `optional` combination is downgraded to a **build pass**
+  (still shown in the report, marked non-gating). SARIF, if requested, is
+  saved regardless.
+- **Any other status, or `422` without `results[]` (Problem Details body) →
+  build error** — unreachable Areté, unknown validator/policy, bad spec.
+  Surface `title` / `detail`; do not treat as a scoring failure.
+- The policy already owns pass/fail (`passingScore`, or `scoring: blocker |
+  error`); `level.met` reflects that. The plugin passes **no `failOn`** in the
+  normal case — see below.
 - `namespace` and `submitter` are self-asserted labels, not credentials.
-- `?format=sarif` is available if the plugin also wants to emit a SARIF file
-  for CI code-scanning upload.
 
 ## Configuration
 
@@ -89,25 +100,29 @@ a spec path, and one `run`:
     <spec>src/main/resources/openapi.yaml</spec>
     <combinations>
       <combination>
-        <run>generic-policy/Enterprise Grade</run>
-        <!-- optional omitted => gating -->
-        <failOn>policy</failOn>                <!-- default: policy -->
+        <run>generic-policy/Enterprise Grade</run>   <!-- gating; policy owns pass/fail -->
       </combination>
       <combination>
         <run>generic-policy/Zalando</run>
-        <optional>true</optional>
+        <optional>true</optional>                    <!-- runs, reported, excluded from the gate -->
       </combination>
     </combinations>
   </configuration>
 </plugin>
 ```
 
-- No scorer dependencies, no `ServiceLoader`, no classpath work — it is an
-  HTTP call.
-- A failing `verdict` for any **non-optional** combination → **`MojoFailureException`**
-  (a normal build failure).
-- If Areté is unreachable → `MojoExecutionException` by default, or a warning
-  when `<failOnUnavailable>false</failOnUnavailable>` (see open questions).
+- No plugin dependencies to declare, no classpath work — it is one HTTP call,
+  always with `httpStatusOnFail=422`.
+- `422` for a **non-optional** combination → **`MojoFailureException`** (a
+  normal build failure); `201`, or `422` from only `optional` combinations →
+  build passes.
+- Non-scoring failure (unreachable, `4xx` other than the scoring `422`,
+  unknown validator/policy) → **`MojoExecutionException`** by default;
+  `<failOnUnavailable>false</failOnUnavailable>` downgrades an unreachable
+  Areté to a warning (see open questions).
+- `<failOn>` is accepted per combination but omitted from the normal case —
+  an advanced override, passed straight through to the API, only for holding a
+  **stricter** bar than the policy (`error`, `blocker`, `score<NN`).
 - Report to the log **and** `${project.build.directory}/arete-scoring/report.txt`
   (+ `report.json`, + `arete.sarif` when `<sarif>true</sarif>`).
 
@@ -202,7 +217,7 @@ non-gating, so nothing is hidden.
 
 ## Modules
 
-Now three, not four (no SPI):
+Three:
 
 | Module | Purpose |
 |---|---|
@@ -212,7 +227,7 @@ Now three, not four (no SPI):
 
 ## Non-goals
 
-- A local `Scorer` SPI or any local scoring logic.
+- Any local scoring logic — all of it is server-side in Areté.
 - A merged/normalised score across combinations.
 - Weighting, quorum, merge modes.
 - Managing an Areté instance (starting/stopping a local server) — the plugin
@@ -223,9 +238,9 @@ Now three, not four (no SPI):
 
 1. **`net.dublinx.arete`** vs the existing `net.dublinux.arete` (with a `u`) —
    deliberate new groupId or a typo?
-2. **Name** — `arete-scoring-spi` already exists (OpenAPI policy scoring
-   library). This proposal uses `arete-build-scoring-core` + `arete-maven-plugin`
-   / `arete-gradle-plugin`. OK, or rename to "Areté Gate"?
+2. **Name** — the artifact names here (`arete-build-scoring-core`,
+   `arete-maven-plugin`, `arete-gradle-plugin`) are provisional. "Areté Gate"
+   is an alternative if "scoring" is too close to existing artifact names.
 3. **Unreachable Areté** — hard-fail the build, or warn-and-skip? Proposed:
    hard-fail by default (a silent skip defeats the gate), overridable.
 4. **Spec discovery** — a single `<spec>` path, a glob, or auto-detect
@@ -234,14 +249,19 @@ Now three, not four (no SPI):
    it explicitly? Does CI want a per-branch namespace?
 6. **Submitter default** — `"maven"` / `"gradle"`, or derive from CI env
    (`GITHUB_ACTOR`, `BUILD_USER`, …)?
-7. **`failOn` per combination vs one global** — the API takes one `failOn` per
-   call; N combinations with different `failOn` values need N calls (or the
-   plugin computes the verdict from `level.met` and ignores `failOn`). Prefer
-   the latter — one call, plugin owns the AND.
-8. **SARIF** — emit by default, or opt-in?
-9. **Caching** — the API keys results by spec content hash; should the plugin
-   short-circuit when the spec hasn't changed since the last build?
-10. **Repo** — new modules here, or a separate repo (Gradle plugin publishing
+7. **Per-combination `failOn` overrides** — the API takes one `failOn` per
+   call, so N combinations each overriding it would need N calls. The normal
+   case sends none (policy owns the gate) and does one call; only a
+   `<failOn>`-carrying combination forces a second call. Acceptable, or drop
+   per-combination `failOn` entirely and support one build-wide override?
+8. **`422` overloading** — Areté returns `422` for both "a combination failed
+   its policy" and "unknown validator / bad request". The plugin distinguishes
+   by body shape (`results[]` present vs Problem Details). Fine, or should the
+   API use a distinct status for the scoring-failure case?
+9. **SARIF** — emit by default, or opt-in?
+10. **Caching** — the API keys results by spec content hash; should the plugin
+    short-circuit when the spec hasn't changed since the last build?
+11. **Repo** — new modules here, or a separate repo (Gradle plugin publishing
     vs the Maven reactor)?
 
 ## Suggested build order (checkpoint each with review)
