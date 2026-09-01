@@ -1211,7 +1211,7 @@ the combination is judged against its own policy's bar (<code>level.source</code
 <code>?failOn=error</code> / <code>score&lt;NN</code> etc. overrides every combination
 (<code>level.source</code> = <code>"request"</code>).</p>
 <p>Plugins other than the policy engine can expose a bar via the SPI methods
-<code>getPassingScore(ruleSet)</code> and <code>getSuggestedScoreLevel(ruleSet)</code>.</p>
+<code>getPassingScore(policy)</code> and <code>getSuggestedScoreLevel(policy)</code>.</p>
 <h2 id="remote-fetch">Remote fetch<a class="headerlink" href="#remote-fetch" title="Permanent link">&para;</a></h2>
 <p><code>{ "url": … }</code> is fetched server-side with these constraints:</p>
 <ul>

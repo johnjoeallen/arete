@@ -1034,8 +1034,8 @@ Plugins are loaded through a <strong>child-first <code>URLClassLoader</code></st
 dependencies cannot collide with the host's, and the bundled plugin jar ships
 unversioned to match the application jar.</p>
 <p>A plugin can declare several named check sets, chosen per spec; these were
-first called "scoring types" and then renamed <strong>RuleSet</strong> across the SPI.
-Plugin rule sets are ordered, and the UI submits a rule set by position rather
+first called "scoring types" and then renamed <strong>Policy</strong> across the SPI.
+Plugin policies are ordered, and the UI submits a policy by position rather
 than name. A plugin may also supply its own severity vocabulary and optional
 scoring fields (an overall score, and a per-finding score improvement), and a
 single spec can run several plugins at once with the results merged into one
@@ -1166,7 +1166,7 @@ match the <code>xs.count { }</code> sequence form. <code>text-style</code>, <cod
 violation</strong> — a matcher emits one only for a subject that breaks the rule, and
 a compliant subject yields nothing. A few matchers carried parameter modes
 (<code>operation</code> <code>summary: present</code>, <code>schema</code> <code>max-items: present</code>, <code>text-style</code>
-with no parameters) that were declared but unused and, had a rule set them,
+with no parameters) that were declared but unused and, had a policy them,
 would have flagged compliant subjects with a "matches the configured rule"
 message; those modes were removed from the matchers and their descriptors.
 <code>schema</code> findings that had fallen through to "Property matches the configured

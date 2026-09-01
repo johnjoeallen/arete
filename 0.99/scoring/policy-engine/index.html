@@ -1293,9 +1293,9 @@ Matchers, rule descriptions, and policy definitions can be added or changed
 as text files without changing the host application code.</p>
 <h2 id="how-it-works">How it works<a class="headerlink" href="#how-it-works" title="Permanent link">&para;</a></h2>
 <p>On first use the plugin loads its <strong>policy bundle</strong> from the classpath
-(<code>api-policy/</code> inside the jar) and validates every file in it. <code>getRuleSets()</code>
+(<code>api-policy/</code> inside the jar) and validates every file in it. <code>getPolicies()</code>
 then returns one entry per policy in the bundle — these appear in the
-Areté UI as selectable rule sets.</p>
+Areté UI as selectable policies.</p>
 <p>When scoring runs, the plugin resolves the requested policy. If the name is
 unknown, the <strong>first policy declared</strong> in the bundle manifest is used as the
 default. Each rule listed in that policy is then evaluated <strong>in declaration
@@ -1631,7 +1631,7 @@ costs.</p>
 <li>Every rule id must exist in the bundle.</li>
 <li><strong>Declaration order is report order</strong> in the findings table.</li>
 <li>The first policy in <code>PolicyBundle.yaml</code> is the fallback when a caller
-  requests an unknown rule set.</li>
+  requests an unknown policy.</li>
 </ul>
 <p>Bundled policies: <code>Enterprise Grade</code> (the default), <code>Zalando</code>, and
 <code>Zalando Extended</code> — see <a href="../policies/">Policies</a>. Every rule they can reference

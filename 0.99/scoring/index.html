@@ -565,10 +565,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#rule-sets" class="md-nav__link">
+  <a href="#policies" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Rule sets
+        Policies
       
     </span>
   </a>
@@ -912,10 +912,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#rule-sets" class="md-nav__link">
+  <a href="#policies" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Rule sets
+        Policies
       
     </span>
   </a>
@@ -980,7 +980,7 @@ organisation-specific plugin such as a breaking-changes checker.</p>
 <p><img alt="The scoring picker and findings" src="../assets/screenshot-scoring.png" /></p>
 <h2 id="running-scoring">Running scoring<a class="headerlink" href="#running-scoring" title="Permanent link">&para;</a></h2>
 <p>A <strong>Scoring</strong> picker on the spec's page lists every globally enabled plugin
-as its own row — a checkbox plus that plugin's own rule-set dropdown — so more
+as its own row — a checkbox plus that plugin's own policy dropdown — so more
 than one plugin can run at once. Click <strong>Score</strong> to run every checked plugin;
 nothing runs until you do.</p>
 <p>Which plugins are checked is remembered <strong>per spec</strong> in the database, so
@@ -1011,20 +1011,20 @@ than combining two unrelated models into a meaningless number.</p>
 and in the findings table) comes from the plugin's <code>getSeverityLabel(Severity)</code>,
 so a plugin can surface its own vocabulary (e.g. <code>Must</code> / <code>Should</code> / <code>May</code> /
 <code>Hint</code>). The default simply title-cases the enum name.</p>
-<h2 id="rule-sets">Rule sets<a class="headerlink" href="#rule-sets" title="Permanent link">&para;</a></h2>
-<p>A plugin can declare more than one named rule set — e.g. an
+<h2 id="policies">Policies<a class="headerlink" href="#policies" title="Permanent link">&para;</a></h2>
+<p>A plugin can declare more than one named policy — e.g. an
 <code>internal</code> / <code>external</code> split for an organisation that lints differently by API
 audience. Every enabled plugin gets its own row in the picker with its own
-rule-set dropdown; a plugin with only the implicit default set just has one
+policy dropdown; a plugin with only the implicit default set just has one
 entry.</p>
-<p>A rule set is a <strong>plugin-chosen name</strong>, not an engine-specific concept. The
-Areté Policy Engine exposes one rule set per bundled <a href="policies/">policy</a>:
+<p>A policy is a <strong>plugin-chosen name</strong>, not an engine-specific concept. The
+Areté Policy Engine exposes one policy per bundled <a href="policies/">policy</a>:
 <strong>Enterprise Grade</strong> (the default), <strong>Zalando</strong>, and <strong>Zalando Extended</strong>.</p>
 <div class="admonition note">
-<p class="admonition-title"><code>getRuleSets()</code> returns a <code>List</code>, not a <code>Set</code></p>
-<p>The picker submits a rule set's <strong>position</strong> in the returned list, and the
+<p class="admonition-title"><code>getPolicies()</code> returns a <code>List</code>, not a <code>Set</code></p>
+<p>The picker submits a policy's <strong>position</strong> in the returned list, and the
 UI shows them in that order (preferred default first). A <code>Set.of(...)</code> with
-two or more elements has no iteration-order guarantee in Java, so rule sets
+two or more elements has no iteration-order guarantee in Java, so policies
 would reshuffle on every restart. Keep the order stable across releases.</p>
 </div>
 <h2 id="where-plugins-come-from">Where plugins come from<a class="headerlink" href="#where-plugins-come-from" title="Permanent link">&para;</a></h2>
@@ -1052,7 +1052,7 @@ a narrower, additional switch layered on top of the global setting.</p>
   matchers, rules, and policies work, and how to extend the bundle.</li>
 <li><a href="rules/">Rule Catalogue</a> — every rule in the bundle and which policies use it.</li>
 <li><a href="policies/">Policies</a> — the bundled Enterprise Grade, Zalando, and Zalando
-  Extended rule sets.</li>
+  Extended policies.</li>
 <li><a href="writing-a-plugin/">Writing a Plugin</a> — implement the <code>SpecScoringPlugin</code>
   SPI.</li>
 </ul>
