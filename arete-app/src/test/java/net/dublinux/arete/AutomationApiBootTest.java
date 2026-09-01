@@ -63,4 +63,18 @@ class AutomationApiBootTest {
                         .contentType("application/yaml").content("openapi: 3.0.0\ninfo: {title: T, version: 1}"))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    void staticCssIsServedWithAContentHashSoAStaleCacheCannotMaskAReleasedChange() throws Exception {
+        String html = mvc.perform(get("/"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        java.util.regex.Matcher m = java.util.regex.Pattern
+                .compile("href=\"(/css/app-[0-9a-f]{8,}\\.css)\"").matcher(html);
+        org.junit.jupiter.api.Assertions.assertTrue(m.find(),
+                "expected a fingerprinted /css/app-<hash>.css link, got: " + html.replaceAll("(?s).*?(<link[^>]*app[^>]*>).*", "$1"));
+
+        mvc.perform(get(m.group(1))).andExpect(status().isOk());
+    }
 }

@@ -12,7 +12,7 @@
             document.documentElement.setAttribute('data-theme', theme);
         })();
     </script>
-    <link rel="stylesheet" href="/css/app.css">
+    <link rel="stylesheet" th:href="@{/css/app.css}" href="/css/app.css">
 </head>
 <body>
 <div th:replace="~{fragments/sidebar :: sidebar(${specs}, ${q}, ${specId})}"></div>
@@ -142,9 +142,9 @@
     </div>
     </div>
 </div>
-<script src="/js/tabs.js" defer></script>
-<script src="/js/sidebar-refresh.js" defer></script>
-<script src="/js/interactivity.js" defer></script>
-<script src="/js/theme.js" defer></script>
+<script th:src="@{/js/tabs.js}" src="/js/tabs.js" defer></script>
+<script th:src="@{/js/sidebar-refresh.js}" src="/js/sidebar-refresh.js" defer></script>
+<script th:src="@{/js/interactivity.js}" src="/js/interactivity.js" defer></script>
+<script th:src="@{/js/theme.js}" src="/js/theme.js" defer></script>
 </body>
 </html>
