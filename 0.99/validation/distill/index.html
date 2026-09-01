@@ -1412,15 +1412,15 @@ relying on emptiness, and use <code>truthy(x)</code> when you need the boolean i
 </tr>
 <tr>
 <td><code>s.contains(t)</code></td>
-<td>boolean; <code>t</code> is a string, or a list — true if any element matches</td>
+<td>Java <code>String.contains</code>, extended: <code>t</code> may be a list — true if any element is contained</td>
 </tr>
 <tr>
 <td><code>s.startsWith(t)</code></td>
-<td>boolean; <code>t</code> is a string, or a list — true if <code>s</code> starts with any element. Raw prefix: no trim, no word boundary (<code>"Listing".startsWith("List")</code> is true). For a word-aware check see <a href="#builtin-functions"><code>startsWithAny</code></a></td>
+<td>Java <code>String.startsWith</code>, extended: <code>t</code> may be a list — true if <code>s</code> starts with any element</td>
 </tr>
 <tr>
 <td><code>s.endsWith(t)</code></td>
-<td>boolean; <code>t</code> is a string, or a list — true if <code>s</code> ends with any element</td>
+<td>Java <code>String.endsWith</code>, extended: <code>t</code> may be a list — true if <code>s</code> ends with any element</td>
 </tr>
 <tr>
 <td><code>s.length</code></td>
