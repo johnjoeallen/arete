@@ -18,7 +18,7 @@ The default policy: it enables every generally-applicable bundled rule, with a f
 
 - **111** rules active
 - passing score: **90** (the [automation API](../automation-api.md) fails below this unless overridden)
-- grades: A ≥ 95, B ≥ 90, C ≥ 80, D ≥ 70, else F
+- grades: A ≥ 95, B ≥ 90, C ≥ 80, D ≥ 70, else F — with a `+`/`-` for the top/bottom third of a band (so 94 is `B+`, 90 is `B-`)
 
 Parameter overrides:
 

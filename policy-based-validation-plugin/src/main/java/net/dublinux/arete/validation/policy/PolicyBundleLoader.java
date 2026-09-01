@@ -181,7 +181,9 @@ final class PolicyBundleLoader {
         rejectUnknown(path, data, Set.of("id", "rules", "scoring", "passingScore", "grades"));
         String scoreLevel = data.containsKey("scoring") ? scoreLevel(path, data.get("scoring")) : null;
         Double passingScore = data.containsKey("passingScore") ? score(path, "passingScore", data.get("passingScore")) : null;
-        Map<String, Double> grades = data.containsKey("grades") ? grades(path, data.get("grades")) : Map.of();
+        Map<String, Double> grades = data.containsKey("grades")
+                ? grades(path, data.get("grades"))
+                : defaultGrades(passingScore);
         Map<String, PolicyDisposition> dispositions = new LinkedHashMap<>();
         for (Map.Entry<String, Object> entry : map(path, "rules", data.get("rules")).entrySet()) {
             Object value = entry.getValue();
@@ -232,6 +234,26 @@ final class PolicyBundleLoader {
         }
         if (out.isEmpty()) throw new BundleValidationException(path + ": grades must not be empty");
         return out;
+    }
+
+    /**
+     * When a policy sets a {@code passingScore} but no explicit {@code grades},
+     * {@code C} is the pass mark and {@code A}/{@code B} space evenly above it
+     * with {@code D} below, so a passing score always earns a grade.
+     */
+    private static Map<String, Double> defaultGrades(Double passingScore) {
+        if (passingScore == null) return Map.of();
+        double p = passingScore, headroom = 100 - p;
+        Map<String, Double> out = new LinkedHashMap<>();
+        out.put("A", round1(p + headroom * 2 / 3));
+        out.put("B", round1(p + headroom / 3));
+        out.put("C", round1(p));
+        out.put("D", round1(Math.max(0, p * 0.8)));
+        return out;
+    }
+
+    private static double round1(double value) {
+        return Math.round(value * 10) / 10.0;
     }
 
     /** Validates and normalises a policy's {@code scoring:} value: {@code blocker | error | score<NN}. */

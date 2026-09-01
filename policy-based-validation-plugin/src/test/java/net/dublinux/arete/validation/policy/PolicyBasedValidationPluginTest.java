@@ -111,6 +111,36 @@ class PolicyBasedValidationPluginTest {
             """;
 
     @Test
+    void gradeForAppendsPlusAndMinusWithinABand() {
+        var bands = new java.util.LinkedHashMap<String, Double>();
+        bands.put("A", 95.0);
+        bands.put("B", 90.0);
+        bands.put("C", 80.0);
+        Policy policy = new Policy("P", Map.of(), null, 90.0, bands);
+        assertEquals("B-", policy.gradeFor(90.0));   // bottom third of [90, 95)
+        assertEquals("B", policy.gradeFor(92.0));    // middle
+        assertEquals("B+", policy.gradeFor(94.5));   // top third
+        assertEquals("A", policy.gradeFor(97.0));    // [95, 100]
+        assertEquals("A+", policy.gradeFor(99.0));
+        assertEquals("F", policy.gradeFor(70.0));    // below the lowest band, never F+/F-
+    }
+
+    @Test
+    void aPassingScoreAloneStillEarnsAGrade() {
+        // no `grades:` block — bands are derived from passingScore, C is the pass mark.
+        Map<String, String> resources = bundledResources();
+        resources.put("policies/EnterpriseGrade.md", resources.get("policies/EnterpriseGrade.md")
+                .replaceFirst("(?s)grades:\\n(  \\w+: \\d+\\n)+", ""));
+
+        PolicyBundle bundle = new PolicyBundleLoader().load(resources::get);
+        Policy policy = bundle.policies().get("Enterprise Grade");
+
+        assertTrue(policy.gradeFor(90.0).startsWith("C"));  // the passing score sits in the C band
+        assertTrue(policy.gradeFor(99.0).startsWith("A"));  // a comfortable pass still grades
+        assertEquals("F", policy.gradeFor(50.0));
+    }
+
+    @Test
     void executesTheEnterpriseGradePolicyAndDeductsOnlyOncePerRule() {
         PolicyBasedValidationPlugin plugin = new PolicyBasedValidationPlugin();
         plugin.configure(Map.of());

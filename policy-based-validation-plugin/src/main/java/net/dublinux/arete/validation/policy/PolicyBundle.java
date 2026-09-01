@@ -47,14 +47,29 @@ record Policy(String id, Map<String, PolicyDisposition> dispositions, String sco
         this(id, dispositions, null, null, Map.of());
     }
 
-    /** The grade label for a numeric score, or null if no band matches / none are defined. */
+    /**
+     * The grade label for a numeric score, or null if no bands are defined.
+     * Within a band wide enough to divide, a score in the top third earns a
+     * {@code +} and the bottom third a {@code -} (so {@code A:95} yields
+     * {@code A-} at 96, {@code A} at 97, {@code A+} at 99). Below the lowest
+     * band the grade is {@code F}.
+     */
     String gradeFor(double score) {
-        for (Map.Entry<String, Double> band : grades.entrySet()) {
-            if (score >= band.getValue()) {
-                return band.getKey();
+        if (grades.isEmpty()) return null;
+        List<Map.Entry<String, Double>> bands = new java.util.ArrayList<>(grades.entrySet());
+        for (int i = 0; i < bands.size(); i++) {
+            double low = bands.get(i).getValue();
+            if (score < low) continue;
+            double high = i == 0 ? Math.max(100.0, score) : bands.get(i - 1).getValue();
+            String label = bands.get(i).getKey();
+            if (high - low >= 3) {
+                double within = (score - low) / (high - low);
+                if (within >= 2.0 / 3) return label + "+";
+                if (within < 1.0 / 3) return label + "-";
             }
+            return label;
         }
-        return grades.isEmpty() ? null : "F";
+        return "F";
     }
 }
 sealed interface PolicyDisposition permits Deduction, Prohibited {

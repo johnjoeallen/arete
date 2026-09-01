@@ -2,11 +2,11 @@
 # regenerate: mvn -pl policy-based-validation-plugin test -Dtest=PolicySnapshotTest -Dsnapshot.update=true
 
 ## Enterprise Grade
-  catalogue    status=SUCCESS  score=79.5   noBlockers=79.5   grade=D    findings=103
-  lint         status=SUCCESS  score=91.5   noBlockers=91.5   grade=B    findings=20
-  house-style  status=SUCCESS  score=87     noBlockers=87     grade=C    findings=33
-  schema       status=SUCCESS  score=87     noBlockers=87     grade=C    findings=47
-  ops          status=SUCCESS  score=90     noBlockers=90     grade=B    findings=46
+  catalogue    status=SUCCESS  score=79.5   noBlockers=79.5   grade=D+   findings=103
+  lint         status=SUCCESS  score=91.5   noBlockers=91.5   grade=B-   findings=20
+  house-style  status=SUCCESS  score=87     noBlockers=87     grade=C+   findings=33
+  schema       status=SUCCESS  score=87     noBlockers=87     grade=C+   findings=47
+  ops          status=SUCCESS  score=90     noBlockers=90     grade=B-   findings=46
 
 ## Lenient
   catalogue    status=SUCCESS  score=96     noBlockers=96     grade=-    findings=102
