@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -94,6 +95,9 @@ class PolicySnapshotTest {
     @Test
     void policyScoresMatchSnapshot() {
         PolicyBasedValidationPlugin plugin = new PolicyBasedValidationPlugin();
+        // Bundled policies only — ignore any ~/.arete/policies on the dev machine
+        // so the snapshot is identical here and in CI.
+        plugin.configure(Map.of("policies-dir", "target/no-such-policies-dir"));
         List<String> ruleSets = new ArrayList<>(plugin.getRuleSets());
         ruleSets.sort(String::compareTo);
 

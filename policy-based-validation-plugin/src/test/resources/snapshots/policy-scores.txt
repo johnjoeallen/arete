@@ -8,20 +8,6 @@
   schema       status=SUCCESS  score=87     noBlockers=87     grade=C+   findings=47
   ops          status=SUCCESS  score=90     noBlockers=90     grade=B-   findings=46
 
-## Lenient
-  catalogue    status=SUCCESS  score=96     noBlockers=96     grade=-    findings=102
-  lint         status=SUCCESS  score=98.4   noBlockers=98.4   grade=-    findings=19
-  house-style  status=SUCCESS  score=97.5   noBlockers=97.5   grade=-    findings=32
-  schema       status=SUCCESS  score=97.5   noBlockers=97.5   grade=-    findings=46
-  ops          status=SUCCESS  score=98.1   noBlockers=98.1   grade=-    findings=45
-
-## Pedantic
-  catalogue    status=SUCCESS  score=0      noBlockers=24     grade=-    findings=102
-  lint         status=SUCCESS  score=0      noBlockers=72     grade=-    findings=19
-  house-style  status=SUCCESS  score=0      noBlockers=56     grade=-    findings=32
-  schema       status=SUCCESS  score=0      noBlockers=54     grade=-    findings=46
-  ops          status=SUCCESS  score=0      noBlockers=66     grade=-    findings=45
-
 ## Zalando
   catalogue    status=SUCCESS  score=91.5   noBlockers=91.5   grade=-    findings=42
   lint         status=SUCCESS  score=96     noBlockers=96     grade=-    findings=11
