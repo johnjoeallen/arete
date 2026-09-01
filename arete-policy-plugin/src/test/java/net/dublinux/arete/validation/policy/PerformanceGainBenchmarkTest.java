@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
  * {@code validate()} wall time.
  *
  * <p>Not run in the normal build. Enable with {@code -Darete.benchmark=true}:
- * {@code mvn -pl policy-based-validation-plugin test -Dtest=PerformanceGainBenchmarkTest -Darete.benchmark=true}.
+ * {@code mvn -pl arete-policy-plugin test -Dtest=PerformanceGainBenchmarkTest -Darete.benchmark=true}.
  */
 class PerformanceGainBenchmarkTest {
 

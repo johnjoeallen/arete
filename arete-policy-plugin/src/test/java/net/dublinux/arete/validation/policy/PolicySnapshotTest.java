@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  *
  * <p>After an intended change, regenerate and review the diff:
  * <pre>
- * mvn -pl policy-based-validation-plugin test -Dtest=PolicySnapshotTest -Dsnapshot.update=true
+ * mvn -pl arete-policy-plugin test -Dtest=PolicySnapshotTest -Dsnapshot.update=true
  * </pre>
  */
 class PolicySnapshotTest {
@@ -39,7 +39,7 @@ class PolicySnapshotTest {
     private static final boolean UPDATE = Boolean.getBoolean("snapshot.update");
     private static final Path SNAPSHOT_DIR = Path.of("src", "test", "resources", "snapshots");
     private static final String REGEN =
-            "# regenerate: mvn -pl policy-based-validation-plugin test -Dtest=PolicySnapshotTest -Dsnapshot.update=true";
+            "# regenerate: mvn -pl arete-policy-plugin test -Dtest=PolicySnapshotTest -Dsnapshot.update=true";
 
     private record Fixture(String name, String spec) { }
 

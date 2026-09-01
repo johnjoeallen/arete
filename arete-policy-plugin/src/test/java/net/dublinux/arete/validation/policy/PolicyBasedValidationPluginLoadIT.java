@@ -50,7 +50,7 @@ class PolicyBasedValidationPluginLoadIT {
 
     private static File findBuiltJar() {
         File[] jars = new File("target").listFiles((directory, name) ->
-                name.startsWith("policy-based-validation-plugin-") && name.endsWith(".jar"));
+                name.startsWith("arete-policy-plugin-") && name.endsWith(".jar"));
         if (jars == null || jars.length == 0) throw new IllegalStateException("No packaged generic-policy plugin jar found");
         return jars[0];
     }

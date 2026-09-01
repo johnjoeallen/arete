@@ -11,7 +11,7 @@ produces:
 | Artifact | Path |
 |---|---|
 | App fat jar | `arete-app/target/arete-<version>.jar` |
-| Bundled plugin jar | `policy-based-validation-plugin/target/policy-based-validation-plugin-<version>.jar` |
+| Bundled plugin jar | `arete-policy-plugin/target/arete-policy-plugin-<version>.jar` |
 
 `build.sh` / `build.bat` run this and copy both into `scripts/` (the plugin jar
 under `scripts/plugins/`) so the launcher scripts can run straight away.

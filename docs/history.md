@@ -74,7 +74,7 @@ shown as percentages, and a zero or uncomputed impact is hidden.
 ## From Zally rules to the policy engine
 
 The bundled validator became a **generic policy engine**
-(`policy-based-validation-plugin`, entry point `PolicyBasedValidationPlugin`).
+(`arete-policy-plugin`, entry point `PolicyBasedValidationPlugin`).
 Instead of hard-coded Java checks it ships a **policy bundle**: a tree of
 Markdown + YAML files defining matchers (programs that inspect the normalised
 API model and return occurrences), rules (a matcher plus a scope and

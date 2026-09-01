@@ -14,7 +14,7 @@
 
     <modules>
         <module>arete-validation-spi</module>
-        <module>policy-based-validation-plugin</module>
+        <module>arete-policy-plugin</module>
         <module>arete-app</module>
     </modules>
 

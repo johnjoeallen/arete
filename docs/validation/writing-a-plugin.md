@@ -107,7 +107,7 @@ between plugins — and between a plugin and Areté itself — never collide.
 ## A worked example
 
 The bundled
-[`policy-based-validation-plugin`](https://github.com/johnjoeallen/arete/tree/main/policy-based-validation-plugin)
+[`arete-policy-plugin`](https://github.com/johnjoeallen/arete/tree/main/arete-policy-plugin)
 is a complete, shaded `SpecValidationPlugin` — its `pom.xml`, `META-INF/services`
 registration, `getRuleSets()` implementation, and packaging are the best
 starting point for your own.

@@ -33,7 +33,7 @@ jobs:
           cp arete-app/target/arete-${VERSION}.jar dist/arete/arete.jar
           cp scripts/arete.sh dist/arete/
           cp scripts/arete.bat dist/arete/
-          cp policy-based-validation-plugin/target/policy-based-validation-plugin-${VERSION}.jar dist/arete/plugins/policy-based-validation-plugin.jar
+          cp arete-policy-plugin/target/arete-policy-plugin-${VERSION}.jar dist/arete/plugins/arete-policy-plugin.jar
           chmod +x dist/arete/arete.sh
           ZIP="$(pwd)/arete-${VERSION}.zip"
           (cd dist && zip -r "$ZIP" arete)

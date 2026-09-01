@@ -1,6 +1,6 @@
 # Areté Policy Engine
 
-The **Areté Policy Engine** (`policy-based-validation-plugin`, plugin id
+The **Areté Policy Engine** (`arete-policy-plugin`, plugin id
 `generic-policy`) is the built-in, policy-driven validation plugin. Instead of
 hard-coding checks in Java, it ships a **policy bundle**: a tree of Markdown +
 YAML files defining **matchers** (Distill programs that inspect the normalised
@@ -45,7 +45,7 @@ they are not part of the deployed matcher runtime. See
 
 ## The policy bundle
 
-Everything lives under `policy-based-validation-plugin/src/main/resources/api-policy/`:
+Everything lives under `arete-policy-plugin/src/main/resources/api-policy/`:
 
 ```
 api-policy/
@@ -428,7 +428,7 @@ The result reports `overallScore` (`effectiveScore`) and
    `matchers:`.
 3. Add rules that use it.
 4. Regenerate the behaviour snapshots and review the diff:
-   `mvn -pl policy-based-validation-plugin test -Dtest=PolicySnapshotTest -Dsnapshot.update=true`.
+   `mvn -pl arete-policy-plugin test -Dtest=PolicySnapshotTest -Dsnapshot.update=true`.
 
 ### Behaviour snapshots
 
@@ -465,8 +465,8 @@ declaration with no overrides.
 ### Build & install
 
 ```bash
-mvn -q -pl policy-based-validation-plugin -am package -DskipTests
-cp policy-based-validation-plugin/target/policy-based-validation-plugin-*.jar \
+mvn -q -pl arete-policy-plugin -am package -DskipTests
+cp arete-policy-plugin/target/arete-policy-plugin-*.jar \
    ~/.arete/plugins/
 ```
 

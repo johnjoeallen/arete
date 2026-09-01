@@ -1,5 +1,5 @@
 # policy score by fixture spec
-# regenerate: mvn -pl policy-based-validation-plugin test -Dtest=PolicySnapshotTest -Dsnapshot.update=true
+# regenerate: mvn -pl arete-policy-plugin test -Dtest=PolicySnapshotTest -Dsnapshot.update=true
 
 ## Enterprise Grade
   catalogue    status=SUCCESS  score=79.5   noBlockers=79.5   grade=D+   findings=103

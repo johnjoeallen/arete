@@ -19,7 +19,7 @@ import pathlib
 import re
 
 REPO = pathlib.Path(__file__).resolve().parents[1]
-SOURCE = REPO / "policy-based-validation-plugin/src/main/resources/api-policy/policies/EnterpriseGrade.md"
+SOURCE = REPO / "arete-policy-plugin/src/main/resources/api-policy/policies/EnterpriseGrade.md"
 PROHIBIT = {"SECURITY001", "SECURITY002", "SEC009"}
 
 

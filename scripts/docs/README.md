@@ -6,7 +6,7 @@ Helpers for keeping the docs site (`docs/`) in sync with the code.
 
 Regenerates `docs/validation/rules.md` and `docs/validation/policies.md` from
 the policy bundle
-(`policy-based-validation-plugin/src/main/resources/api-policy/`). Run it
+(`arete-policy-plugin/src/main/resources/api-policy/`). Run it
 after adding or changing a rule, policy, or rule.
 
 ```bash

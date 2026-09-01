@@ -54,7 +54,7 @@ endpoint with severity badges, JSON Pointer locations, and links to rule
 docs.
 
 The release bundles the **Areté Policy Engine**
-(`policy-based-validation-plugin`) — a policy-driven linter whose matchers,
+(`arete-policy-plugin`) — a policy-driven linter whose matchers,
 rules, and policies are plain text files, with matchers written in Distill,
 a safe-by-construction expression language. It ships the Enterprise Grade,
 Zalando, and Zalando Extended policies. Drop additional plugin jars into
@@ -78,7 +78,7 @@ protected boundary.
 | Module | Purpose |
 |---|---|
 | `arete-validation-spi` | Plugin SPI, published to Maven Central (`net.dublinux.arete:arete-validation-spi`). |
-| `policy-based-validation-plugin` | The bundled Areté Policy Engine. |
+| `arete-policy-plugin` | The bundled Areté Policy Engine. |
 | `arete-app` | The Spring Boot application. |
 
 ## Release

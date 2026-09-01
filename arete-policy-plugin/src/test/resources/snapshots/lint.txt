@@ -1,17 +1,17 @@
-# house-style — bundled-rule findings (Distill)
-# regenerate: mvn -pl policy-based-validation-plugin test -Dtest=PolicySnapshotTest -Dsnapshot.update=true
+# lint — bundled-rule findings (Distill)
+# regenerate: mvn -pl arete-policy-plugin test -Dtest=PolicySnapshotTest -Dsnapshot.update=true
 
 ## REST001  (resource-path / path)
   (no findings)
 
 ## DOC001  (operation / operation)
-  (no findings)
+  /paths/~1x/get  |  GET /x  |  Operation summary is missing
 
 ## DOC002  (text-style / operation-summary)
-  /paths/~1v2~1Payments/get  |  GET /v2/Payments  |  Operation summary does not begin with a capital letter
+  (no findings)
 
 ## DOC003  (text-style / operation-summary)
-  /paths/~1v2~1Payments/get  |  GET /v2/Payments  |  Operation summary is not sentence case
+  (no findings)
 
 ## DOC004  (text-style / operation-summary)
   (no findings)
@@ -32,10 +32,10 @@
   /  |  API  |  API metadata is missing x-audience
 
 ## DOC009  (text-style / operation-summary)
-  /paths/~1v2~1Payments/get  |  GET /v2/Payments  |  Operation summary is not action-oriented
+  (no findings)
 
 ## STANDARD001  (hostname / api)
-  /servers  |  https://internal.corp/v2  |  Server hostname is not lowercase hyphenated
+  /servers  |  /  |  Server hostname is not lowercase hyphenated
 
 ## STANDARD002  (resource-path / path)
   (no findings)
@@ -50,7 +50,7 @@
   (no findings)
 
 ## STANDARD006  (path-count / api)
-  /paths/~1v2~1Payments  |  /v2/Payments  |  Nested resource type is not exposed as a root resource
+  (no findings)
 
 ## STANDARD007  (resource-path / path)
   (no findings)
@@ -59,13 +59,13 @@
   (no findings)
 
 ## STANDARD009  (query-collection / query-parameter)
-  /paths/~1v2~1Payments/get/parameters/0  |  GET /v2/Payments  |  Collection query parameter tags does not use form serialization with explode=true
+  (no findings)
 
 ## SECURITY001  (security / operation)
-  /paths/~1v2~1Payments/get  |  GET /v2/Payments  |  Operation does not require security scheme bearerAuth
+  /paths/~1x/get  |  GET /x  |  Operation does not require security scheme bearerAuth
 
 ## SECURITY002  (security / operation)
-  /paths/~1v2~1Payments/get  |  GET /v2/Payments  |  Operation does not require security scheme bearerAuth with scopes read
+  /paths/~1x/get  |  GET /x  |  Operation does not require security scheme bearerAuth with scopes read
 
 ## CASE001  (naming / property)
   (no findings)
@@ -80,10 +80,10 @@
   (no findings)
 
 ## CASE005  (naming / path-segment)
-  /paths/~1v2~1Payments  |  Payments  |  Name does not use the configured convention
+  (no findings)
 
 ## REST002  (naming / path-segment)
-  /paths/~1v2~1Payments  |  v2  |  Collection name is singular
+  /paths/~1x  |  x  |  Collection name is singular
 
 ## REST003  (resource-path / operation)
   (no findings)
@@ -131,24 +131,22 @@
   (no findings)
 
 ## JSON016  (response-code / response)
-  /paths/~1v2~1Payments  |  GET /v2/Payments  |  Successful response is not a JSON object
+  (no findings)
 
 ## STATUS006  (response-code / response)
-  /paths/~1v2~1Payments  |  GET /v2/Payments  |  Error response does not declare application/problem+json
-  /paths/~1v2~1Payments  |  GET /v2/Payments  |  Error response does not declare application/problem+json
+  /paths/~1x  |  GET /x  |  Error response does not declare application/problem+json
 
 ## STATUS007  (response-header / response)
-  /paths/~1v2~1Payments/get  |  GET /v2/Payments  |  Response 429 lacks one or more required headers: RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset
+  (no findings)
 
 ## STANDARD010  (openapi-version / api)
   (no findings)
 
 ## CONTENT001  (media-type / media-type)
-  /paths/~1v2~1Payments/get  |  GET /v2/Payments  |  Request body media type absent
+  /paths/~1x/get  |  GET /x  |  Request body media type absent
 
 ## CONTENT002  (media-type / media-type)
-  /paths/~1v2~1Payments/get  |  GET /v2/Payments  |  Response 429 media type absent
-  /paths/~1v2~1Payments/get  |  GET /v2/Payments  |  Response 500 media type absent
+  /paths/~1x/get  |  GET /x  |  Response 200 media type absent
 
 ## CONTENT003  (media-type / media-type)
   (no findings)
@@ -163,14 +161,13 @@
   (no findings)
 
 ## ERROR003  (error-response / operation)
-  (no findings)
+  /paths/~1x/get  |  GET /x  |  Operation does not document a server-error response
 
 ## ERROR004  (error-response / response)
   (no findings)
 
 ## ERROR005  (error-response / response)
-  /paths/~1v2~1Payments/get  |  GET /v2/Payments  |  Error response does not declare application/problem+json
-  /paths/~1v2~1Payments/get  |  GET /v2/Payments  |  Error response does not declare application/problem+json
+  /paths/~1x/get  |  GET /x  |  Error response does not declare application/problem+json
 
 ## ERROR006  (error-response / response)
   (no findings)
@@ -212,13 +209,13 @@
   (no findings)
 
 ## FILTER001  (collection-capability / operation)
-  /paths/~1v2~1Payments/get  |  GET /v2/Payments  |  Collection operation lacks the configured query capability
+  /paths/~1x/get  |  GET /x  |  Collection operation lacks the configured query capability
 
 ## FILTER002  (collection-capability / query-parameter)
   (no findings)
 
 ## SORT001  (collection-capability / operation)
-  /paths/~1v2~1Payments/get  |  GET /v2/Payments  |  Collection operation lacks the configured query capability
+  /paths/~1x/get  |  GET /x  |  Collection operation lacks the configured query capability
 
 ## SORT002  (collection-capability / query-parameter)
   (no findings)
@@ -230,10 +227,10 @@
   (no findings)
 
 ## FIELD001  (collection-capability / operation)
-  /paths/~1v2~1Payments/get  |  GET /v2/Payments  |  Collection operation lacks the configured query capability
+  /paths/~1x/get  |  GET /x  |  Collection operation lacks the configured query capability
 
 ## PAGE001  (pagination / operation)
-  /paths/~1v2~1Payments/get  |  GET /v2/Payments  |  Collection operation lacks the configured pagination control
+  /paths/~1x/get  |  GET /x  |  Collection operation lacks the configured pagination control
 
 ## PAGE002  (pagination / query-parameter)
   (no findings)
@@ -245,7 +242,7 @@
   (no findings)
 
 ## PAGE005  (pagination / response)
-  /paths/~1v2~1Payments/get  |  GET /v2/Payments  |  Successful paginated response lacks a Link header
+  /paths/~1x/get  |  GET /x  |  Successful paginated response lacks a Link header
 
 ## PAGE006  (pagination / query-parameter)
   (no findings)
@@ -290,7 +287,7 @@
   (no findings)
 
 ## VERSION001  (versioning / path)
-  /paths/~1v2~1Payments  |  /v2/Payments  |  Interface version is exposed through uri
+  (no findings)
 
 ## VERSION002  (versioning / header)
   (no findings)
@@ -299,7 +296,7 @@
   (no findings)
 
 ## VERSION004  (versioning / api)
-  (no findings)
+  /paths  |  API  |  Interface has no explicit versioning
 
 ## COMPAT001  (compatibility / api)
   (no findings)
@@ -359,16 +356,13 @@
   (no findings)
 
 ## DOC010  (operation-metadata / operation)
-  /paths/~1v2~1Payments/get  |  GET /v2/Payments  |  Operation has no operationId
+  /paths/~1x/get  |  GET /x  |  Operation has no operationId
 
 ## DOC011  (operation-metadata / operation)
-  /paths/~1v2~1Payments/get  |  GET /v2/Payments  |  Operation is not assigned any tag
+  /paths/~1x/get  |  GET /x  |  Operation is not assigned any tag
 
 ## DOC012  (api-title / api)
-  /info/title  |  draft payments poc  |  API title does not end with 'API'
-  /info/title  |  draft payments poc  |  API title ends with the discouraged marker 'PoC'
-  /info/title  |  draft payments poc  |  API title word 'draft' is not in Title Case
-  /info/title  |  draft payments poc  |  API title word 'payments' is not in Title Case
+  /info/title  |  T  |  API title does not end with 'API'
 
 ## CASE006  (schema-name / schema)
   (no findings)
@@ -377,10 +371,10 @@
   (no findings)
 
 ## SEC009  (server-url / api)
-  /servers  |  https://internal.corp/v2  |  Server URL points at an internal or non-routable host: internal.corp
+  (no findings)
 
 ## STANDARD018  (extensions / api)
-  /info  |  info  |  Uses the non-standard extension 'x-weird'
+  (no findings)
 
 ## STANDARD019  (schema-composition / schema)
   (no findings)
@@ -389,19 +383,19 @@
   (no findings)
 
 ## STANDARD021  (document-lint / api)
-  (no findings)
+  /  |  document  |  Parser reported: attribute paths.'/x'(get).responses.404.content.'application/json'.schema.#/components/schemas/Ghost is missing
 
 ## STANDARD022  (document-lint / api)
-  (no findings)
+  /paths  |  document  |  HTTP status keys are declared as bare numbers, not strings: 200
 
 ## DOC013  (documentation-completeness / property)
   (no findings)
 
 ## DOC014  (documentation-completeness / parameter)
-  /paths/~1v2~1Payments/get/parameters/0  |  GET /v2/Payments tags  |  GET /v2/Payments tags has no description or example
+  (no findings)
 
 ## STATUS008  (status-class / response)
-  /paths/~1v2~1Payments/get  |  GET /v2/Payments 500  |  Documents a server-error (500) response; these should be omitted from the contract
+  (no findings)
 
 ## CASE007  (schema-name / schema)
   (no findings)
@@ -413,7 +407,7 @@
   (no findings)
 
 ## DOC015  (operation / operation)
-  /paths/~1v2~1Payments/get  |  GET /v2/Payments  |  Operation description is missing
+  /paths/~1x/get  |  GET /x  |  Operation description is missing
 
 ## JSON020  (example-validity / property)
   (no findings)
@@ -425,7 +419,7 @@
   (no findings)
 
 ## STANDARD023  (server-url / api)
-  (no findings)
+  /servers  |  /  |  Server URL does not match the approved pattern https://[a-z0-9-]+(\.[a-z0-9-]+)+(:[0-9]+)?(/[^\s]*)?
 
 ## JSON021  (schema / property)
   (no findings)
