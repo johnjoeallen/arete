@@ -247,7 +247,10 @@ required to sit behind a protected boundary. Each policy can declare a
 passing score and grade bands (`passingScore:` / `grades:`, or a non-numeric
 `scoring: blocker | error`); the score, grade, and pass/fail against that bar
 are reported on every validation, and the automation-API verdict honours the
-bar unless the caller overrides it. A `shared` deployment mode
+bar unless the caller overrides it. Grading was later made universal — a
+policy with no `grades:` block derives bands from its `passingScore`, or falls
+back to a default `A ≥ 90 … D ≥ 60` — and a `+`/`-` is appended for the top or
+bottom third of a band. A `shared` deployment mode
 locks down the local-filesystem features (path loading, the drop folder,
 `file:` URLs) that only make sense for a single-user install, and the
 server-side URL fetcher is restricted to `http`/`https` with a mandatory SSRF

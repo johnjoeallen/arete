@@ -9,15 +9,15 @@
   ops          status=SUCCESS  score=90     noBlockers=90     grade=B-   findings=46
 
 ## Zalando
-  catalogue    status=SUCCESS  score=91.5   noBlockers=91.5   grade=-    findings=42
-  lint         status=SUCCESS  score=96     noBlockers=96     grade=-    findings=11
-  house-style  status=SUCCESS  score=93     noBlockers=93     grade=-    findings=18
-  schema       status=SUCCESS  score=94     noBlockers=94     grade=-    findings=15
-  ops          status=SUCCESS  score=94.5   noBlockers=94.5   grade=-    findings=23
+  catalogue    status=SUCCESS  score=91.5   noBlockers=91.5   grade=A-   findings=42
+  lint         status=SUCCESS  score=96     noBlockers=96     grade=A    findings=11
+  house-style  status=SUCCESS  score=93     noBlockers=93     grade=A-   findings=18
+  schema       status=SUCCESS  score=94     noBlockers=94     grade=A    findings=15
+  ops          status=SUCCESS  score=94.5   noBlockers=94.5   grade=A    findings=23
 
 ## Zalando Extended
-  catalogue    status=SUCCESS  score=87     noBlockers=87     grade=-    findings=64
-  lint         status=SUCCESS  score=94.5   noBlockers=94.5   grade=-    findings=14
-  house-style  status=SUCCESS  score=92     noBlockers=92     grade=-    findings=20
-  schema       status=SUCCESS  score=91     noBlockers=91     grade=-    findings=26
-  ops          status=SUCCESS  score=92     noBlockers=92     grade=-    findings=31
+  catalogue    status=SUCCESS  score=87     noBlockers=87     grade=B+   findings=64
+  lint         status=SUCCESS  score=94.5   noBlockers=94.5   grade=A    findings=14
+  house-style  status=SUCCESS  score=92     noBlockers=92     grade=A-   findings=20
+  schema       status=SUCCESS  score=91     noBlockers=91     grade=A-   findings=26
+  ops          status=SUCCESS  score=92     noBlockers=92     grade=A-   findings=31

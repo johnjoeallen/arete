@@ -150,6 +150,7 @@ Contains only implemented rules mapped to the supplied Zalando rule catalogue. N
 
 - **40** rules active
 - suggested gate: `error` (used by the [automation API](../automation-api.md) unless overridden)
+- grades: the default `A ≥ 90, B ≥ 80, C ≥ 70, D ≥ 60, else F` (no explicit bands)
 
 Parameter overrides:
 
@@ -209,6 +210,7 @@ Everything in the `Zalando` policy, plus the checks that were previously only in
 
 - **61** rules active
 - suggested gate: `error` (used by the [automation API](../automation-api.md) unless overridden)
+- grades: the default `A ≥ 90, B ≥ 80, C ≥ 70, D ≥ 60, else F` (no explicit bands)
 
 Parameter overrides:
 

@@ -126,6 +126,16 @@ class PolicyBasedValidationPluginTest {
     }
 
     @Test
+    void aPolicyWithNeitherGradesNorPassingScoreUsesTheDefaultBands() {
+        // Zalando declares scoring: error only — no grades:, no passingScore:.
+        Policy zalando = distillBundle().policies().get("Zalando");
+        assertEquals("A", zalando.gradeFor(95.0));   // default bands A:90 B:80 C:70 D:60
+        assertEquals("B", zalando.gradeFor(85.0));
+        assertEquals("D", zalando.gradeFor(65.0));
+        assertEquals("F", zalando.gradeFor(55.0));
+    }
+
+    @Test
     void aPassingScoreAloneStillEarnsAGrade() {
         // no `grades:` block — bands are derived from passingScore, C is the pass mark.
         Map<String, String> resources = bundledResources();

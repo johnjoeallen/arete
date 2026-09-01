@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -183,7 +184,8 @@ final class PolicyBundleLoader {
         Double passingScore = data.containsKey("passingScore") ? score(path, "passingScore", data.get("passingScore")) : null;
         Map<String, Double> grades = data.containsKey("grades")
                 ? grades(path, data.get("grades"))
-                : defaultGrades(passingScore);
+                : passingScore != null ? passingScoreGrades(passingScore)
+                : DEFAULT_GRADES;
         Map<String, PolicyDisposition> dispositions = new LinkedHashMap<>();
         for (Map.Entry<String, Object> entry : map(path, "rules", data.get("rules")).entrySet()) {
             Object value = entry.getValue();
@@ -236,19 +238,29 @@ final class PolicyBundleLoader {
         return out;
     }
 
+    /** The grade bands a policy gets when it declares neither {@code grades} nor {@code passingScore}. */
+    private static final Map<String, Double> DEFAULT_GRADES;
+    static {
+        Map<String, Double> g = new LinkedHashMap<>();
+        g.put("A", 90.0);
+        g.put("B", 80.0);
+        g.put("C", 70.0);
+        g.put("D", 60.0);
+        DEFAULT_GRADES = Collections.unmodifiableMap(g);
+    }
+
     /**
      * When a policy sets a {@code passingScore} but no explicit {@code grades},
      * {@code C} is the pass mark and {@code A}/{@code B} space evenly above it
      * with {@code D} below, so a passing score always earns a grade.
      */
-    private static Map<String, Double> defaultGrades(Double passingScore) {
-        if (passingScore == null) return Map.of();
-        double p = passingScore, headroom = 100 - p;
+    private static Map<String, Double> passingScoreGrades(double passingScore) {
+        double headroom = 100 - passingScore;
         Map<String, Double> out = new LinkedHashMap<>();
-        out.put("A", round1(p + headroom * 2 / 3));
-        out.put("B", round1(p + headroom / 3));
-        out.put("C", round1(p));
-        out.put("D", round1(Math.max(0, p * 0.8)));
+        out.put("A", round1(passingScore + headroom * 2 / 3));
+        out.put("B", round1(passingScore + headroom / 3));
+        out.put("C", round1(passingScore));
+        out.put("D", round1(Math.max(0, passingScore * 0.8)));
         return out;
     }
 

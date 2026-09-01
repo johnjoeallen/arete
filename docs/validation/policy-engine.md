@@ -358,9 +358,9 @@ Prose describing the policy's intent.
   threshold first. A score at or above a threshold earns that label; within a
   band wide enough to divide, the top third adds a `+` and the bottom third a
   `-`; below the lowest band the grade is `F`. Reported alongside the numeric
-  score. If omitted while `passingScore` is set, bands are derived from it
-  (`C` = the pass mark, `A`/`B` evenly above, `D` below), so a passing score
-  always earns a grade.
+  score. **Every policy is graded**: if `grades:` is omitted, bands are derived
+  from `passingScore` (`C` = the pass mark, `A`/`B` above, `D` below) when it is
+  set, otherwise the default `A ≥ 90, B ≥ 80, C ≥ 70, D ≥ 60` applies.
 - `scoring:` (optional) — a non-numeric gate, `blocker` or `error`, for a
   policy that gates on findings rather than a score. `passingScore` wins if
   both are set; with neither, the API gate defaults to `blocker`.
