@@ -91,7 +91,7 @@ a spec path, and one `run`:
 
 ```xml
 <plugin>
-  <groupId>net.dublinx.arete</groupId>
+  <groupId>net.dublinux.arete</groupId>
   <artifactId>arete-maven-plugin</artifactId>
   <configuration>
     <areteUrl>${arete.url}</areteUrl>          <!-- from a profile, see below -->
@@ -126,7 +126,7 @@ a spec path, and one `run`:
 - Report to the log **and** `${project.build.directory}/arete-scoring/report.txt`
   (+ `report.json`, + `arete.sarif` when `<sarif>true</sarif>`).
 
-### Gradle — plugin id `net.dublinx.arete`
+### Gradle — plugin id `net.dublinux.arete`
 
 ```kotlin
 areteScoring {
@@ -236,32 +236,30 @@ Three:
 
 ## Open questions for review
 
-1. **`net.dublinx.arete`** vs the existing `net.dublinux.arete` (with a `u`) —
-   deliberate new groupId or a typo?
-2. **Name** — the artifact names here (`arete-build-scoring-core`,
+1. **Name** — the artifact names here (`arete-build-scoring-core`,
    `arete-maven-plugin`, `arete-gradle-plugin`) are provisional. "Areté Gate"
    is an alternative if "scoring" is too close to existing artifact names.
-3. **Unreachable Areté** — hard-fail the build, or warn-and-skip? Proposed:
+2. **Unreachable Areté** — hard-fail the build, or warn-and-skip? Proposed:
    hard-fail by default (a silent skip defeats the gate), overridable.
-4. **Spec discovery** — a single `<spec>` path, a glob, or auto-detect
+3. **Spec discovery** — a single `<spec>` path, a glob, or auto-detect
    (`src/main/resources/**/openapi.{yaml,json}`)? Multi-spec modules?
-5. **Namespace default** — `${project.groupId}` / `project.group`, or require
+4. **Namespace default** — `${project.groupId}` / `project.group`, or require
    it explicitly? Does CI want a per-branch namespace?
-6. **Submitter default** — `"maven"` / `"gradle"`, or derive from CI env
+5. **Submitter default** — `"maven"` / `"gradle"`, or derive from CI env
    (`GITHUB_ACTOR`, `BUILD_USER`, …)?
-7. **Per-combination `failOn` overrides** — the API takes one `failOn` per
+6. **Per-combination `failOn` overrides** — the API takes one `failOn` per
    call, so N combinations each overriding it would need N calls. The normal
    case sends none (policy owns the gate) and does one call; only a
    `<failOn>`-carrying combination forces a second call. Acceptable, or drop
    per-combination `failOn` entirely and support one build-wide override?
-8. **`422` overloading** — Areté returns `422` for both "a combination failed
+7. **`422` overloading** — Areté returns `422` for both "a combination failed
    its policy" and "unknown validator / bad request". The plugin distinguishes
    by body shape (`results[]` present vs Problem Details). Fine, or should the
    API use a distinct status for the scoring-failure case?
-9. **SARIF** — emit by default, or opt-in?
-10. **Caching** — the API keys results by spec content hash; should the plugin
-    short-circuit when the spec hasn't changed since the last build?
-11. **Repo** — new modules here, or a separate repo (Gradle plugin publishing
+8. **SARIF** — emit by default, or opt-in?
+9. **Caching** — the API keys results by spec content hash; should the plugin
+   short-circuit when the spec hasn't changed since the last build?
+10. **Repo** — new modules here, or a separate repo (Gradle plugin publishing
     vs the Maven reactor)?
 
 ## Suggested build order (checkpoint each with review)
