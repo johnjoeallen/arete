@@ -5,8 +5,6 @@ set "JAR=%~dp0arete.jar"
 set "DATA_DIR=%USERPROFILE%\.arete\data"
 set "PORT="
 set "WIPE=0"
-set "FORK=0"
-set "RULE_LANGUAGES="
 
 :parse
 if "%~1"=="" goto :afterparse
@@ -32,31 +30,16 @@ if /i "%~1"=="--reset-db" (
     shift
     goto :parse
 )
-if /i "%~1"=="--fork-rules" (
-    set "FORK=1"
-    shift
-    goto :parse
-)
-if /i "%~1"=="--rule-languages" (
-    set "RULE_LANGUAGES=%~2"
-    shift
-    shift
-    goto :parse
-)
 if /i "%~1"=="-h" goto :usage
 if /i "%~1"=="--help" goto :usage
 echo Unknown option: %~1
 goto :usage
 
 :usage
-echo Usage: %~nx0 [--port PORT] [--wipe-db] [--fork-rules] [--rule-languages LIST] [-h^|--help]
+echo Usage: %~nx0 [--port PORT] [--wipe-db] [-h^|--help]
 echo.
 echo   --port, -p PORT   Run the server on PORT instead of the configured default.
 echo   --wipe-db         Delete the local database ^(%DATA_DIR%^) before starting.
-echo   --fork-rules   Run each rule in a disposable JVM with a timeout.
-echo   --rule-languages LIST
-echo                     Comma-separated rule language precedence, e.g.
-echo                     "distill,groovy" ^(the default^) or "groovy,distill".
 echo   -h, --help        Show this help and exit.
 exit /b 0
 
@@ -96,12 +79,7 @@ if "%WIPE%"=="1" (
     rmdir /s /q "%DATA_DIR%" 2>nul
 )
 
-set "JAVA_OPTS="
-if not "%RULE_LANGUAGES%"=="" (
-    set "JAVA_OPTS=-Darete.policy.rule-languages=%RULE_LANGUAGES%"
-)
-if "%FORK%"=="1" set "JAVA_OPTS=%JAVA_OPTS% -Darete.policy.fork-rules=true"
 set "ARGS="
 if not "%PORT%"=="" set "ARGS=--server.port=%PORT%"
 
-java %JAVA_OPTS% -jar "%JAR%" %ARGS%
+java -jar "%JAR%" %ARGS%

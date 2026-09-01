@@ -6,20 +6,13 @@ JAR="$DIR/arete.jar"
 DATA_DIR="$HOME/.arete/data"
 PORT=""
 WIPE=0
-FORK=0
-RULE_LANGUAGES=""
 
 usage() {
   cat <<EOF
-Usage: $(basename "$0") [--port PORT] [--wipe-db] [--fork-rules] [--rule-languages LIST] [-h|--help]
+Usage: $(basename "$0") [--port PORT] [--wipe-db] [-h|--help]
 
   --port, -p PORT   Run the server on PORT instead of the configured default.
   --wipe-db         Delete the local database ($DATA_DIR) before starting.
-  --fork-rules  Run each rule in a disposable JVM with a timeout.
-  --rule-languages LIST
-                    Comma-separated rule language precedence, e.g.
-                    "distill,groovy" (the default) or "groovy,distill". The first
-                    language with a source file present is used per rule.
   -h, --help        Show this help and exit.
 EOF
 }
@@ -29,9 +22,6 @@ while [ $# -gt 0 ]; do
     --port=*) PORT="${1#*=}"; shift ;;
     --port|-p) PORT="$2"; shift 2 ;;
     --wipe-db|--reset-db) WIPE=1; shift ;;
-    --fork-rules) FORK=1; shift ;;
-    --rule-languages=*) RULE_LANGUAGES="${1#*=}"; shift ;;
-    --rule-languages) RULE_LANGUAGES="$2"; shift 2 ;;
     -h|--help) usage; exit 0 ;;
     *) echo "Unknown option: $1" >&2; usage >&2; exit 1 ;;
   esac
@@ -68,14 +58,8 @@ if [ "$WIPE" -eq 1 ]; then
 fi
 
 ARGS=()
-if [ -n "$RULE_LANGUAGES" ]; then
-  ARGS+=("-Darete.policy.rule-languages=$RULE_LANGUAGES")
-fi
-if [ "$FORK" -eq 1 ]; then
-  ARGS+=("-Darete.policy.fork-rules=true")
-fi
 if [ -n "$PORT" ]; then
   ARGS+=("--server.port=$PORT")
 fi
 
-exec java "${ARGS[@]}" -jar "$JAR"
+exec java -jar "$JAR" "${ARGS[@]}"
