@@ -88,8 +88,17 @@ How the plugin reads it:
 
 ## Configuration
 
-Both plugins share the same shape. Common case needs only the URL, namespace,
-a spec path, and one `run`:
+Both plugins share the same shape. Common case needs only the URL, a spec
+path, and one `run`.
+
+- **`spec`** is an explicit path; a **list** is accepted for a multi-spec
+  module (each spec × each combination). No glob or auto-detect.
+- **`namespace`** defaults to the module's group (`project.groupId` /
+  `project.group`).
+- **`submitter`** defaults to `"maven"` / `"gradle"`, unless a CI actor
+  variable is set (`GITHUB_ACTOR`, `GITLAB_USER_LOGIN`, `BUILD_USER_ID`) — then
+  that.
+- **`optional`** omitted ⇒ the combination gates.
 
 ### Maven — `arete-gate-maven-plugin`, goal `check`, phase `verify`
 
@@ -120,10 +129,9 @@ a spec path, and one `run`:
 - `422` for a **non-optional** combination → **`MojoFailureException`** (a
   normal build failure); `201`, or `422` from only `optional` combinations →
   build passes.
-- Non-scoring failure (unreachable, `4xx` other than the scoring `422`,
-  unknown validator/policy) → **`MojoExecutionException`** by default;
-  `<failOnUnavailable>false</failOnUnavailable>` downgrades an unreachable
-  Areté to a warning.
+- Any non-2xx that is not `422` (unreachable, `400`/`404`, `5xx`) →
+  **`MojoExecutionException`** by default; `<failOnUnavailable>false</failOnUnavailable>`
+  downgrades an unreachable Areté to a warning.
 - No `<failOn>` in the normal case — the policy owns pass/fail. A single
   build-wide `<failOn>` (`error` | `blocker` | `score<NN`) is accepted as an
   advanced override for holding a **stricter** bar than the policy; it is
@@ -148,6 +156,8 @@ areteGate {
 - Registers `areteGateCheck`, wires `check.dependsOn(areteGateCheck)`.
 - Failing non-optional verdict → task throws through Gradle's normal
   verification-failure path (`VerificationException`).
+- The spec file(s) are declared as task inputs, so an unchanged spec skips the
+  task via Gradle's up-to-date checking. (Maven re-runs every time in v1.)
 - Report to `${layout.buildDirectory}/reports/arete-gate/report.txt`
   (+ `.json`, + SARIF).
 - `build.gradle` and `build.gradle.kts` both supported.
@@ -238,20 +248,6 @@ Three:
 - Managing an Areté instance (starting/stopping a local server) — the plugin
   assumes one is reachable at the configured URL.
 - Aggregating verdicts across reactor modules — each module gates itself.
-
-## Decisions
-
-| # | Question | Resolution |
-|---|---|---|
-| 1 | **Name** — `arete-build-scoring-*` collides with the app's "scoring" vocabulary and `arete-scoring-spi`. | **Areté Gate.** Modules `arete-gate-core`, `arete-gate-maven-plugin`, `arete-gate-gradle-plugin`; Gradle plugin id `net.dublinux.arete.gate`. *("Gate" names what it does; leaves "scoring" for the engine.) — needs sign-off* |
-| 2 | **Unreachable Areté** — fail or skip? | **Hard-fail by default** (`MojoExecutionException` / `GradleException`). `failOnUnavailable = false` downgrades an unreachable Areté to a warning. A silent skip defeats the gate. |
-| 3 | **Spec discovery** — path, glob, or auto-detect? | **Explicit `spec` path, required.** Accepts a **list** for multi-spec modules (each spec × each combination). No glob/auto-detect in v1 — a stray example spec would score the wrong file. |
-| 4 | **Namespace default** | Default to the module's group (`${project.groupId}` / `project.group`), overridable. Per-branch namespaces are set via config by whoever wants them, not defaulted. |
-| 5 | **Submitter default** | `"maven"` / `"gradle"`, **unless** a known CI actor var is set (`GITHUB_ACTOR`, `GITLAB_USER_LOGIN`, `BUILD_USER_ID`) — then use that. Overridable. |
-| 6 | **Per-combination `failOn`** | **Dropped.** One optional **build-wide** `failOn` override, so the plugin always makes a single API call. The "stricter than the policy" case is build-wide anyway. |
-| 7 | **`422` overloading** (policy failure vs bad request) | **`422` = scoring failure only.** The plugin treats every non-2xx that isn't `422` as a build error. **Areté API change:** move request rejections (unknown validator/policy, bad namespace, unparseable spec) off `422` onto `400` / `404` with `application/problem+json`. |
-| 8 | **SARIF** | **Opt-in** (`<sarif>true</sarif>` / `sarif = true`). Generating a file nothing uploads is noise. |
-| 9 | **Caching** | No plugin-side result cache — the API is already content-hash-cached and one round-trip is cheap. **Gradle:** declare the spec file(s) as task inputs so an unchanged spec skips the task via normal up-to-date checking. **Maven:** re-run every time in v1. |
 
 ## Areté API change (prerequisite)
 
