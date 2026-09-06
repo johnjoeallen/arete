@@ -91,6 +91,30 @@ compiled and validated at bundle load like any other expression.
 `0`, and `[]`. Use explicit checks (`text != ""`, `count(list) > 0`) rather than
 relying on emptiness, and use `truthy(x)` when you need the boolean itself.
 
+### Null and blank
+
+A missing model field reads as `null` — `member` access never throws — but
+most [receiver functions](#methods) do not guard their receiver, so
+`op.summary.trim()` fails when `summary` is absent. Reach through a
+possibly-null value with the safe-navigation operator `?.`: `op.summary?.trim()`
+is `null` when `summary` is `null`, otherwise the trimmed string. `a?.b`,
+`a?.b(...)` and `a?.b { … }` all yield `null` the moment the receiver is
+`null`, skipping the rest of the chain.
+
+"Absent, empty, or whitespace-only" is one test, written either way:
+
+```java
+op.summary is blank          // operator form
+op.summary.isBlank()         // receiver-function form — receiver may be null
+op?.summary?.isBlank()       // ?. chain: isBlank still runs on a null summary
+```
+
+`isBlank()`'s implementation guards for a `null` (or non-string) receiver — it
+is not magically null-safe, it is written that way — and the interpreter does
+not let a leading `?.` short-circuit it. So the three lines above are exact
+synonyms, and each keeps the *offending* (blank) subjects. The bundled matchers
+use both spellings.
+
 ## Operators
 
 Highest precedence first:
@@ -98,10 +122,12 @@ Highest precedence first:
 | Operator | Meaning |
 |---|---|
 | `a.b`  `a.b(...)`  `a.b { x -> ... }`  `a.b { ... }`  `a[k]` | member / method / trailing-closure / index |
+| `a?.b`  `a?.b(...)`  `a?.b { ... }` | safe navigation — `null` when `a` is `null`, else as `a.b…` (see [Null and blank](#null-and-blank)) |
 | `!a`  `-a` | logical not, numeric negation |
 | `a + b` | numeric **integer** add if both are numbers; list concat if both are lists; otherwise string concatenation (`null` renders as `"null"`) |
 | `a < b` `a <= b` `a > b` `a >= b` | numeric by value; otherwise lexicographic on strings |
 | `a == b` `a != b` | value equality — numbers compare by numeric value, so `8 == 8` across int/long/double |
+| `a is blank` | `true` when `a` is `null`, `""`, or whitespace-only — same as [`a.isBlank()`](#null-and-blank) |
 | `a ==~ r` `a =~ r` | regex full-match / regex search (right side is a regex literal or a pattern string) |
 | `a && b` &nbsp;&nbsp; `a` `\|\|` `b` | short-circuit boolean |
 | `c ? t : f` | conditional |
@@ -142,6 +168,14 @@ Notes:
 
 ## Methods
 
+A `receiver.name(args)` call is not method dispatch on an object — Distill has
+no user types. It is a **receiver function**: `s.trim()` is `trim(s)`,
+`xs.count { }` is `count(xs, …)`. The interpreter picks the implementation from
+the receiver's runtime kind (string, list, map) and the name. Whether a
+receiver function tolerates a `null` receiver is a property of that one
+implementation, not a language rule — `isBlank()` guards for `null`,
+`trim()` does not.
+
 ### String methods
 
 In `contains` / `startsWith` / `endsWith` / `startsWithWord` / `endsWithWord`,
@@ -157,6 +191,7 @@ In `contains` / `startsWith` / `endsWith` / `startsWithWord` / `endsWithWord`,
 | `s.endsWith(t)` | Java `String.endsWith` |
 | `s.startsWithWord(t)` | word-aware `startsWith`: `s` equals `t`, or begins with `t` followed by a non-alphanumeric character. `"List customers"` and `"List."` match `"List"`; `"Listing"` does not |
 | `s.endsWithWord(t)` | word-aware `endsWith` — the mirror of `startsWithWord` |
+| `s.isBlank()` | `true` when `s` is `null`, `""`, or whitespace-only — the receiver-function spelling of the [`is blank`](#null-and-blank) operator. Its implementation guards for `null` (and non-strings), so `op.summary.isBlank()` needs no `null` guard and `op?.summary?.isBlank()` still evaluates rather than short-circuiting |
 | `s.length` | length (a member, not a call) |
 
 ### Sequence methods
@@ -201,7 +236,7 @@ checks(<source>) {
 ```
 
 - `<source>` is evaluated **once** and bound for the whole block. Apply any
-  shared guard here: `checks(api.operations.filter { !(it.summary is blank) }) { … }`.
+  shared guard here: `checks(api.operations.filter { !it.summary.isBlank() }) { … }`.
 - Each comma-separated **stanza** is a bare `filter { … }.map { … }` chain
   rooted at the source — no receiver token; `filter` with nothing before it
   means "the block's source". The closures use the implicit `it`.
@@ -305,7 +340,7 @@ output is the list of occurrences (`pointer` &nbsp;\|&nbsp; `path` &nbsp;\|&nbsp
 ```java
 distill(api, rule) {
     return api.paths.expand { path -> path.operationDetails
-        .filter { op -> op.summary == null || op.summary.trim() == "" }
+        .filter { op -> op.summary.isBlank() }
         .map { op -> occurrence(op.pointer, op.method + " " + path.path,
             "Operation has no summary") } };
 }
@@ -430,7 +465,7 @@ distill(api, rule) {
 ```java
 // after — one stanza per check, condition directly above its message
 distill(api, rule) {
-    return checks(api.operations.filter { !(it.summary is blank) }) {
+    return checks(api.operations.filter { !it.summary.isBlank() }) {
 
         filter { rule.parameters["trailing-period"] == "present" && it.summary.trim().endsWith(".") }
           .map { occurrence(it.pointer, it.method + " " + it.path,

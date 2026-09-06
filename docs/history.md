@@ -205,6 +205,13 @@ full Distill expression spliced in at evaluation time, with quotes and `/`
 inside it no longer treated as the enclosing delimiter — for the cases that
 genuinely build part of a pattern or message from a rule parameter.
 
+The `blank` builtin, reached only through the `x is blank` operator, was also
+given a method spelling: `x.isBlank()`. Unlike every other method it accepts a
+`null` (or non-string) receiver, so `op.summary.isBlank()` needs no guard and
+`op?.summary?.isBlank()` still runs the check rather than short-circuiting on a
+missing field. The two forms are exact synonyms; the bundled matchers use
+both.
+
 For the common "is this one of a configured set" case a `list` parameter type
 was added, and the string predicates learned to take a list (true if any
 element matches): `s.startsWith` / `s.endsWith` / `s.contains` are Java's, and
