@@ -4,9 +4,9 @@ distill(api, rule) {
             count(rule.parameters.keys) > 0
             && (rule.parameters["method"] == null || operation.method == rule.parameters["method"])
             && (rule.parameters["summary"] != "absent"
-                || operation.summary is blank)
+                || operation.summary.isBlank())
             && (rule.parameters["description"] != "absent"
-                || operation.description is blank)
+                || operation.description.isBlank())
             && (rule.parameters["request-body"] != "present" || operation.requestBodyPresent)
             && (rule.parameters["request-body"] != "absent" || !operation.requestBodyPresent) }
         .map { operation -> occurrence(operation.pointer,

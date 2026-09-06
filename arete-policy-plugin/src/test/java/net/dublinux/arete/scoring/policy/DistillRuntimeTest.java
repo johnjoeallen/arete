@@ -172,6 +172,50 @@ class DistillMatcherEvaluatorTest {
     }
 
     @Test
+    void isBlankCallFormMatchesTheIsBlankOperatorIncludingNullReceivers() {
+        // it?.summary?.isBlank() is the method spelling of `it.summary is blank`:
+        // the ?. chain does not short-circuit isBlank away on a missing summary.
+        String source = "distill(api, rule) { return api.values"
+                + ".filter { it?.summary?.isBlank() }"
+                + ".map { occurrence(\"/\", \"v\", \"blank\") }; }";
+        List<Object> values = java.util.Arrays.asList(
+                Map.of("summary", "List orders"),
+                Map.of("summary", "   "),
+                Map.of("summary", ""),
+                Map.of());
+        assertEquals(3, runtime.execute(source, Map.of("values", values), Map.of("parameters", Map.of())).size());
+        // plain-dot form needs no ?. guard either
+        assertEquals(3, runtime.execute(source.replace("it?.summary?.isBlank()", "it.summary.isBlank()"),
+                Map.of("values", values), Map.of("parameters", Map.of())).size());
+        // ... and the `is blank` operator is an exact synonym
+        assertEquals(3, runtime.execute(source.replace("it?.summary?.isBlank()", "it.summary is blank"),
+                Map.of("values", values), Map.of("parameters", Map.of())).size());
+    }
+
+    @Test
+    void isBlankChainIsTrueWhenAnyLinkIsNull() {
+        // it null, it.summary null, or summary blank -> all true
+        String source = "distill(api, rule) { return api.values"
+                + ".filter { it?.summary?.isBlank() }"
+                + ".map { occurrence(\"/\", \"v\", \"blank\") }; }";
+        List<Object> values = java.util.Arrays.asList(
+                null,                              // it is null
+                Map.of(),                          // summary is null
+                Map.of("summary", "  "),           // summary blank
+                Map.of("summary", "List orders")); // not blank
+        assertEquals(3, runtime.execute(source, Map.of("values", values), Map.of("parameters", Map.of())).size());
+    }
+
+    @Test
+    void isBlankIsFalseForNonStringReceiversJustLikeTheOperator() {
+        String source = "distill(api, rule) { return api.values.filter { it.maximum.isBlank() }"
+                + ".map { occurrence(\"/\", \"v\", \"blank\") }; }";
+        // a numeric field is not blank -> no NPE, no occurrence
+        assertEquals(0, runtime.execute(source,
+                Map.of("values", List.of(Map.of("maximum", 7))), Map.of("parameters", Map.of())).size());
+    }
+
+    @Test
     void canFindOperationWithoutRequestBodyUsingConfiguredMethod() {
         assertEquals(1, runtime.execute("""
                 distill(api, rule) {

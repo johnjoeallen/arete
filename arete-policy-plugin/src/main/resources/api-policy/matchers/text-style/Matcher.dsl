@@ -1,5 +1,5 @@
 distill(api, rule) {
-    return checks(api.operations.filter { !(it.summary is blank) }) {
+    return checks(api.operations.filter { !it.summary.isBlank() }) {
 
         filter { rule.parameters["initial-capital"] != null
                  && (it.summary.trim() ==~ /[A-Z].*/) == rule.parameters["initial-capital"] }

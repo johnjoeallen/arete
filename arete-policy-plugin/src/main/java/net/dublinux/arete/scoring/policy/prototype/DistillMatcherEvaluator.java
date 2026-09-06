@@ -105,7 +105,32 @@ public final class DistillMatcherEvaluator {
         return null;
     }
 
+    /**
+     * Receiver functions ({@code receiver.name(...)}) whose implementation
+     * guards its receiver, so it is safe — and meaningful — to invoke on a
+     * {@code null}. The parser consults this set so a leading {@code ?.} does
+     * <em>not</em> short-circuit the call away: {@code x?.isBlank()} runs
+     * {@code isBlank(null)} rather than yielding {@code null}. This is not a
+     * general null-safety rule; it is the specific list of functions written to
+     * cope with {@code null}. {@code isBlank} is the receiver-function spelling
+     * of the {@code is blank} operator and behaves identically: true for
+     * {@code null}, {@code ""}, or a whitespace-only string, false otherwise.
+     */
+    private static final Set<String> NULL_TOLERANT_CALLS = Set.of("isBlank");
+
+    /**
+     * Dispatches a receiver function {@code receiver.name(args)} — {@code
+     * s.trim()} is {@code trim(s)}, {@code xs.count { }} is {@code count(xs, …)}.
+     * There is no object model; the implementation is chosen from the receiver's
+     * runtime kind and the name. A {@code null} receiver reaches here only for a
+     * {@link #NULL_TOLERANT_CALLS} function (a plain {@code .} on {@code null},
+     * or {@code ?.} which otherwise short-circuits first); every other function
+     * assumes a non-null receiver of the right kind.
+     */
     private static Object call(Object receiver, String name, List<Object> args) {
+        if (NULL_TOLERANT_CALLS.contains(name)) {
+            return isBlank(receiver);
+        }
         if (receiver instanceof String text) return switch (name) {
             case "lower" -> text.toLowerCase();
             case "trim" -> text.trim();
@@ -569,9 +594,11 @@ public final class DistillMatcherEvaluator {
                     Expr receiver = value;
                     if (accept("(")) {
                         List<Expr> args = arguments();
+                        boolean nullTolerant = NULL_TOLERANT_CALLS.contains(name);
                         value = env -> {
                             Object target = receiver.eval(env);
-                            return target == null ? null : call(target, name, args.stream().map(a -> a.eval(env)).toList());
+                            return target == null && !nullTolerant ? null
+                                    : call(target, name, args.stream().map(a -> a.eval(env)).toList());
                         };
                     } else if (at("{")) {
                         ParsedClosure closure = closure();
@@ -645,7 +672,7 @@ public final class DistillMatcherEvaluator {
             "enumPresent", "enumValues", "example",
             "examplePresent", "exampleStrings", "exclusiveMaximum", "exclusiveMinimum", "expand", "expected",
             "explode", "extensibleEnum", "extensionKeys", "filter", "find", "forbidden", "format", "group",
-            "headerDetails", "headers", "in", "info", "inlineCompositionMembers", "itemsPresent", "keys", "length", "licenseName",
+            "headerDetails", "headers", "in", "info", "inlineCompositionMembers", "isBlank", "itemsPresent", "keys", "length", "licenseName",
             "licenseUrl", "lint",
             "location", "lower", "map", "match", "maxItems", "maxLength", "maximum", "mediaTypes", "method",
             "methods", "minLength", "minimum", "name", "nullable", "numericStatusKeys", "openapiVersion",
