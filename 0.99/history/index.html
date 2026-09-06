@@ -1176,6 +1176,12 @@ name the violation.</p>
 full Distill expression spliced in at evaluation time, with quotes and <code>/</code>
 inside it no longer treated as the enclosing delimiter — for the cases that
 genuinely build part of a pattern or message from a rule parameter.</p>
+<p>The <code>blank</code> builtin, reached only through the <code>x is blank</code> operator, was also
+given a method spelling: <code>x.isBlank()</code>. Unlike every other method it accepts a
+<code>null</code> (or non-string) receiver, so <code>op.summary.isBlank()</code> needs no guard and
+<code>op?.summary?.isBlank()</code> still runs the check rather than short-circuiting on a
+missing field. The two forms are exact synonyms; the bundled matchers use
+both.</p>
 <p>For the common "is this one of a configured set" case a <code>list</code> parameter type
 was added, and the string predicates learned to take a list (true if any
 element matches): <code>s.startsWith</code> / <code>s.endsWith</code> / <code>s.contains</code> are Java's, and
