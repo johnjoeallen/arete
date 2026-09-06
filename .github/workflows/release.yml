@@ -21,10 +21,15 @@ jobs:
           cache: maven
 
       - name: Set version from tag
-        # No -DprocessAllModules: that would also rewrite the arete-ci-gate-*
-        # modules, which version independently (1.x, ci-gate-v* tags). Without
-        # it, versions:set only touches modules sharing the old version.
-        run: mvn --no-transfer-progress versions:set -DnewVersion=${GITHUB_REF_NAME#v} -DgenerateBackupPoms=false
+        # -DprocessAllModules is required: arete-scoring-spi, arete-policy-plugin
+        # and arete-app carry an explicit <version> and do not declare
+        # arete-parent as their <parent> (arete-app parents to Spring Boot), so
+        # without it versions:set never reaches them and the packaged jars keep
+        # the SNAPSHOT name. It also stamps the arete-ci-gate-* modules with this
+        # tag's version, which is harmless here — this workflow neither zips nor
+        # publishes them, and their real releases run from ci-gate-v* tags via
+        # publish-ci-gate.yml, which sets their version itself.
+        run: mvn --no-transfer-progress versions:set -DnewVersion=${GITHUB_REF_NAME#v} -DgenerateBackupPoms=false -DprocessAllModules=true
 
       - name: Build
         run: mvn --no-transfer-progress verify
