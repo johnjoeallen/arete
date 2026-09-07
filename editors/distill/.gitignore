@@ -1,0 +1,5 @@
+# produced by `npx @vscode/vsce package` / the release workflow
+*.vsix
+node_modules/
+# copied in at package time from the repo root
+/LICENSE

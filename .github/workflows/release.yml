@@ -46,12 +46,29 @@ jobs:
           ZIP="$(pwd)/arete-${VERSION}.zip"
           (cd dist && zip -r "$ZIP" arete)
 
+      - name: Package Distill editor bundle
+        # editors/distill/ is a self-contained TextMate grammar / VS Code
+        # extension — static files, no build. Ship it two ways: a plain zip for
+        # IntelliJ's "TextMate Bundles" import and manual installs, and a .vsix
+        # (itself a zip) for `code --install-extension`. Versioned by the
+        # extension's own package.json, not the Areté tag.
+        run: |
+          EXT_VERSION=$(node -p "require('./editors/distill/package.json').version")
+          cp LICENSE editors/distill/LICENSE
+          (cd editors && zip -r "$GITHUB_WORKSPACE/distill-syntax-${EXT_VERSION}.zip" distill \
+            -x 'distill/node_modules/*' 'distill/*.vsix' 'distill/.gitignore' 'distill/.vscodeignore')
+          (cd editors/distill && npx --yes @vscode/vsce package --no-dependencies \
+            -o "$GITHUB_WORKSPACE/distill-syntax-${EXT_VERSION}.vsix")
+          echo "EXT_VERSION=${EXT_VERSION}" >> "$GITHUB_ENV"
+
       - name: Create GitHub release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release create "$GITHUB_REF_NAME" \
             arete-${GITHUB_REF_NAME#v}.zip \
+            distill-syntax-${EXT_VERSION}.zip \
+            distill-syntax-${EXT_VERSION}.vsix \
             --title "$GITHUB_REF_NAME" \
             --generate-notes
 

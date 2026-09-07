@@ -1,10 +1,10 @@
 {
   "name": "distill-syntax",
   "displayName": "Distill (Areté matcher DSL)",
-  "description": "Syntax highlighting for Distill — the Java-shaped fluent rule language used in Areté Matcher.distill files.",
+  "description": "Syntax highlighting for Distill — the Groovy influenced fluent rule language used in Areté Matcher.distill files.",
   "version": "0.1.0",
   "publisher": "arete",
-  "license": "SEE LICENSE IN ../../LICENSE",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/johnjoeallen/arete.git",

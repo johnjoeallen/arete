@@ -1,7 +1,7 @@
 # Distill editor support
 
 Syntax highlighting for [Distill](../../docs/scoring/distill.md) — the
-Java-shaped fluent rule language in `api-policy/matchers/*/Matcher.distill`.
+Groovy influenced fluent rule language in `api-policy/matchers/*/Matcher.distill`.
 
 This directory is a VS Code extension **and** a TextMate bundle. Both editors
 use the same `distill.tmLanguage.json` grammar.
@@ -17,21 +17,24 @@ use the same `distill.tmLanguage.json` grammar.
 
 It is highlighting only — no parsing, diagnostics, or completion.
 
+Every Areté release attaches `distill-syntax-<version>.zip` (raw bundle, for
+IntelliJ) and `distill-syntax-<version>.vsix` (for VS Code) — see the
+[Releases page](https://github.com/johnjoeallen/arete/releases).
+
 ## Install — VS Code
 
-**From the repo (recommended for contributors):**
+**From a release:** download the `.vsix` and
 
 ```sh
-ln -s "$(pwd)/editors/distill" ~/.vscode/extensions/distill-syntax
-# then reload VS Code
+code --install-extension distill-syntax-0.1.0.vsix
 ```
 
-**As a package:**
+**From the repo (contributors):**
 
 ```sh
-cd editors/distill
-npx vsce package            # produces distill-syntax-0.1.0.vsix
-code --install-extension distill-syntax-0.1.0.vsix
+ln -s "$(pwd)/editors/distill" ~/.vscode/extensions/distill-syntax   # reload VS Code
+# or build the package yourself:
+cd editors/distill && npx @vscode/vsce package --no-dependencies
 ```
 
 Applies to every `*.distill` file (bundled matchers are `Matcher.distill`). For
@@ -39,7 +42,8 @@ a one-off file with another name, `Change Language Mode` → `Distill`.
 
 ## Install — IntelliJ IDEA / other JetBrains IDEs
 
-Settings → Editor → **TextMate Bundles** → `+` → select this `editors/distill`
+Unzip `distill-syntax-<version>.zip` (or use this `editors/distill` folder from
+a checkout), then Settings → Editor → **TextMate Bundles** → `+` → select the
 folder → Apply. JetBrains IDEs read the VS Code extension layout directly.
 
 The integration binds by file extension, so `*.distill` files highlight as soon
