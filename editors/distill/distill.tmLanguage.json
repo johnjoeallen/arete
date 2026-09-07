@@ -43,8 +43,8 @@
       "name": "meta.interpolation.distill",
       "begin": "\\{\\{",
       "end": "\\}\\}",
-      "beginCaptures": { "0": { "name": "punctuation.section.interpolation.begin.distill" } },
-      "endCaptures": { "0": { "name": "punctuation.section.interpolation.end.distill" } },
+      "beginCaptures": { "0": { "name": "keyword.control.interpolation.begin.distill" } },
+      "endCaptures": { "0": { "name": "keyword.control.interpolation.end.distill" } },
       "patterns": [{ "include": "$self" }]
     },
     "numbers": {
