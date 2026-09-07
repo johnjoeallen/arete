@@ -1258,7 +1258,7 @@
 
 
 <h1 id="distill-reference">Distill reference<a class="headerlink" href="#distill-reference" title="Permanent link">&para;</a></h1>
-<p>Matchers are written in Distill (<code>Matcher.dsl</code>). A Distill script
+<p>Matchers are written in Distill (<code>Matcher.distill</code>). A Distill script
 <em>distills</em> the API model down to the occurrences that violate a rule: it is a
 single expression that walks <code>api</code>, keeps what matches, and returns a list of
 <code>occurrence(...)</code> values.</p>
@@ -1859,7 +1859,7 @@ run costs nothing after the first call.</p>
 </tbody>
 </table>
 <h3 id="matchers">Matchers<a class="headerlink" href="#matchers" title="Permanent link">&para;</a></h3>
-<p>Each example is a full <code>Matcher.dsl</code> run against the spec beside it; the
+<p>Each example is a full <code>Matcher.distill</code> run against the spec beside it; the
 output is the list of occurrences (<code>pointer</code> &nbsp;|&nbsp; <code>path</code> &nbsp;|&nbsp; <code>message</code>).</p>
 <p><strong>Operations with no <code>summary</code>.</strong></p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="n">distill</span><span class="p">(</span><span class="n">api</span><span class="p">,</span><span class="w"> </span><span class="n">rule</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
@@ -2012,7 +2012,7 @@ above). <code>enumerate</code> then supplies the positional "all but the first" 
 <a href="#repeatable-filtermap-checks"><code>checks(source) { … }</code></a> instead — it binds the
 source once and drops the repeated selector.</p>
 <h2 id="coverage">Coverage<a class="headerlink" href="#coverage" title="Permanent link">&para;</a></h2>
-<p>All 52 bundled matchers ship a <code>Matcher.dsl</code>, and all 155 bundled rules are
+<p>All 52 bundled matchers ship a <code>Matcher.distill</code>, and all 155 bundled rules are
 built on those matchers. The <code>operation-metadata</code> matcher handles duplicate
 <code>operationId</code> values and the <code>response-example</code> matcher handles duplicate error
 payloads; both use <code>group</code> as shown above. <code>path-count</code> uses <code>pathSegments(...)</code>

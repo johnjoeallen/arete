@@ -1304,7 +1304,7 @@ order</strong>: its matcher runs against the normalised API model and the rule's
 returns occurrences, the policy's <strong>disposition</strong> (a point deduction or
 <code>PROHIBITED</code>) is applied once, and one finding is emitted for each occurrence.</p>
 <h3 id="matcher-language">Matcher language<a class="headerlink" href="#matcher-language" title="Permanent link">&para;</a></h3>
-<p>Matchers are written in <a href="../distill/">Distill</a> (<code>Matcher.dsl</code>), currently the
+<p>Matchers are written in <a href="../distill/">Distill</a> (<code>Matcher.distill</code>), currently the
 only supported matcher language. It is a small expression language shaped for
 rule pipelines (<code>.map</code> / <code>.filter</code> / <code>.expand</code>, slashy regex literals,
 <code>occurrence(...)</code>).</p>
@@ -1325,7 +1325,7 @@ they are not part of the deployed matcher runtime. See
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>├── matchers/
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>│   └── &lt;matcher-id&gt;/
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>│       ├── Matcher.md          # descriptor (YAML front matter) + prose
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>│       ├── Matcher.dsl         # the matcher, in Distill — the only runtime used
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>│       ├── Matcher.distill         # the matcher, in Distill — the only runtime used
 <a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>│       └── Matcher.groovy      # build-time parity check (optional)
 <a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>├── rules/
 <a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>│   └── &lt;RULE-ID&gt;.md             # rule front matter + human documentation
@@ -1360,7 +1360,7 @@ observed</strong> by returning occurrences and takes no position on severity or 
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nn">---</span>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">naming</span><span class="w">                       </span><span class="c1"># must match the manifest key</span>
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="nt">language</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">distill</span><span class="w">                </span><span class="c1"># the matcher language</span>
-<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Matcher.dsl</span><span class="w">              </span><span class="c1"># the matcher source</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="nt">source</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Matcher.distill</span><span class="w">              </span><span class="c1"># the matcher source</span>
 <a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="nt">scopes</span><span class="p">:</span><span class="w">                          </span><span class="c1"># the scope values a matcher may request</span>
 <a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">property</span>
 <a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">path-segment</span>
@@ -1524,7 +1524,7 @@ operation's <code>method</code>, <code>path</code>, and <code>pointer</code>, so
 a subject without an outer <code>api.paths.expand</code>. These pair with
 <a href="../distill/#repeatable-filtermap-checks"><code>checks(source) { … }</code></a>.</p>
 <h3 id="writing-a-matcher">Writing a matcher<a class="headerlink" href="#writing-a-matcher" title="Permanent link">&para;</a></h3>
-<p>Matchers are written in <strong>Distill</strong> (<code>Matcher.dsl</code>); its grammar and builtins
+<p>Matchers are written in <strong>Distill</strong> (<code>Matcher.distill</code>); its grammar and builtins
 have their own chapter — the <a href="../distill/">Distill reference</a>.</p>
 <p>Matchers:</p>
 <ul>
@@ -1675,7 +1675,7 @@ rule, 2.0 each, security rules <code>PROHIBITED</code>), make good starting poin
 <h3 id="a-new-matcher-and-rule">A new matcher and rule<a class="headerlink" href="#a-new-matcher-and-rule" title="Permanent link">&para;</a></h3>
 <ol>
 <li>Create <code>matchers/&lt;id&gt;/Matcher.md</code> (descriptor) and
-   <code>matchers/&lt;id&gt;/Matcher.dsl</code> (the Distill expression).</li>
+   <code>matchers/&lt;id&gt;/Matcher.distill</code> (the Distill expression).</li>
 <li>Add <code>&lt;id&gt;: matchers/&lt;id&gt;/Matcher.md</code> to <code>PolicyBundle.yaml</code> under
    <code>matchers:</code>.</li>
 <li>Add rules that use it.</li>
