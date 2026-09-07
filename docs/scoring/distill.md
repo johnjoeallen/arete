@@ -87,7 +87,9 @@ schema.name ==~ /{{rule.parameters["prefix"]}}[A-Z][A-Za-z0-9]*/
 ```
 
 A literal with no `{{` is an ordinary constant with no added cost. A hole is
-compiled and validated at bundle load like any other expression.
+compiled and validated at bundle load like any other expression. A lone hole
+(`"{{ x }}"`) is also the idiom for [rendering a possibly-null value as a
+string](#idioms), empty when absent.
 
 ### Truthiness
 
@@ -614,6 +616,19 @@ distill(api, rule) {
         : [];
 }
 ```
+
+**Possibly-null value as a string — `"{{ x }}"`.** A hole renders `null` as
+`""`, so a lone hole is the shortest way to coerce an optional value to a
+string, empty when absent — without a `== null ? "" :` guard or the `"null"`
+that `+` concatenation would produce:
+
+```java
+tokenise(",", "{{rule.parameters["allowed"]}}")   // [] when the param is absent
+```
+
+`x ?: ""` says the same thing and is clearer when `x` is already known to be a
+string; `"{{ x }}"` also covers non-string and reads well when the value is
+being built into a larger string anyway.
 
 **"Seen already?" — group, don't accumulate.** `group` replaces a mutable
 `seen` map: group the entries by their key, keep the groups with more than one
