@@ -173,10 +173,11 @@ class DistillMatcherEvaluatorTest {
 
     @Test
     void isBlankCallFormMatchesTheIsBlankOperatorIncludingNullReceivers() {
-        // it?.summary?.isBlank() is the method spelling of `it.summary is blank`:
-        // the ?. chain does not short-circuit isBlank away on a missing summary.
+        // The canonical spelling is the plain dot: member access is null-safe and
+        // isBlank guards its receiver, so `it.summary.isBlank()` needs no ?. and is
+        // an exact synonym of `it.summary is blank` — including when summary is null.
         String source = "distill(api, rule) { return api.values"
-                + ".filter { it?.summary?.isBlank() }"
+                + ".filter { it.summary.isBlank() }"
                 + ".map { occurrence(\"/\", \"v\", \"blank\") }; }";
         List<Object> values = java.util.Arrays.asList(
                 Map.of("summary", "List orders"),
@@ -184,19 +185,15 @@ class DistillMatcherEvaluatorTest {
                 Map.of("summary", ""),
                 Map.of());
         assertEquals(3, runtime.execute(source, Map.of("values", values), Map.of("parameters", Map.of())).size());
-        // plain-dot form needs no ?. guard either
-        assertEquals(3, runtime.execute(source.replace("it?.summary?.isBlank()", "it.summary.isBlank()"),
-                Map.of("values", values), Map.of("parameters", Map.of())).size());
-        // ... and the `is blank` operator is an exact synonym
-        assertEquals(3, runtime.execute(source.replace("it?.summary?.isBlank()", "it.summary is blank"),
+        assertEquals(3, runtime.execute(source.replace("it.summary.isBlank()", "it.summary is blank"),
                 Map.of("values", values), Map.of("parameters", Map.of())).size());
     }
 
     @Test
-    void isBlankChainIsTrueWhenAnyLinkIsNull() {
-        // it null, it.summary null, or summary blank -> all true
+    void plainDotIsBlankIsTrueWhenAnyLinkIsNull() {
+        // it null, it.summary null, or summary blank -> all true, via plain dot
         String source = "distill(api, rule) { return api.values"
-                + ".filter { it?.summary?.isBlank() }"
+                + ".filter { it.summary.isBlank() }"
                 + ".map { occurrence(\"/\", \"v\", \"blank\") }; }";
         List<Object> values = java.util.Arrays.asList(
                 null,                              // it is null
@@ -204,6 +201,38 @@ class DistillMatcherEvaluatorTest {
                 Map.of("summary", "  "),           // summary blank
                 Map.of("summary", "List orders")); // not blank
         assertEquals(3, runtime.execute(source, Map.of("values", values), Map.of("parameters", Map.of())).size());
+    }
+
+    @Test
+    void safeCallShortCircuitsToNullUnconditionally() {
+        // ?. always yields null on a null receiver — even before a null-guarding
+        // call like isBlank(). So it drops the null/absent subjects it "sees".
+        String source = "distill(api, rule) { return api.values"
+                + ".filter { it.summary?.isBlank() }"
+                + ".map { occurrence(\"/\", \"v\", \"blank\") }; }";
+        List<Object> values = java.util.Arrays.asList(
+                Map.of("summary", "   "),           // blank -> isBlank() -> true
+                Map.of("summary", ""),              // blank -> true
+                Map.of(),                           // summary null -> ?. short-circuits -> null
+                Map.of("summary", "List orders"));  // not blank -> false
+        assertEquals(2, runtime.execute(source, Map.of("values", values), Map.of("parameters", Map.of())).size());
+    }
+
+    @Test
+    void inlineDefaultSubstitutesWhenReceiverIsNotTruthy() {
+        // x ?: d — d fills in for null/false, then the chain continues from it.
+        String source = "distill(api, rule) { return api.values"
+                + ".filter { (it.summary ?: \"n/a\").lower() == \"n/a\" }"
+                + ".map { occurrence(\"/\", \"v\", \"default\") }; }";
+        List<Object> values = java.util.Arrays.asList(
+                Map.of("summary", "List orders"),  // truthy -> kept -> "list orders" != "n/a"
+                Map.of(),                          // null -> "n/a"
+                Map.of("summary", ""));            // "" is truthy in Distill -> stays "" != "n/a"
+        assertEquals(1, runtime.execute(source, Map.of("values", values), Map.of("parameters", Map.of())).size());
+        // list default keeps a null collection iterable
+        assertEquals(0, runtime.execute(
+                "distill(api, rule) { return count(api.servers ?: []) > 0 ? [occurrence(\"/\", \"v\", \"x\")] : []; }",
+                Map.of("values", List.of()), Map.of("parameters", Map.of())).size());
     }
 
     @Test

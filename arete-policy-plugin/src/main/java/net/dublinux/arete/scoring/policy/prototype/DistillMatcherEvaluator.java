@@ -107,28 +107,29 @@ public final class DistillMatcherEvaluator {
 
     /**
      * Receiver functions ({@code receiver.name(...)}) whose implementation
-     * guards its receiver, so it is safe — and meaningful — to invoke on a
-     * {@code null}. The parser consults this set so a leading {@code ?.} does
-     * <em>not</em> short-circuit the call away: {@code x?.isBlank()} runs
-     * {@code isBlank(null)} rather than yielding {@code null}. This is not a
-     * general null-safety rule; it is the specific list of functions written to
-     * cope with {@code null}. {@code isBlank} is the receiver-function spelling
-     * of the {@code is blank} operator and behaves identically: true for
-     * {@code null}, {@code ""}, or a whitespace-only string, false otherwise.
+     * guards its receiver, so a plain {@code .} call on a {@code null} receiver
+     * is safe and meaningful rather than an error. This is purely an
+     * implementation note consulted by {@link #call}: it is <em>not</em> a
+     * navigation rule, and {@code ?.} does not consult it — {@code x?.isBlank()}
+     * short-circuits to {@code null} on a null {@code x} like any other safe
+     * call. Write {@code x.isBlank()} (plain dot) to get {@code isBlank(null)}.
+     * {@code isBlank} is the receiver-function spelling of the {@code is blank}
+     * operator and behaves identically: true for {@code null}, {@code ""}, or a
+     * whitespace-only string, false otherwise.
      */
-    private static final Set<String> NULL_TOLERANT_CALLS = Set.of("isBlank");
+    private static final Set<String> NULL_GUARDING_CALLS = Set.of("isBlank");
 
     /**
      * Dispatches a receiver function {@code receiver.name(args)} — {@code
      * s.trim()} is {@code trim(s)}, {@code xs.count { }} is {@code count(xs, …)}.
      * There is no object model; the implementation is chosen from the receiver's
      * runtime kind and the name. A {@code null} receiver reaches here only for a
-     * {@link #NULL_TOLERANT_CALLS} function (a plain {@code .} on {@code null},
-     * or {@code ?.} which otherwise short-circuits first); every other function
-     * assumes a non-null receiver of the right kind.
+     * {@link #NULL_GUARDING_CALLS} function via a plain {@code .} ({@code ?.}
+     * short-circuits before the call); every other function assumes a non-null
+     * receiver of the right kind.
      */
     private static Object call(Object receiver, String name, List<Object> args) {
-        if (NULL_TOLERANT_CALLS.contains(name)) {
+        if (NULL_GUARDING_CALLS.contains(name)) {
             return isBlank(receiver);
         }
         if (receiver instanceof String text) return switch (name) {
@@ -580,8 +581,16 @@ public final class DistillMatcherEvaluator {
             };
         }
         private Expr postfix(Expr value) {
-            while (at(".") || (at("?") && ".".equals(lookahead.text())) || at("[")) {
-                if (accept(".")) {
+            while (at(".") || (at("?") && (".".equals(lookahead.text()) || ":".equals(lookahead.text()))) || at("[")) {
+                if (at("?") && ":".equals(lookahead.text())) {
+                    // x ?: default — substitute `default` (a simple operand) when
+                    // `x` is not truthy, then keep chaining from that value. Never
+                    // short-circuits the rest of the expression.
+                    advance(); advance();
+                    Expr fallback = primary();
+                    Expr receiver = value;
+                    value = env -> { Object v = receiver.eval(env); return truthy(v) ? v : fallback.eval(env); };
+                } else if (accept(".")) {
                     String name = expectId();
                     if (!KNOWN_MEMBERS.contains(name)) throw new IllegalArgumentException("unknown property or operation: " + name);
                     if (accept("(")) { List<Expr> args = arguments(); Expr receiver = value; value = env -> call(receiver.eval(env), name, args.stream().map(a -> a.eval(env)).toList()); }
@@ -594,10 +603,9 @@ public final class DistillMatcherEvaluator {
                     Expr receiver = value;
                     if (accept("(")) {
                         List<Expr> args = arguments();
-                        boolean nullTolerant = NULL_TOLERANT_CALLS.contains(name);
                         value = env -> {
                             Object target = receiver.eval(env);
-                            return target == null && !nullTolerant ? null
+                            return target == null ? null
                                     : call(target, name, args.stream().map(a -> a.eval(env)).toList());
                         };
                     } else if (at("{")) {

@@ -93,27 +93,73 @@ relying on emptiness, and use `truthy(x)` when you need the boolean itself.
 
 ### Null and blank
 
-A missing model field reads as `null` — `member` access never throws — but
-most [receiver functions](#methods) do not guard their receiver, so
-`op.summary.trim()` fails when `summary` is absent. Reach through a
-possibly-null value with the safe-navigation operator `?.`: `op.summary?.trim()`
-is `null` when `summary` is `null`, otherwise the trimmed string. `a?.b`,
-`a?.b(...)` and `a?.b { … }` all yield `null` the moment the receiver is
-`null`, skipping the rest of the chain.
+A missing model field reads as `null`. Distill *looks* like Groovy here, but the
+null rules are different and simpler — don't carry Groovy habits over.
 
-"Absent, empty, or whitespace-only" is one test, written either way:
+**Member access and indexing are always null-safe.** `a.b` (and `a[k]`) is
+`null` when `a` is `null` *or* when `b` is absent — it never throws, at any
+depth:
+
+```java
+op.requestBody.schema.type        // null anywhere in the chain → null, no error
+```
+
+So `?.` before a plain member buys nothing. These pairs are identical, and the
+short forms are canonical:
+
+```java
+op?.summary          ==  op.summary
+op.responses?.keys   ==  op.responses.keys
+```
+
+**`?.` matters only before a call `(...)` or closure `{ }`** — and there it
+yields `null` on a `null` receiver, *unconditionally*. Unlike Groovy there is no
+truthiness test, and no "this function tolerates `null`" exception — `?.` always
+short-circuits that one hop:
+
+```java
+op.summary?.trim()                     // null summary → null; else trimmed string
+op.summary?.lower()?.startsWith("get") // repeat ?. past each nullable hop
+op.summary?.trim().lower()             // WRONG: .lower() runs on null → error
+```
+
+**Blank test.** "Absent, empty, or whitespace-only" is one check. `isBlank`
+returns `true` for `null` (a missing value *is* blank) and its receiver is
+already null-safe, so write the **plain dot** — no `?.`:
 
 ```java
 op.summary is blank          // operator form
-op.summary.isBlank()         // receiver-function form — receiver may be null
-op?.summary?.isBlank()       // ?. chain: isBlank still runs on a null summary
+op.summary.isBlank()         // receiver-function form — null/blank → true
 ```
 
-`isBlank()`'s implementation guards for a `null` (or non-string) receiver — it
-is not magically null-safe, it is written that way — and the interpreter does
-not let a leading `?.` short-circuit it. So the three lines above are exact
-synonyms, and each keeps the *offending* (blank) subjects. The bundled matchers
-use both spellings.
+These are exact synonyms and each keeps the *offending* (blank) subjects. Do
+**not** write `op.summary == null || op.summary.isBlank()` — the first half is
+dead. Do **not** write `op.summary?.isBlank()` — the `?.` short-circuits a
+`null` to `null` (falsy), *losing* the blank subject you meant to catch. The
+guarding is an implementation detail of `isBlank`, not a navigation rule.
+
+**Inline default: `x ?: d`.** Yields `d` when `x` is not truthy (`x` is `null`
+or `false`), otherwise `x`; the chain then continues from whichever value that
+is — `?:` never short-circuits the rest of the expression.
+
+```java
+op.deprecated ?: false            // absent flag → false
+(op.summary ?: "n/a").lower()     // absent summary → "n/a"
+count(op.parameters ?: [])        // absent list → 0
+```
+
+The default is a **simple operand** — a literal, a name, `(...)`, or `[...]`. A
+default that is itself a member chain must be parenthesised, or the `.` binds to
+the `?:` result instead:
+
+```java
+op.summary ?: (rule.title) . lower()   // ✓ default is rule.title
+op.summary ?: rule.title . lower()     // ✗ parses as (op.summary ?: rule).title.lower()
+```
+
+Distill's truthiness is narrow: `""`, `0`, and `[]` are **truthy**, so `?:`
+leaves them alone (Groovy's Elvis would replace them). For "absent **or**
+empty", use `x.isBlank()`, not `x ?: ""`.
 
 ## Operators
 
@@ -121,8 +167,9 @@ Highest precedence first:
 
 | Operator | Meaning |
 |---|---|
-| `a.b`  `a.b(...)`  `a.b { x -> ... }`  `a.b { ... }`  `a[k]` | member / method / trailing-closure / index |
-| `a?.b`  `a?.b(...)`  `a?.b { ... }` | safe navigation — `null` when `a` is `null`, else as `a.b…` (see [Null and blank](#null-and-blank)) |
+| `a.b`  `a.b(...)`  `a.b { x -> ... }`  `a.b { ... }`  `a[k]` | member / method / trailing-closure / index — member and index are **always null-safe** (`null` receiver or missing key → `null`) |
+| `a?.b(...)`  `a?.b { ... }` | safe call — `null` when `a` is `null`, else as `a.b…`. Only meaningful before `(...)` or `{ }`; `a?.b` on a bare member is the same as `a.b`. Short-circuits one hop, unconditionally. (see [Null and blank](#null-and-blank)) |
+| `a ?: d` | inline default — `a` when truthy, else `d` substituted in place; the chain continues. `d` is a simple operand (parenthesise a member chain). Null/`false`-based, not Groovy-style. |
 | `!a`  `-a` | logical not, numeric negation |
 | `a + b` | numeric **integer** add if both are numbers; list concat if both are lists; otherwise string concatenation (`null` renders as `"null"`) |
 | `a < b` `a <= b` `a > b` `a >= b` | numeric by value; otherwise lexicographic on strings |
@@ -191,7 +238,7 @@ In `contains` / `startsWith` / `endsWith` / `startsWithWord` / `endsWithWord`,
 | `s.endsWith(t)` | Java `String.endsWith` |
 | `s.startsWithWord(t)` | word-aware `startsWith`: `s` equals `t`, or begins with `t` followed by a non-alphanumeric character. `"List customers"` and `"List."` match `"List"`; `"Listing"` does not |
 | `s.endsWithWord(t)` | word-aware `endsWith` — the mirror of `startsWithWord` |
-| `s.isBlank()` | `true` when `s` is `null`, `""`, or whitespace-only — the receiver-function spelling of the [`is blank`](#null-and-blank) operator. Its implementation guards for `null` (and non-strings), so `op.summary.isBlank()` needs no `null` guard and `op?.summary?.isBlank()` still evaluates rather than short-circuiting |
+| `s.isBlank()` | `true` when `s` is `null`, `""`, or whitespace-only — the receiver-function spelling of the [`is blank`](#null-and-blank) operator. Its implementation guards for `null` (and non-strings), so `op.summary.isBlank()` needs no `?.` guard — and must not have one, since `?.` would short-circuit a `null` away before `isBlank` sees it |
 | `s.length` | length (a member, not a call) |
 
 ### Sequence methods
