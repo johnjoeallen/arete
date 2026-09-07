@@ -1357,7 +1357,9 @@ enclosing delimiter, so a hole can itself contain string literals.</p>
 <a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="n">schema</span><span class="p">.</span><span class="na">name</span><span class="w"> </span><span class="o">==~</span><span class="w"> </span><span class="o">/</span><span class="p">{{</span><span class="n">rule</span><span class="p">.</span><span class="na">parameters</span><span class="o">[</span><span class="s">"prefix"</span><span class="o">]</span><span class="p">}}</span><span class="o">[</span><span class="n">A</span><span class="o">-</span><span class="n">Z</span><span class="o">][</span><span class="n">A</span><span class="o">-</span><span class="n">Za</span><span class="o">-</span><span class="n">z0</span><span class="o">-</span><span class="mi">9</span><span class="o">]*/</span>
 </code></pre></div>
 <p>A literal with no <code>{{</code> is an ordinary constant with no added cost. A hole is
-compiled and validated at bundle load like any other expression.</p>
+compiled and validated at bundle load like any other expression. A lone hole
+(<code>"{{ x }}"</code>) is also the idiom for <a href="#idioms">rendering a possibly-null value as a
+string</a>, empty when absent.</p>
 <h3 id="truthiness">Truthiness<a class="headerlink" href="#truthiness" title="Permanent link">&para;</a></h3>
 <p><code>false</code> and <code>null</code> are falsy. <strong>Everything else is truthy</strong>, including <code>""</code>,
 <code>0</code>, and <code>[]</code>. Use explicit checks (<code>text != ""</code>, <code>count(list) &gt; 0</code>) rather than
@@ -2014,6 +2016,15 @@ nothing" branches, then let the surrounding <code>expand</code> flatten it:</p>
 <a id="__codelineno-30-4" name="__codelineno-30-4" href="#__codelineno-30-4"></a><span class="w">        </span><span class="p">:</span><span class="w"> </span><span class="o">[]</span><span class="p">;</span>
 <a id="__codelineno-30-5" name="__codelineno-30-5" href="#__codelineno-30-5"></a><span class="p">}</span>
 </code></pre></div>
+<p><strong>Possibly-null value as a string — <code>"{{ x }}"</code>.</strong> A hole renders <code>null</code> as
+<code>""</code>, so a lone hole is the shortest way to coerce an optional value to a
+string, empty when absent — without a <code>== null ? "" :</code> guard or the <code>"null"</code>
+that <code>+</code> concatenation would produce:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a><span class="n">tokenise</span><span class="p">(</span><span class="s">","</span><span class="p">,</span><span class="w"> </span><span class="s">"{{rule.parameters["</span><span class="n">allowed</span><span class="s">"]}}"</span><span class="p">)</span><span class="w">   </span><span class="c1">// [] when the param is absent</span>
+</code></pre></div>
+<p><code>x ?: ""</code> says the same thing and is clearer when <code>x</code> is already known to be a
+string; <code>"{{ x }}"</code> also covers non-string and reads well when the value is
+being built into a larger string anyway.</p>
 <p><strong>"Seen already?" — group, don't accumulate.</strong> <code>group</code> replaces a mutable
 <code>seen</code> map: group the entries by their key, keep the groups with more than one
 member, and report all but the first (see the duplicate-<code>operationId</code> example
@@ -2021,8 +2032,8 @@ above). <code>enumerate</code> then supplies the positional "all but the first" 
 <code>indexed[0] &gt; 0</code>. This is O(n) and needs no repetition.</p>
 <p><strong>List building.</strong> Concatenate independent checks with <code>+</code> when they run over
 <em>different</em> sources:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-31-1" name="__codelineno-31-1" href="#__codelineno-31-1"></a><span class="n">info</span><span class="p">.</span><span class="na">extensionKeys</span><span class="p">.</span><span class="na">filter</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}.</span><span class="na">map</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">occurrence</span><span class="p">(...)</span><span class="w"> </span><span class="p">}</span>
-<a id="__codelineno-31-2" name="__codelineno-31-2" href="#__codelineno-31-2"></a><span class="w">  </span><span class="o">+</span><span class="w"> </span><span class="n">api</span><span class="p">.</span><span class="na">paths</span><span class="p">.</span><span class="na">expand</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-32-1" name="__codelineno-32-1" href="#__codelineno-32-1"></a><span class="n">info</span><span class="p">.</span><span class="na">extensionKeys</span><span class="p">.</span><span class="na">filter</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}.</span><span class="na">map</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">occurrence</span><span class="p">(...)</span><span class="w"> </span><span class="p">}</span>
+<a id="__codelineno-32-2" name="__codelineno-32-2" href="#__codelineno-32-2"></a><span class="w">  </span><span class="o">+</span><span class="w"> </span><span class="n">api</span><span class="p">.</span><span class="na">paths</span><span class="p">.</span><span class="na">expand</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">}</span>
 </code></pre></div>
 <p>When the checks share one source, use
 <a href="#repeatable-filtermap-checks"><code>checks(source) { … }</code></a> instead — it binds the
