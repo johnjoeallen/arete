@@ -1672,6 +1672,10 @@ a stanza's <code>filter</code> (<code>rule.parameters["trailing-period"] == "pre
 <h2 id="builtin-functions">Builtin functions<a class="headerlink" href="#builtin-functions" title="Permanent link">&para;</a></h2>
 <p>This is the complete set — a closed boundary, not a starter kit. A matcher can
 call these and nothing else.</p>
+<p>Builtins that differ between UK and US spelling accept <strong>both</strong> — <code>tokenise</code> /
+<code>tokenize</code>, <code>normalise</code> / <code>normalize</code>. Generated matchers use the UK spelling.
+(Member names such as <code>licenseName</code> mirror the OpenAPI model and are not
+aliased.)</p>
 <table>
 <thead>
 <tr>
@@ -1693,12 +1697,16 @@ call these and nothing else.</p>
 <td>match anywhere in <code>text</code></td>
 </tr>
 <tr>
-<td><code>tokenize(delim, text)</code></td>
-<td>split <code>text</code> on the <strong>literal string</strong> <code>delim</code>; empty tokens are kept (pair with <code>.filter { t -&gt; t != "" }</code>)</td>
+<td><code>tokenise(delim, text)</code></td>
+<td>split <code>text</code> on the <strong>literal string</strong> <code>delim</code>; empty tokens are kept (pair with <code>.filter { t -&gt; t != "" }</code>). For prose, use <code>words</code> / <code>normalise</code> instead — they treat punctuation as a boundary</td>
+</tr>
+<tr>
+<td><code>normalise(text)</code></td>
+<td><code>text</code> with token boundaries normalised: every run of separator characters becomes one space, leading/trailing whitespace removed. A separator is anything that is not a letter or digit, <strong>except</strong> a <code>'</code> or <code>-</code> between two alphanumerics (<code>opt-in</code>, <code>user's</code> stay whole). <code>"  Service,(API) / v2 "</code> → <code>"Service API v2"</code></td>
 </tr>
 <tr>
 <td><code>words(text)</code></td>
-<td>substantive words of <code>text</code>: whitespace-separated tokens, leading/trailing punctuation stripped, keeping only those that still contain a letter. Count is <code>count(words(text))</code>; per-word length is <code>w.length</code> inside <code>.any</code> / <code>.all</code> / <code>.filter</code></td>
+<td>the substantive logical words of <code>text</code>: <code>normalise</code> then split on spaces, keeping only tokens that contain a letter. Punctuation between words is a boundary — <code>"Service,API"</code> → <code>["Service", "API"]</code>, never <code>["ServiceAPI"]</code>. Count is <code>count(words(text))</code>; per-word length is <code>w.length</code> inside <code>.any</code> / <code>.all</code> / <code>.filter</code></td>
 </tr>
 <tr>
 <td><code>count(list)</code></td>
@@ -1805,15 +1813,15 @@ run costs nothing after the first call.</p>
 <td><code>true</code> &nbsp; <code>true</code> &nbsp; <code>true</code></td>
 </tr>
 <tr>
-<td><code>tokenize(",", "a,,b")</code></td>
+<td><code>tokenise(",", "a,,b")</code></td>
 <td><code>["a", "", "b"]</code> — empty token kept</td>
 </tr>
 <tr>
-<td><code>count(tokenize(",", "a,,b"))</code></td>
+<td><code>count(tokenise(",", "a,,b"))</code></td>
 <td><code>3</code></td>
 </tr>
 <tr>
-<td><code>join("|", tokenize(",", "a,,b"))</code></td>
+<td><code>join("|", tokenise(",", "a,,b"))</code></td>
 <td><code>"a\|\|b"</code></td>
 </tr>
 <tr>
@@ -1825,12 +1833,20 @@ run costs nothing after the first call.</p>
 <td><code>["v1", "orders", "items"]</code> — empty and <code>{…}</code> segments dropped</td>
 </tr>
 <tr>
-<td><code>words("Get  the widget — v2!")</code></td>
-<td><code>["Get", "the", "widget", "v2"]</code> — whitespace runs collapsed, <code>—</code> and <code>!</code> dropped</td>
+<td><code>normalise("  Service,(API) / v2 ")</code></td>
+<td><code>"Service API v2"</code></td>
 </tr>
 <tr>
-<td><code>words("List").size()</code> &nbsp; <code>count(words("List all customers"))</code></td>
-<td><code>1</code> &nbsp; <code>3</code></td>
+<td><code>words("Get the widget—v2!")</code></td>
+<td><code>["Get", "the", "widget", "v2"]</code> — <code>—</code> and <code>!</code> are boundaries</td>
+</tr>
+<tr>
+<td><code>words("Service,API")</code> &nbsp; <code>words("opt-in")</code></td>
+<td><code>["Service", "API"]</code> &nbsp; <code>["opt-in"]</code></td>
+</tr>
+<tr>
+<td><code>count(words("List all customers"))</code></td>
+<td><code>3</code></td>
 </tr>
 <tr>
 <td><code>parseInt("  42 ")</code> &nbsp; <code>parseInt("x", 0)</code></td>
