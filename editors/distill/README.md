@@ -42,8 +42,11 @@ Applies to any file named `Matcher.dsl` (or `*.distill`). For a one-off file,
 Settings → Editor → **TextMate Bundles** → `+` → select this `editors/distill`
 folder → Apply. JetBrains IDEs read the VS Code extension layout directly.
 
-`Matcher.dsl` is then highlighted automatically; for `*.distill` add the
-mapping under Settings → Editor → File Types if needed.
+The IntelliJ TextMate integration binds by **file extension**, so `*.distill`
+files are highlighted after the bundle is added. The `Matcher.dsl` *filename*
+is not picked up automatically (`.dsl` is too generic to claim globally); map
+it by hand under Settings → Editor → File Types → *TextMate* → add pattern
+`Matcher.dsl`.
 
 ## Keeping the grammar current
 
