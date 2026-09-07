@@ -277,7 +277,7 @@ Matchers:
 has no `import`, no I/O, no reflection, no recursion, and execution is bounded
 by a hard interpreter-step cap. A matcher can call only the core
 list/string/closure operations and a fixed, closed set of builtins
-(`regexFullMatch`, `tokenize`, `pathSegments`, `parseInt`, …), catalogued in
+(`regexFullMatch`, `tokenise`, `pathSegments`, `parseInt`, …), catalogued in
 the [Distill reference](distill.md#builtin-functions). That set is the
 boundary: widening it takes a reviewed change to the interpreter, and a matcher
 has no way to reach around it.

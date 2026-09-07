@@ -57,11 +57,13 @@
     def checkKeys = ['initial-capital', 'convention', 'trailing-period', 'maximum-length', 'minimum-words', 'maximum-word-length', 'match']
     if (!checkKeys.any { parameters.containsKey(it) }) return []
 
-    // Substantive words: whitespace-split, edge punctuation stripped, must hold a letter.
+    // Substantive words: every run of non-alphanumerics is a boundary, except a
+    // ' or - between two alphanumerics; leading/trailing whitespace removed.
     def words = { text ->
-        (text ?: '').trim().split(/\s+/)
-            .collect { it.replaceAll(/^[^\p{L}\p{N}]+/, '').replaceAll(/[^\p{L}\p{N}]+$/, '') }
-            .findAll { it =~ /\p{L}/ }
+        ((text ?: '') as String)
+            .replaceAll(/(?<![\p{L}\p{N}])['-]|['-](?![\p{L}\p{N}])|[^\p{L}\p{N}'-]/, ' ')
+            .replaceAll(/ +/, ' ').trim()
+            .split(' ').findAll { it && it =~ /\p{L}/ }
     }
 
     def matches = { operation ->

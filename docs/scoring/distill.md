@@ -349,13 +349,19 @@ a stanza's `filter` (`rule.parameters["trailing-period"] == "present" && …`).
 This is the complete set — a closed boundary, not a starter kit. A matcher can
 call these and nothing else.
 
+Builtins that differ between UK and US spelling accept **both** — `tokenise` /
+`tokenize`, `normalise` / `normalize`. Generated matchers use the UK spelling.
+(Member names such as `licenseName` mirror the OpenAPI model and are not
+aliased.)
+
 | Function | Result |
 |---|---|
 | `occurrence(pointer, path, message)` | an occurrence; `pointer` and `path` may be `null`, `message` must be non-blank. Non-string arguments are stringified. |
 | `regexFullMatch(pattern, text)` | whole-string match; `pattern` is a regex literal or a string |
 | `regexSearch(pattern, text)` | match anywhere in `text` |
-| `tokenize(delim, text)` | split `text` on the **literal string** `delim`; empty tokens are kept (pair with `.filter { t -> t != "" }`) |
-| `words(text)` | substantive words of `text`: whitespace-separated tokens, leading/trailing punctuation stripped, keeping only those that still contain a letter. Count is `count(words(text))`; per-word length is `w.length` inside `.any` / `.all` / `.filter` |
+| `tokenise(delim, text)` | split `text` on the **literal string** `delim`; empty tokens are kept (pair with `.filter { t -> t != "" }`). For prose, use `words` / `normalise` instead — they treat punctuation as a boundary |
+| `normalise(text)` | `text` with token boundaries normalised: every run of separator characters becomes one space, leading/trailing whitespace removed. A separator is anything that is not a letter or digit, **except** a `'` or `-` between two alphanumerics (`opt-in`, `user's` stay whole). `"  Service,(API) / v2 "` → `"Service API v2"` |
+| `words(text)` | the substantive logical words of `text`: `normalise` then split on spaces, keeping only tokens that contain a letter. Punctuation between words is a boundary — `"Service,API"` → `["Service", "API"]`, never `["ServiceAPI"]`. Count is `count(words(text))`; per-word length is `w.length` inside `.any` / `.all` / `.filter` |
 | `count(list)` | element count (an integer). For a filtered count use the sequence form `list.count { x -> ... }`. |
 | `distinct(list)` | de-duplicated list — drops `null`, keeps first-seen order, compares by string value |
 | `parseInt(text)` / `parseInt(text, fallback)` | base-10 integer after trimming; `fallback` (default `-1`) on failure |
@@ -409,13 +415,15 @@ Each row is a complete expression and the value it produces.
 | `[10, 20, 30][5]` | `null` — out of range |
 | `type(3)` &nbsp; `type("s")` &nbsp; `type([1])` | `"int"` &nbsp; `"string"` &nbsp; `"list"` |
 | `truthy("")` &nbsp; `truthy([])` &nbsp; `truthy(0)` | `true` &nbsp; `true` &nbsp; `true` |
-| `tokenize(",", "a,,b")` | `["a", "", "b"]` — empty token kept |
-| `count(tokenize(",", "a,,b"))` | `3` |
-| `join("|", tokenize(",", "a,,b"))` | `"a\|\|b"` |
+| `tokenise(",", "a,,b")` | `["a", "", "b"]` — empty token kept |
+| `count(tokenise(",", "a,,b"))` | `3` |
+| `join("|", tokenise(",", "a,,b"))` | `"a\|\|b"` |
 | `distinct(["b", "a", "b", null, "a"])` | `["b", "a"]` — `null` dropped, first-seen order |
 | `pathSegments("/v1/orders/{id}/items")` | `["v1", "orders", "items"]` — empty and `{…}` segments dropped |
-| `words("Get  the widget — v2!")` | `["Get", "the", "widget", "v2"]` — whitespace runs collapsed, `—` and `!` dropped |
-| `words("List").size()` &nbsp; `count(words("List all customers"))` | `1` &nbsp; `3` |
+| `normalise("  Service,(API) / v2 ")` | `"Service API v2"` |
+| `words("Get the widget—v2!")` | `["Get", "the", "widget", "v2"]` — `—` and `!` are boundaries |
+| `words("Service,API")` &nbsp; `words("opt-in")` | `["Service", "API"]` &nbsp; `["opt-in"]` |
+| `count(words("List all customers"))` | `3` |
 | `parseInt("  42 ")` &nbsp; `parseInt("x", 0)` | `42` &nbsp; `0` |
 | `strip("--hi--", "-")` &nbsp; `strip("  hi  ")` | `"hi"` &nbsp; `"hi"` |
 | `last(["a", "b"])` &nbsp; `last([])` | `"b"` &nbsp; `""` |

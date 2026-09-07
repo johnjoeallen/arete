@@ -238,19 +238,42 @@ public final class DistillMatcherEvaluator {
     private static boolean regexFullMatch(Object pattern, Object text) { return pattern(pattern).matches(String.valueOf(text)); }
 
     /**
-     * Splits prose into substantive words: whitespace-separated tokens with
-     * leading/trailing non-alphanumerics stripped, keeping only those left
-     * holding at least one letter. {@code "Get  the widget — v2!"} →
-     * {@code ["Get", "the", "widget", "v2"]}. Per-word length is then
-     * {@code w.length}; the count is {@code count(words(...))}.
+     * A {@code '} or {@code -} with a letter or digit on both sides — the two
+     * punctuation marks that {@link #normalize} keeps inside a word ({@code
+     * opt-in}, {@code user's}). Everything else non-alphanumeric is a boundary.
+     */
+    private static final java.util.regex.Pattern WORD_SEPARATOR = java.util.regex.Pattern.compile(
+            "(?<![\\p{L}\\p{N}])['-]|['-](?![\\p{L}\\p{N}])|[^\\p{L}\\p{N}'-]");
+
+    /**
+     * Normalises token boundaries: every run of separator characters becomes a
+     * single space and leading/trailing whitespace is removed, so the caller can
+     * tokenize on {@code " "} alone. A separator is anything that is not a letter
+     * or digit, <em>except</em> a {@code '} or {@code -} sitting between two
+     * alphanumerics. {@code "  Service,(API) / v2 "} → {@code "Service API v2"};
+     * {@code "opt-in"} and {@code "user's"} are unchanged. Spelled {@code
+     * normalise} or {@code normalize}.
+     */
+    private static String normalize(Object text) {
+        if (text == null) return "";
+        return WORD_SEPARATOR.matcher(String.valueOf(text)).replaceAll(" ").replaceAll(" +", " ").trim();
+    }
+
+    /**
+     * The substantive logical words of a value: {@link #normalize} then split on
+     * spaces, keeping only tokens that hold at least one letter.
+     * {@code "Get the widget—v2!"} → {@code ["Get", "the", "widget", "v2"]}.
+     * Punctuation between words is a boundary, so {@code "Service,API"} →
+     * {@code ["Service", "API"]}, never {@code ["ServiceAPI"]}. Per-word length
+     * is {@code w.length}; the count is {@code count(words(...))}.
      */
     private static List<Object> words(Object text) {
         List<Object> out = new ArrayList<>();
-        if (text == null) return out;
-        for (String token : String.valueOf(text).trim().split("\\s+")) {
-            String trimmed = token.replaceAll("^[^\\p{L}\\p{N}]+", "").replaceAll("[^\\p{L}\\p{N}]+$", "");
-            if (trimmed.codePoints().anyMatch(Character::isLetter)) {
-                out.add(trimmed);
+        String normalised = normalize(text);
+        if (normalised.isEmpty()) return out;
+        for (String token : normalised.split(" ")) {
+            if (token.codePoints().anyMatch(Character::isLetter)) {
+                out.add(token);
             }
         }
         return out;
@@ -294,6 +317,7 @@ public final class DistillMatcherEvaluator {
             case "regexFullMatch" -> regexFullMatch(args.get(0), args.get(1));
             case "tokenize" -> List.of(String.valueOf(args.get(1)).split(java.util.regex.Pattern.quote(String.valueOf(args.get(0)))));
             case "words" -> words(args.get(0));
+            case "normalize" -> normalize(args.get(0));
             case "last" -> { List<Object> values = iterableOf(args.get(0)); yield values.isEmpty() ? "" : values.get(values.size() - 1); }
             case "count" -> (long) iterableOf(args.get(0)).size();
             case "distinct" -> {
@@ -508,8 +532,9 @@ public final class DistillMatcherEvaluator {
             }
             if (accept("(")) {
                 if (!KNOWN_FUNCTIONS.contains(name)) throw new IllegalArgumentException("unknown function: " + name);
+                String fn = SPELLING_ALIASES.getOrDefault(name, name);
                 List<Expr> args = arguments();
-                return env -> function(name, args.stream().map(a -> a.eval(env)).toList());
+                return env -> function(fn, args.stream().map(a -> a.eval(env)).toList());
             }
             return env -> env.get(name);
         }
@@ -669,9 +694,19 @@ public final class DistillMatcherEvaluator {
         }
     }
 
+    /**
+     * UK/US spelling variants of builtins. Both spellings parse and validate;
+     * the value is the canonical name dispatched at runtime. Generated Distill
+     * uses the UK spelling ({@code tokenise}, {@code normalise}).
+     */
+    private static final Map<String, String> SPELLING_ALIASES = Map.of(
+            "tokenise", "tokenize",
+            "normalise", "normalize");
+
     /** Package-private for {@code DistillGrammarSnapshotTest}, which regenerates the editor grammar from this list. */
     static final Set<String> KNOWN_FUNCTIONS = Set.of(
-            "regexSearch", "regexFullMatch", "tokenize", "words", "last", "count", "checks", "distinct", "join", "strip",
+            "regexSearch", "regexFullMatch", "tokenize", "tokenise", "normalize", "normalise", "words", "last", "count",
+            "checks", "distinct", "join", "strip",
             "urlHost", "parseInt", "truthy", "pathSegments", "enumerate", "type", "occurrence",
             "operationMessage");
 

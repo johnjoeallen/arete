@@ -63,7 +63,7 @@
     "function-name": {
       "comment": "@generated distill.function.names",
       "name": "support.function.distill",
-      "match": "\\b(checks|count|distinct|enumerate|join|last|occurrence|operationMessage|parseInt|pathSegments|regexFullMatch|regexSearch|strip|tokenize|truthy|type|urlHost|words)\\b(?=\\s*\\()"
+      "match": "\\b(checks|count|distinct|enumerate|join|last|normalise|normalize|occurrence|operationMessage|parseInt|pathSegments|regexFullMatch|regexSearch|strip|tokenise|tokenize|truthy|type|urlHost|words)\\b(?=\\s*\\()"
     },
     "sequence-op": {
       "comment": "bare sequence operations, valid with no receiver inside a checks(...) { } block",

@@ -164,6 +164,43 @@ class DistillMatcherEvaluatorTest {
     }
 
     @Test
+    void wordsTreatsInternalPunctuationAsABoundaryNotDecoration() {
+        // "Service,API" is two logical words, never the merged "ServiceAPI".
+        String src = "distill(api, rule) { return api.values"
+                + ".filter { v -> last(words(v)).lower() == \"api\" }"
+                + ".map { v -> occurrence(\"/\", v, \"ends-api\") }; }";
+        assertEquals(4, runtime.execute(src, Map.of("values", java.util.List.of(
+                "Service API", "Service,API", "Service/API", "Service (API)", "Service Bus")),
+                Map.of("parameters", Map.of())).size());
+        // ' and - stay inside a word; leading/trailing whitespace and punctuation go
+        assertEquals(1, runtime.execute(
+                "distill(api, rule) { return api.values.filter { v -> count(words(v)) == 4 }"
+                        + ".map { v -> occurrence(\"/\", v, \"4\") }; }",
+                Map.of("values", java.util.List.of("  opt-in and user's choice  ", "Create/update the user record now")),
+                Map.of("parameters", Map.of())).size());
+    }
+
+    @Test
+    void normaliseCollapsesSeparatorsAndTrims() {
+        String src = "distill(api, rule) { return api.values"
+                + ".filter { v -> normalise(v) == \"Service API v2\" }"
+                + ".map { v -> occurrence(\"/\", v, \"n\") }; }";
+        assertEquals(3, runtime.execute(src, Map.of("values", java.util.List.of(
+                "  Service,(API) / v2 ", "Service   API   v2", "Service API v2", "Service API")),
+                Map.of("parameters", Map.of())).size());
+        // normalize (US) is the same builtin
+        assertEquals(1, runtime.execute(src.replace("normalise(v)", "normalize(v)"),
+                Map.of("values", java.util.List.of("Service API v2")), Map.of("parameters", Map.of())).size());
+    }
+
+    @Test
+    void tokeniseIsAnAcceptedSpellingOfTokenize() {
+        assertEquals(List.of(new Diagnostic("/", "a", "x"), new Diagnostic("/", "b", "x")), runtime.execute(
+                "distill(api, rule) { return tokenise(\",\", \"a,b\").map { t -> occurrence(\"/\", t, \"x\") }; }",
+                Map.of(), Map.of("parameters", Map.of())));
+    }
+
+    @Test
     void isBlankMatchesNullEmptyAndWhitespaceOnlyStrings() {
         assertEquals(3, runtime.execute(
                 "distill(api, rule) { return api.values.filter { value -> value is blank }.map { value -> occurrence(\"/\", \"value\", \"blank\") }; }",

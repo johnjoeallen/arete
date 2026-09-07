@@ -6,12 +6,21 @@
     if (!(title instanceof String) || title.trim().isEmpty()) return out
     def pointer = '/info/title'
 
+    // Logical words: every run of non-alphanumerics is a boundary, except a
+    // ' or - between two alphanumerics; leading/trailing whitespace removed.
+    def words = { text ->
+        ((text ?: '') as String)
+            .replaceAll(/(?<![\p{L}\p{N}])['-]|['-](?![\p{L}\p{N}])|[^\p{L}\p{N}'-]/, ' ')
+            .replaceAll(/ +/, ' ').trim()
+            .split(' ').findAll { it && it =~ /\p{L}/ }
+    }
+
     if (p.suffix && !title.trim().endsWith(p.suffix as String)) {
         out << [pointer: pointer, path: title, message: "API title does not end with '${p.suffix}'"]
     }
 
-    def words = title.split(' ').findAll { it }
-    def lastWord = words ? words[-1].replaceAll(/[()\[\]:,.]/, '').toLowerCase() : ''
+    def titleWords = words(title)
+    def lastWord = titleWords ? titleWords[-1].toLowerCase() : ''
     ((p.forbidden ?: '') as String).split(',').collect { it.trim() }.findAll { it }.each { token ->
         if (token.toLowerCase() == lastWord) {
             out << [pointer: pointer, path: title, message: "API title ends with the discouraged marker '${token}'"]
@@ -19,10 +28,9 @@
     }
 
     if (p.case == 'title-case') {
-        title.split(' ').findAll { it }.each { word ->
-            def core = word.replaceAll(/[()\[\]:,.]/, '')
-            if (core.isEmpty() || connectors.contains(core.toLowerCase()) || core.length() <= 3) return
-            if (!(core ==~ /[A-Z0-9].*/)) {
+        words(title).each { word ->
+            if (connectors.contains(word.toLowerCase()) || word.length() <= 3) return
+            if (!(word ==~ /[A-Z0-9].*/)) {
                 out << [pointer: pointer, path: title, message: "API title word '${word}' is not in Title Case"]
             }
         }

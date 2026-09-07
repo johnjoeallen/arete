@@ -457,6 +457,19 @@ class DistillGroovyParityTest {
                 Map.of("suffix", "API", "forbidden", "PoC,Test,WIP,Draft", "case", "title-case"), false);
     }
 
+    @Test void apiTitlePunctuationJoinedWords() {
+        // "Payments,API": the comma is a word boundary — the last logical word is
+        // "API" (forbidden) and "Payments" / "API" are the title-case candidates.
+        // Both implementations must agree once tokenisation is separator-aware.
+        String spec = """
+                openapi: 3.0.0
+                info: { title: "Payments,API", version: 1.0.0, openapi: 3.0.0 }
+                paths: {}
+                """;
+        assertParity("api-title", "api",
+                Map.of("forbidden", "API", "case", "title-case"), true, spec);
+    }
+
     @Test void extensionsAllowed() {
         assertParity("extensions", "api", Map.of("allowed", "x-api-id,x-audience,x-extensible-enum"), false);
     }
