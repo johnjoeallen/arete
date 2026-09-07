@@ -10,6 +10,7 @@
     { "include": "#keywords" },
     { "include": "#is-blank" },
     { "include": "#function-name" },
+    { "include": "#method-call" },
     { "include": "#sequence-op" },
     { "include": "#closure-param" },
     { "include": "#member-name" },
@@ -57,17 +58,22 @@
       ]
     },
     "is-blank": {
-      "name": "keyword.operator.word.distill",
+      "name": "keyword.control.distill",
       "match": "\\bis\\s+blank\\b"
     },
     "function-name": {
       "comment": "@generated distill.function.names",
-      "name": "support.function.distill",
+      "name": "entity.name.function.distill",
       "match": "\\b(checks|count|distinct|enumerate|join|last|normalise|normalize|occurrence|operationMessage|parseInt|pathSegments|regexFullMatch|regexSearch|strip|tokenise|tokenize|truthy|type|urlHost|words)\\b(?=\\s*\\()"
+    },
+    "method-call": {
+      "comment": "any name after a dot immediately applied as a call or trailing closure — .filter { }, .trim(), .isBlank()",
+      "name": "entity.name.function.distill",
+      "match": "(?<=\\.)\\s*([A-Za-z_]\\w*)\\b(?=\\s*[({])"
     },
     "sequence-op": {
       "comment": "bare sequence operations, valid with no receiver inside a checks(...) { } block",
-      "name": "support.function.distill",
+      "name": "entity.name.function.distill",
       "match": "\\b(all|any|count|expand|filter|find|group|map|match)\\b(?=\\s*\\{)"
     },
     "closure-param": {
@@ -76,12 +82,12 @@
     },
     "member-name": {
       "comment": "@generated distill.member.names",
-      "name": "support.type.property.distill",
+      "name": "entity.other.attribute-name.distill",
       "match": "(?<=\\.)\\s*(all|allowed|any|array|audience|case|check|components|compositionKind|contactEmail|contactName|contactUrl|contains|count|description|descriptions|distinct|endsWith|endsWithWord|enumPresent|enumValues|example|examplePresent|exampleStrings|exclusiveMaximum|exclusiveMinimum|expand|expected|explode|extensibleEnum|extensionKeys|filter|find|forbidden|format|group|headerDetails|headers|in|info|inlineCompositionMembers|isBlank|itemsPresent|keys|length|licenseName|licenseUrl|lint|location|lower|map|match|maxItems|maxLength|maximum|mediaTypes|method|methods|minLength|minimum|name|nullable|numericStatusKeys|openapiVersion|operationDetails|operationId|operations|parameters|parserMessages|path|paths|pattern|pointer|properties|refs|requestBodyInlineObject|requestBodyPresent|requestBodyRequired|requestMediaTypes|require|required|requiredFields|responses|schemaInlineObject|schemaMaximum|schemaPresent|schemaProperties|schemaType|schemaTypes|schemas|scope|security|securitySchemes|segments|servers|startsWith|startsWithWord|status|style|suffix|summary|tags|templateParameters|text|title|toList|trim|type|values)\\b"
     },
     "property": {
       "comment": "any other dotted access — model fields arrive dynamically from the spec",
-      "name": "variable.other.property.distill",
+      "name": "entity.other.attribute-name.distill",
       "match": "(?<=\\.)\\s*([A-Za-z_]\\w*)\\b"
     },
     "operators": {

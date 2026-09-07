@@ -2,7 +2,7 @@
   "name": "distill-syntax",
   "displayName": "Distill (Areté matcher DSL)",
   "description": "Syntax highlighting for Distill — the Groovy influenced fluent rule language used in Areté Matcher.distill files.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "publisher": "arete",
   "license": "Apache-2.0",
   "repository": {

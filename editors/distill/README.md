@@ -47,7 +47,16 @@ a checkout), then Settings → Editor → **TextMate Bundles** → `+` → selec
 folder → Apply. JetBrains IDEs read the VS Code extension layout directly.
 
 The integration binds by file extension, so `*.distill` files highlight as soon
-as the bundle is added — no File Types setup.
+as the bundle is added — no File Types setup. IntelliJ does not hot-reload a
+changed grammar: after updating this folder, remove the bundle entry and re-add
+it (or restart the IDE).
+
+IntelliJ's TextMate engine maps only a subset of scopes to colours, so the
+grammar targets the well-supported ones: functions and sequence operations
+(`filter`, `map`, `occurrence`, …) render as `entity.name.function`, model
+fields as `entity.other.attribute-name`, `api` / `rule` / `it` as
+`variable.language`. Some fine-grained distinctions VS Code shows (known vs.
+unknown members) collapse to one colour here.
 
 ## Keeping the grammar current
 
