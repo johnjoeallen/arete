@@ -1270,6 +1270,9 @@ reflection, recursion, or unbounded iteration.</p>
 <p>The build also runs a matching <code>Matcher.groovy</code> for some matchers as a parity
 check; Groovy is not part of the deployed runtime. A deployed Areté always
 evaluates matchers with Distill.</p>
+<p><strong>Editor support.</strong> <a href="https://github.com/johnjoeallen/arete/tree/main/editors/distill"><code>editors/distill/</code></a>
+is a syntax-highlighting grammar for VS Code and IntelliJ / other JetBrains
+IDEs — see its <code>README.md</code> for install steps.</p>
 <h2 id="the-entry-point">The entry point<a class="headerlink" href="#the-entry-point" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">distill</span><span class="p">(</span><span class="n">api</span><span class="p">,</span><span class="w"> </span><span class="n">rule</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="o">&lt;</span><span class="n">expression</span><span class="o">&gt;</span><span class="p">;</span>
