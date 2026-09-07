@@ -669,12 +669,14 @@ public final class DistillMatcherEvaluator {
         }
     }
 
-    private static final Set<String> KNOWN_FUNCTIONS = Set.of(
+    /** Package-private for {@code DistillGrammarSnapshotTest}, which regenerates the editor grammar from this list. */
+    static final Set<String> KNOWN_FUNCTIONS = Set.of(
             "regexSearch", "regexFullMatch", "tokenize", "words", "last", "count", "checks", "distinct", "join", "strip",
             "urlHost", "parseInt", "truthy", "pathSegments", "enumerate", "type", "occurrence",
             "operationMessage");
 
-    private static final Set<String> KNOWN_MEMBERS = Set.of(
+    /** Package-private for {@code DistillGrammarSnapshotTest}, which regenerates the editor grammar from this list. */
+    static final Set<String> KNOWN_MEMBERS = Set.of(
             "all", "allowed", "any", "array", "audience", "case", "check", "components", "compositionKind", "contains",
             "contactEmail", "contactName", "contactUrl", "count", "description", "descriptions", "distinct", "endsWith", "endsWithWord",
             "enumPresent", "enumValues", "example",

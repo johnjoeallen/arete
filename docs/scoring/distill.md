@@ -157,9 +157,51 @@ op.summary ?: (rule.title) . lower()   // ✓ default is rule.title
 op.summary ?: rule.title . lower()     // ✗ parses as (op.summary ?: rule).title.lower()
 ```
 
-Distill's truthiness is narrow: `""`, `0`, and `[]` are **truthy**, so `?:`
-leaves them alone (Groovy's Elvis would replace them). For "absent **or**
-empty", use `x.isBlank()`, not `x ?: ""`.
+### `?:` is null/false only — not Groovy's Elvis
+
+Groovy's `?:` tests *Groovy truthiness*, which counts `""`, `0`, `[]`, `[:]`
+and `null` as falsy — so `"" ?: "x"` is `"x"` in Groovy. Distill's truthiness
+is narrow (see [Truthiness](#truthiness)): **only `null` and `false` are
+falsy**; `""`, `0`, and `[]` are all truthy. So `?:` substitutes far less
+often than a reader coming from Groovy will expect:
+
+```java
+null ?: "x"        // "x"   — receiver is null
+false ?: true      // true  — receiver is false
+"" ?: "x"          // ""    — empty string is truthy, receiver stands  (Groovy: "x")
+0 ?: 9             // 0     — zero is truthy                            (Groovy: 9)
+[] ?: [1]          // []    — empty list is truthy                     (Groovy: [1])
+"got it" ?: "x"    // "got it"
+```
+
+This makes `x ?: ""` almost useless: it only rewrites `null` to `""`, and a
+`null` string already behaves like `""` almost everywhere —
+[`isBlank()`](#null-and-blank) is true for both, `+` renders both as nothing
+useful, and `.trim()` needs a `?.` guard either way. So:
+
+```java
+op.summary ?: ""                 // only helps if something downstream throws on null but not ""
+(op.summary ?: "").trim()        // vs. op.summary?.trim() — same result, fewer moving parts
+op.summary.isBlank()             // "absent or empty or whitespace" — the check you usually want
+!op.summary.isBlank()            // "present and non-empty"
+```
+
+Where `?:` *does* earn its place is a non-string default that keeps a later
+operation total:
+
+```java
+count(op.parameters ?: [])                      // null list → 0, no ?. needed downstream
+(op.parameters ?: []).any { p -> p.required }   // iterate a possibly-absent list
+(op.deprecated ?: false) && rule.parameters.strict
+op.operationId ?: (path.path + " " + op.method) // fallback identifier — parenthesised, it is not a simple operand
+```
+
+For a `null`-only default that also passes `""` through untouched, the
+explicit ternary still reads clearest:
+
+```java
+op.summary == null ? "n/a" : op.summary          // "" stays "", only null → "n/a"
+```
 
 ## Operators
 

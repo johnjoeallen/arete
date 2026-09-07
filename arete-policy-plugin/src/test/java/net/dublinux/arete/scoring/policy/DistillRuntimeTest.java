@@ -233,6 +233,11 @@ class DistillMatcherEvaluatorTest {
         assertEquals(0, runtime.execute(
                 "distill(api, rule) { return count(api.servers ?: []) > 0 ? [occurrence(\"/\", \"v\", \"x\")] : []; }",
                 Map.of("values", List.of()), Map.of("parameters", Map.of())).size());
+        // a parenthesised expression is a valid default
+        assertEquals(1, runtime.execute(
+                "distill(api, rule) { return (rule.parameters[\"missing\"] ?: (rule.parameters[\"fallback\"] + \"!\")) == \"off!\""
+                        + " ? [occurrence(\"/\", \"v\", \"x\")] : []; }",
+                Map.of("values", List.of()), Map.of("parameters", Map.of("fallback", "off"))).size());
     }
 
     @Test

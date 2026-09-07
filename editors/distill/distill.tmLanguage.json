@@ -1,0 +1,112 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Distill",
+  "scopeName": "source.distill",
+  "comment": "Areté matcher DSL. The function-name and member-name alternations are @generated — keep them in sync with DistillMatcherEvaluator via DistillGrammarSnapshotTest.",
+  "patterns": [
+    { "include": "#strings" },
+    { "include": "#regexp" },
+    { "include": "#numbers" },
+    { "include": "#keywords" },
+    { "include": "#is-blank" },
+    { "include": "#function-name" },
+    { "include": "#sequence-op" },
+    { "include": "#closure-param" },
+    { "include": "#member-name" },
+    { "include": "#property" },
+    { "include": "#operators" },
+    { "include": "#language-variables" },
+    { "include": "#identifiers" },
+    { "include": "#punctuation" }
+  ],
+  "repository": {
+    "strings": {
+      "name": "string.quoted.double.distill",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        { "name": "constant.character.escape.distill", "match": "\\\\." },
+        { "include": "#interpolation" }
+      ]
+    },
+    "regexp": {
+      "name": "string.regexp.distill",
+      "begin": "(?<![\\w)\\]])~?/(?![/*])",
+      "end": "/|(?=\\n)",
+      "patterns": [
+        { "name": "constant.character.escape.distill", "match": "\\\\." },
+        { "include": "#interpolation" }
+      ]
+    },
+    "interpolation": {
+      "name": "meta.interpolation.distill",
+      "begin": "\\{\\{",
+      "end": "\\}\\}",
+      "beginCaptures": { "0": { "name": "punctuation.section.interpolation.begin.distill" } },
+      "endCaptures": { "0": { "name": "punctuation.section.interpolation.end.distill" } },
+      "patterns": [{ "include": "$self" }]
+    },
+    "numbers": {
+      "name": "constant.numeric.distill",
+      "match": "\\b\\d+\\b"
+    },
+    "keywords": {
+      "patterns": [
+        { "name": "keyword.control.distill", "match": "\\b(distill|return)\\b" },
+        { "name": "constant.language.distill", "match": "\\b(true|false|null)\\b" }
+      ]
+    },
+    "is-blank": {
+      "name": "keyword.operator.word.distill",
+      "match": "\\bis\\s+blank\\b"
+    },
+    "function-name": {
+      "comment": "@generated distill.function.names",
+      "name": "support.function.distill",
+      "match": "\\b(checks|count|distinct|enumerate|join|last|occurrence|operationMessage|parseInt|pathSegments|regexFullMatch|regexSearch|strip|tokenize|truthy|type|urlHost|words)\\b(?=\\s*\\()"
+    },
+    "sequence-op": {
+      "comment": "bare sequence operations, valid with no receiver inside a checks(...) { } block",
+      "name": "support.function.distill",
+      "match": "\\b(all|any|count|expand|filter|find|group|map|match)\\b(?=\\s*\\{)"
+    },
+    "closure-param": {
+      "name": "variable.parameter.distill",
+      "match": "\\b([A-Za-z_]\\w*)\\b(?=\\s*->)"
+    },
+    "member-name": {
+      "comment": "@generated distill.member.names",
+      "name": "support.type.property.distill",
+      "match": "(?<=\\.)\\s*(all|allowed|any|array|audience|case|check|components|compositionKind|contactEmail|contactName|contactUrl|contains|count|description|descriptions|distinct|endsWith|endsWithWord|enumPresent|enumValues|example|examplePresent|exampleStrings|exclusiveMaximum|exclusiveMinimum|expand|expected|explode|extensibleEnum|extensionKeys|filter|find|forbidden|format|group|headerDetails|headers|in|info|inlineCompositionMembers|isBlank|itemsPresent|keys|length|licenseName|licenseUrl|lint|location|lower|map|match|maxItems|maxLength|maximum|mediaTypes|method|methods|minLength|minimum|name|nullable|numericStatusKeys|openapiVersion|operationDetails|operationId|operations|parameters|parserMessages|path|paths|pattern|pointer|properties|refs|requestBodyInlineObject|requestBodyPresent|requestBodyRequired|requestMediaTypes|require|required|requiredFields|responses|schemaInlineObject|schemaMaximum|schemaPresent|schemaProperties|schemaType|schemaTypes|schemas|scope|security|securitySchemes|segments|servers|startsWith|startsWithWord|status|style|suffix|summary|tags|templateParameters|text|title|toList|trim|type|values)\\b"
+    },
+    "property": {
+      "comment": "any other dotted access — model fields arrive dynamically from the spec",
+      "name": "variable.other.property.distill",
+      "match": "(?<=\\.)\\s*([A-Za-z_]\\w*)\\b"
+    },
+    "operators": {
+      "patterns": [
+        { "name": "keyword.operator.comparison.distill", "match": "==~|=~|==|!=|<=|>=|<|>" },
+        { "name": "keyword.operator.logical.distill", "match": "&&|\\|\\||!" },
+        { "name": "keyword.operator.elvis.distill", "match": "\\?:|\\?\\." },
+        { "name": "keyword.operator.distill", "match": "->|\\?|:|\\+|-|=" }
+      ]
+    },
+    "language-variables": {
+      "name": "variable.language.distill",
+      "match": "\\b(api|rule|it)\\b"
+    },
+    "identifiers": {
+      "name": "variable.other.distill",
+      "match": "\\b[A-Za-z_]\\w*\\b"
+    },
+    "punctuation": {
+      "patterns": [
+        { "name": "punctuation.section.block.distill", "match": "[{}]" },
+        { "name": "punctuation.section.brackets.distill", "match": "[\\[\\]]" },
+        { "name": "punctuation.section.parens.distill", "match": "[()]" },
+        { "name": "punctuation.separator.distill", "match": "[;,.]" }
+      ]
+    }
+  }
+}
