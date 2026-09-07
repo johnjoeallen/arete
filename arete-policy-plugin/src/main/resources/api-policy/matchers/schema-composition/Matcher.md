@@ -1,7 +1,7 @@
 ---
 id: schema-composition
 language: distill
-source: Matcher.dsl
+source: Matcher.distill
 scopes: [schema, operation]
 parameters:
   check:

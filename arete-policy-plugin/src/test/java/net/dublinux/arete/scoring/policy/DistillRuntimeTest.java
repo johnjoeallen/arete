@@ -295,7 +295,7 @@ class DistillMatcherEvaluatorTest {
 
     @Test
     void operationSemanticsDistillScriptMatchesAllConfiguredModes() {
-        String source = readResource("api-policy/matchers/operation-semantics/Matcher.dsl");
+        String source = readResource("api-policy/matchers/operation-semantics/Matcher.distill");
         Map<String, Object> api = api("""
                 openapi: 3.0.0
                 info: { title: Test, version: 1.0.0 }

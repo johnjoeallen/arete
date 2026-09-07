@@ -1,7 +1,7 @@
 ---
 id: error-response
 language: distill
-source: Matcher.dsl
+source: Matcher.distill
 scopes: [operation, response]
 parameters:
   required-class:

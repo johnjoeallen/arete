@@ -1,7 +1,7 @@
 ---
 id: versioning
 language: distill
-source: Matcher.dsl
+source: Matcher.distill
 scopes: [path, header, media-type, api]
 parameters:
   location:

@@ -1,7 +1,7 @@
 ---
 id: identifier
 language: distill
-source: Matcher.dsl
+source: Matcher.distill
 scopes: [property]
 parameters:
   name-pattern:

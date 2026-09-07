@@ -1,7 +1,7 @@
 ---
 id: path-prefix
 language: distill
-source: Matcher.dsl
+source: Matcher.distill
 scopes: [api]
 parameters: {}
 ---

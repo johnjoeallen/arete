@@ -1,7 +1,7 @@
 ---
 id: sensitive-data
 language: distill
-source: Matcher.dsl
+source: Matcher.distill
 scopes: [property, query-parameter, path-parameter, header]
 parameters:
   pattern:

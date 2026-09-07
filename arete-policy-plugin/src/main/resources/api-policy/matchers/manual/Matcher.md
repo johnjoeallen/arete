@@ -1,7 +1,7 @@
 ---
 id: manual
 language: distill
-source: Matcher.dsl
+source: Matcher.distill
 scopes: [project, operation, property, schema]
 parameters: {}
 ---

@@ -1,7 +1,7 @@
 ---
 id: proprietary-header
 language: distill
-source: Matcher.dsl
+source: Matcher.distill
 scopes: [header]
 parameters:
   allowed:

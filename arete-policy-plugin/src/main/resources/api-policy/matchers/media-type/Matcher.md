@@ -1,7 +1,7 @@
 ---
 id: media-type
 language: distill
-source: Matcher.dsl
+source: Matcher.distill
 scopes: [media-type]
 parameters:
   location:

@@ -1,7 +1,7 @@
 ---
 id: array-items
 language: distill
-source: Matcher.dsl
+source: Matcher.distill
 scopes: [api]
 parameters: {}
 ---

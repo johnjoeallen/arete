@@ -1,7 +1,7 @@
 ---
 id: response-header
 language: distill
-source: Matcher.dsl
+source: Matcher.distill
 scopes: [response]
 parameters:
   status:

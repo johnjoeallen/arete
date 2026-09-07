@@ -1,7 +1,7 @@
 ---
 id: collection-capability
 language: distill
-source: Matcher.dsl
+source: Matcher.distill
 scopes: [operation, query-parameter]
 parameters:
   name-pattern:

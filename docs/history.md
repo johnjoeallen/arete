@@ -136,7 +136,7 @@ It is a focused data-pipeline processor — `.map` / `.filter` / `.expand`,
 slashy regex literals, a fixed builtin set — and nothing else.
 
 It was prototyped as "DetectorScript", renamed **Sift** (`.sift`), and finally
-**Distill** (`Matcher.dsl`). It grew in phases — Groovy-style `~/regex/`
+**Distill** (`Matcher.distill`). It grew in phases — Groovy-style `~/regex/`
 literals with `==~` / `=~`, bare `/regex/` in operand position, `[key]`
 indexing, numeric operators, short-circuit `&&` / `||`, value-based numeric
 equality, and `distinct` / `urlHost` / `join` / `group` / `type` / `blank`
@@ -146,7 +146,7 @@ abstraction, reflecting that a matcher reports observed rule occurrences.
 
 Once Distill reached parity it became the primary language, and **Starlark
 was removed entirely**. Groovy was then withdrawn from the runtime as well: a
-deployed Areté loads only `Matcher.dsl` sources, and where a `Matcher.groovy`
+deployed Areté loads only `Matcher.distill` sources, and where a `Matcher.groovy`
 still exists it is exercised solely by the build-time parity check, never
 against a submitted spec. The child-JVM mode was removed with it — that
 isolation only ever existed to contain unsandboxed Groovy, and Distill needs

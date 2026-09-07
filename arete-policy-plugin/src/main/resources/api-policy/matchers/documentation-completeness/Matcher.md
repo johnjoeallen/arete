@@ -1,7 +1,7 @@
 ---
 id: documentation-completeness
 language: distill
-source: Matcher.dsl
+source: Matcher.distill
 scopes: [property, parameter]
 parameters:
   require:

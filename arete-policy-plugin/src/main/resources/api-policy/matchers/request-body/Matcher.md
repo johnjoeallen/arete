@@ -1,7 +1,7 @@
 ---
 id: request-body
 language: distill
-source: Matcher.dsl
+source: Matcher.distill
 scopes: [operation]
 parameters:
   check:

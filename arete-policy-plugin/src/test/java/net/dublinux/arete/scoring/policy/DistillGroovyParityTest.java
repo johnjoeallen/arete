@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 /**
- * Every bundled rule that ships both Matcher.dsl and Matcher.groovy must produce exactly
+ * Every bundled rule that ships both Matcher.distill and Matcher.groovy must produce exactly
  * the same diagnostics from both implementations. for a representative spec.
  */
 class DistillGroovyParityTest {
@@ -795,7 +795,7 @@ class DistillGroovyParityTest {
         for (Matcher descriptor : bundle.matchers().values()) {
             String groovySource = readOptional("api-policy/matchers/" + descriptor.id() + "/Matcher.groovy");
             if (groovySource == null) continue;
-            String dslSource = read("api-policy/matchers/" + descriptor.id() + "/Matcher.dsl");
+            String dslSource = read("api-policy/matchers/" + descriptor.id() + "/Matcher.distill");
             Matcher groovyMatcher = new Matcher(descriptor.id(), "groovy", groovySource, descriptor.scopes(), Map.of());
             Matcher dslMatcher = new Matcher(descriptor.id(), "distill", dslSource, descriptor.scopes(), Map.of());
             @SuppressWarnings("unchecked")
@@ -935,7 +935,7 @@ class DistillGroovyParityTest {
 
         for (Case c : cases) {
             String groovySource = read("api-policy/matchers/" + c.matcher() + "/Matcher.groovy");
-            String dslSource = read("api-policy/matchers/" + c.matcher() + "/Matcher.dsl");
+            String dslSource = read("api-policy/matchers/" + c.matcher() + "/Matcher.distill");
             Matcher groovyMatcher = new Matcher(c.matcher(), "groovy", groovySource, List.of(c.scope()), Map.of());
             Matcher dslMatcher = new Matcher(c.matcher(), "distill", dslSource, List.of(c.scope()), Map.of());
             @SuppressWarnings("unchecked")
@@ -1042,7 +1042,7 @@ class DistillGroovyParityTest {
 
         List<Diagnostic> groovyDiagnostics = new GroovyMatcherEvaluator().execute(groovyRule, api, rule);
         List<Diagnostic> distillDiagnostics = new DistillMatcherEvaluator().execute(
-                read("api-policy/matchers/" + matcherId + "/Matcher.dsl"), api, rule.asMap());
+                read("api-policy/matchers/" + matcherId + "/Matcher.distill"), api, rule.asMap());
 
         assertEquals(groovyDiagnostics, distillDiagnostics, matcherId + " distill/groovy output differs");
         if (expectFindings) {

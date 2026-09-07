@@ -1,7 +1,7 @@
 ---
 id: bulk-operation
 language: distill
-source: Matcher.dsl
+source: Matcher.distill
 scopes: [operation]
 parameters:
   operation-type:

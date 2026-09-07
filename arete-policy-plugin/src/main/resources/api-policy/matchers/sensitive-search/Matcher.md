@@ -1,7 +1,7 @@
 ---
 id: sensitive-search
 language: distill
-source: Matcher.dsl
+source: Matcher.distill
 scopes: [query-parameter, operation]
 parameters:
   search-pattern:

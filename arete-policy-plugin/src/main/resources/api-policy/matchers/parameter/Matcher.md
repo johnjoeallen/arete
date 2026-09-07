@@ -1,7 +1,7 @@
 ---
 id: parameter
 language: distill
-source: Matcher.dsl
+source: Matcher.distill
 scopes: [operation, parameter]
 parameters:
   check:

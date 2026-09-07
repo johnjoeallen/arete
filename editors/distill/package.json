@@ -1,7 +1,7 @@
 {
   "name": "distill-syntax",
   "displayName": "Distill (Areté matcher DSL)",
-  "description": "Syntax highlighting for Distill — the Java-shaped fluent rule language used in Areté Matcher.dsl files.",
+  "description": "Syntax highlighting for Distill — the Java-shaped fluent rule language used in Areté Matcher.distill files.",
   "version": "0.1.0",
   "publisher": "arete",
   "license": "SEE LICENSE IN ../../LICENSE",
@@ -21,7 +21,6 @@
       {
         "id": "distill",
         "aliases": ["Distill", "distill"],
-        "filenames": ["Matcher.dsl"],
         "extensions": [".distill"],
         "configuration": "./language-configuration.json"
       }

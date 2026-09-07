@@ -1,7 +1,7 @@
 ---
 id: status-class
 language: distill
-source: Matcher.dsl
+source: Matcher.distill
 scopes: [response]
 parameters:
   forbidden:

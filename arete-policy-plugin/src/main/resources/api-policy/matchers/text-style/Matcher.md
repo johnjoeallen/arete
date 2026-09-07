@@ -1,7 +1,7 @@
 ---
 id: text-style
 language: distill
-source: Matcher.dsl
+source: Matcher.distill
 scopes:
   - operation-summary
 parameters:

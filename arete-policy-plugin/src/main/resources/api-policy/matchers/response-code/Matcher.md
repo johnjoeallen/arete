@@ -1,7 +1,7 @@
 ---
 id: response-code
 language: distill
-source: Matcher.dsl
+source: Matcher.distill
 scopes:
   - operation
   - response

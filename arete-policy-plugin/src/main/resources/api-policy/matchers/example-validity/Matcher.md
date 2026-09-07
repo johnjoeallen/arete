@@ -1,7 +1,7 @@
 ---
 id: example-validity
 language: distill
-source: Matcher.dsl
+source: Matcher.distill
 scopes: [schema, property]
 parameters:
   check:

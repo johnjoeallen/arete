@@ -25,7 +25,7 @@ Matchers were originally Groovy closures run in-process. Groovy executes
 arbitrary code with full JVM access, so it fails the first requirement
 outright: a Groovy matcher from an untrusted source can do anything the
 application can. It is retained now only as a build-time parity reference —
-`Matcher.groovy` files are run against `Matcher.dsl` on every build to catch
+`Matcher.groovy` files are run against `Matcher.distill` on every build to catch
 any semantic drift, never against a submitted spec.
 
 Groovy is not even the fast option. Compiled once and reused, it is **~4–5×
@@ -80,7 +80,7 @@ deployments ever need**. It cannot cover every conceivable check — a rule that
 needs data the model does not expose, or logic the pipeline cannot phrase,
 still calls for a plugin — but in practice virtually every API-style rule is
 expressible as a matcher. The intended path for a new rule is: write a
-`Matcher.dsl`, not a Java class; reserve a new plugin for the rare case that
+`Matcher.distill`, not a Java class; reserve a new plugin for the rare case that
 genuinely needs one.
 
 So trust is spent **once, at the plugin boundary**, and not again for every

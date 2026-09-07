@@ -1,7 +1,7 @@
 ---
 id: operation-semantics
 language: distill
-source: Matcher.dsl
+source: Matcher.distill
 scopes:
   - operation
   - path

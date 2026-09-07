@@ -1,7 +1,7 @@
 ---
 id: api-title
 language: distill
-source: Matcher.dsl
+source: Matcher.distill
 scopes: [api]
 parameters:
   suffix:

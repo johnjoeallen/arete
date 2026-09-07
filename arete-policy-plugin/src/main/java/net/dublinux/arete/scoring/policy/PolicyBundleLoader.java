@@ -23,7 +23,7 @@ final class PolicyBundleLoader {
 
     /** The rule source file each supported language is loaded from. */
     private static final Map<String, String> SOURCE_FILE = Map.of(
-            "distill", "Matcher.dsl",
+            "distill", "Matcher.distill",
             "groovy", "Matcher.groovy");
 
     /**
@@ -31,7 +31,7 @@ final class PolicyBundleLoader {
      * language in the list that has a source file present wins.
      *
      * <p>The default is {@code ["distill"]}: the deployed runtime only ever
-     * evaluates {@code Matcher.dsl}. {@code Matcher.groovy} is a build-time
+     * evaluates {@code Matcher.distill}. {@code Matcher.groovy} is a build-time
      * parity reference, not a live source. Tests may pass a different
      * precedence explicitly.
      */

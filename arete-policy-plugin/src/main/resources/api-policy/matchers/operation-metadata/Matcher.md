@@ -1,7 +1,7 @@
 ---
 id: operation-metadata
 language: distill
-source: Matcher.dsl
+source: Matcher.distill
 scopes: [api, operation]
 parameters:
   check:

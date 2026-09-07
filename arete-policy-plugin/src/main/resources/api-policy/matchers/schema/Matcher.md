@@ -1,7 +1,7 @@
 ---
 id: schema
 language: distill
-source: Matcher.dsl
+source: Matcher.distill
 scopes:
   - property
 parameters:

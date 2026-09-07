@@ -1,7 +1,7 @@
 # Distill editor support
 
 Syntax highlighting for [Distill](../../docs/scoring/distill.md) — the
-Java-shaped fluent rule language in `api-policy/matchers/*/Matcher.dsl`.
+Java-shaped fluent rule language in `api-policy/matchers/*/Matcher.distill`.
 
 This directory is a VS Code extension **and** a TextMate bundle. Both editors
 use the same `distill.tmLanguage.json` grammar.
@@ -34,19 +34,16 @@ npx vsce package            # produces distill-syntax-0.1.0.vsix
 code --install-extension distill-syntax-0.1.0.vsix
 ```
 
-Applies to any file named `Matcher.dsl` (or `*.distill`). For a one-off file,
-`Change Language Mode` → `Distill`.
+Applies to every `*.distill` file (bundled matchers are `Matcher.distill`). For
+a one-off file with another name, `Change Language Mode` → `Distill`.
 
 ## Install — IntelliJ IDEA / other JetBrains IDEs
 
 Settings → Editor → **TextMate Bundles** → `+` → select this `editors/distill`
 folder → Apply. JetBrains IDEs read the VS Code extension layout directly.
 
-The IntelliJ TextMate integration binds by **file extension**, so `*.distill`
-files are highlighted after the bundle is added. The `Matcher.dsl` *filename*
-is not picked up automatically (`.dsl` is too generic to claim globally); map
-it by hand under Settings → Editor → File Types → *TextMate* → add pattern
-`Matcher.dsl`.
+The integration binds by file extension, so `*.distill` files highlight as soon
+as the bundle is added — no File Types setup.
 
 ## Keeping the grammar current
 

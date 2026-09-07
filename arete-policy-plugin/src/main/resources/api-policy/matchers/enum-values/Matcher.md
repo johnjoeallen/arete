@@ -1,7 +1,7 @@
 ---
 id: enum-values
 language: distill
-source: Matcher.dsl
+source: Matcher.distill
 scopes: [property]
 parameters:
   check:

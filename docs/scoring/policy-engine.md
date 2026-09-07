@@ -27,7 +27,7 @@ returns occurrences, the policy's **disposition** (a point deduction or
 
 ### Matcher language
 
-Matchers are written in [Distill](distill.md) (`Matcher.dsl`), currently the
+Matchers are written in [Distill](distill.md) (`Matcher.distill`), currently the
 only supported matcher language. It is a small expression language shaped for
 rule pipelines (`.map` / `.filter` / `.expand`, slashy regex literals,
 `occurrence(...)`).
@@ -53,7 +53,7 @@ api-policy/
 ├── matchers/
 │   └── <matcher-id>/
 │       ├── Matcher.md          # descriptor (YAML front matter) + prose
-│       ├── Matcher.dsl         # the matcher, in Distill — the only runtime used
+│       ├── Matcher.distill         # the matcher, in Distill — the only runtime used
 │       └── Matcher.groovy      # build-time parity check (optional)
 ├── rules/
 │   └── <RULE-ID>.md             # rule front matter + human documentation
@@ -99,7 +99,7 @@ observed** by returning occurrences and takes no position on severity or score
 ---
 id: naming                       # must match the manifest key
 language: distill                # the matcher language
-source: Matcher.dsl              # the matcher source
+source: Matcher.distill              # the matcher source
 scopes:                          # the scope values a matcher may request
   - property
   - path-segment
@@ -250,7 +250,7 @@ a subject without an outer `api.paths.expand`. These pair with
 
 ### Writing a matcher
 
-Matchers are written in **Distill** (`Matcher.dsl`); its grammar and builtins
+Matchers are written in **Distill** (`Matcher.distill`); its grammar and builtins
 have their own chapter — the [Distill reference](distill.md).
 
 Matchers:
@@ -423,7 +423,7 @@ The result reports `overallScore` (`effectiveScore`) and
 ### A new matcher and rule
 
 1. Create `matchers/<id>/Matcher.md` (descriptor) and
-   `matchers/<id>/Matcher.dsl` (the Distill expression).
+   `matchers/<id>/Matcher.distill` (the Distill expression).
 2. Add `<id>: matchers/<id>/Matcher.md` to `PolicyBundle.yaml` under
    `matchers:`.
 3. Add rules that use it.

@@ -1,7 +1,7 @@
 ---
 id: authentication-error
 language: distill
-source: Matcher.dsl
+source: Matcher.distill
 scopes: [operation, response]
 parameters:
   status:

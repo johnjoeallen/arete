@@ -1,7 +1,7 @@
 ---
 id: naming
 language: distill
-source: Matcher.dsl
+source: Matcher.distill
 scopes:
   - property
   - path-parameter

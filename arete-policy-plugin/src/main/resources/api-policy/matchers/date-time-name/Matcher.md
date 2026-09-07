@@ -1,7 +1,7 @@
 ---
 id: date-time-name
 language: distill
-source: Matcher.dsl
+source: Matcher.distill
 scopes: [property]
 parameters:
   suffix:

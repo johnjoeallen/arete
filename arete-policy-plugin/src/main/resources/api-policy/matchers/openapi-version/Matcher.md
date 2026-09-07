@@ -1,7 +1,7 @@
 ---
 id: openapi-version
 language: distill
-source: Matcher.dsl
+source: Matcher.distill
 scopes: [api]
 parameters:
   allowed:

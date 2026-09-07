@@ -1,7 +1,7 @@
 ---
 id: query-collection
 language: distill
-source: Matcher.dsl
+source: Matcher.distill
 scopes: [query-parameter]
 parameters:
   style:

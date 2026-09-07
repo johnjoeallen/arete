@@ -1,7 +1,7 @@
 ---
 id: pagination
 language: distill
-source: Matcher.dsl
+source: Matcher.distill
 scopes: [operation, query-parameter, response]
 parameters:
   name-pattern:

@@ -1,7 +1,7 @@
 ---
 id: compatibility
 language: distill
-source: Matcher.dsl
+source: Matcher.distill
 scopes: [api, operation, path, schema-property]
 parameters:
   change:

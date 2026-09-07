@@ -1,6 +1,6 @@
 # Distill reference
 
-Matchers are written in Distill (`Matcher.dsl`). A Distill script
+Matchers are written in Distill (`Matcher.distill`). A Distill script
 *distills* the API model down to the occurrences that violate a rule: it is a
 single expression that walks `api`, keeps what matches, and returns a list of
 `occurrence(...)` values.
@@ -425,7 +425,7 @@ Each row is a complete expression and the value it produces.
 
 ### Matchers
 
-Each example is a full `Matcher.dsl` run against the spec beside it; the
+Each example is a full `Matcher.distill` run against the spec beside it; the
 output is the list of occurrences (`pointer` &nbsp;\|&nbsp; `path` &nbsp;\|&nbsp; `message`).
 
 **Operations with no `summary`.**
@@ -627,7 +627,7 @@ source once and drops the repeated selector.
 
 ## Coverage
 
-All 52 bundled matchers ship a `Matcher.dsl`, and all 155 bundled rules are
+All 52 bundled matchers ship a `Matcher.distill`, and all 155 bundled rules are
 built on those matchers. The `operation-metadata` matcher handles duplicate
 `operationId` values and the `response-example` matcher handles duplicate error
 payloads; both use `group` as shown above. `path-count` uses `pathSegments(...)`

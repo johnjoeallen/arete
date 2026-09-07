@@ -968,7 +968,7 @@ class PolicyScoringPluginTest {
             if (path.endsWith("Matcher.groovy")) continue;
             resources.put(path, readResource("api-policy/" + path));
             if (path.endsWith("Matcher.md")) {
-                String dslPath = path.replace("Matcher.md", "Matcher.dsl");
+                String dslPath = path.replace("Matcher.md", "Matcher.distill");
                 resources.put(dslPath, readResource("api-policy/" + dslPath));
             }
         }
@@ -1004,7 +1004,7 @@ class PolicyScoringPluginTest {
         for (String matcher : new String[] {"path-prefix", "tag", "component-usage",
                 "array-items", "security-scheme", "path-syntax", "markdown-safety"}) {
             resources.put("matchers/" + matcher + "/Matcher.md", readResource("api-policy/matchers/" + matcher + "/Matcher.md"));
-            resources.put("matchers/" + matcher + "/Matcher.dsl", readResource("api-policy/matchers/" + matcher + "/Matcher.dsl"));
+            resources.put("matchers/" + matcher + "/Matcher.distill", readResource("api-policy/matchers/" + matcher + "/Matcher.distill"));
         }
         for (String rule : new String[] {"JSON021", "JSON022", "JSON023", "JSON024", "REST007", "CASE008",
                 "DOC017", "DOC018", "DOC019", "DOC020", "STANDARD024", "STANDARD025", "STANDARD026",
@@ -1056,8 +1056,8 @@ class PolicyScoringPluginTest {
                 "extensions", "documentation-completeness", "schema-composition", "document-lint", "status-class", "example-validity", "response-example"}) {
             resources.put("matchers/" + matcherId + "/Matcher.md",
                     readResource("api-policy/matchers/" + matcherId + "/Matcher.md"));
-            resources.put("matchers/" + matcherId + "/Matcher.dsl",
-                    readResource("api-policy/matchers/" + matcherId + "/Matcher.dsl"));
+            resources.put("matchers/" + matcherId + "/Matcher.distill",
+                    readResource("api-policy/matchers/" + matcherId + "/Matcher.distill"));
         }
         return resources;
     }

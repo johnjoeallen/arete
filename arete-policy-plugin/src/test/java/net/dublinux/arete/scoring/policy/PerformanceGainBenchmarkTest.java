@@ -213,7 +213,7 @@ class PerformanceGainBenchmarkTest {
         // The 'schema' matcher: 79 lines of Groovy / 41 of Distill, nested
         // closures over api.schemas[*].properties[*].
         String groovySource = resource("api-policy/matchers/schema/Matcher.groovy");
-        String dslSource = resource("api-policy/matchers/schema/Matcher.dsl");
+        String dslSource = resource("api-policy/matchers/schema/Matcher.distill");
         Matcher groovyMatcher = new Matcher("schema", "groovy", groovySource, List.of("property"), Map.of());
         Matcher dslMatcher = new Matcher("schema", "distill", dslSource, List.of("property"), Map.of());
         PolicyRule rule = new PolicyRule("BENCH", "Bench", "Bench", "schema", "property",
