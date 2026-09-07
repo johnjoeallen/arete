@@ -45,6 +45,7 @@
       "end": "\\}\\}",
       "beginCaptures": { "0": { "name": "keyword.control.interpolation.begin.distill" } },
       "endCaptures": { "0": { "name": "keyword.control.interpolation.end.distill" } },
+      "contentName": "string.interpolated.distill",
       "patterns": [{ "include": "$self" }]
     },
     "numbers": {
