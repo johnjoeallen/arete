@@ -2,12 +2,12 @@ distill(api, rule) {
     return rule.parameters["check"] == "tags-present"
         ? api.paths.expand { path -> path.operationDetails
             .filter { op -> count(op.tags) == 0 }
-            .map { op -> occurrence(op.pointer, op.method + " " + path.path,
+            .map { op -> occurrence(op.pointer, "{{op.method}} {{path.path}}",
                 "Operation is not assigned any tag") } }
         : rule.parameters["check"] == "unique-operation-id"
         ? api.paths
             .expand { path -> path.operationDetails.map { op ->
-                [op.pointer, op.method + " " + path.path, op.operationId] } }
+                [op.pointer, "{{op.method}} {{path.path}}", op.operationId] } }
             .group { entry -> "" + entry[2] }
             .values
             .expand { group ->
@@ -18,7 +18,7 @@ distill(api, rule) {
                         ? enumerate(group)
                             .filter { indexed -> indexed[0] > 0 }
                             .map { indexed -> occurrence(indexed[1][0], indexed[1][1],
-                                "operationId '" + group[0][2] + "' is also used by " + group[0][1]) }
+                                "operationId '{{group[0][2]}}' is also used by {{group[0][1]}}") }
                         : []) }
         : [];
 }

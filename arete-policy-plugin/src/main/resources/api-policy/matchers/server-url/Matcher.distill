@@ -7,13 +7,13 @@ distill(api, rule) {
                     || urlHost(url).lower() ==~ /.*(\.internal|\.local|\.corp|\.intranet|\.lan|\.home|\.test)/
                     || (!urlHost(url).contains(".") && urlHost(url) != "")) }
             .map { url -> occurrence("/servers", url,
-                "Server URL points at an internal or non-routable host: " + urlHost(url)) }
+                "Server URL points at an internal or non-routable host: {{urlHost(url)}}") }
         : rule.parameters["check"] == "placeholder-host"
         ? api.servers
             .filter { url -> urlHost(url) != null
                 && urlHost(url).lower() ==~ /(.*\.)?example\.(com|org|net)/ }
             .map { url -> occurrence("/servers", url,
-                "Server URL uses the documentation placeholder host " + urlHost(url)) }
+                "Server URL uses the documentation placeholder host {{urlHost(url)}}") }
         : rule.parameters["check"] == "trailing-slash"
         ? api.servers
             .filter { url -> url.endsWith("/") && url != "/" }
@@ -23,6 +23,6 @@ distill(api, rule) {
             ? api.servers
                 .filter { url -> !(url ==~ rule.parameters["pattern"]) }
                 .map { url -> occurrence("/servers", url,
-                    "Server URL does not match the approved pattern " + rule.parameters["pattern"]) }
+                    "Server URL does not match the approved pattern {{rule.parameters["pattern"]}}") }
             : api.servers.filter { url -> false };
 }

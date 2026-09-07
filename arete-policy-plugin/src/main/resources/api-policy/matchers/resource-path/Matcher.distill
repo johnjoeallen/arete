@@ -26,8 +26,8 @@ distill(api, rule) {
                        || last(tokenize("/", path.path)).lower() ==~ /(get|list|create|update|delete|remove|add|set).*/)
                 : false }
             .expand { path -> path.operations
-                .map { method -> occurrence(path.pointer + "/" + method.lower(),
-                    method + " " + path.path,
+                .map { method -> occurrence("{{path.pointer}}/{{method.lower()}}",
+                    "{{method}} {{path.path}}",
                     rule.parameters["match"] == "query-predicate" ? "Resource path contains a query predicate"
                         : rule.parameters["match"] == "rpc-style" ? "API uses RPC-style resource design"
                         : rule.parameters["match"] == "custom-action" ? "Custom action resource is used"

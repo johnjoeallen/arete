@@ -15,9 +15,6 @@ distill(api, rule) {
         : count(distinct(api.paths.map { path ->
                 count(pathSegments(path.path)) > 0 ? pathSegments(path.path)[0] : null })) > rule.parameters["maximum"]
         ? [occurrence("/paths", "API",
-            "API has "
-              + ("" + count(distinct(api.paths.map { path ->
-                    count(pathSegments(path.path)) > 0 ? pathSegments(path.path)[0] : null })))
-              + " top-level resource types (maximum " + ("" + rule.parameters["maximum"]) + ")")]
+            "API has {{count(distinct(api.paths.map { path -> count(pathSegments(path.path)) > 0 ? pathSegments(path.path)[0] : null }))}} top-level resource types (maximum {{rule.parameters["maximum"]}})")]
         : [];
 }

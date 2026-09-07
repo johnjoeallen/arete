@@ -5,6 +5,6 @@ distill(api, rule) {
                 .expand { response -> response.headerDetails
                     .filter { header -> !header.schemaPresent }
                     .map { header -> occurrence(operation.pointer,
-                        operation.method + " " + path.path + " " + response.status,
-                        "Response header '" + header.name + "' defines neither a schema nor content") } } } };
+                        "{{operation.method}} {{path.path}} {{response.status}}",
+                        "Response header '{{header.name}}' defines neither a schema nor content") } } } };
 }

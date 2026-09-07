@@ -21,5 +21,5 @@ distill(api, rule) {
                         mt ==~ /(?i).*\+?v[0-9]+.*|.*version[0-9]+.*/ } }
                 : false }
             .map { path -> occurrence(path.pointer, path.path,
-                "Interface version is exposed through " + rule.parameters["location"]) };
+                "Interface version is exposed through {{rule.parameters["location"]}}") };
 }

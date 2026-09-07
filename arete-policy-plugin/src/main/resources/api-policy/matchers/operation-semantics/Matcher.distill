@@ -25,6 +25,6 @@ distill(api, rule) {
             }
             .map { operation -> occurrence(
                 operation.pointer,
-                operation.method + " " + path.path,
+                "{{operation.method}} {{path.path}}",
                 operationMessage(rule.parameters)) } };
 }

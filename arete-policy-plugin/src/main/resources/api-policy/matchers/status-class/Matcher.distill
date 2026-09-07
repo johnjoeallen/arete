@@ -4,6 +4,6 @@ distill(api, rule) {
             && parseInt(response.status, -1) >= 500
             && parseInt(response.status, -1) < 600 }
         .map { response -> occurrence(operation.pointer,
-            operation.method + " " + path.path + " " + response.status,
-            "Documents a server-error (" + response.status + ") response; these should be omitted from the contract") } } };
+            "{{operation.method}} {{path.path}} {{response.status}}",
+            "Documents a server-error ({{response.status}}) response; these should be omitted from the contract") } } };
 }

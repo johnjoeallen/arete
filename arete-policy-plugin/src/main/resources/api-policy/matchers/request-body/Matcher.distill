@@ -9,8 +9,8 @@ distill(api, rule) {
                     && operation.requestBodyPresent
                     && !operation.requestBodyRequired) }
             .map { operation -> occurrence(operation.pointer,
-                operation.method + " " + path.path,
+                "{{operation.method}} {{path.path}}",
                 rule.parameters.check == "forbidden-on-methods"
-                    ? operation.method + " operation declares a request body"
+                    ? "{{operation.method}} operation declares a request body"
                     : "Request body is present but not marked required: true") } };
 }
