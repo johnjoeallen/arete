@@ -7,7 +7,7 @@ distill(api, rule) {
                     && param.name ==~ /(?i)(api[-_])?version|x-api-version/ }
                 || operation.mediaTypes.any { mt -> mt ==~ /(?i).*\+?v[0-9]+.*|.*version[0-9]+.*/ } } }
             ? api.paths.filter { p -> false }
-            : tokenize(",", "x").map { u -> occurrence("/paths", "API",
+            : tokenise(",", "x").map { u -> occurrence("/paths", "API",
                 "Interface has no explicit versioning") })
         : api.paths
             .filter { path ->

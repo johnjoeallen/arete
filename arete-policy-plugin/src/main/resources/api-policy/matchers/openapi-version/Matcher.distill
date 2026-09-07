@@ -1,6 +1,6 @@
 distill(api, rule) {
-    return tokenize(",", "check")
-        .filter { unused -> !(tokenize(",", rule.parameters.allowed).any { a ->
+    return tokenise(",", "check")
+        .filter { unused -> !(tokenise(",", rule.parameters.allowed).any { a ->
             api.info.openapiVersion == a.trim()
             || (api.info.openapiVersion == null ? false : api.info.openapiVersion.startsWith(a.trim() + ".")) }) }
         .map { unused -> occurrence("/info", "API",

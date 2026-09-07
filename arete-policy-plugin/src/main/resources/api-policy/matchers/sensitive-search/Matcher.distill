@@ -11,8 +11,8 @@ distill(api, rule) {
                     && param.name =~ ("(?i)" + rule.parameters["search-pattern"]) }) > 0
              && count(operation.parameters.filter { param -> param.in == "query"
                     && param.name =~ ("(?i)" + rule.parameters["sensitive-pattern"]) }) > 0)
-                ? tokenize(",", "x").map { u -> occurrence(operation.pointer,
+                ? tokenise(",", "x").map { u -> occurrence(operation.pointer,
                     "{{operation.method}} {{path.path}}",
                     "Operation permits searching sensitive query data") }
-                : tokenize(",", "x").filter { u -> false } } };
+                : tokenise(",", "x").filter { u -> false } } };
 }

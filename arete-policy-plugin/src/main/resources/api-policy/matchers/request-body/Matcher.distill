@@ -4,7 +4,7 @@ distill(api, rule) {
             .filter { operation ->
                 (rule.parameters.check == "forbidden-on-methods"
                     && operation.requestBodyPresent
-                    && tokenize(",", rule.parameters.methods).any { m -> m.trim() == operation.method })
+                    && tokenise(",", rule.parameters.methods).any { m -> m.trim() == operation.method })
                 || (rule.parameters.check == "required-flag-missing"
                     && operation.requestBodyPresent
                     && !operation.requestBodyRequired) }

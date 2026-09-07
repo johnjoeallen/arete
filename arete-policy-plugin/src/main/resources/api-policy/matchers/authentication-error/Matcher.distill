@@ -12,17 +12,17 @@ distill(api, rule) {
             .expand { resp ->
                 (rule.parameters["required-status"] != null
                         && parseInt(resp.status, -1) != rule.parameters["required-status"])
-                    ? tokenize(",", "x").filter { u -> false }
+                    ? tokenise(",", "x").filter { u -> false }
                     : (rule.parameters["required-header"] != null
                         && !resp.headers.any { h -> h.lower() == rule.parameters["required-header"].lower() }
-                        ? tokenize(",", "x").map { u -> occurrence(operation.pointer,
+                        ? tokenise(",", "x").map { u -> occurrence(operation.pointer,
                             "{{operation.method}} {{path.path}}",
                             "Authentication response is missing {{rule.parameters["required-header"]}}") }
-                        : tokenize(",", "x").filter { u -> false })
+                        : tokenise(",", "x").filter { u -> false })
                     + (rule.parameters["forbidden-header"] != null
                         && resp.headers.any { h -> h.lower() == rule.parameters["forbidden-header"].lower() }
-                        ? tokenize(",", "x").map { u -> occurrence(operation.pointer,
+                        ? tokenise(",", "x").map { u -> occurrence(operation.pointer,
                             "{{operation.method}} {{path.path}}",
                             "Authorization response must not include {{rule.parameters["forbidden-header"]}}") }
-                        : tokenize(",", "x").filter { u -> false }) } } };
+                        : tokenise(",", "x").filter { u -> false }) } } };
 }

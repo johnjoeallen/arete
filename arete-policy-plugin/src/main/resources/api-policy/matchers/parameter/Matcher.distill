@@ -2,10 +2,10 @@ distill(api, rule) {
     return api.paths.expand { path -> path.operationDetails.expand { operation ->
         rule.parameters.check == "max-count"
             ? ((rule.parameters.maximum != null && count(operation.parameters) > rule.parameters.maximum)
-                ? tokenize(",", "x").map { u -> occurrence(operation.pointer,
+                ? tokenise(",", "x").map { u -> occurrence(operation.pointer,
                     "{{operation.method}} {{path.path}}",
                     "Operation declares {{count(operation.parameters)}} parameters, more than the maximum of {{rule.parameters.maximum}}") }
-                : tokenize(",", "x").filter { u -> false })
+                : tokenise(",", "x").filter { u -> false })
         : rule.parameters.check == "path-required"
             ? operation.parameters
                 .filter { param -> param.in == "path" && !param.required }
@@ -40,5 +40,5 @@ distill(api, rule) {
                 .map { name -> occurrence(operation.pointer,
                     "{{operation.method}} {{path.path}}",
                     "Path template placeholder '{" + name + "}' has no matching path parameter") }
-        : tokenize(",", "x").filter { u -> false } } };
+        : tokenise(",", "x").filter { u -> false } } };
 }

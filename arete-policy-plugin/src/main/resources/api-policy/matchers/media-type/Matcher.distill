@@ -13,7 +13,7 @@ distill(api, rule) {
 
             filter { o -> rule.parameters["match"] == "not-allowed"
                           && o.requestMediaTypes.any { t ->
-                                 !(tokenize(",", rule.parameters["allowed"]).any { a -> a.trim().lower() == t.lower() }) } }
+                                 !(tokenise(",", rule.parameters["allowed"]).any { a -> a.trim().lower() == t.lower() }) } }
               .map { o -> occurrence(o.pointer, "{{o.method}} {{o.path}}",
                                      "Request body media type not-allowed") }
           }
@@ -30,7 +30,7 @@ distill(api, rule) {
 
             filter { r -> rule.parameters["match"] == "not-allowed"
                           && r.mediaTypes.any { t ->
-                                 !(tokenize(",", rule.parameters["allowed"]).any { a -> a.trim().lower() == t.lower() }) } }
+                                 !(tokenise(",", rule.parameters["allowed"]).any { a -> a.trim().lower() == t.lower() }) } }
               .map { r -> occurrence(r.pointer, "{{r.method}} {{r.path}}",
                                      "Response {{r.status}} media type not-allowed") }
           };
