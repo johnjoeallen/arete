@@ -69,6 +69,7 @@ protected boundary.
 - [Scoring overview](https://johnjoeallen.github.io/arete/scoring/)
 - [Policy engine](https://johnjoeallen.github.io/arete/scoring/policy-engine/)
 - [Distill reference](https://johnjoeallen.github.io/arete/scoring/distill/)
+  — editor highlighting for VS Code / IntelliJ lives in [`editors/distill/`](editors/distill/)
 - [Rule catalogue](https://johnjoeallen.github.io/arete/scoring/rules/)
   and [policies](https://johnjoeallen.github.io/arete/scoring/policies/)
 - [Writing a plugin](https://johnjoeallen.github.io/arete/scoring/writing-a-plugin/)

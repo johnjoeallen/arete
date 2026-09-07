@@ -15,6 +15,10 @@ The build also runs a matching `Matcher.groovy` for some matchers as a parity
 check; Groovy is not part of the deployed runtime. A deployed Areté always
 evaluates matchers with Distill.
 
+**Editor support.** [`editors/distill/`](https://github.com/johnjoeallen/arete/tree/main/editors/distill)
+is a syntax-highlighting grammar for VS Code and IntelliJ / other JetBrains
+IDEs — see its `README.md` for install steps.
+
 ## The entry point
 
 ```java
