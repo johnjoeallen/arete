@@ -41,8 +41,9 @@
     },
     "interpolation": {
       "name": "meta.interpolation.distill",
-      "begin": "\\{\\{",
-      "end": "\\}\\}",
+      "comment": "innermost {{ }} is the hole — the pair adjacent to the content; extra braces on either side are literal",
+      "begin": "\\{\\{(?=[^{])",
+      "end": "(?<=[^}])\\}\\}",
       "beginCaptures": { "0": { "name": "keyword.control.interpolation.begin.distill" } },
       "endCaptures": { "0": { "name": "keyword.control.interpolation.end.distill" } },
       "contentName": "string.interpolated.distill",

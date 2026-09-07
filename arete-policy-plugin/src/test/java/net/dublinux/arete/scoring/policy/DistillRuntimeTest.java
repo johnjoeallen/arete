@@ -64,6 +64,28 @@ class DistillMatcherEvaluatorTest {
     }
 
     @Test
+    void literalBracesAroundAHoleNeedNoEscape() {
+        // The inner {{ }} is the hole; extra adjacent braces are literal, in any
+        // number, as long as the hole's own pair is balanced.
+        Map<String, Object> rule = Map.of("parameters", Map.of("name", "id",
+                "xs", java.util.List.of("a", "", "b")));
+
+        assertEquals("placeholder '{id}' unmatched", runtime.execute("""
+                distill(api, rule) { return [occurrence("/", "x", "placeholder '{{{rule.parameters.name}}}' unmatched")]; }
+                """, Map.of(), rule).get(0).message());
+
+        assertEquals("a {{{id}}} b", runtime.execute("""
+                distill(api, rule) { return [occurrence("/", "x", "a {{{{{rule.parameters.name}}}}} b")]; }
+                """, Map.of(), rule).get(0).message());
+
+        // a lone } inside the hole is content (a closure brace); }} closes it
+        assertEquals("n=2", runtime.execute("""
+                distill(api, rule) { return [occurrence("/", "x",
+                    "n={{count(rule.parameters["xs"].filter { v -> v != "" })}}")]; }
+                """, Map.of(), rule).get(0).message());
+    }
+
+    @Test
     void regexLiteralInterpolatesDoubleBraceHolesIncludingQuotedSubExpressions() {
         // The alternation is built from a rule parameter — the hole holds a string
         // literal, whose quotes are not the enclosing regex/string delimiters.

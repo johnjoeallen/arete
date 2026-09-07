@@ -75,8 +75,8 @@ There is no map literal. `null` is not a keyword — it arrives from the model
 
 A string **or** regex literal may contain `{{ … }}` holes. Each hole is a full
 Distill expression, evaluated when the literal is evaluated and spliced in as a
-string (`null` becomes `""`). Quotes and `/` inside a hole are not the
-enclosing delimiter, so a hole can itself contain string literals.
+string (`null` becomes `""`). Quotes, `/`, and closure braces inside a hole are
+not the enclosing delimiter, so a hole can hold string literals and closures.
 
 ```java
 occurrence("/info/title", api.info.title,
@@ -85,6 +85,17 @@ occurrence("/info/title", api.info.title,
 // splice a rule-supplied fragment into a pattern
 schema.name ==~ /{{rule.parameters["prefix"]}}[A-Z][A-Za-z0-9]*/
 ```
+
+**Literal braces next to a hole need no escape.** The `{{` / `}}` closest to
+the content are the hole; any extra adjacent braces are literal, in any number:
+
+```java
+"Path template placeholder '{{{name}}}' has no matching path parameter"
+// -> Path template placeholder '{orderId}' has no matching path parameter
+```
+
+`{{{name}}}` is `{` + hole(`name`) + `}`; `{{{{{name}}}}}` is `{{{name}}}`; and
+so on. A lone `}` inside a hole is content (a closure's brace); `}}` closes it.
 
 A literal with no `{{` is an ordinary constant with no added cost. A hole is
 compiled and validated at bundle load like any other expression. A lone hole
@@ -430,6 +441,7 @@ Each row is a complete expression and the value it produces.
 | `strip("--hi--", "-")` &nbsp; `strip("  hi  ")` | `"hi"` &nbsp; `"hi"` |
 | `last(["a", "b"])` &nbsp; `last([])` | `"b"` &nbsp; `""` |
 | `"Order-1" ==~ /[A-Za-z]+-[0-9]+/` | `true` |
+| `"x '{{{rule.parameters.n}}}'"` when `n` is `id` | `"x '{id}'"` — literal braces around the hole |
 | `enumerate(["a", "b"]).map { p -> p[0] + "=" + p[1] }` | `["0=a", "1=b"]` |
 | `["ax", "ay", "bz"].group { s -> s.startsWith("a") }.values` | `[["ax", "ay"], ["bz"]]` |
 

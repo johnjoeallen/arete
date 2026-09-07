@@ -39,6 +39,6 @@ distill(api, rule) {
                 .filter { name -> !operation.parameters.any { param -> param.in == "path" && param.name == name } }
                 .map { name -> occurrence(operation.pointer,
                     "{{operation.method}} {{path.path}}",
-                    "Path template placeholder '{" + name + "}' has no matching path parameter") }
+                    "Path template placeholder '{{{name}}}' has no matching path parameter") }
         : tokenise(",", "x").filter { u -> false } } };
 }

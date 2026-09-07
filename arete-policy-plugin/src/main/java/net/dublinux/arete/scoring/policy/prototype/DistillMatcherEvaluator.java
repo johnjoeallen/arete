@@ -61,6 +61,16 @@ public final class DistillMatcherEvaluator {
         }
     }
 
+    /**
+     * Private markers the lexer wraps around a {@code {{ ... }}} hole once it has
+     * resolved which braces are delimiters and which are literal. Control
+     * characters that cannot occur in a bundle source, so the hole span is
+     * unambiguous where a raw {@code {{ }} } scan would trip over an adjacent
+     * literal brace (e.g. {@code '{{{name}}}'}).
+     */
+    private static final char HOLE_START = '\u0000';
+    private static final char HOLE_END = '\u0001';
+
     private interface Expr { Object eval(Map<String, Object> env); }
     private interface Closure { Object apply(Object value); }
     private record Program(Expr result) { List<Diagnostic> apply(Map<String, Object> env) { return castDiagnostics(result.eval(env)); } }
@@ -422,8 +432,8 @@ public final class DistillMatcherEvaluator {
                 while (cursor < source.length()) {
                     char c = source.charAt(cursor);
                     if (hole == 0 && c == '"') break;
-                    if (c == '{' && cursor + 1 < source.length() && source.charAt(cursor + 1) == '{') { hole++; out.append("{{"); cursor += 2; continue; }
-                    if (hole > 0 && c == '}' && cursor + 1 < source.length() && source.charAt(cursor + 1) == '}') { hole--; out.append("}}"); cursor += 2; continue; }
+                    if (c == '{') { hole += openHole(out); continue; }
+                    if (hole > 0 && c == '}') { hole -= closeHole(out); continue; }
                     if (hole == 0 && c == '\\' && cursor + 1 < source.length()) { out.append(source.charAt(cursor + 1)); cursor += 2; continue; }
                     out.append(c); cursor++;
                 }
@@ -441,8 +451,8 @@ public final class DistillMatcherEvaluator {
                 while (cursor < source.length()) {
                     char c = source.charAt(cursor);
                     if (hole == 0 && c == '/') break;
-                    if (c == '{' && cursor + 1 < source.length() && source.charAt(cursor + 1) == '{') { hole++; out.append("{{"); cursor += 2; continue; }
-                    if (hole > 0 && c == '}' && cursor + 1 < source.length() && source.charAt(cursor + 1) == '}') { hole--; out.append("}}"); cursor += 2; continue; }
+                    if (c == '{') { hole += openHole(out); continue; }
+                    if (hole > 0 && c == '}') { hole -= closeHole(out); continue; }
                     if (hole == 0 && c == '\\' && cursor + 1 < source.length()) {
                         char escaped = source.charAt(cursor + 1);
                         out.append(escaped == '/' ? "/" : "\\" + escaped);
@@ -456,6 +466,47 @@ public final class DistillMatcherEvaluator {
             }
             for (String operator : List.of("==~", "=~", "==", "!=", "<=", ">=", "&&", "||", "->")) if (source.startsWith(operator, cursor)) { cursor += operator.length(); return new Token(Kind.SYMBOL, operator); }
             cursor++; return new Token(Kind.SYMBOL, String.valueOf(ch));
+        }
+
+        /**
+         * At a run of {@code n} {@code '{'} in a string or regex body: the last
+         * two open an interpolation hole (emitted as {@link #HOLE_START}), any
+         * leading ones are literal. Returns 1 if a hole opened, else 0. So
+         * {@code '{{{name}}}'} is a literal brace wrapping the hole {@code name}
+         * — no escape needed.
+         */
+        private int openHole(StringBuilder out) {
+            int run = 0;
+            while (cursor + run < source.length() && source.charAt(cursor + run) == '{') run++;
+            if (run >= 2) {
+                for (int i = 0; i < run - 2; i++) out.append('{');
+                out.append(HOLE_START);
+                cursor += run;
+                return 1;
+            }
+            out.append('{');
+            cursor++;
+            return 0;
+        }
+
+        /**
+         * At a run of {@code n} {@code '}'} inside a hole: the first two close it
+         * (emitted as {@link #HOLE_END}), any trailing ones are literal. A lone
+         * {@code '}'} is hole content (a closure brace). Returns 1 if the hole
+         * closed, else 0.
+         */
+        private int closeHole(StringBuilder out) {
+            int run = 0;
+            while (cursor + run < source.length() && source.charAt(cursor + run) == '}') run++;
+            if (run >= 2) {
+                out.append(HOLE_END);
+                for (int i = 0; i < run - 2; i++) out.append('}');
+                cursor += run;
+                return 1;
+            }
+            out.append('}');
+            cursor++;
+            return 0;
         }
 
         /** True when the next token sits where an operand (hence a regex) is expected. */
@@ -539,8 +590,14 @@ public final class DistillMatcherEvaluator {
             return env -> env.get(name);
         }
 
-        /** {@code {{ expr }}} holes in a string or regex literal. */
-        private static final java.util.regex.Pattern HOLE = java.util.regex.Pattern.compile("\\{\\{(.*?)\\}\\}");
+        /**
+         * A hole in a lexed string/regex body — the lexer has already reduced
+         * {@code {{ expr }}} (and any literal braces around it) to
+         * {@link #HOLE_START}{@code expr}{@link #HOLE_END}. Content holds no
+         * further markers; nested holes are not supported.
+         */
+        private static final java.util.regex.Pattern HOLE =
+                java.util.regex.Pattern.compile("\\u0000([^\\u0000\\u0001]*)\\u0001");
 
         /**
          * A string or regex literal, with {@code {{ expr }}} holes spliced in at
