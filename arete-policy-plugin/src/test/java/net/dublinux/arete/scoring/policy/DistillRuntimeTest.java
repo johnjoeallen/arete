@@ -32,6 +32,36 @@ class DistillMatcherEvaluatorTest {
     }
 
     @Test
+    void validationRejectsPropertyUsedAsAFunction() {
+        Matcher matcher = new Matcher("test", "distill",
+                "distill(api, rule) { return api.name.length(); }", List.of("api"), Map.of());
+
+        BundleValidationException error = assertThrows(BundleValidationException.class,
+                () -> runtime.validate(matcher));
+        org.junit.jupiter.api.Assertions.assertTrue(error.getMessage().contains(".length"));
+    }
+
+    @Test
+    void validationRejectsCallOperationUsedAsAProperty() {
+        Matcher matcher = new Matcher("test", "distill",
+                "distill(api, rule) { return api.name.trim; }", List.of("api"), Map.of());
+
+        BundleValidationException error = assertThrows(BundleValidationException.class,
+                () -> runtime.validate(matcher));
+        org.junit.jupiter.api.Assertions.assertTrue(error.getMessage().contains(".trim"));
+    }
+
+    @Test
+    void validationRejectsClosureOperationUsedWithArguments() {
+        Matcher matcher = new Matcher("test", "distill",
+                "distill(api, rule) { return api.values.map(api.name); }", List.of("api"), Map.of());
+
+        BundleValidationException error = assertThrows(BundleValidationException.class,
+                () -> runtime.validate(matcher));
+        org.junit.jupiter.api.Assertions.assertTrue(error.getMessage().contains(".map"));
+    }
+
+    @Test
     void occurrenceIsTheSupportedFindingBuiltin() {
         assertEquals(List.of(new Diagnostic("/", "API", "Found")), runtime.execute(
                 "distill(api, rule) { return [occurrence(\"/\", \"API\", \"Found\")]; }",

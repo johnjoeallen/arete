@@ -15,6 +15,7 @@ import java.util.function.Function;
 
 /** Interpreter for Distill, the Java-shaped fluent rule language (Matcher.dsl). */
 public final class DistillMatcherEvaluator {
+    private static final System.Logger LOG = System.getLogger(DistillMatcherEvaluator.class.getName());
 
     /**
      * Parsed programs keyed by {@code matcher.id() + "\0" + matcher.source()},
@@ -40,7 +41,13 @@ public final class DistillMatcherEvaluator {
             throw new BundleValidationException("Unsupported rule language '" + rule.language() + "'");
         }
         try {
-            compiled(rule);
+            Program program = compiled(rule);
+            for (String name : program.unclassifiedPropertyUses()) {
+                LOG.log(System.Logger.Level.WARNING,
+                        "Matcher ''{0}'' uses member ''.{1}'' as an assumed property; "
+                                + "its operation shape has not been classified",
+                        new Object[] {rule.id(), name});
+            }
         } catch (RuntimeException e) {
             throw new BundleValidationException("Matcher '" + rule.id() + "' does not compile: " + e.getMessage());
         }
@@ -73,7 +80,9 @@ public final class DistillMatcherEvaluator {
 
     private interface Expr { Object eval(Map<String, Object> env); }
     private interface Closure { Object apply(Object value); }
-    private record Program(Expr result) { List<Diagnostic> apply(Map<String, Object> env) { return castDiagnostics(result.eval(env)); } }
+    private record Program(Expr result, Set<String> unclassifiedPropertyUses) {
+        List<Diagnostic> apply(Map<String, Object> env) { return castDiagnostics(result.eval(env)); }
+    }
     private record ParsedClosure(String parameter, Expr body) { }
 
     private static List<Diagnostic> castDiagnostics(Object value) {
@@ -529,11 +538,12 @@ public final class DistillMatcherEvaluator {
 
     private static final class Parser {
         private final Lexer lexer; private Token token; private Token lookahead;
+        private final Set<String> unclassifiedPropertyUses = new java.util.LinkedHashSet<>();
         /** Inside {@code checks(source) { ... }}: the bound source, so a stanza can start {@code filter { ... }}. */
         private Expr implicitReceiver;
         private int checksDepth;
         Parser(String source) { lexer = new Lexer(source); token = lexer.next(); lookahead = lexer.next(); }
-        Program parse() { expect("distill"); expect("("); String api = expectId(); expect(","); String rule = expectId(); expect(")"); expect("{"); expect("return"); Expr expression = expression(); expect(";"); expect("}"); expectKind(Kind.EOF); return new Program(expression); }
+        Program parse() { expect("distill"); expect("("); String api = expectId(); expect(","); String rule = expectId(); expect(")"); expect("{"); expect("return"); Expr expression = expression(); expect(";"); expect("}"); expectKind(Kind.EOF); return new Program(expression, Set.copyOf(unclassifiedPropertyUses)); }
         private Expr expression() { Expr condition = or(); if (accept("?")) { Expr whenTrue = expression(); expect(":"); Expr whenFalse = expression(); return env -> truthy(condition.eval(env)) ? whenTrue.eval(env) : whenFalse.eval(env); } return condition; }
         private Expr or() { Expr left = and(); while (accept("||")) { Expr right = and(); Expr l = left, r = right; left = env -> truthy(l.eval(env)) || truthy(r.eval(env)); } return left; }
         private Expr and() { Expr left = equality(); while (accept("&&")) { Expr right = equality(); Expr l = left, r = right; left = env -> truthy(l.eval(env)) && truthy(r.eval(env)); } return left; }
@@ -675,15 +685,16 @@ public final class DistillMatcherEvaluator {
                 } else if (accept(".")) {
                     String name = expectId();
                     if (!KNOWN_MEMBERS.contains(name)) throw new IllegalArgumentException("unknown property or operation: " + name);
-                    if (accept("(")) { List<Expr> args = arguments(); Expr receiver = value; value = env -> call(receiver.eval(env), name, args.stream().map(a -> a.eval(env)).toList()); }
-                    else if (at("{")) { ParsedClosure closure = closure(); Expr receiver = value; value = env -> call(receiver.eval(env), name, List.of((Closure) argument -> closure.body().eval(with(env, closure.parameter(), argument)))); }
-                    else { Expr receiver = value; value = env -> member(receiver.eval(env), name); }
+                    if (accept("(")) { requireShape(name, Shape.CALL); List<Expr> args = arguments(); Expr receiver = value; value = env -> call(receiver.eval(env), name, args.stream().map(a -> a.eval(env)).toList()); }
+                    else if (at("{")) { requireShape(name, Shape.CLOSURE); ParsedClosure closure = closure(); Expr receiver = value; value = env -> call(receiver.eval(env), name, List.of((Closure) argument -> closure.body().eval(with(env, closure.parameter(), argument)))); }
+                    else { requireShape(name, Shape.PROPERTY); Expr receiver = value; value = env -> member(receiver.eval(env), name); }
                 } else if (accept("?")) {
                     expect(".");
                     String name = expectId();
                     if (!KNOWN_MEMBERS.contains(name)) throw new IllegalArgumentException("unknown property or operation: " + name);
                     Expr receiver = value;
                     if (accept("(")) {
+                        requireShape(name, Shape.CALL);
                         List<Expr> args = arguments();
                         value = env -> {
                             Object target = receiver.eval(env);
@@ -691,6 +702,7 @@ public final class DistillMatcherEvaluator {
                                     : call(target, name, args.stream().map(a -> a.eval(env)).toList());
                         };
                     } else if (at("{")) {
+                        requireShape(name, Shape.CLOSURE);
                         ParsedClosure closure = closure();
                         value = env -> {
                             Object target = receiver.eval(env);
@@ -698,6 +710,7 @@ public final class DistillMatcherEvaluator {
                                     List.of((Closure) argument -> closure.body().eval(with(env, closure.parameter(), argument))));
                         };
                     } else {
+                        requireShape(name, Shape.PROPERTY);
                         value = env -> member(receiver.eval(env), name);
                     }
                 } else {
@@ -706,6 +719,29 @@ public final class DistillMatcherEvaluator {
                 }
             }
             return value;
+        }
+        private void requireShape(String name, Shape actual) {
+            // `match` is both a sequence closure operation and a commonly used
+            // matcher parameter/property name (for example,
+            // `rule.parameters.match`). The receiver's syntax disambiguates
+            // the two uses: bare access is a property, closure syntax is the
+            // sequence operation, and parenthesized call syntax is invalid.
+            if (name.equals("match") && actual == Shape.PROPERTY) return;
+            Shape expected;
+            if (CALL_MEMBERS.contains(name)) expected = Shape.CALL;
+            else if (CLOSURE_MEMBERS.contains(name)) expected = Shape.CLOSURE;
+            else if (PROPERTY_MEMBERS.contains(name)) expected = Shape.PROPERTY;
+            else {
+                expected = Shape.PROPERTY;
+                if (actual == Shape.PROPERTY) {
+                    unclassifiedPropertyUses.add(name);
+                    return;
+                }
+            }
+            if (actual != expected) {
+                throw new IllegalArgumentException("." + name + " requires "
+                        + expected.description + " syntax, got " + actual.description);
+            }
         }
         private ParsedClosure closure() {
             expect("{");
@@ -730,6 +766,14 @@ public final class DistillMatcherEvaluator {
         private String expectId() { expectKind(Kind.ID); String result = token.text(); advance(); return result; }
         private void expectKind(Kind kind) { if (token.kind() != kind) throw new IllegalArgumentException("expected " + kind + ", got " + token.text()); }
         private void advance() { token = lookahead; lookahead = lexer.next(); }
+    }
+
+    private enum Shape {
+        PROPERTY("plain-property"), CALL("call"), CLOSURE("closure");
+
+        private final String description;
+
+        Shape(String description) { this.description = description; }
     }
 
     /**
@@ -784,4 +828,16 @@ public final class DistillMatcherEvaluator {
             "schemaInlineObject", "schemaMaximum", "schemaPresent", "schemaProperties", "schemaType", "schemaTypes", "schemas",
             "securitySchemes", "scope", "security", "segments", "servers", "startsWith", "startsWithWord", "status", "style", "suffix", "summary",
             "tags", "templateParameters", "text", "title", "toList", "trim", "type", "values");
+
+    /** Confirmed receiver operations that require parenthesized arguments. */
+    static final Set<String> CALL_MEMBERS = Set.of(
+            "trim", "lower", "isBlank", "contains", "startsWith", "endsWith",
+            "startsWithWord", "endsWithWord");
+
+    /** Confirmed receiver operations that require a closure body. */
+    static final Set<String> CLOSURE_MEMBERS = Set.of(
+            "map", "filter", "match", "expand", "any", "all", "find", "count", "group");
+
+    /** Confirmed receiver properties. Other known members default to properties with a warning. */
+    static final Set<String> PROPERTY_MEMBERS = Set.of("length", "keys", "values");
 }

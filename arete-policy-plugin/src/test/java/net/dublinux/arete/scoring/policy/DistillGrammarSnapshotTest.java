@@ -35,6 +35,12 @@ class DistillGrammarSnapshotTest {
         assertTrue(Files.exists(GRAMMAR), "missing " + GRAMMAR.toAbsolutePath());
 
         String grammar = Files.readString(GRAMMAR);
+        Set<String> classified = new java.util.HashSet<>();
+        classified.addAll(DistillMatcherEvaluator.CALL_MEMBERS);
+        classified.addAll(DistillMatcherEvaluator.CLOSURE_MEMBERS);
+        classified.addAll(DistillMatcherEvaluator.PROPERTY_MEMBERS);
+        assertTrue(DistillMatcherEvaluator.KNOWN_MEMBERS.containsAll(classified),
+                "shape table contains a member absent from KNOWN_MEMBERS");
         String updated = grammar;
         updated = rewriteAlternation(updated, "@generated distill.function.names",
                 DistillMatcherEvaluator.KNOWN_FUNCTIONS);
