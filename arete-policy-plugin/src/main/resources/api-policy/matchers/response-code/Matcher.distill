@@ -15,10 +15,10 @@ distill(api, rule) {
         : rule.scope == "operation"
         ? api.paths.expand { path -> path.operationDetails
             .filter { operation ->
-                !(rule.parameters["operation-type"] == "create"
-                    && operation.method != "POST")
-                && !(rule.parameters["operation-type"] == "create"
-                    && last(tokenise("/", path.path)) ==~ /(?i)(search|query|find|filter|.*:.*)/)
+                !(rule.parameters["method"] != null
+                    && operation.method != rule.parameters["method"])
+                && !(rule.parameters["exclude-last-segment"] != null
+                    && last(tokenise("/", path.path)) ==~ rule.parameters["exclude-last-segment"])
                 && !(rule.parameters["operation-type"] == "identifiable-resource-retrieval"
                     && !(operation.method == "GET" && path.path.contains("{")))
                 && rule.parameters["required-status"] != null

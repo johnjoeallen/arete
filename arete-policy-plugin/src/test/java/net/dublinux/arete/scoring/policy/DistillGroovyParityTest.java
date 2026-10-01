@@ -526,8 +526,11 @@ class DistillGroovyParityTest {
         assertParity("response-code", "response", Map.of("error-format", "problem-json"), true);
     }
 
+    private static final Map<String, Object> CREATE_STATUS = Map.of("method", "POST",
+            "exclude-last-segment", "(?i)(search|query|find|filter|.*:.*)", "required-status", 201);
+
     @Test void responseCodeCreateStatus() {
-        assertParity("response-code", "operation", Map.of("operation-type", "create", "required-status", 201), true);
+        assertParity("response-code", "operation", CREATE_STATUS, true);
     }
 
     @Test void responseCodeCreateStatusSkipsSearchAndActionPaths() {
@@ -547,12 +550,12 @@ class DistillGroovyParityTest {
                   /widgets/{id}:
                     put: { responses: { '201': { description: Created, headers: { Location: { schema: { type: string } } } } } }
                 """;
-        assertParity("response-code", "operation", Map.of("operation-type", "create", "required-status", 201), true, spec);
+        assertParity("response-code", "operation", CREATE_STATUS, true, spec);
         var parsed = new OpenAPIV3Parser().readContents(spec, null, new ParseOptions());
         var found = new DistillMatcherEvaluator().execute(read("api-policy/matchers/response-code/Matcher.distill"),
                 OpenApiMapAdapter.toMap(parsed.getOpenAPI(), parsed.getMessages(), spec),
                 new PolicyRule("PARITY", "Parity", "Parity", "response-code", "operation",
-                        Map.of("operation-type", "create", "required-status", 201), "").asMap());
+                        CREATE_STATUS, "").asMap());
         assertEquals(List.of("POST /things"), found.stream().map(Diagnostic::path).toList());
     }
 

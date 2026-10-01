@@ -18,10 +18,9 @@
     if (p['response-shape'] == 'json-object') return api.paths.collectMany { path -> path.operationDetails.collectMany { op -> op.responses.findAll { statusNumber(it.status) >= 200 && statusNumber(it.status) < 300 && it.schemaTypes && it.schemaTypes.any { t -> t != 'object' } }.collect { [pointer: path.pointer, path: op.method + ' ' + path.path, message: 'Successful response is not a JSON object'] } } }
     if (p['error-format'] == 'problem-json') return api.paths.collectMany { path -> path.operationDetails.collectMany { op -> op.responses.findAll { statusNumber(it.status) >= 400 && statusNumber(it.status) < 600 && !(op.mediaTypes ?: []).contains('application/problem+json') }.collect { [pointer: path.pointer, path: op.method + ' ' + path.path, message: 'Error response does not declare application/problem+json'] } } }
     def operationMatches = { path, operation ->
-        if (p['operation-type'] == 'create' && operation.method != 'POST') return false
-        // Search-style (/search, /query, ...) and custom-method (/orders/{id}:cancel) POSTs do not create a resource.
+        if (p['method'] != null && operation.method != p['method']) return false
         def lastSegment = path.path.split('/').toList().findAll { it }.with { it ? it.last() : '' }
-        if (p['operation-type'] == 'create' && lastSegment ==~ /(?i)(search|query|find|filter|.*:.*)/) return false
+        if (p['exclude-last-segment'] != null && lastSegment ==~ p['exclude-last-segment']) return false
         if (p['operation-type'] == 'identifiable-resource-retrieval' && !(operation.method == 'GET' && path.path.contains('{'))) return false
         if (p['required-status'] != null && !operation.responses.any { statusNumber(it.status) == p['required-status'] }) return true
         false

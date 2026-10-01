@@ -3,7 +3,10 @@ id: STATUS001
 category: HTTP status
 matcher: response-code
 scope: operation
-parameters: { operation-type: create, required-status: 201 }
+parameters:
+  method: POST
+  exclude-last-segment: "(?i)(search|query|find|filter|.*:.*)"
+  required-status: 201
 ---
 
 # STATUS001 — Creation operation lacks an appropriate success status
@@ -21,12 +24,17 @@ are separate design considerations.
 The rule has `operation` scope and uses the `response-code` rule:
 
 ```yaml
-parameters: { operation-type: create, required-status: 201 }
+parameters:
+  method: POST
+  exclude-last-segment: "(?i)(search|query|find|filter|.*:.*)"
+  required-status: 201
 ```
 
-An operation is treated as a creation operation when its method is POST,
-unless the last path segment is `search`, `query`, `find` or `filter`, or
-contains a `:` (a custom method such as `/orders/{id}:cancel`). Those are
+An operation is treated as a creation operation when its method equals the
+`method` parameter (POST), unless the last path segment matches the
+`exclude-last-segment` regular expression (`search`, `query`, `find`, `filter`,
+or anything containing `:`, a custom method such as `/orders/{id}:cancel`).
+Both are configured in the rule, not the matcher. Those are
 searches or actions, not creation. PUT is never required to document 201 (it
 normally replaces a resource); a PUT that does document 201 is not reported. If none of its documented responses has numeric status 201, the rule
 reports the operation at its operation pointer with `Operation lacks the
@@ -64,7 +72,7 @@ paths:
 
 ## Parameters, references, and limitations
 
-The rule requires both configured parameters. Status keys are normalised to
+The rule requires `required-status`; `method` and `exclude-last-segment` are optional. Status keys are normalised to
 integers before comparison, and referenced responses count only when resolved
 into the host’s response facts. The rule does not inspect summaries,
 request bodies, response descriptions, Location headers, runtime behavior, or

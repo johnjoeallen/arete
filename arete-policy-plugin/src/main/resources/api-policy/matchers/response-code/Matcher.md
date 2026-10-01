@@ -9,7 +9,13 @@ parameters:
   operation-type:
     type: enum
     required: false
-    values: [create, identifiable-resource-retrieval]
+    values: [identifiable-resource-retrieval]
+  method:
+    type: string
+    required: false
+  exclude-last-segment:
+    type: string
+    required: false
   required-status:
     type: integer
     required: false
@@ -34,6 +40,10 @@ parameters:
 ---
 
 # Response-code rule
+
+`method` limits an operation check to one HTTP method, and
+`exclude-last-segment` is a regular expression; operations whose path ends in a
+matching segment are skipped.
 
 Evaluates documented response status codes from the stable rule model. It
 does not infer runtime outcomes or authentication state. Operation-level rules
