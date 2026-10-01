@@ -32,8 +32,9 @@ requestBody:
 
 ## Detection and scope
 
-The rule has `media-type` scope and reports operations whose request body has
-no documented media type.
+The rule has `media-type` scope and reports operations that declare a request body
+with no documented media type. Operations without a request body, such as a
+typical `GET`, are not reported.
 
 ## Configuration and limitations
 

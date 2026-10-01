@@ -190,7 +190,18 @@ class DistillGroovyParityTest {
     }
 
     @Test void mediaTypeRequestAbsent() {
-        assertParity("media-type", "media-type", Map.of("location", "request", "match", "absent"), true);
+        // A body-less GET must stay quiet; only the POST declares a body with no media type.
+        String spec = """
+                openapi: 3.0.0
+                info: { title: T, version: 1.0.0 }
+                paths:
+                  /x:
+                    get: { responses: { '200': { description: OK } } }
+                    post:
+                      requestBody: { description: no content }
+                      responses: { '200': { description: OK } }
+                """;
+        assertParity("media-type", "media-type", Map.of("location", "request", "match", "absent"), true, spec);
     }
 
     @Test void mediaTypeRequestWildcard() {

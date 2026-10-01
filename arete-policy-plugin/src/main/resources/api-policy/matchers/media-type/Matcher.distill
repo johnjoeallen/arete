@@ -2,7 +2,8 @@ distill(api, rule) {
     return rule.parameters["location"] == "request"
         ? checks(api.operations) {
 
-            filter { o -> rule.parameters["match"] == "absent" && count(o.requestMediaTypes) == 0 }
+            filter { o -> rule.parameters["match"] == "absent" && o.requestBodyPresent
+                          && count(o.requestMediaTypes) == 0 }
               .map { o -> occurrence(o.pointer, "{{o.method}} {{o.path}}",
                                      "Request body media type absent") },
 

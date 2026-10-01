@@ -156,11 +156,7 @@
   (no findings)
 
 ## CONTENT001  (media-type / media-type)
-  /paths/~1customers/get  |  GET /customers  |  Request body media type absent
-  /paths/~1invoices/get  |  GET /invoices  |  Request body media type absent
-  /paths/~1orders/get  |  GET /orders  |  Request body media type absent
-  /paths/~1orders/post  |  POST /orders  |  Request body media type absent
-  /paths/~1orders~1{id}~1items~1{itemId}~1tags/get  |  GET /orders/{id}/items/{itemId}/tags  |  Request body media type absent
+  (no findings)
 
 ## CONTENT002  (media-type / media-type)
   /paths/~1customers/get  |  GET /customers  |  Response 200 media type absent

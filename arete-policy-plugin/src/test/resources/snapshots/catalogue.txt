@@ -167,12 +167,7 @@
   (no findings)
 
 ## CONTENT001  (media-type / media-type)
-  /paths/~1bulk-create~1orders~1{batchId}/post  |  POST /bulk-create/orders/{batchId}  |  Request body media type absent
-  /paths/~1catalog~1searchByName/put  |  PUT /catalog/searchByName  |  Request body media type absent
-  /paths/~1orders/post  |  POST /orders  |  Request body media type absent
-  /paths/~1orders~1{orderId}/get  |  GET /orders/{orderId}  |  Request body media type absent
-  /paths/~1reports/get  |  GET /reports  |  Request body media type absent
-  /paths/~1things~1{thingKey}/get  |  GET /things/{thingKey}  |  Request body media type absent
+  (no findings)
 
 ## CONTENT002  (media-type / media-type)
   /paths/~1bulk-create~1orders~1{batchId}/post  |  POST /bulk-create/orders/{batchId}  |  Response 200 media type absent

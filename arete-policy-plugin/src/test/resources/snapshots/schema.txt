@@ -145,8 +145,7 @@
   (no findings)
 
 ## CONTENT001  (media-type / media-type)
-  /paths/~1widgets/get  |  GET /widgets  |  Request body media type absent
-  /paths/~1widgets/post  |  POST /widgets  |  Request body media type absent
+  (no findings)
 
 ## CONTENT002  (media-type / media-type)
   /paths/~1widgets/get  |  GET /widgets  |  Response 200 media type absent

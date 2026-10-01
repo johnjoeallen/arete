@@ -144,7 +144,7 @@
   (no findings)
 
 ## CONTENT001  (media-type / media-type)
-  /paths/~1v2~1Payments/get  |  GET /v2/Payments  |  Request body media type absent
+  (no findings)
 
 ## CONTENT002  (media-type / media-type)
   /paths/~1v2~1Payments/get  |  GET /v2/Payments  |  Response 429 media type absent

@@ -12,6 +12,7 @@
     api.paths.collectMany { path ->
         path.operationDetails.collectMany { operation ->
             if (p.location == 'request') {
+                if (p.match == 'absent' && !operation.requestBodyPresent) return []
                 def types = operation.requestMediaTypes ?: []
                 return matches(types) ? [[pointer: operation.pointer, path: operation.method + ' ' + path.path, message: 'Request body media type ' + p.match]] : []
             }
