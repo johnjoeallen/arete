@@ -923,6 +923,42 @@ class PolicyScoringPluginTest {
     }
 
     @Test
+    void mediaTypeRulesSeeContentBehindComponentRefs() {
+        String spec = """
+                openapi: 3.0.0
+                info: { title: Test API, version: 1.0.0 }
+                paths:
+                  /customers:
+                    post:
+                      requestBody: { $ref: '#/components/requestBodies/Customer' }
+                      responses: { '201': { $ref: '#/components/responses/Created' } }
+                  /orders:
+                    post:
+                      requestBody: { $ref: '#/components/requestBodies/Empty' }
+                      responses: { '201': { $ref: '#/components/responses/Empty' } }
+                components:
+                  requestBodies:
+                    Customer: { content: { application/json: { schema: { type: object } } } }
+                    Empty: { description: no content }
+                  responses:
+                    Created: { description: Created, content: { application/json: { schema: { type: object } } } }
+                    Empty: { description: no content }
+                """;
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+
+        Map<String, Object> api = OpenApiMapAdapter.toMap(new OpenAPIV3Parser().readContents(spec, null, options).getOpenAPI());
+        PolicyBundle bundle = distillBundle();
+        DistillMatcherEvaluator runtime = new DistillMatcherEvaluator();
+
+        for (String rule : new String[] {"CONTENT001", "CONTENT002"}) {
+            var hits = runtime.execute(bundle.matchers().get("media-type"), api, bundle.rules().get(rule));
+            assertEquals(1, hits.size(), rule + " " + hits);
+            assertTrue(hits.get(0).path().contains("/orders"), rule + " at " + hits.get(0).path());
+        }
+    }
+
+    @Test
     void packagesThePolicyBundleResources() {
         assertResource("api-policy/PolicyBundle.yaml");
         assertResource("api-policy/rules/REST001.md");

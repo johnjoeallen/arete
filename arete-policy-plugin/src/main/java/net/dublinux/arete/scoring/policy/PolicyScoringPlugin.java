@@ -125,6 +125,16 @@ public final class PolicyScoringPlugin implements SpecScoringPlugin, RuleDocumen
         return value != null ? value : System.getProperty(propertyKey);
     }
 
+    /**
+     * Resolve {@code $ref}s so referenced request bodies, responses and headers carry their content.
+     * Not {@code resolveFully}: schema {@code $ref}s must stay visible to the inline-schema checks.
+     */
+    private static ParseOptions parseOptions() {
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        return options;
+    }
+
     @Override
     public ScoringResult score(SpecInput input) {
         PolicyBundle currentBundle;
@@ -133,7 +143,7 @@ public final class PolicyScoringPlugin implements SpecScoringPlugin, RuleDocumen
         } catch (BundleValidationException e) {
             return ScoringResult.pluginError("Could not load generic policy bundle: " + e.getMessage());
         }
-        SwaggerParseResult parsed = new OpenAPIV3Parser().readContents(input.getContent(), null, new ParseOptions());
+        SwaggerParseResult parsed = new OpenAPIV3Parser().readContents(input.getContent(), null, parseOptions());
         if (parsed.getOpenAPI() == null) {
             String detail = parsed.getMessages() == null ? "unknown parse error" : String.join("; ", parsed.getMessages());
             return ScoringResult.parseError("OpenAPI parsing failed: " + detail);
@@ -191,7 +201,7 @@ public final class PolicyScoringPlugin implements SpecScoringPlugin, RuleDocumen
     @Override
     public ScoringResult testMatcher(MatcherTestRequest request) {
         try {
-            SwaggerParseResult parsed = new OpenAPIV3Parser().readContents(request.spec(), null, new ParseOptions());
+            SwaggerParseResult parsed = new OpenAPIV3Parser().readContents(request.spec(), null, parseOptions());
             if (parsed.getOpenAPI() == null) {
                 String detail = parsed.getMessages() == null ? "unknown parse error" : String.join("; ", parsed.getMessages());
                 return ScoringResult.parseError("OpenAPI parsing failed: " + detail);

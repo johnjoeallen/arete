@@ -1,10 +1,13 @@
 package net.dublinux.arete.scoring.policy;
 
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.parameters.RequestBody;
+import io.swagger.v3.oas.models.responses.ApiResponse;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -49,6 +52,7 @@ final class OpenApiMapAdapter {
     }
 
     static Map<String, Object> toMap(OpenAPI openApi) {
+        Components components = openApi.getComponents();
         List<Map<String, Object>> paths = new ArrayList<>();
         if (openApi.getPaths() != null) {
             for (Map.Entry<String, PathItem> entry : openApi.getPaths().entrySet()) {
@@ -82,22 +86,23 @@ final class OpenApiMapAdapter {
                         detail.put("operationId", operation == null ? null : operation.getOperationId());
                         detail.put("tags", operation == null || operation.getTags() == null ? List.of() : List.copyOf(operation.getTags()));
                         detail.put("extensionKeys", operation == null ? List.of() : extensionKeys(operation.getExtensions()));
-                        detail.put("requestBodyPresent", operation != null && operation.getRequestBody() != null);
-                        detail.put("requestBodyRequired", operation != null && operation.getRequestBody() != null
-                                && Boolean.TRUE.equals(operation.getRequestBody().getRequired()));
-                        detail.put("requestBodyInlineObject", operation != null && operation.getRequestBody() != null
-                                && hasInlineObjectSchema(operation.getRequestBody().getContent()));
+                        RequestBody requestBody = operation == null ? null : resolve(operation.getRequestBody(), components);
+                        detail.put("requestBodyPresent", operation != null && requestBody != null);
+                        detail.put("requestBodyRequired", operation != null && requestBody != null
+                                && Boolean.TRUE.equals(requestBody.getRequired()));
+                        detail.put("requestBodyInlineObject", operation != null && requestBody != null
+                                && hasInlineObjectSchema(requestBody.getContent()));
                         detail.put("security", operation == null || operation.getSecurity() == null ? null : securityRequirements(operation.getSecurity()));
                         List<String> mediaTypes = new ArrayList<>();
                         List<String> requestMediaTypes = new ArrayList<>();
-                        if (operation != null && operation.getRequestBody() != null && operation.getRequestBody().getContent() != null) {
-                            requestMediaTypes.addAll(operation.getRequestBody().getContent().keySet());
+                        if (operation != null && requestBody != null && requestBody.getContent() != null) {
+                            requestMediaTypes.addAll(requestBody.getContent().keySet());
                             mediaTypes.addAll(requestMediaTypes);
                         }
                         List<Map<String, Object>> responses = new ArrayList<>();
                         if (operation != null && operation.getResponses() != null) {
                             for (Map.Entry<String, ?> responseEntry : operation.getResponses().entrySet()) {
-                                Object response = responseEntry.getValue();
+                                Object response = resolve(responseEntry.getValue(), components);
                                 Map<String, Object> responseMap = new LinkedHashMap<>();
                                 responseMap.put("status", responseEntry.getKey());
                                 // Operation context, so api.responses elements are self-locating.
@@ -435,6 +440,25 @@ final class OpenApiMapAdapter {
             result.add(entry);
         }
         return result;
+    }
+
+    /** Follows a same-document {@code #/components/requestBodies/X} ref, which the parser leaves as a stub. */
+    private static RequestBody resolve(RequestBody body, Components components) {
+        if (body == null || body.get$ref() == null || components == null || components.getRequestBodies() == null) return body;
+        RequestBody target = components.getRequestBodies().get(refName(body.get$ref()));
+        return target == null || target == body ? body : resolve(target, components);
+    }
+
+    /** Follows a same-document {@code #/components/responses/X} ref; non-{@link ApiResponse} values pass through. */
+    private static Object resolve(Object response, Components components) {
+        if (!(response instanceof ApiResponse stub) || stub.get$ref() == null
+                || components == null || components.getResponses() == null) return response;
+        ApiResponse target = components.getResponses().get(refName(stub.get$ref()));
+        return target == null || target == stub ? response : resolve(target, components);
+    }
+
+    private static String refName(String ref) {
+        return ref.substring(ref.lastIndexOf('/') + 1);
     }
 
     /** Reads parser response properties without exposing parser response types to rules. */
