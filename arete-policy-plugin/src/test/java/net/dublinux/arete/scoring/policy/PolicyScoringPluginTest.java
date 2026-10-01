@@ -959,6 +959,14 @@ class PolicyScoringPluginTest {
     }
 
     @Test
+    void labelsErrorSeverityAsBlockerBecauseOnlyProhibitedRulesUseIt() {
+        PolicyScoringPlugin plugin = new PolicyScoringPlugin();
+
+        assertEquals("Blocker", plugin.getSeverityLabel(net.dublinux.arete.scoring.spi.Severity.ERROR));
+        assertEquals("Warning", plugin.getSeverityLabel(net.dublinux.arete.scoring.spi.Severity.WARNING));
+    }
+
+    @Test
     void packagesThePolicyBundleResources() {
         assertResource("api-policy/PolicyBundle.yaml");
         assertResource("api-policy/rules/REST001.md");

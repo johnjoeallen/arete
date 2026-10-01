@@ -19,6 +19,9 @@
     if (p['error-format'] == 'problem-json') return api.paths.collectMany { path -> path.operationDetails.collectMany { op -> op.responses.findAll { statusNumber(it.status) >= 400 && statusNumber(it.status) < 600 && !(op.mediaTypes ?: []).contains('application/problem+json') }.collect { [pointer: path.pointer, path: op.method + ' ' + path.path, message: 'Error response does not declare application/problem+json'] } } }
     def operationMatches = { path, operation ->
         if (p['operation-type'] == 'create' && !(operation.method == 'POST' || operation.method == 'PUT')) return false
+        // Search-style (/search, /query, ...) and custom-method (/orders/{id}:cancel) POSTs do not create a resource.
+        def lastSegment = path.path.split('/').toList().findAll { it }.with { it ? it.last() : '' }
+        if (p['operation-type'] == 'create' && lastSegment ==~ /(?i)(search|query|find|filter|.*:.*)/) return false
         if (p['operation-type'] == 'identifiable-resource-retrieval' && !(operation.method == 'GET' && path.path.contains('{'))) return false
         if (p['required-status'] != null && !operation.responses.any { statusNumber(it.status) == p['required-status'] }) return true
         false

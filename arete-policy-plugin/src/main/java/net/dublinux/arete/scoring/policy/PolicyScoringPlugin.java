@@ -58,6 +58,16 @@ public final class PolicyScoringPlugin implements SpecScoringPlugin, RuleDocumen
         return activeBundle().policies().keySet().stream().toList();
     }
 
+    /**
+     * This plugin reports only {@code PROHIBITED} matches at {@code ERROR}; deductions are
+     * {@code WARNING}. Labelling ERROR "Blocker" makes the panel's severity filter show exactly
+     * the rules that zero the score.
+     */
+    @Override
+    public String getSeverityLabel(Severity severity) {
+        return severity == Severity.ERROR ? "Blocker" : SpecScoringPlugin.super.getSeverityLabel(severity);
+    }
+
     @Override
     public Optional<String> getSuggestedScoreLevel(String policyName) {
         Policy policy = activeBundle().policies().get(policyName);

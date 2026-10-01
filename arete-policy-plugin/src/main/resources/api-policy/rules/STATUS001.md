@@ -25,7 +25,9 @@ parameters: { operation-type: create, required-status: 201 }
 ```
 
 An operation is treated as a creation operation when its method is POST or
-PUT. If none of its documented responses has numeric status 201, the rule
+PUT, unless the last path segment is `search`, `query`, `find` or `filter`, or
+contains a `:` (a custom method such as `/orders/{id}:cancel`). Those are
+searches or actions, not creation. If none of its documented responses has numeric status 201, the rule
 reports the operation at its operation pointer with `Operation lacks the
 required documented status`.
 

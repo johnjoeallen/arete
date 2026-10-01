@@ -530,6 +530,28 @@ class DistillGroovyParityTest {
         assertParity("response-code", "operation", Map.of("operation-type", "create", "required-status", 201), true);
     }
 
+    @Test void responseCodeCreateStatusSkipsSearchAndActionPaths() {
+        // Only POST /things is creation; the search and custom-method POSTs must stay quiet.
+        String spec = """
+                openapi: 3.0.0
+                info: { title: T, version: 1.0.0 }
+                paths:
+                  /things:
+                    post: { responses: { '200': { description: OK } } }
+                  /things/search:
+                    post: { responses: { '200': { description: OK } } }
+                  /things/{id}:cancel:
+                    post: { responses: { '200': { description: OK } } }
+                """;
+        assertParity("response-code", "operation", Map.of("operation-type", "create", "required-status", 201), true, spec);
+        var parsed = new OpenAPIV3Parser().readContents(spec, null, new ParseOptions());
+        var found = new DistillMatcherEvaluator().execute(read("api-policy/matchers/response-code/Matcher.distill"),
+                OpenApiMapAdapter.toMap(parsed.getOpenAPI(), parsed.getMessages(), spec),
+                new PolicyRule("PARITY", "Parity", "Parity", "response-code", "operation",
+                        Map.of("operation-type", "create", "required-status", 201), "").asMap());
+        assertEquals(List.of("POST /things"), found.stream().map(Diagnostic::path).toList());
+    }
+
     @Test void responseCodeRetrievalStatus() {
         assertParity("response-code", "operation",
                 Map.of("operation-type", "identifiable-resource-retrieval", "required-status", 404), true);
