@@ -531,7 +531,7 @@ class DistillGroovyParityTest {
     }
 
     @Test void responseCodeCreateStatusSkipsSearchAndActionPaths() {
-        // Only POST /things is creation; the search and custom-method POSTs must stay quiet.
+        // Only POST /things is flagged: search/custom-method POSTs are not creation and PUT never requires 201.
         String spec = """
                 openapi: 3.0.0
                 info: { title: T, version: 1.0.0 }
@@ -542,6 +542,10 @@ class DistillGroovyParityTest {
                     post: { responses: { '200': { description: OK } } }
                   /things/{id}:cancel:
                     post: { responses: { '200': { description: OK } } }
+                  /things/{id}:
+                    put: { responses: { '200': { description: OK } } }
+                  /widgets/{id}:
+                    put: { responses: { '201': { description: Created, headers: { Location: { schema: { type: string } } } } } }
                 """;
         assertParity("response-code", "operation", Map.of("operation-type", "create", "required-status", 201), true, spec);
         var parsed = new OpenAPIV3Parser().readContents(spec, null, new ParseOptions());

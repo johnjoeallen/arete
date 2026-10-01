@@ -24,10 +24,11 @@ The rule has `operation` scope and uses the `response-code` rule:
 parameters: { operation-type: create, required-status: 201 }
 ```
 
-An operation is treated as a creation operation when its method is POST or
-PUT, unless the last path segment is `search`, `query`, `find` or `filter`, or
+An operation is treated as a creation operation when its method is POST,
+unless the last path segment is `search`, `query`, `find` or `filter`, or
 contains a `:` (a custom method such as `/orders/{id}:cancel`). Those are
-searches or actions, not creation. If none of its documented responses has numeric status 201, the rule
+searches or actions, not creation. PUT is never required to document 201 (it
+normally replaces a resource); a PUT that does document 201 is not reported. If none of its documented responses has numeric status 201, the rule
 reports the operation at its operation pointer with `Operation lacks the
 required documented status`.
 

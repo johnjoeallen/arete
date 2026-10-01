@@ -358,7 +358,6 @@
 
 ## STATUS001  (response-code / operation)
   /paths/~1bulk-create~1orders~1{batchId}/post  |  POST /bulk-create/orders/{batchId}  |  Operation lacks the required documented status
-  /paths/~1catalog~1searchByName/put  |  PUT /catalog/searchByName  |  Operation lacks the required documented status
   /paths/~1orders/post  |  POST /orders  |  Operation lacks the required documented status
 
 ## STATUS002  (response-header / response)

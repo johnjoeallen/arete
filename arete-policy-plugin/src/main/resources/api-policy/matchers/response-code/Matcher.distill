@@ -16,7 +16,7 @@ distill(api, rule) {
         ? api.paths.expand { path -> path.operationDetails
             .filter { operation ->
                 !(rule.parameters["operation-type"] == "create"
-                    && !(operation.method == "POST" || operation.method == "PUT"))
+                    && operation.method != "POST")
                 && !(rule.parameters["operation-type"] == "create"
                     && last(tokenise("/", path.path)) ==~ /(?i)(search|query|find|filter|.*:.*)/)
                 && !(rule.parameters["operation-type"] == "identifiable-resource-retrieval"
