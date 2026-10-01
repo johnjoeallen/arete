@@ -12,7 +12,7 @@ Download the latest `arete-<version>.zip` from the
 and run the launcher script for your platform:
 
 ```bash
-unzip arete-<version>.zip
+unzip arete-<version>.zip -d arete   # the zip has no top-level folder
 cd arete
 ./arete.sh        # Linux/macOS
 arete.bat         # Windows
