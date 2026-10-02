@@ -18,18 +18,31 @@ Areté becomes an embeddable policy-engine library first. The server and web UI 
 
 ## Target architecture
 
-```text
- Consumers         arete CLI (fat jar)    Maven and Gradle plugins    arete-server
-                   score, diff, report    thin wrappers, in-process   local web UI: view, score, fix before commit
-                              \                     |                     /
-                               v                    v                    v
- +-------------------------------------------------------------------------------+
- | arete-engine: library with no Spring, DB or UI                                |
- |  Spec loader | Distill | Policy loader      | Scoring        | Reports         |
- |  OpenAPI,$ref| matchers| URI, pin, checksum | score,diff,gate| JSON, MR text   |
- +-------------------------------------------------------------------------------+
-                               ^                                     ^
-   Specs: head file; base via git show at the merge-base     Policy content: path, https, git or Maven coordinate
+```mermaid
+flowchart TB
+    cli["arete CLI (fat jar)<br/>score, diff, gate, report"]
+    plugins["Maven and Gradle plugins<br/>thin wrappers, in-process"]
+    server["arete-server<br/>local web UI: view, score, fix before commit"]
+
+    subgraph engine["arete-engine: library with no Spring, DB or UI"]
+        direction LR
+        spec["Spec loader<br/>OpenAPI, $ref"]
+        distill["Distill<br/>matchers, rules"]
+        policy["Policy loader<br/>URI, pin, checksum"]
+        scoring["Scoring<br/>score, diff, gate"]
+        reports["Reports<br/>JSON, markdown, SARIF"]
+        spec --> distill --> scoring --> reports
+        policy --> distill
+    end
+
+    specs["Specs<br/>head file; base via git show or raw fetch"]
+    content["Policy content<br/>path, https, git or Maven coordinate"]
+
+    cli --> engine
+    plugins --> engine
+    server --> engine
+    specs --> spec
+    content --> policy
 ```
 
 The CLI, third-party embedders and the server all call the same engine. The engine reads specs and policy content and writes reports; it never opens a port or a database.
