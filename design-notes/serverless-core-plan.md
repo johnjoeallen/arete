@@ -102,11 +102,10 @@ The plan:
 | Setting | Meaning |
 | --- | --- |
 | `expect: no-match` | Default, as today. Matches are violations. |
-| `expect: match` | Must match. No match is the violation, reported at the scope's pointer (the operation, schema or spec root). |
+| `expect: match` | Must match. No match is the violation, reported at the scope's pointer (the operation, schema or spec root), and costed by `points`, `per-match` or `tiers` like any other violation. |
 | `points` | Flat deduction when the rule is violated, as today. |
 | `per-match` and `max` | Deduct per match, capped at `max`. |
 | `tiers` | Deduction by match count, for example 1 or more costs 1, 5 or more costs 3, 20 or more costs 8. |
-| `on-no-match` | Deduction applied when nothing matches, for rules where absence is the problem. |
 | `PROHIBITED` | Unchanged. Any violation forces the score to 0. |
 
 The names and syntax are a proposal. A policy file declares a format version, so existing policies keep their current meaning.
