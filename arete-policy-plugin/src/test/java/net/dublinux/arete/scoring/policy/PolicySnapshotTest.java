@@ -52,8 +52,7 @@ class PolicySnapshotTest {
 
     private static PolicyBundle bundle() {
         return new PolicyBundleLoader().load(
-                new ClasspathBundleResources(PolicySnapshotTest.class.getClassLoader()),
-                new PolicyBundleLoader.LoadOptions(List.of("distill")));
+                new ClasspathBundleResources(PolicySnapshotTest.class.getClassLoader()));
     }
 
     @TestFactory

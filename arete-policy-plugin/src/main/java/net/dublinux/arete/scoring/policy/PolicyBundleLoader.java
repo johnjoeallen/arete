@@ -18,38 +18,10 @@ import java.util.Set;
 /** Loads and validates every declarative resource and rule reference. */
 final class PolicyBundleLoader {
     private final Yaml yaml;
-    private final GroovyMatcherEvaluator groovyRuntime = new GroovyMatcherEvaluator();
     private final DistillMatcherEvaluator distillRuntime = new DistillMatcherEvaluator();
 
-    /** The rule source file each supported language is loaded from. */
-    private static final Map<String, String> SOURCE_FILE = Map.of(
-            "distill", "Matcher.distill",
-            "groovy", "Matcher.groovy");
-
-    /**
-     * Ordered list of rule languages to try for each rule. The first
-     * language in the list that has a source file present wins.
-     *
-     * <p>The default is {@code ["distill"]}: the deployed runtime only ever
-     * evaluates {@code Matcher.distill}. {@code Matcher.groovy} is a build-time
-     * parity reference, not a live source. Tests may pass a different
-     * precedence explicitly.
-     */
-    record LoadOptions(List<String> languagePrecedence) {
-        LoadOptions {
-            if (languagePrecedence == null || languagePrecedence.isEmpty()) {
-                throw new BundleValidationException("rule language precedence must not be empty");
-            }
-            for (String language : languagePrecedence) {
-                if (!SOURCE_FILE.containsKey(language)) {
-                    throw new BundleValidationException("unknown rule language '" + language
-                            + "'; supported: " + SOURCE_FILE.keySet());
-                }
-            }
-            languagePrecedence = List.copyOf(languagePrecedence);
-        }
-        static LoadOptions defaults() { return new LoadOptions(List.of("distill")); }
-    }
+    /** The only matcher language: every matcher is a {@code Matcher.distill} beside its {@code Matcher.md}. */
+    private static final String MATCHER_SOURCE = "Matcher.distill";
 
     PolicyBundleLoader() {
         LoaderOptions options = new LoaderOptions();
@@ -66,14 +38,10 @@ final class PolicyBundleLoader {
     record OverlayPolicy(String name, String content) { }
 
     PolicyBundle load(BundleResources resources) {
-        return load(resources, LoadOptions.defaults(), List.of());
+        return load(resources, List.of());
     }
 
-    PolicyBundle load(BundleResources resources, LoadOptions loadOptions) {
-        return load(resources, loadOptions, List.of());
-    }
-
-    PolicyBundle load(BundleResources resources, LoadOptions loadOptions, List<OverlayPolicy> overlayPolicies) {
+    PolicyBundle load(BundleResources resources, List<OverlayPolicy> overlayPolicies) {
         Map<String, Object> manifest = yamlMap("PolicyBundle.yaml", resources.read("PolicyBundle.yaml"));
         rejectUnknown("PolicyBundle.yaml", manifest, Set.of("formatVersion", "bundleId", "bundleVersion", "rules", "policies", "matchers"));
         if (!Integer.valueOf(1).equals(manifest.get("formatVersion"))) throw new BundleValidationException("PolicyBundle.yaml: formatVersion must be 1");
@@ -88,22 +56,10 @@ final class PolicyBundleLoader {
             Matcher descriptor = parseRuleDefinition(descriptorPath, resources.read(descriptorPath));
             if (!entry.getKey().equals(descriptor.id())) throw new BundleValidationException(descriptorPath + ": manifest rule id does not match descriptor id");
 
-            Matcher matcher = null;
-            for (String language : loadOptions.languagePrecedence()) {
-                String source = optionalRead(resources, siblingPath(descriptorPath, SOURCE_FILE.get(language)));
-                if (source == null) continue;
-                matcher = new Matcher(descriptor.id(), language, source, descriptor.scopes(), descriptor.parameters());
-                switch (language) {
-                    case "groovy" -> groovyRuntime.validate(matcher);
-                    case "distill" -> distillRuntime.validate(matcher);
-                    default -> throw new BundleValidationException("unknown matcher language '" + language + "'");
-                }
-                break;
-            }
-            if (matcher == null) {
-                throw new BundleValidationException(descriptorPath + ": no rule source for languages "
-                        + loadOptions.languagePrecedence());
-            }
+            String source = optionalRead(resources, siblingPath(descriptorPath, MATCHER_SOURCE));
+            if (source == null) throw new BundleValidationException(descriptorPath + ": no " + MATCHER_SOURCE + " beside it");
+            Matcher matcher = new Matcher(descriptor.id(), "distill", source, descriptor.scopes(), descriptor.parameters());
+            distillRuntime.validate(matcher);
             matchers.put(matcher.id(), matcher);
         }
 

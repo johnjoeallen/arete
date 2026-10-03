@@ -37,9 +37,8 @@ rule pipelines (`.map` / `.filter` / `.expand`, slashy regex literals,
   network, reflection, or unbounded loops.
 - See the [Distill reference](distill.md) for the full grammar and builtin catalogue.
 
-The build also runs optional `Matcher.groovy` counterparts as parity checks;
-they are not part of the deployed matcher runtime. See
-[The case for Distill](performance.md) for how the engines compare.
+Distill is the only matcher language; there is no second runtime. See
+[The case for Distill](performance.md) for why.
 
 ---
 
@@ -53,8 +52,7 @@ api-policy/
 ├── matchers/
 │   └── <matcher-id>/
 │       ├── Matcher.md          # descriptor (YAML front matter) + prose
-│       ├── Matcher.distill         # the matcher, in Distill — the only runtime used
-│       └── Matcher.groovy      # build-time parity check (optional)
+│       └── Matcher.distill     # the matcher, in Distill — the only runtime used
 ├── rules/
 │   └── <RULE-ID>.md             # rule front matter + human documentation
 └── policies/
@@ -460,9 +458,8 @@ and checks the findings — and each policy's end-to-end score — against golde
 files under `src/test/resources/snapshots/`. Any change to a matcher, rule
 parameters, or the scoring model surfaces as a diff there. After an intended
 change, regenerate with `-Dsnapshot.update=true` and review what moved before
-committing the updated snapshots. (`Matcher.groovy` parity checks still run for
-matchers that have one, but they compare two implementations of the current
-behaviour, not against a frozen baseline — the snapshots are the baseline.)
+committing the updated snapshots. The per-rule examples in
+`src/test/resources/corpus/` and the whole-API specs beside them are checked the same way.
 
 ### A new policy
 

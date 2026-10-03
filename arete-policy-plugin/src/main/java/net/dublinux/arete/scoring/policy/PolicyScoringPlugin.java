@@ -92,7 +92,7 @@ public final class PolicyScoringPlugin implements SpecScoringPlugin, RuleDocumen
     @Override
     public synchronized void configure(Map<String, String> config) {
         bundle = bundleLoader.load(new ClasspathBundleResources(getClass().getClassLoader()),
-                PolicyBundleLoader.LoadOptions.defaults(), loadUserPolicies(config));
+                loadUserPolicies(config));
     }
 
     /**

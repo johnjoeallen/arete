@@ -11,9 +11,8 @@ only the immutable `api` and `rule` values, a fixed set of builtins, and
 [RE2/J](https://github.com/google/re2j) regular expressions. There is no I/O,
 reflection, recursion, or unbounded iteration.
 
-The build also runs a matching `Matcher.groovy` for some matchers as a parity
-check; Groovy is not part of the deployed runtime. A deployed Areté always
-evaluates matchers with Distill.
+Distill is the only matcher language. (Matchers were once also written in Groovy;
+that runtime and its parity checks have been removed.)
 
 **Editor support.** [`editors/distill/`](https://github.com/johnjoeallen/arete/tree/main/editors/distill)
 is a syntax-highlighting grammar for VS Code and IntelliJ / other JetBrains

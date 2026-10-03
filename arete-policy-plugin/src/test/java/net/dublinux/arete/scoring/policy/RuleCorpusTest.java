@@ -37,8 +37,7 @@ class RuleCorpusTest {
     @TestFactory
     Stream<DynamicTest> everyRuleReportsItsViolationAndAcceptsItsFix() throws IOException {
         PolicyBundle bundle = new PolicyBundleLoader().load(
-                new ClasspathBundleResources(RuleCorpusTest.class.getClassLoader()),
-                new PolicyBundleLoader.LoadOptions(List.of("distill")));
+                new ClasspathBundleResources(RuleCorpusTest.class.getClassLoader()));
         DistillMatcherEvaluator distill = new DistillMatcherEvaluator();
 
         try (Stream<Path> dirs = Files.list(VIOLATIONS)) {
