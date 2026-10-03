@@ -1,0 +1,3 @@
+# Rules a good API still trips, with the reason. Each must keep firing (the test fails if one goes quiet).
+JSON011  Conflicts with CASE001: a date-time property must end _at, but createdAt is the camelCase CASE001 requires and created_at fails CASE001. Any timestamp trips one of the two.
+VERSION004  Enterprise Grade only. VERSION001-003 flag a version in the path, a header and a media type, so any versioning trips one of them and none trips VERSION004.

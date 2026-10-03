@@ -1,4 +1,8 @@
-# Rule corpus
+# Corpus
+
+Two kinds of example: one small spec pair per rule (`violations/`), and whole APIs scored end to end (`good/`, `messy/`).
+
+## Rules: `violations/`
 
 One directory per bundled rule under `violations/<RULE>/`:
 
@@ -23,3 +27,20 @@ A rule with a `pending.txt` is a known gap, not a passing test. Today:
 
 - `COMPAT001`–`COMPAT006` compare against a baseline spec, which the engine does not take yet.
 - `HTTP008` and `UPDATE003` are deliberately inert (a no-op vocabulary, and a manual-review rule).
+
+## Whole APIs: `good/` and `messy/`
+
+`WholeApiCorpusTest` scores each spec under every bundled policy.
+
+- `good/<name>.yaml|json` is an API a reviewer would accept. It must report nothing, except the rules
+  listed in `<name>.allowed` (a rule id, then the reason). Every allowed rule must still fire, so the
+  list cannot go stale. The current exceptions are genuine conflicts inside a policy: `JSON011` against
+  `CASE001` for any timestamp, and `VERSION004` against `VERSION001`-`003` in Enterprise Grade.
+- `messy/<name>.yaml` is an API with many problems. Findings and score under each policy are recorded in
+  `<name>.snapshot`; a change shows as a diff to review. `deeply-nested` exercises references, nesting,
+  composition and cycles.
+
+```
+mvn -pl arete-policy-plugin test -Dtest=WholeApiCorpusTest -Dcorpus.update=true   # regenerate snapshots
+mvn -pl arete-policy-plugin test -Dtest=WholeApiCorpusTest -Dcorpus.print=true    # show what a good spec trips
+```

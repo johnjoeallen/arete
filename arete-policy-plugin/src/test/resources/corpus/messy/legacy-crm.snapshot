@@ -1,0 +1,321 @@
+# findings and score by policy; regenerate with -Dcorpus.update=true
+
+## Enterprise Grade  score=67.0  grade=F  findings=164
+  BULK002  /components/schemas/Definition1/properties/customer  |  Array property has no maximum item count
+  BULK002  /components/schemas/Definition1/properties/tags  |  Array property has no maximum item count
+  CASE001  /components/schemas/Definition1/properties/customer_id  |  Name does not use the configured convention
+  CASE003  /paths/~1getCustomers/get/parameters/0  |  Name does not use the configured convention
+  CASE005  /paths/~1getCustomers  |  Name does not use the configured convention
+  CASE005  /paths/~1orders?status=open  |  Name does not use the configured convention
+  CASE006  /components/schemas/Definition1  |  Schema name 'Definition1' is a placeholder rather than a meaningful domain name
+  DOC002  /paths/~1customers~1actions~1archive/post  |  Operation summary does not begin with a capital letter
+  DOC002  /paths/~1getCustomers/get  |  Operation summary does not begin with a capital letter
+  DOC003  /paths/~1customers~1actions~1archive/post  |  Operation summary is not sentence case
+  DOC003  /paths/~1getCustomers/get  |  Operation summary is not sentence case
+  DOC004  /paths/~1getCustomers/get  |  Operation summary ends with a period
+  DOC006  /info  |  API metadata is missing contact email
+  DOC006  /info  |  API metadata is missing contact name
+  DOC006  /info  |  API metadata is missing description
+  DOC006  /info  |  API metadata is missing semantic version
+  DOC007  /  |  API metadata is missing x-api-id
+  DOC008  /  |  API metadata is missing x-audience
+  DOC009  /paths/~1customers~1actions~1archive/post  |  Operation summary is not action-oriented
+  DOC009  /paths/~1customers~1{customerId}~1orders~1{orderId}~1items/get  |  Operation summary is not action-oriented
+  DOC009  /paths/~1customer~1{customerId}/patch  |  Operation summary is not action-oriented
+  DOC009  /paths/~1getCustomers/get  |  Operation summary is not action-oriented
+  DOC009  /paths/~1orders?status=open/get  |  Operation summary is not action-oriented
+  DOC010  /paths/~1customers~1actions~1archive/post  |  Operation has no operationId
+  DOC010  /paths/~1customers~1{customerId}~1orders~1{orderId}~1items/get  |  operationId 'list' is also used by GET /orders?status=open
+  DOC010  /paths/~1customer~1{customerId}/delete  |  Operation has no operationId
+  DOC010  /paths/~1customer~1{customerId}/get  |  Operation has no operationId
+  DOC010  /paths/~1customer~1{customerId}/patch  |  Operation has no operationId
+  DOC010  /paths/~1customer~1{customerId}/post  |  Operation has no operationId
+  DOC010  /paths/~1customer~1{customerId}/put  |  Operation has no operationId
+  DOC010  /paths/~1getCustomers/get  |  Operation has no operationId
+  DOC011  /paths/~1customers~1actions~1archive/post  |  Operation is not assigned any tag
+  DOC011  /paths/~1customers~1{customerId}~1orders~1{orderId}~1items/get  |  Operation is not assigned any tag
+  DOC011  /paths/~1customer~1{customerId}/delete  |  Operation is not assigned any tag
+  DOC011  /paths/~1customer~1{customerId}/get  |  Operation is not assigned any tag
+  DOC011  /paths/~1customer~1{customerId}/patch  |  Operation is not assigned any tag
+  DOC011  /paths/~1customer~1{customerId}/post  |  Operation is not assigned any tag
+  DOC011  /paths/~1customer~1{customerId}/put  |  Operation is not assigned any tag
+  DOC011  /paths/~1getCustomers/get  |  Operation is not assigned any tag
+  DOC011  /paths/~1orders?status=open/get  |  Operation is not assigned any tag
+  DOC012  /info/title  |  API title does not end with 'API'
+  DOC012  /info/title  |  API title ends with the discouraged marker 'PoC'
+  DOC012  /info/title  |  API title word 'service' is not in Title Case
+  DOC013  /components/schemas/Definition1/properties/age  |  Definition1.age has no description
+  DOC013  /components/schemas/Definition1/properties/created  |  Definition1.created has no description or example
+  DOC013  /components/schemas/Definition1/properties/customer  |  Definition1.customer has no description or example
+  DOC013  /components/schemas/Definition1/properties/customer_id  |  Definition1.customer_id has no description or example
+  DOC013  /components/schemas/Definition1/properties/displayName  |  Definition1.displayName has no description or example
+  DOC013  /components/schemas/Definition1/properties/nickname  |  Definition1.nickname has no description or example
+  DOC013  /components/schemas/Definition1/properties/ssn  |  Definition1.ssn has no description or example
+  DOC013  /components/schemas/Definition1/properties/status  |  Definition1.status has no description or example
+  DOC013  /components/schemas/Definition1/properties/tags  |  Definition1.tags has no description or example
+  DOC013  /components/schemas/Definition1/properties/tier  |  Definition1.tier has no description or example
+  DOC013  /components/schemas/create_customer_request/properties/name  |  create_customer_request.name has no description or example
+  DOC014  /paths/~1customer~1{customerId}/get/parameters/0  |  GET /customer/{customerId} id has no description or example
+  DOC014  /paths/~1getCustomers/get/parameters/0  |  GET /getCustomers pageSize has no description or example
+  DOC014  /paths/~1getCustomers/get/parameters/1  |  GET /getCustomers q has no description or example
+  DOC014  /paths/~1getCustomers/get/parameters/2  |  GET /getCustomers X-Internal-Trace has no description or example
+  DOC014  /paths/~1getCustomers/get/parameters/3  |  GET /getCustomers X-API-Version has no description or example
+  DOC015  /paths/~1customers~1actions~1archive/post  |  Operation description is missing
+  DOC015  /paths/~1customers~1{customerId}~1orders~1{orderId}~1items/get  |  Operation description is missing
+  DOC015  /paths/~1customer~1{customerId}/delete  |  Operation description is missing
+  DOC015  /paths/~1customer~1{customerId}/get  |  Operation description is missing
+  DOC015  /paths/~1customer~1{customerId}/patch  |  Operation description is missing
+  DOC015  /paths/~1customer~1{customerId}/post  |  Operation description is missing
+  DOC015  /paths/~1customer~1{customerId}/put  |  Operation description is missing
+  DOC015  /paths/~1getCustomers/get  |  Operation description is missing
+  DOC015  /paths/~1orders?status=open/get  |  Operation description is missing
+  DOC020  /info/license  |  API metadata does not declare a license
+  DOC021  /paths/~1customers~1actions~1archive/post  |  Operation summary has too few words to be meaningful
+  DOC021  /paths/~1customers~1{customerId}~1orders~1{orderId}~1items/get  |  Operation summary has too few words to be meaningful
+  DOC021  /paths/~1customer~1{customerId}/delete  |  Operation summary has too few words to be meaningful
+  DOC021  /paths/~1customer~1{customerId}/get  |  Operation summary has too few words to be meaningful
+  DOC021  /paths/~1customer~1{customerId}/patch  |  Operation summary has too few words to be meaningful
+  DOC021  /paths/~1customer~1{customerId}/post  |  Operation summary has too few words to be meaningful
+  DOC021  /paths/~1orders?status=open/get  |  Operation summary has too few words to be meaningful
+  HTTP001  /paths/~1customer~1{customerId}/get  |  GET operation appears to mutate state
+  HTTP002  /paths/~1customer~1{customerId}/post  |  POST appears to replace an identified resource
+  HTTP004  /paths/~1customer~1{customerId}/delete  |  Operation has a request body
+  HTTP005  /paths/~1customer~1{customerId}/get  |  Operation has a request body
+  HTTP006  /paths/~1customer~1{customerId}/get  |  HTTP method and resource semantics appear inconsistent
+  HTTP006  /paths/~1customer~1{customerId}/post  |  HTTP method and resource semantics appear inconsistent
+  HTTP009  /paths/~1customer~1{customerId}/delete  |  DELETE operation declares a request body
+  JSON004  /components/schemas/Definition1/properties/customer  |  Array property has a singular name
+  JSON006  /components/schemas/Definition1/properties/nickname  |  Optional property explicitly permits null
+  JSON007  /components/schemas/Definition1/properties/tier  |  Property uses an enum
+  JSON009  /components/schemas/Definition1/properties/status  |  Property uses an enum
+  JSON010  /components/schemas/Definition1/properties/created  |  Common field has an inconsistent type or format
+  JSON012  /components/schemas/Definition1/properties/age  |  Numeric property does not declare a format
+  JSON012  /components/schemas/Definition1/properties/customer_id  |  Numeric property does not declare a format
+  JSON012  /components/schemas/Definition1/properties/status  |  Numeric property does not declare a format
+  JSON012  /paths/~1customer~1{customerId}/post/requestBody/content/application~1json/schema/properties/customer_id  |  Numeric property does not declare a format
+  JSON014  /components/schemas/Definition1/properties/status  |  Enum is not marked extensible
+  JSON014  /components/schemas/Definition1/properties/tier  |  Enum is not marked extensible
+  JSON015  /components/schemas/Definition1/properties/tier  |  Enum value is not UPPER_SNAKE_CASE
+  JSON016  /paths/~1getCustomers  |  Successful response is not a JSON object
+  JSON017  /components/schemas/Definition1/properties/tier  |  Enum for 'tier' contains duplicate values
+  JSON018  /components/schemas/Definition1/properties/age  |  Numeric property does not declare a format
+  JSON018  /components/schemas/Definition1/properties/customer_id  |  Numeric property does not declare a format
+  JSON018  /components/schemas/Definition1/properties/status  |  Numeric property does not declare a format
+  JSON018  /paths/~1customer~1{customerId}/post/requestBody/content/application~1json/schema/properties/customer_id  |  Numeric property does not declare a format
+  JSON020  /components/schemas/Definition1/properties/age  |  Example exceeds maximum 120.0
+  JSON023  /components/schemas/Definition1/properties/tags  |  Array property 'tags' declares no items
+  REST001  /paths/~1getCustomers/get  |  Resource path contains an operation verb
+  REST002  /paths/~1customers~1actions~1archive  |  Collection name is singular
+  REST002  /paths/~1customer~1{customerId}  |  Collection name is singular
+  REST002  /paths/~1orders?status=open  |  Collection name is singular
+  REST004  /paths/~1customers~1actions~1archive/post  |  Custom action resource is used
+  SEC009  /servers  |  Server URL points at an internal or non-routable host: localhost
+  SECURITY001  /paths/~1customers~1actions~1archive/post  |  Operation does not require security scheme bearerAuth
+  SECURITY001  /paths/~1customers~1{customerId}~1orders~1{orderId}~1items/get  |  Operation does not require security scheme bearerAuth
+  SECURITY001  /paths/~1customer~1{customerId}/delete  |  Operation does not require security scheme bearerAuth
+  SECURITY001  /paths/~1customer~1{customerId}/get  |  Operation does not require security scheme bearerAuth
+  SECURITY001  /paths/~1customer~1{customerId}/patch  |  Operation does not require security scheme bearerAuth
+  SECURITY001  /paths/~1customer~1{customerId}/post  |  Operation does not require security scheme bearerAuth
+  SECURITY001  /paths/~1customer~1{customerId}/put  |  Operation does not require security scheme bearerAuth
+  SECURITY001  /paths/~1getCustomers/get  |  Operation does not require security scheme bearerAuth
+  SECURITY001  /paths/~1orders?status=open/get  |  Operation does not require security scheme bearerAuth
+  SECURITY002  /paths/~1customers~1actions~1archive/post  |  Operation does not require security scheme bearerAuth with scopes read, write
+  SECURITY002  /paths/~1customers~1{customerId}~1orders~1{orderId}~1items/get  |  Operation does not require security scheme bearerAuth with scopes read, write
+  SECURITY002  /paths/~1customer~1{customerId}/delete  |  Operation does not require security scheme bearerAuth with scopes read, write
+  SECURITY002  /paths/~1customer~1{customerId}/get  |  Operation does not require security scheme bearerAuth with scopes read, write
+  SECURITY002  /paths/~1customer~1{customerId}/patch  |  Operation does not require security scheme bearerAuth with scopes read, write
+  SECURITY002  /paths/~1customer~1{customerId}/post  |  Operation does not require security scheme bearerAuth with scopes read, write
+  SECURITY002  /paths/~1customer~1{customerId}/put  |  Operation does not require security scheme bearerAuth with scopes read, write
+  SECURITY002  /paths/~1getCustomers/get  |  Operation does not require security scheme bearerAuth with scopes read, write
+  SECURITY002  /paths/~1orders?status=open/get  |  Operation does not require security scheme bearerAuth with scopes read, write
+  STANDARD001  /servers  |  Server hostname is not lowercase hyphenated
+  STANDARD003  /paths/~1getCustomers/get  |  Response 200 contains an unexpected headers: Link
+  STANDARD005  /paths/~1customers~1actions~1archive  |  Resource path exceeds the maximum nesting depth
+  STANDARD005  /paths/~1customers~1{customerId}~1orders~1{orderId}~1items  |  Resource path exceeds the maximum nesting depth
+  STANDARD006  /paths/~1customers~1actions~1archive  |  Nested resource type is not exposed as a root resource
+  STANDARD006  /paths/~1customers~1{customerId}~1orders~1{orderId}~1items  |  Nested resource type is not exposed as a root resource
+  STANDARD008  /paths/~1getCustomers/get/parameters/2  |  Proprietary request header is not allow-listed: X-Internal-Trace
+  STANDARD008  /paths/~1getCustomers/get/parameters/3  |  Proprietary request header is not allow-listed: X-API-Version
+  STANDARD013  /paths/~1customers~1{customerId}~1orders~1{orderId}~1items/get  |  Path template placeholder '{customerId}' has no matching path parameter
+  STANDARD013  /paths/~1customers~1{customerId}~1orders~1{orderId}~1items/get  |  Path template placeholder '{orderId}' has no matching path parameter
+  STANDARD013  /paths/~1customer~1{customerId}/delete  |  Path template placeholder '{customerId}' has no matching path parameter
+  STANDARD013  /paths/~1customer~1{customerId}/get  |  Path parameter 'id' has no matching {placeholder} in the path template
+  STANDARD013  /paths/~1customer~1{customerId}/get  |  Path template placeholder '{customerId}' has no matching path parameter
+  STANDARD013  /paths/~1customer~1{customerId}/patch  |  Path template placeholder '{customerId}' has no matching path parameter
+  STANDARD013  /paths/~1customer~1{customerId}/post  |  Path template placeholder '{customerId}' has no matching path parameter
+  STANDARD013  /paths/~1customer~1{customerId}/put  |  Path template placeholder '{customerId}' has no matching path parameter
+  STANDARD015  /paths/~1customer~1{customerId}/delete  |  Request body is present but not marked required: true
+  STANDARD015  /paths/~1customer~1{customerId}/get  |  Request body is present but not marked required: true
+  STANDARD015  /paths/~1customer~1{customerId}/post  |  Request body is present but not marked required: true
+  STANDARD017  /paths/~1getCustomers/get  |  Response header 'Link' defines neither a schema nor content
+  STANDARD020  /paths/~1customer~1{customerId}/delete  |  Request body declares an inline object schema instead of a $ref
+  STANDARD020  /paths/~1customer~1{customerId}/get  |  Request body declares an inline object schema instead of a $ref
+  STANDARD020  /paths/~1customer~1{customerId}/post  |  Request body declares an inline object schema instead of a $ref
+  STANDARD021  /  |  Parser reported: attribute paths.'/customers/{customerId}/orders/{orderId}/items'(get).responses.200.content.'application/xml'.schema.#/components/schemas/Missing is missing
+  STANDARD022  /paths  |  HTTP status keys are declared as bare numbers, not strings: 200, 500
+  STANDARD025  /paths/~1orders?status=open  |  Path key contains '?'; declare query parameters in 'parameters' instead
+  STANDARD027  /servers  |  Server URL has a trailing slash, which produces '//' when joined with a path
+  STATUS001  /paths/~1customers~1actions~1archive/post  |  Operation lacks the required documented status
+  STATUS001  /paths/~1customer~1{customerId}/post  |  Operation lacks the required documented status
+  STATUS004  /paths/~1customers~1{customerId}~1orders~1{orderId}~1items/get  |  Operation lacks the required documented status
+  STATUS004  /paths/~1customer~1{customerId}/get  |  Operation lacks the required documented status
+  STATUS005  /paths/~1getCustomers/get  |  Status code conflicts with response semantics
+  STATUS006  /paths/~1getCustomers  |  Error response does not declare application/problem+json
+  STATUS008  /paths/~1getCustomers/get  |  Documents a server-error (500) response; these should be omitted from the contract
+  UPDATE001  /paths/~1customer~1{customerId}/put  |  PUT appears to perform a partial update
+  UPDATE002  /paths/~1customer~1{customerId}/patch  |  PATCH operation is used
+  VERSION002  /paths/~1getCustomers  |  Interface version is exposed through header
+
+## Zalando  score=87.0  grade=B+  findings=57
+  CASE001  /components/schemas/Definition1/properties/customer_id  |  Name does not use the configured convention
+  CASE003  /paths/~1getCustomers/get/parameters/0  |  Name does not use the configured convention
+  CASE005  /paths/~1getCustomers  |  Name does not use the configured convention
+  CASE005  /paths/~1orders?status=open  |  Name does not use the configured convention
+  DOC006  /info  |  API metadata is missing contact email
+  DOC006  /info  |  API metadata is missing contact name
+  DOC006  /info  |  API metadata is missing description
+  DOC006  /info  |  API metadata is missing semantic version
+  DOC007  /  |  API metadata is missing x-api-id
+  DOC008  /  |  API metadata is missing x-audience
+  JSON004  /components/schemas/Definition1/properties/customer  |  Array property has a singular name
+  JSON009  /components/schemas/Definition1/properties/status  |  Property uses an enum
+  JSON010  /components/schemas/Definition1/properties/created  |  Common field has an inconsistent type or format
+  JSON012  /components/schemas/Definition1/properties/age  |  Numeric property does not declare a format
+  JSON012  /components/schemas/Definition1/properties/customer_id  |  Numeric property does not declare a format
+  JSON012  /components/schemas/Definition1/properties/status  |  Numeric property does not declare a format
+  JSON012  /paths/~1customer~1{customerId}/post/requestBody/content/application~1json/schema/properties/customer_id  |  Numeric property does not declare a format
+  JSON014  /components/schemas/Definition1/properties/status  |  Enum is not marked extensible
+  JSON014  /components/schemas/Definition1/properties/tier  |  Enum is not marked extensible
+  JSON015  /components/schemas/Definition1/properties/tier  |  Enum value is not UPPER_SNAKE_CASE
+  JSON016  /paths/~1getCustomers  |  Successful response is not a JSON object
+  REST002  /paths/~1customers~1actions~1archive  |  Collection name is singular
+  REST002  /paths/~1customer~1{customerId}  |  Collection name is singular
+  REST002  /paths/~1orders?status=open  |  Collection name is singular
+  REST004  /paths/~1customers~1actions~1archive/post  |  Custom action resource is used
+  SECURITY001  /paths/~1customers~1actions~1archive/post  |  Operation does not require security scheme bearerAuth
+  SECURITY001  /paths/~1customers~1{customerId}~1orders~1{orderId}~1items/get  |  Operation does not require security scheme bearerAuth
+  SECURITY001  /paths/~1customer~1{customerId}/delete  |  Operation does not require security scheme bearerAuth
+  SECURITY001  /paths/~1customer~1{customerId}/get  |  Operation does not require security scheme bearerAuth
+  SECURITY001  /paths/~1customer~1{customerId}/patch  |  Operation does not require security scheme bearerAuth
+  SECURITY001  /paths/~1customer~1{customerId}/post  |  Operation does not require security scheme bearerAuth
+  SECURITY001  /paths/~1customer~1{customerId}/put  |  Operation does not require security scheme bearerAuth
+  SECURITY001  /paths/~1getCustomers/get  |  Operation does not require security scheme bearerAuth
+  SECURITY001  /paths/~1orders?status=open/get  |  Operation does not require security scheme bearerAuth
+  SECURITY002  /paths/~1customers~1actions~1archive/post  |  Operation does not require security scheme bearerAuth with scopes read
+  SECURITY002  /paths/~1customers~1{customerId}~1orders~1{orderId}~1items/get  |  Operation does not require security scheme bearerAuth with scopes read
+  SECURITY002  /paths/~1customer~1{customerId}/delete  |  Operation does not require security scheme bearerAuth with scopes read
+  SECURITY002  /paths/~1customer~1{customerId}/get  |  Operation does not require security scheme bearerAuth with scopes read
+  SECURITY002  /paths/~1customer~1{customerId}/patch  |  Operation does not require security scheme bearerAuth with scopes read
+  SECURITY002  /paths/~1customer~1{customerId}/post  |  Operation does not require security scheme bearerAuth with scopes read
+  SECURITY002  /paths/~1customer~1{customerId}/put  |  Operation does not require security scheme bearerAuth with scopes read
+  SECURITY002  /paths/~1getCustomers/get  |  Operation does not require security scheme bearerAuth with scopes read
+  SECURITY002  /paths/~1orders?status=open/get  |  Operation does not require security scheme bearerAuth with scopes read
+  STANDARD001  /servers  |  Server hostname is not lowercase hyphenated
+  STANDARD003  /paths/~1getCustomers/get  |  Response 200 contains an unexpected headers: Link
+  STANDARD005  /paths/~1customers~1actions~1archive  |  Resource path exceeds the maximum nesting depth
+  STANDARD005  /paths/~1customers~1{customerId}~1orders~1{orderId}~1items  |  Resource path exceeds the maximum nesting depth
+  STANDARD006  /paths/~1customers~1actions~1archive  |  Nested resource type is not exposed as a root resource
+  STANDARD006  /paths/~1customers~1{customerId}~1orders~1{orderId}~1items  |  Nested resource type is not exposed as a root resource
+  STANDARD008  /paths/~1getCustomers/get/parameters/2  |  Proprietary request header is not allow-listed: X-Internal-Trace
+  STANDARD008  /paths/~1getCustomers/get/parameters/3  |  Proprietary request header is not allow-listed: X-API-Version
+  STATUS001  /paths/~1customers~1actions~1archive/post  |  Operation lacks the required documented status
+  STATUS001  /paths/~1customer~1{customerId}/post  |  Operation lacks the required documented status
+  STATUS004  /paths/~1customers~1{customerId}~1orders~1{orderId}~1items/get  |  Operation lacks the required documented status
+  STATUS004  /paths/~1customer~1{customerId}/get  |  Operation lacks the required documented status
+  STATUS005  /paths/~1getCustomers/get  |  Status code conflicts with response semantics
+  STATUS006  /paths/~1getCustomers  |  Error response does not declare application/problem+json
+
+## Zalando Extended  score=82.0  grade=B-  findings=93
+  CASE001  /components/schemas/Definition1/properties/customer_id  |  Name does not use the configured convention
+  CASE003  /paths/~1getCustomers/get/parameters/0  |  Name does not use the configured convention
+  CASE005  /paths/~1getCustomers  |  Name does not use the configured convention
+  CASE005  /paths/~1orders?status=open  |  Name does not use the configured convention
+  DOC006  /info  |  API metadata is missing contact email
+  DOC006  /info  |  API metadata is missing contact name
+  DOC006  /info  |  API metadata is missing description
+  DOC006  /info  |  API metadata is missing semantic version
+  DOC007  /  |  API metadata is missing x-api-id
+  DOC008  /  |  API metadata is missing x-audience
+  DOC011  /paths/~1customers~1actions~1archive/post  |  Operation is not assigned any tag
+  DOC011  /paths/~1customers~1{customerId}~1orders~1{orderId}~1items/get  |  Operation is not assigned any tag
+  DOC011  /paths/~1customer~1{customerId}/delete  |  Operation is not assigned any tag
+  DOC011  /paths/~1customer~1{customerId}/get  |  Operation is not assigned any tag
+  DOC011  /paths/~1customer~1{customerId}/patch  |  Operation is not assigned any tag
+  DOC011  /paths/~1customer~1{customerId}/post  |  Operation is not assigned any tag
+  DOC011  /paths/~1customer~1{customerId}/put  |  Operation is not assigned any tag
+  DOC011  /paths/~1getCustomers/get  |  Operation is not assigned any tag
+  DOC011  /paths/~1orders?status=open/get  |  Operation is not assigned any tag
+  DOC020  /info/license  |  API metadata does not declare a license
+  JSON004  /components/schemas/Definition1/properties/customer  |  Array property has a singular name
+  JSON009  /components/schemas/Definition1/properties/status  |  Property uses an enum
+  JSON010  /components/schemas/Definition1/properties/created  |  Common field has an inconsistent type or format
+  JSON012  /components/schemas/Definition1/properties/age  |  Numeric property does not declare a format
+  JSON012  /components/schemas/Definition1/properties/customer_id  |  Numeric property does not declare a format
+  JSON012  /components/schemas/Definition1/properties/status  |  Numeric property does not declare a format
+  JSON012  /paths/~1customer~1{customerId}/post/requestBody/content/application~1json/schema/properties/customer_id  |  Numeric property does not declare a format
+  JSON014  /components/schemas/Definition1/properties/status  |  Enum is not marked extensible
+  JSON014  /components/schemas/Definition1/properties/tier  |  Enum is not marked extensible
+  JSON015  /components/schemas/Definition1/properties/tier  |  Enum value is not UPPER_SNAKE_CASE
+  JSON016  /paths/~1getCustomers  |  Successful response is not a JSON object
+  JSON021  /components/schemas/Definition1/properties/customer_id  |  Numeric property does not declare both a minimum and a maximum
+  JSON021  /components/schemas/Definition1/properties/status  |  Numeric property does not declare both a minimum and a maximum
+  JSON021  /paths/~1customer~1{customerId}/post/requestBody/content/application~1json/schema/properties/customer_id  |  Numeric property does not declare both a minimum and a maximum
+  JSON022  /components/schemas/Definition1/properties/created  |  String property does not declare a maximum length
+  JSON022  /components/schemas/Definition1/properties/displayName  |  String property does not declare a maximum length
+  JSON022  /components/schemas/Definition1/properties/nickname  |  String property does not declare a maximum length
+  JSON022  /components/schemas/Definition1/properties/ssn  |  String property does not declare a maximum length
+  JSON022  /components/schemas/Definition1/properties/tier  |  String property does not declare a maximum length
+  JSON022  /components/schemas/create_customer_request/properties/name  |  String property does not declare a maximum length
+  JSON022  /paths/~1customer~1{customerId}/post/requestBody/content/application~1json/schema/properties/password  |  String property does not declare a maximum length
+  JSON023  /components/schemas/Definition1/properties/tags  |  Array property 'tags' declares no items
+  REST002  /paths/~1customers~1actions~1archive  |  Collection name is singular
+  REST002  /paths/~1customer~1{customerId}  |  Collection name is singular
+  REST002  /paths/~1orders?status=open  |  Collection name is singular
+  REST004  /paths/~1customers~1actions~1archive/post  |  Custom action resource is used
+  SECURITY001  /paths/~1customers~1actions~1archive/post  |  Operation does not require security scheme bearerAuth
+  SECURITY001  /paths/~1customers~1{customerId}~1orders~1{orderId}~1items/get  |  Operation does not require security scheme bearerAuth
+  SECURITY001  /paths/~1customer~1{customerId}/delete  |  Operation does not require security scheme bearerAuth
+  SECURITY001  /paths/~1customer~1{customerId}/get  |  Operation does not require security scheme bearerAuth
+  SECURITY001  /paths/~1customer~1{customerId}/patch  |  Operation does not require security scheme bearerAuth
+  SECURITY001  /paths/~1customer~1{customerId}/post  |  Operation does not require security scheme bearerAuth
+  SECURITY001  /paths/~1customer~1{customerId}/put  |  Operation does not require security scheme bearerAuth
+  SECURITY001  /paths/~1getCustomers/get  |  Operation does not require security scheme bearerAuth
+  SECURITY001  /paths/~1orders?status=open/get  |  Operation does not require security scheme bearerAuth
+  SECURITY002  /paths/~1customers~1actions~1archive/post  |  Operation does not require security scheme bearerAuth with scopes read
+  SECURITY002  /paths/~1customers~1{customerId}~1orders~1{orderId}~1items/get  |  Operation does not require security scheme bearerAuth with scopes read
+  SECURITY002  /paths/~1customer~1{customerId}/delete  |  Operation does not require security scheme bearerAuth with scopes read
+  SECURITY002  /paths/~1customer~1{customerId}/get  |  Operation does not require security scheme bearerAuth with scopes read
+  SECURITY002  /paths/~1customer~1{customerId}/patch  |  Operation does not require security scheme bearerAuth with scopes read
+  SECURITY002  /paths/~1customer~1{customerId}/post  |  Operation does not require security scheme bearerAuth with scopes read
+  SECURITY002  /paths/~1customer~1{customerId}/put  |  Operation does not require security scheme bearerAuth with scopes read
+  SECURITY002  /paths/~1getCustomers/get  |  Operation does not require security scheme bearerAuth with scopes read
+  SECURITY002  /paths/~1orders?status=open/get  |  Operation does not require security scheme bearerAuth with scopes read
+  STANDARD001  /servers  |  Server hostname is not lowercase hyphenated
+  STANDARD003  /paths/~1getCustomers/get  |  Response 200 contains an unexpected headers: Link
+  STANDARD005  /paths/~1customers~1actions~1archive  |  Resource path exceeds the maximum nesting depth
+  STANDARD005  /paths/~1customers~1{customerId}~1orders~1{orderId}~1items  |  Resource path exceeds the maximum nesting depth
+  STANDARD006  /paths/~1customers~1actions~1archive  |  Nested resource type is not exposed as a root resource
+  STANDARD006  /paths/~1customers~1{customerId}~1orders~1{orderId}~1items  |  Nested resource type is not exposed as a root resource
+  STANDARD008  /paths/~1getCustomers/get/parameters/2  |  Proprietary request header is not allow-listed: X-Internal-Trace
+  STANDARD008  /paths/~1getCustomers/get/parameters/3  |  Proprietary request header is not allow-listed: X-API-Version
+  STANDARD013  /paths/~1customers~1{customerId}~1orders~1{orderId}~1items/get  |  Path template placeholder '{customerId}' has no matching path parameter
+  STANDARD013  /paths/~1customers~1{customerId}~1orders~1{orderId}~1items/get  |  Path template placeholder '{orderId}' has no matching path parameter
+  STANDARD013  /paths/~1customer~1{customerId}/delete  |  Path template placeholder '{customerId}' has no matching path parameter
+  STANDARD013  /paths/~1customer~1{customerId}/get  |  Path parameter 'id' has no matching {placeholder} in the path template
+  STANDARD013  /paths/~1customer~1{customerId}/get  |  Path template placeholder '{customerId}' has no matching path parameter
+  STANDARD013  /paths/~1customer~1{customerId}/patch  |  Path template placeholder '{customerId}' has no matching path parameter
+  STANDARD013  /paths/~1customer~1{customerId}/post  |  Path template placeholder '{customerId}' has no matching path parameter
+  STANDARD013  /paths/~1customer~1{customerId}/put  |  Path template placeholder '{customerId}' has no matching path parameter
+  STANDARD023  /servers  |  Server URL does not match the approved pattern https://[a-z0-9-]+(\.[a-z0-9-]+)+(:[0-9]+)?(/[^\s]*)?
+  STANDARD023  /servers  |  Server URL does not match the approved pattern https://[a-z0-9-]+(\.[a-z0-9-]+)+(:[0-9]+)?(/[^\s]*)?
+  STANDARD024  /components/schemas/Definition1  |  Component schema 'Definition1' is defined but never referenced
+  STANDARD024  /components/schemas/Unused  |  Component schema 'Unused' is defined but never referenced
+  STANDARD024  /components/schemas/create_customer_request  |  Component schema 'create_customer_request' is defined but never referenced
+  STANDARD025  /paths/~1orders?status=open  |  Path key contains '?'; declare query parameters in 'parameters' instead
+  STANDARD027  /servers  |  Server URL has a trailing slash, which produces '//' when joined with a path
+  STATUS001  /paths/~1customers~1actions~1archive/post  |  Operation lacks the required documented status
+  STATUS001  /paths/~1customer~1{customerId}/post  |  Operation lacks the required documented status
+  STATUS004  /paths/~1customers~1{customerId}~1orders~1{orderId}~1items/get  |  Operation lacks the required documented status
+  STATUS004  /paths/~1customer~1{customerId}/get  |  Operation lacks the required documented status
+  STATUS005  /paths/~1getCustomers/get  |  Status code conflicts with response semantics
+  STATUS006  /paths/~1getCustomers  |  Error response does not declare application/problem+json

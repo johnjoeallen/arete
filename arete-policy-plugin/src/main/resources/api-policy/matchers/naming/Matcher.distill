@@ -22,9 +22,9 @@ distill(api, rule) {
             || (rule.parameters["match"] == "unsupported-character" && candidate.name ==~ /[A-Za-z][A-Za-z0-9_-]*/)
             || (rule.parameters["suffix"] != null && rule.parameters["match"] == "present"
                 && !candidate.name.endsWith(rule.parameters["suffix"]))
-            || (rule.parameters["semantic"] == "collection" && candidate.name.lower().endsWith("s") && candidate.name.length > 1)
-            || (rule.parameters["semantic"] == "singular" && candidate.name.lower().endsWith("s") && candidate.name.length > 1)
-            || (rule.parameters["semantic"] == "plural" && !(candidate.name.lower().endsWith("s") && candidate.name.length > 1))
+            || (rule.parameters["semantic"] == "collection" && (candidate.name.lower().endsWith("s") && candidate.name.length > 1 || ["children", "people", "women"].any { w -> candidate.name.lower().endsWith(w) } || ["men", "data", "media", "criteria", "indices", "series", "species", "feet", "teeth", "mice", "geese"].any { w -> candidate.name.lower() == w }))
+            || (rule.parameters["semantic"] == "singular" && (candidate.name.lower().endsWith("s") && candidate.name.length > 1 || ["children", "people", "women"].any { w -> candidate.name.lower().endsWith(w) } || ["men", "data", "media", "criteria", "indices", "series", "species", "feet", "teeth", "mice", "geese"].any { w -> candidate.name.lower() == w }))
+            || (rule.parameters["semantic"] == "plural" && !(candidate.name.lower().endsWith("s") && candidate.name.length > 1 || ["children", "people", "women"].any { w -> candidate.name.lower().endsWith(w) } || ["men", "data", "media", "criteria", "indices", "series", "species", "feet", "teeth", "mice", "geese"].any { w -> candidate.name.lower() == w }))
             || (rule.parameters["schema-type"] == "array" && candidate.type != "array")) }
         .map { candidate -> occurrence(candidate.pointer, candidate.name,
             rule.parameters["suffix"] != null ? "Name has prohibited suffix {{rule.parameters["suffix"]}}"

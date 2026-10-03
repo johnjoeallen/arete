@@ -1,0 +1,405 @@
+openapi: 3.0.3
+info:
+  title: Product Catalogue API
+  description: Browse and maintain products and the categories they belong to.
+  version: 2.0.1
+  contact:
+    name: Catalogue Team
+    email: catalogue@acme-retail.com
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+x-api-id: 2a9d6c50-7a0e-4e0b-b1c4-8a1f3c5d9b77
+x-audience: company-internal
+servers:
+  - url: https://api.acme-retail.com
+tags:
+  - name: products
+    description: Products on sale.
+  - name: categories
+    description: The category tree products are filed under.
+security:
+  - bearerAuth: [read, write]
+paths:
+  /products:
+    get:
+      tags: [products]
+      operationId: listProducts
+      summary: List all products
+      description: Returns a page of products.
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Filter'
+        - $ref: '#/components/parameters/Sort'
+        - $ref: '#/components/parameters/Fields'
+      responses:
+        '200':
+          description: A page of products.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductPage'
+        '400': { $ref: '#/components/responses/InvalidInput' }
+        '401': { $ref: '#/components/responses/Unauthorised' }
+    post:
+      tags: [products]
+      operationId: createProduct
+      summary: Create a product
+      description: Adds a product to the catalogue.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewProduct'
+      responses:
+        '201':
+          description: The product was created.
+          headers:
+            Location:
+              description: URI of the new product.
+              schema: { type: string, format: uri, maxLength: 2000 }
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400': { $ref: '#/components/responses/InvalidInput' }
+        '401': { $ref: '#/components/responses/Unauthorised' }
+  /products/{product_id}:
+    parameters:
+      - $ref: '#/components/parameters/ProductId'
+    get:
+      tags: [products]
+      operationId: getProduct
+      summary: Get a product
+      description: Returns one product with its dimensions and pricing.
+      responses:
+        '200':
+          description: The product.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '401': { $ref: '#/components/responses/Unauthorised' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [products]
+      operationId: replaceProduct
+      summary: Replace a product
+      description: Replaces the whole representation of a product.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewProduct'
+      responses:
+        '200':
+          description: The replaced product.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400': { $ref: '#/components/responses/InvalidInput' }
+        '401': { $ref: '#/components/responses/Unauthorised' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [products]
+      operationId: deleteProduct
+      summary: Delete a product
+      description: Removes a product from the catalogue.
+      responses:
+        '204': { description: The product was deleted. }
+        '401': { $ref: '#/components/responses/Unauthorised' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /categories:
+    get:
+      tags: [categories]
+      operationId: listCategories
+      summary: List top level categories
+      description: Returns the top level categories with their children.
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+        - $ref: '#/components/parameters/Filter'
+        - $ref: '#/components/parameters/Sort'
+        - $ref: '#/components/parameters/Fields'
+      responses:
+        '200':
+          description: A page of categories.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryPage'
+        '401': { $ref: '#/components/responses/Unauthorised' }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  parameters:
+    ProductId:
+      name: product_id
+      in: path
+      required: true
+      description: Identifier of the product.
+      example: p-10042
+      schema: { type: string, maxLength: 40 }
+    Limit:
+      name: limit
+      in: query
+      description: Maximum number of items to return.
+      example: 25
+      schema: { type: integer, minimum: 1, maximum: 100, default: 25 }
+    Cursor:
+      name: cursor
+      in: query
+      description: Opaque cursor returned by the previous page.
+      example: eyJvZmZzZXQiOjI1fQ
+      schema: { type: string, maxLength: 200 }
+    Filter:
+      name: filter
+      in: query
+      description: Filter expression, for example colour eq red.
+      example: colour eq red
+      schema: { type: string, maxLength: 200 }
+    Sort:
+      name: sort
+      in: query
+      description: Sort expression, for example name asc.
+      example: name asc
+      schema: { type: string, maxLength: 100 }
+    Fields:
+      name: fields
+      in: query
+      description: Comma separated list of fields to return.
+      example: id,name
+      schema: { type: string, maxLength: 200 }
+  responses:
+    InvalidInput:
+      description: The request was invalid.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    Unauthorised:
+      description: Authentication is required.
+      headers:
+        WWW-Authenticate:
+          description: The authentication challenge.
+          schema: { type: string, maxLength: 200 }
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+    NotFound:
+      description: The resource does not exist.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/Problem' }
+  schemas:
+    ProductSummary:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+          maxLength: 40
+          description: Product identifier.
+          example: p-10042
+        name:
+          type: string
+          maxLength: 120
+          description: Display name of the product.
+          example: Hex bolt M12
+      example:
+        id: p-10042
+        name: Hex bolt M12
+    Money:
+      type: object
+      description: An amount of money in a currency.
+      required: [amount, currency]
+      properties:
+        amount:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 1000000
+          description: Amount in the currency's major unit.
+          example: 4.5
+        currency:
+          type: string
+          maxLength: 3
+          description: ISO 4217 currency code.
+          example: EUR
+      example:
+        amount: 4.5
+        currency: EUR
+    ProductDetails:
+      type: object
+      description: Dimensions, price and category of a product.
+      properties:
+        dimensions:
+          type: object
+          description: Physical size of the product.
+          example: { width: 2.5, height: 12, depth: 2.5, weight: { value: 0.04, unit: kg } }
+          properties:
+            width:
+              type: number
+              format: double
+              minimum: 0
+              maximum: 10000
+              description: Width in centimetres.
+              example: 2.5
+            height:
+              type: number
+              format: double
+              minimum: 0
+              maximum: 10000
+              description: Height in centimetres.
+              example: 12
+            depth:
+              type: number
+              format: double
+              minimum: 0
+              maximum: 10000
+              description: Depth in centimetres.
+              example: 2.5
+            weight:
+              type: object
+              description: Weight of one unit.
+              example: { value: 0.04, unit: kg }
+              properties:
+                value:
+                  type: number
+                  format: double
+                  minimum: 0
+                  maximum: 100000
+                  description: Weight in the stated unit.
+                  example: 0.04
+                unit:
+                  type: string
+                  maxLength: 8
+                  description: Unit of weight, such as kg or lb.
+                  example: kg
+        price:
+          $ref: '#/components/schemas/Money'
+        category:
+          $ref: '#/components/schemas/Category'
+      example:
+        dimensions: { width: 2.5, height: 12, depth: 2.5, weight: { value: 0.04, unit: kg } }
+        price: { amount: 4.5, currency: EUR }
+    Product:
+      description: A product with its dimensions, price and category.
+      allOf:
+        - $ref: '#/components/schemas/ProductSummary'
+        - $ref: '#/components/schemas/ProductDetails'
+      example:
+        id: p-10042
+        name: Hex bolt M12
+        price: { amount: 4.5, currency: EUR }
+    NewProduct:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          maxLength: 120
+          description: Display name of the product.
+          example: Hex bolt M12
+        details:
+          $ref: '#/components/schemas/ProductDetails'
+      example:
+        name: Hex bolt M12
+    Category:
+      type: object
+      description: A node in the category tree.
+      required: [id, name]
+      properties:
+        id:
+          type: string
+          maxLength: 40
+          description: Category identifier.
+          example: c-fasteners
+        name:
+          type: string
+          maxLength: 120
+          description: Display name of the category.
+          example: Fasteners
+        children:
+          type: array
+          description: Sub categories.
+          example: []
+          maxItems: 200
+          items:
+            $ref: '#/components/schemas/Category'
+      example:
+        id: c-fasteners
+        name: Fasteners
+        children: []
+    ProductPage:
+      type: object
+      required: [items]
+      properties:
+        nextCursor:
+          type: string
+          maxLength: 200
+          description: Cursor for the next page, absent on the last page.
+          example: eyJvZmZzZXQiOjI1fQ
+        items:
+          type: array
+          description: The products on this page.
+          example: []
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/Product'
+      example:
+        items: []
+    CategoryPage:
+      type: object
+      required: [items]
+      properties:
+        nextCursor:
+          type: string
+          maxLength: 200
+          description: Cursor for the next page, absent on the last page.
+          example: eyJvZmZzZXQiOjI1fQ
+        items:
+          type: array
+          description: The categories on this page.
+          example: []
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/Category'
+      example:
+        items: []
+    Problem:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+          maxLength: 2000
+          description: Problem type identifier.
+          example: https://api.acme-retail.com/problems/not-found
+        title:
+          type: string
+          maxLength: 200
+          description: Short summary of the problem.
+          example: Product not found
+        status:
+          type: integer
+          format: int32
+          minimum: 100
+          maximum: 599
+          description: HTTP status code.
+          example: 404
+        detail:
+          type: string
+          maxLength: 1000
+          description: Explanation specific to this occurrence.
+          example: No product exists with that identifier.
+      example:
+        type: https://api.acme-retail.com/problems/not-found
+        title: Product not found
+        status: 404
+        detail: No product exists with that identifier.

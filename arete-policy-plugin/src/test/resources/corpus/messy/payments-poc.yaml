@@ -1,0 +1,79 @@
+openapi: 3.0.3
+info:
+  title: Payments
+  description: Take payments. <script>alert(1)</script>
+  version: 0.1.0
+  contact: { name: Payments }
+  license: { name: Proprietary }
+x-internal-owner: payments
+servers:
+  - url: https://api.example.com/payments/
+tags:
+  - name: Payments
+  - name: Payments
+    description: Duplicate
+paths:
+  /v1/payments:
+    post:
+      tags: [Payment Operations]
+      operationId: createPayment
+      summary: Create a payment
+      security: []
+      requestBody:
+        required: false
+        content:
+          application/vnd.acme.v2+json:
+            schema:
+              type: object
+              required: [amount]
+              properties:
+                amount: { type: number }
+                card_number: { type: string }
+                accountId: { type: integer }
+      responses:
+        '200': { description: Created }
+        '429': { description: Too many requests }
+        '404': { description: Not found, content: { application/json: { schema: { type: object } } } }
+    get:
+      summary: List
+      operationId: createPayment
+      parameters:
+        - { name: page, in: query, schema: { type: string } }
+        - { name: limit, in: query, schema: { type: integer } }
+        - { name: sort, in: query, schema: { type: array, items: { type: string } }, style: simple }
+        - { name: filter, in: query, schema: { type: array, items: { type: string } } }
+        - { name: ids, in: query, style: pipeDelimited, explode: false, schema: { type: array, items: { type: string } } }
+        - { name: ids, in: query, schema: { type: string } }
+        - { name: a, in: query, schema: { type: string } }
+        - { name: b, in: query, schema: { type: string } }
+        - { name: c, in: query, schema: { type: string } }
+        - { name: d, in: query, schema: { type: string } }
+        - { name: e, in: query, schema: { type: string } }
+        - { name: f, in: query, schema: { type: string } }
+        - { name: g, in: query, schema: { type: string } }
+      responses:
+        '200': { description: OK }
+  /v1/payments/{paymentId}/refund:
+    put:
+      summary: Partial refund of a payment
+      responses:
+        '204': { description: Refunded }
+        '401': { description: Authentication required, headers: {} }
+        '403': { description: Forbidden, headers: { WWW-Authenticate: { schema: { type: string } } } }
+        '405': { description: Method not allowed, headers: {} }
+components:
+  securitySchemes:
+    basicAuth: { type: http, scheme: basic }
+  schemas:
+    PaymentResponse:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        status: { type: string, enum: [1, '2'] }
+    PaymentRequest:
+      allOf:
+        - $ref: '#/components/schemas/Base'
+        - type: object
+          properties:
+            note: { type: string }
+    Base: { type: object }

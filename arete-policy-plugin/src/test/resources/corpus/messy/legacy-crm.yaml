@@ -1,0 +1,116 @@
+openapi: 3.0.0
+info:
+  title: crm service PoC
+  version: draft
+servers:
+  - url: http://localhost:8080/api/v1/
+  - url: https://Customer_API.internal/v1
+paths:
+  /getCustomers:
+    get:
+      summary: get all customers.
+      parameters:
+        - { name: pageSize, in: query, schema: { type: string } }
+        - { name: q, in: query, schema: { type: string } }
+        - { name: X-Internal-Trace, in: header, schema: { type: string } }
+        - { name: X-API-Version, in: header, schema: { type: string } }
+      responses:
+        200:
+          description: Error loading customer list
+          headers:
+            Link: { description: related }
+          content:
+            '*/*':
+              schema: { type: array, items: { type: string } }
+        500: { description: Internal server error }
+  /customer/{customerId}:
+    get:
+      summary: Activate customer
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        content:
+          application/json: { schema: { type: object } }
+      responses:
+        '200': { description: OK }
+    post:
+      summary: Replace customer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                customer_id: { type: integer }
+                password: { type: string, format: password }
+      responses:
+        '200': { description: OK }
+    put:
+      summary: Update selected customer fields
+      responses:
+        '204': { description: Updated }
+    patch:
+      summary: Change customer
+      responses:
+        '200': { description: OK }
+    delete:
+      summary: Delete customer
+      requestBody:
+        content:
+          application/json: { schema: { type: object } }
+      responses:
+        '204': { description: Deleted }
+  /customers/actions/archive:
+    post:
+      summary: archive
+      responses:
+        '200': { description: Archived }
+  /orders?status=open:
+    get:
+      summary: Open orders
+      operationId: list
+      responses:
+        '200': { description: OK }
+  /customers/{customerId}/orders/{orderId}/items:
+    get:
+      summary: Items
+      operationId: list
+      responses:
+        '200':
+          description: OK
+          content:
+            application/xml:
+              schema: { $ref: '#/components/schemas/Missing' }
+components:
+  schemas:
+    Definition1:
+      type: object
+      properties:
+        customer_id: { type: integer }
+        created: { type: string }
+        displayName: { type: string }
+        status:
+          type: integer
+          enum: [1, 2, 3]
+        tier:
+          type: string
+          enum: [GOLD, silver, Bronze, GOLD]
+        ssn: { type: string }
+        tags: { type: array }
+        customer:
+          type: array
+          items: { type: string }
+        nickname:
+          type: string
+          nullable: true
+        age:
+          type: integer
+          minimum: 0
+          maximum: 120
+          example: 999
+    create_customer_request:
+      type: object
+      properties:
+        name: { type: string }
+    Unused:
+      type: object

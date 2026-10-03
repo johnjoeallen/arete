@@ -71,7 +71,12 @@
             default: return false
         }
     }
-    def plural = { name -> name.toLowerCase().endsWith('s') && name.length() > 1 }
+    def irregularSuffixes = ['children', 'people', 'women']
+    def irregularWords = ['men', 'data', 'media', 'criteria', 'indices', 'series', 'species', 'feet', 'teeth', 'mice', 'geese']
+    def plural = { name ->
+        def lower = name.toLowerCase()
+        (lower.endsWith('s') && name.length() > 1) || irregularSuffixes.any { lower.endsWith(it) } || irregularWords.contains(lower)
+    }
     def matches = { candidate ->
         def name = candidate.name
         if (parameters.convention && parameters.match == 'non-conforming' && conforms(name, parameters.convention)) return false
