@@ -1,0 +1,6 @@
+openapi: 3.0.0
+info: { title: Corpus, version: 1.0.0, description: Corpus example. }
+tags:
+  - name: orders
+    description: Create, retrieve, and cancel customer orders.
+paths: {}
