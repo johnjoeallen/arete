@@ -2,22 +2,22 @@
 # regenerate: mvn -pl arete-policy-plugin test -Dtest=PolicySnapshotTest -Dsnapshot.update=true
 
 ## Enterprise Grade
-  catalogue    status=SUCCESS  score=79.5   noBlockers=79.5   grade=D+   findings=102
+  catalogue    status=SUCCESS  score=80     noBlockers=80     grade=C-   findings=101
   lint         status=SUCCESS  score=91.5   noBlockers=91.5   grade=B-   findings=19
-  house-style  status=SUCCESS  score=86.5   noBlockers=86.5   grade=C    findings=34
+  house-style  status=SUCCESS  score=87     noBlockers=87     grade=C+   findings=33
   schema       status=SUCCESS  score=87     noBlockers=87     grade=C+   findings=47
   ops          status=SUCCESS  score=90     noBlockers=90     grade=B-   findings=45
 
 ## Zalando
-  catalogue    status=SUCCESS  score=91.5   noBlockers=91.5   grade=A-   findings=40
+  catalogue    status=SUCCESS  score=92     noBlockers=92     grade=A-   findings=39
   lint         status=SUCCESS  score=96     noBlockers=96     grade=A    findings=10
-  house-style  status=SUCCESS  score=92.5   noBlockers=92.5   grade=A-   findings=19
+  house-style  status=SUCCESS  score=93     noBlockers=93     grade=A-   findings=18
   schema       status=SUCCESS  score=94     noBlockers=94     grade=A    findings=15
   ops          status=SUCCESS  score=94.5   noBlockers=94.5   grade=A    findings=22
 
 ## Zalando Extended
-  catalogue    status=SUCCESS  score=87     noBlockers=87     grade=B+   findings=64
+  catalogue    status=SUCCESS  score=87.5   noBlockers=87.5   grade=B+   findings=63
   lint         status=SUCCESS  score=94.5   noBlockers=94.5   grade=A    findings=13
-  house-style  status=SUCCESS  score=91.5   noBlockers=91.5   grade=A-   findings=21
+  house-style  status=SUCCESS  score=92     noBlockers=92     grade=A-   findings=20
   schema       status=SUCCESS  score=91     noBlockers=91     grade=A-   findings=26
   ops          status=SUCCESS  score=92     noBlockers=92     grade=A-   findings=30

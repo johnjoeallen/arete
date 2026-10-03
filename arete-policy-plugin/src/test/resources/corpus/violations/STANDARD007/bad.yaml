@@ -1,0 +1,5 @@
+openapi: 3.0.0
+info: { title: Corpus, version: 1.0.0, description: Corpus example. }
+paths:
+  /customers/customerId: { get: { responses: { '200': { description: OK } } } }
+  /orders/2024-history: { get: { responses: { '200': { description: OK } } } }

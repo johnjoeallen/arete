@@ -1,0 +1,1 @@
+/paths  |  HTTP status keys are declared as bare numbers, not strings: 200, 404

@@ -40,7 +40,7 @@ class RuleCorpusTest {
 
         try (Stream<Path> dirs = Files.list(VIOLATIONS)) {
             return dirs.filter(Files::isDirectory).sorted().toList().stream().map(dir -> DynamicTest.dynamicTest(dir.getFileName().toString(), () -> {
-                PolicyRule rule = bundle.rules().get(dir.getFileName().toString());
+                PolicyRule rule = withOverrides(bundle.rules().get(dir.getFileName().toString()), dir);
                 assertTrue(rule != null, "no bundled rule " + dir.getFileName());
                 Matcher matcher = bundle.matchers().get(rule.matcherId());
 
@@ -55,6 +55,24 @@ class RuleCorpusTest {
                 else assertEquals(Files.readString(recorded), actual, rule.id() + " findings changed — review; regenerate with -Dcorpus.update=true");
             }));
         }
+    }
+
+    /**
+     * Applies {@code parameters.properties}, when a rule's directory has one, over the rule's own
+     * parameters: a rule whose default can never be violated by a spec that parses (the supported
+     * OpenAPI versions, say) is exercised with the parameter a policy would set.
+     */
+    private static PolicyRule withOverrides(PolicyRule rule, Path dir) throws IOException {
+        Path file = dir.resolve("parameters.properties");
+        if (rule == null || !Files.exists(file)) return rule;
+        java.util.Properties overrides = new java.util.Properties();
+        try (var in = Files.newBufferedReader(file)) { overrides.load(in); }
+        java.util.Map<String, Object> parameters = new java.util.LinkedHashMap<>(rule.parameters());
+        for (String key : overrides.stringPropertyNames()) {
+            String value = overrides.getProperty(key);
+            parameters.put(key, "true".equals(value) ? Boolean.TRUE : "false".equals(value) ? Boolean.FALSE : value);
+        }
+        return new PolicyRule(rule.id(), rule.title(), rule.category(), rule.matcherId(), rule.scope(), parameters, rule.documentationMarkdown());
     }
 
     private static List<String> findings(DistillMatcherEvaluator distill, Matcher matcher, PolicyRule rule, Path spec) {

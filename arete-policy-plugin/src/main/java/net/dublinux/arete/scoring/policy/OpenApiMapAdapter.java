@@ -369,7 +369,7 @@ final class OpenApiMapAdapter {
                     || (parameter.getExamples() != null && !parameter.getExamples().isEmpty())
                     || (parameter.getSchema() != null && parameter.getSchema().getExample() != null));
             detail.put("extensionKeys", extensionKeys(parameter.getExtensions()));
-            detail.put("style", parameter.getStyle());
+            detail.put("style", parameter.getStyle() == null ? null : parameter.getStyle().toString());
             detail.put("explode", parameter.getExplode());
             detail.put("schemaType", parameter.getSchema() == null ? null : parameter.getSchema().getType());
             detail.put("schemaMaximum", parameter.getSchema() == null ? null : parameter.getSchema().getMaximum());

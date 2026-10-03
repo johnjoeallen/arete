@@ -35,7 +35,7 @@
   /paths/~1v2~1Payments/get  |  GET /v2/Payments  |  Operation summary is not action-oriented
 
 ## STANDARD001  (hostname / api)
-  /servers  |  https://internal.corp/v2  |  Server hostname is not lowercase hyphenated
+  (no findings)
 
 ## STANDARD002  (resource-path / path)
   (no findings)

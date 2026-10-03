@@ -38,7 +38,7 @@
   /paths/~1bulk-create~1orders~1{batchId}/post  |  POST /bulk-create/orders/{batchId}  |  Operation summary is not action-oriented
 
 ## STANDARD001  (hostname / api)
-  /servers  |  https://api.example.com/v1  |  Server hostname is not lowercase hyphenated
+  (no findings)
 
 ## STANDARD002  (resource-path / path)
   (no findings)
