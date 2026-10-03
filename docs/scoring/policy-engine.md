@@ -416,6 +416,87 @@ policies.
 Two ready-made examples, `Lenient` (every rule, 0.1 each) and `Pedantic` (every
 rule, 2.0 each, security rules `PROHIBITED`), make good starting points.
 
+### Policy sources
+
+The bundle in the jar is only the default. An engine takes a list of **sources**,
+loaded in order and layered: a later source adds to the earlier ones, or replaces an
+entry with the same id, and may use any matcher or rule an earlier one defines. An
+organisation's own standards live in a bundle of their own, apart from the public tool.
+
+A source is a URI with an optional pin, `<uri>[#sha256=<hex>][&version=<v>]`:
+
+| Source | Example |
+|---|---|
+| Bundle in the jar | `classpath:api-policy` (the default) |
+| Directory or zip on disk | `file:./policy/`, `file:./policy-2.3.1.zip` |
+| Zip over HTTPS | `https://host/policy-2.3.1.zip` (plain HTTP only for loopback) |
+| Maven coordinate | `maven:org.acme:api-policy:2.3.1` (a zip; add `:jar` for a jar) |
+
+A Maven coordinate is looked up in the repositories you configure, in Maven layout
+(`org/acme/api-policy/2.3.1/api-policy-2.3.1.zip`). A repository is an `https:` or
+`file:` base URL, so a local `~/.m2/repository` works offline. The engine does not read
+Maven settings: pass the repository (and any token header) to it. A zip may hold its
+files at the root or inside one folder.
+
+**Pins.** `sha256` is the digest of the archive; `version` is the bundle's `bundleVersion`.
+A source that does not match its pin fails the load, so a bundle cannot change under you.
+With `requirePin`, a remote source with no `sha256` is refused before anything is downloaded.
+Fetched archives are kept in a cache by digest (`~/.arete/cache/policies` by default), so a
+pinned source is read from there on later runs, with no network. Every archive is bounded
+in size and entry count.
+
+```java
+Engine engine = Engine.builder()
+        .policySource("classpath:api-policy")
+        .policySource("maven:org.acme:api-policy:2.3.1#sha256=9f2c…")
+        .mavenRepository("https://repo.acme.com/maven")
+        .requirePin(true)
+        .build();
+```
+
+Without the builder, `new Engine().configure(Map)` reads the same settings from the keys
+`policy-sources`, `maven-repositories`, `require-pin`, `cache-dir` and `policies-dir`, or from
+system properties `arete.policy.sources`, `arete.policy.maven-repositories`,
+`arete.policy.require-pin`, `arete.policy.cache-dir` and `arete.policy.policies-dir`.
+
+### Locked rules
+
+A policy can mark a rule `locked`, which stops a team overriding it in `.arete.yaml`:
+
+```yaml
+rules:
+  SECURITY001:
+    points: 5
+    locked: true
+```
+
+The lock is enforced by the engine. A team that needs different rules has to pick a different policy.
+
+### Team overrides: `.arete.yaml`
+
+A team keeps its deliberate, reviewed deviations from a policy in an `.arete.yaml` next to its
+specs. Each states a `reason`, and either disables the rule or changes its `points` or `parameters`:
+
+```yaml
+policy: Enterprise Grade
+overrides:
+  STATUS003:
+    reason: Our gateway answers 403 for a missing token, by design.
+    disable: true
+  PAGE004:
+    reason: Reporting endpoints page in thousands.
+    points: 1
+    parameters: { maximum: 1000 }
+```
+
+```java
+ScoringResult result = engine.score(input, Overrides.parse(Files.readString(Path.of(".arete.yaml"))));
+```
+
+The file is parsed strictly: an unknown key, a missing reason, or an override of a rule that does not
+exist is an error, so a typo cannot silently do nothing. An override of a locked rule fails the run. An
+override of a rule the chosen policy does not run has no effect. The bundle itself is never changed.
+
 ---
 
 ## Scoring

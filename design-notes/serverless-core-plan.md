@@ -4,8 +4,10 @@
 
 > **Status: in progress.** Done on `merge/serverless-core`: false-positive and `$ref` fixes, the rule
 > corpus and whole-API specs, Groovy removed, `arete-engine-api` / `arete-engine` split with a plain
-> `Engine` class (no plugin SPI, no plugin jars, no global plugin settings). Not started: the URI policy
-> loader, `.arete.yaml`, the CLI, reports, the merge-gate and the Maven/Gradle wrappers.
+> `Engine` class (no plugin SPI, no plugin jars, no global plugin settings). Also done: the policy
+> loader (file, https and Maven sources with pin, checksum and cache; layering), `locked` rules and
+> `.arete.yaml` overrides. Not started: git sources, the CLI, reports, the merge-gate and the Maven/Gradle
+> wrappers.
 
 ## Goals and requirements
 

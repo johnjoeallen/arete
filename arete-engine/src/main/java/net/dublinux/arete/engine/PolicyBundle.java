@@ -4,12 +4,18 @@ import java.util.List;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
-record PolicyBundle(Map<String, PolicyRule> rules, Map<String, Policy> policies, Map<String, Matcher> matchers) {
+record PolicyBundle(Map<String, PolicyRule> rules, Map<String, Policy> policies, Map<String, Matcher> matchers,
+        String bundleId, String bundleVersion) {
     PolicyBundle {
         matchers = Collections.unmodifiableMap(new LinkedHashMap<>(matchers));
         policies = Collections.unmodifiableMap(new LinkedHashMap<>(policies));
         rules = Collections.unmodifiableMap(new LinkedHashMap<>(rules));
+    }
+
+    PolicyBundle(Map<String, PolicyRule> rules, Map<String, Policy> policies, Map<String, Matcher> matchers) {
+        this(rules, policies, matchers, null, null);
     }
     Policy policyOrDefault(String requestedId) {
         Policy selected = policies.get(requestedId);
@@ -35,8 +41,9 @@ record ParameterDefinition(String type, boolean required, List<String> values) {
  *                      if the policy defines no grade bands.
  */
 record Policy(String id, Map<String, PolicyDisposition> dispositions, String scoreLevel,
-        Double passingScore, Map<String, Double> grades) {
+        Double passingScore, Map<String, Double> grades, Set<String> locked) {
     Policy {
+        locked = locked == null ? Set.of() : Set.copyOf(locked);
         // Policy declaration order is report order. Map.copyOf deliberately
         // makes no iteration-order promise, so retain the YAML LinkedHashMap.
         dispositions = Collections.unmodifiableMap(new LinkedHashMap<>(dispositions));
@@ -44,7 +51,11 @@ record Policy(String id, Map<String, PolicyDisposition> dispositions, String sco
     }
 
     Policy(String id, Map<String, PolicyDisposition> dispositions) {
-        this(id, dispositions, null, null, Map.of());
+        this(id, dispositions, null, null, Map.of(), Set.of());
+    }
+
+    Policy(String id, Map<String, PolicyDisposition> dispositions, String scoreLevel, Double passingScore, Map<String, Double> grades) {
+        this(id, dispositions, scoreLevel, passingScore, grades, Set.of());
     }
 
     /**
@@ -88,10 +99,6 @@ record Prohibited(Map<String, Object> parameters) implements PolicyDisposition {
     Prohibited() { this(Map.of()); }
 }
 record Diagnostic(String pointer, String path, String message) { }
-
-final class BundleValidationException extends RuntimeException {
-    BundleValidationException(String message) { super(message); }
-}
 
 final class MatcherEvaluationException extends RuntimeException {
     MatcherEvaluationException(String message) { super(message); }

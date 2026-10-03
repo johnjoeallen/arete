@@ -38,19 +38,29 @@ final class PolicyBundleLoader {
     record OverlayPolicy(String name, String content) { }
 
     PolicyBundle load(BundleResources resources) {
-        return load(resources, List.of());
+        return load(resources, null, List.of());
     }
 
     PolicyBundle load(BundleResources resources, List<OverlayPolicy> overlayPolicies) {
+        return load(resources, null, overlayPolicies);
+    }
+
+    /**
+     * Loads one bundle. With a {@code base}, the new bundle is layered on it: its rules, matchers and
+     * policies add to the base or replace the base's entry with the same id, may refer to anything the
+     * base defines, and may leave out any section it does not need.
+     */
+    PolicyBundle load(BundleResources resources, PolicyBundle base, List<OverlayPolicy> overlayPolicies) {
         Map<String, Object> manifest = yamlMap("PolicyBundle.yaml", resources.read("PolicyBundle.yaml"));
         rejectUnknown("PolicyBundle.yaml", manifest, Set.of("formatVersion", "bundleId", "bundleVersion", "rules", "policies", "matchers"));
         if (!Integer.valueOf(1).equals(manifest.get("formatVersion"))) throw new BundleValidationException("PolicyBundle.yaml: formatVersion must be 1");
-        Map<String, String> rulePaths = stringMap("PolicyBundle.yaml", "rules", manifest.get("rules"));
-        Map<String, String> policyPaths = stringMap("PolicyBundle.yaml", "policies", manifest.get("policies"));
-        Map<String, String> matcherPaths = stringMap("PolicyBundle.yaml", "matchers", manifest.get("matchers"));
-        if (rulePaths.isEmpty() || policyPaths.isEmpty() || matcherPaths.isEmpty()) throw new BundleValidationException("PolicyBundle.yaml: rules, policies, and matchers must not be empty");
+        Map<String, String> rulePaths = stringMap("PolicyBundle.yaml", "rules", base != null && manifest.get("rules") == null ? Map.of() : manifest.get("rules"));
+        Map<String, String> policyPaths = stringMap("PolicyBundle.yaml", "policies", base != null && manifest.get("policies") == null ? Map.of() : manifest.get("policies"));
+        Map<String, String> matcherPaths = stringMap("PolicyBundle.yaml", "matchers", base != null && manifest.get("matchers") == null ? Map.of() : manifest.get("matchers"));
+        if (base == null && (rulePaths.isEmpty() || policyPaths.isEmpty() || matcherPaths.isEmpty())) throw new BundleValidationException("PolicyBundle.yaml: rules, policies, and matchers must not be empty");
 
         Map<String, Matcher> matchers = new LinkedHashMap<>();
+        if (base != null) matchers.putAll(base.matchers());
         for (Map.Entry<String, String> entry : matcherPaths.entrySet()) {
             String descriptorPath = safePath("PolicyBundle.yaml", entry.getValue());
             Matcher descriptor = parseRuleDefinition(descriptorPath, resources.read(descriptorPath));
@@ -64,6 +74,7 @@ final class PolicyBundleLoader {
         }
 
         Map<String, PolicyRule> rules = new LinkedHashMap<>();
+        if (base != null) rules.putAll(base.rules());
         for (Map.Entry<String, String> entry : rulePaths.entrySet()) {
             String path = safePath("PolicyBundle.yaml", entry.getValue());
             PolicyRule rule = parseRule(path, resources.read(path));
@@ -80,6 +91,7 @@ final class PolicyBundleLoader {
         }
 
         Map<String, Policy> policies = new LinkedHashMap<>();
+        if (base != null) policies.putAll(base.policies());
         for (Map.Entry<String, String> entry : policyPaths.entrySet()) {
             String path = safePath("PolicyBundle.yaml", entry.getValue());
             Policy policy = parsePolicy(path, resources.read(path), rules, matchers);
@@ -88,15 +100,27 @@ final class PolicyBundleLoader {
             policies.put(policy.id(), policy);
         }
 
-        // Overlay policies (e.g. from ~/.arete/policies/) are parsed against
-        // the same rules and matchers and merged last, so a user policy that
-        // reuses a bundled id deliberately overrides it.
-        for (OverlayPolicy overlay : overlayPolicies) {
-            Policy policy = parsePolicy(overlay.name(), overlay.content(), rules, matchers);
-            for (String matcherId : policy.dispositions().keySet()) if (!rules.containsKey(matcherId)) throw new BundleValidationException(overlay.name() + ": unknown policy rule '" + matcherId + "'");
+        return withOverlays(new PolicyBundle(rules, policies, matchers, optionalString(manifest.get("bundleId")), optionalString(manifest.get("bundleVersion"))), overlayPolicies);
+    }
+
+    /**
+     * Adds policy documents from outside a bundle (a file under {@code ~/.arete/policies/}, say). They are
+     * parsed against the bundle's rules and matchers and added last, so one that reuses a bundled policy
+     * id deliberately replaces it.
+     */
+    PolicyBundle withOverlays(PolicyBundle bundle, List<OverlayPolicy> overlays) {
+        if (overlays.isEmpty()) return bundle;
+        Map<String, Policy> policies = new LinkedHashMap<>(bundle.policies());
+        for (OverlayPolicy overlay : overlays) {
+            Policy policy = parsePolicy(overlay.name(), overlay.content(), bundle.rules(), bundle.matchers());
+            for (String ruleId : policy.dispositions().keySet()) if (!bundle.rules().containsKey(ruleId)) throw new BundleValidationException(overlay.name() + ": unknown policy rule '" + ruleId + "'");
             policies.put(policy.id(), policy);
         }
-        return new PolicyBundle(rules, policies, matchers);
+        return new PolicyBundle(bundle.rules(), policies, bundle.matchers(), bundle.bundleId(), bundle.bundleVersion());
+    }
+
+    private static String optionalString(Object value) {
+        return value == null ? null : String.valueOf(value);
     }
 
     private Matcher parseRuleDefinition(String path, String content) {
@@ -136,6 +160,7 @@ final class PolicyBundleLoader {
     private Policy parsePolicy(String path, String content, Map<String, PolicyRule> rules, Map<String, Matcher> matchers) {
         Map<String, Object> data = frontMatter(path, content);
         rejectUnknown(path, data, Set.of("id", "rules", "scoring", "passingScore", "grades"));
+        Set<String> locked = new java.util.LinkedHashSet<>();
         String scoreLevel = data.containsKey("scoring") ? scoreLevel(path, data.get("scoring")) : null;
         Double passingScore = data.containsKey("passingScore") ? score(path, "passingScore", data.get("passingScore")) : null;
         Map<String, Double> grades = data.containsKey("grades")
@@ -151,7 +176,11 @@ final class PolicyBundleLoader {
                 dispositions.put(entry.getKey(), new Prohibited());
             } else if (value instanceof Map<?, ?> raw) {
                 Map<String, Object> declaration = map(path, "rules." + entry.getKey(), raw);
-                rejectUnknown(path, declaration, Set.of("points", "parameters"));
+                rejectUnknown(path, declaration, Set.of("points", "parameters", "locked"));
+                if (declaration.containsKey("locked")) {
+                    if (!(declaration.get("locked") instanceof Boolean flag)) throw new BundleValidationException(path + ": " + entry.getKey() + ".locked must be true or false");
+                    if (flag) locked.add(entry.getKey());
+                }
                 Object points = declaration.get("points");
                 Map<String, Object> overrides = declaration.containsKey("parameters")
                         ? map(path, "rules." + entry.getKey() + ".parameters", declaration.get("parameters"))
@@ -167,7 +196,7 @@ final class PolicyBundleLoader {
                 else throw new BundleValidationException(path + ": " + entry.getKey() + ".points must be a number from 0 to 100 or PROHIBITED");
             } else throw new BundleValidationException(path + ": " + entry.getKey() + " must be a number, PROHIBITED, or a declaration with points and parameters");
         }
-        return new Policy(requiredString(path, "id", data.get("id")), dispositions, scoreLevel, passingScore, grades);
+        return new Policy(requiredString(path, "id", data.get("id")), dispositions, scoreLevel, passingScore, grades, locked);
     }
 
     private static double score(String path, String field, Object value) {
@@ -251,7 +280,7 @@ final class PolicyBundleLoader {
         return Double.isFinite(number.doubleValue()) && number.doubleValue() >= 0 && number.doubleValue() <= 100;
     }
 
-    private static void validateParameterOverrides(String path, String matcherId, Map<String, Object> overrides, Matcher rule) {
+    static void validateParameterOverrides(String path, String matcherId, Map<String, Object> overrides, Matcher rule) {
         for (Map.Entry<String, Object> parameter : overrides.entrySet()) {
             ParameterDefinition definition = rule.parameters().get(parameter.getKey());
             if (definition == null) throw new BundleValidationException(path + ": " + matcherId + " overrides unknown parameter '" + parameter.getKey() + "'");
@@ -404,13 +433,98 @@ interface BundleResources { String read(String path); }
 
 final class ClasspathBundleResources implements BundleResources {
     private final ClassLoader classLoader;
-    ClasspathBundleResources(ClassLoader classLoader) { this.classLoader = classLoader; }
+    private final String root;
+
+    ClasspathBundleResources(ClassLoader classLoader) { this(classLoader, "api-policy"); }
+
+    ClasspathBundleResources(ClassLoader classLoader, String root) {
+        this.classLoader = classLoader;
+        this.root = root.endsWith("/") ? root : root + "/";
+    }
+
     @Override public String read(String path) {
-        try (InputStream input = classLoader.getResourceAsStream("api-policy/" + path)) {
+        try (InputStream input = classLoader.getResourceAsStream(root + path)) {
             if (input == null) throw new BundleValidationException("Missing bundle resource '" + path + "'");
             return new String(input.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new BundleValidationException("Could not read bundle resource '" + path + "': " + e.getMessage());
         }
+    }
+}
+
+/** A bundle laid out as a directory. A path that leaves the directory is refused. */
+final class DirectoryBundleResources implements BundleResources {
+    private final java.nio.file.Path root;
+
+    DirectoryBundleResources(java.nio.file.Path root) { this.root = root.toAbsolutePath().normalize(); }
+
+    @Override public String read(String path) {
+        java.nio.file.Path file = root.resolve(path).normalize();
+        if (!file.startsWith(root)) throw new BundleValidationException("Bundle resource '" + path + "' is outside the bundle");
+        try {
+            return java.nio.file.Files.readString(file, StandardCharsets.UTF_8);
+        } catch (java.nio.file.NoSuchFileException e) {
+            throw new BundleValidationException("Missing bundle resource '" + path + "'");
+        } catch (IOException e) {
+            throw new BundleValidationException("Could not read bundle resource '" + path + "': " + e.getMessage());
+        }
+    }
+}
+
+/** A bundle read from a zip archive into memory, with limits so a hostile archive cannot exhaust it. */
+final class ZipBundleResources implements BundleResources {
+    static final int MAX_ENTRIES = 5_000;
+    static final long MAX_ENTRY_BYTES = 5L * 1024 * 1024;
+    static final long MAX_TOTAL_BYTES = 50L * 1024 * 1024;
+
+    private final Map<String, String> files;
+
+    private ZipBundleResources(Map<String, String> files) { this.files = files; }
+
+    static ZipBundleResources of(byte[] archive, String origin) {
+        Map<String, byte[]> entries = new LinkedHashMap<>();
+        long total = 0;
+        try (java.util.zip.ZipInputStream zip = new java.util.zip.ZipInputStream(new java.io.ByteArrayInputStream(archive))) {
+            java.util.zip.ZipEntry entry;
+            while ((entry = zip.getNextEntry()) != null) {
+                if (entry.isDirectory()) continue;
+                if (entries.size() >= MAX_ENTRIES) throw new BundleValidationException(origin + ": archive has too many entries");
+                java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream();
+                byte[] buffer = new byte[8192];
+                int read;
+                while ((read = zip.read(buffer)) > 0) {
+                    out.write(buffer, 0, read);
+                    total += read;
+                    if (out.size() > MAX_ENTRY_BYTES || total > MAX_TOTAL_BYTES) {
+                        throw new BundleValidationException(origin + ": archive is too large to be a policy bundle");
+                    }
+                }
+                entries.put(entry.getName().replace('\\', '/'), out.toByteArray());
+            }
+        } catch (IOException e) {
+            throw new BundleValidationException(origin + ": not a readable zip archive (" + e.getMessage() + ")");
+        }
+        // The manifest may sit at the archive root or inside one folder (policy-2.3.1/PolicyBundle.yaml).
+        String prefix = null;
+        for (String name : entries.keySet()) {
+            if (name.equals("PolicyBundle.yaml")) { prefix = ""; break; }
+            if (name.endsWith("/PolicyBundle.yaml") && (prefix == null || name.length() < prefix.length() + "PolicyBundle.yaml".length())) {
+                prefix = name.substring(0, name.length() - "PolicyBundle.yaml".length());
+            }
+        }
+        if (prefix == null) throw new BundleValidationException(origin + ": no PolicyBundle.yaml in the archive");
+        Map<String, String> files = new LinkedHashMap<>();
+        for (Map.Entry<String, byte[]> entry : entries.entrySet()) {
+            if (entry.getKey().startsWith(prefix)) {
+                files.put(entry.getKey().substring(prefix.length()), new String(entry.getValue(), StandardCharsets.UTF_8));
+            }
+        }
+        return new ZipBundleResources(files);
+    }
+
+    @Override public String read(String path) {
+        String content = files.get(path);
+        if (content == null) throw new BundleValidationException("Missing bundle resource '" + path + "'");
+        return content;
     }
 }

@@ -88,9 +88,104 @@ public class Engine {
                 : java.util.OptionalDouble.of(policy.passingScore());
     }
 
+    /**
+     * Loads the bundles this engine scores with. Keys, all optional, each also readable from the system
+     * property named in brackets:
+     * <ul>
+     *   <li>{@code policy-sources} ({@code arete.policy.sources}) — comma-separated {@link PolicySource}s,
+     *       layered in order; default {@code classpath:api-policy};</li>
+     *   <li>{@code maven-repositories} ({@code arete.policy.maven-repositories}) — comma-separated base URLs
+     *       for {@code maven:} sources;</li>
+     *   <li>{@code require-pin} ({@code arete.policy.require-pin}) — {@code true} to refuse a remote source
+     *       without a {@code sha256};</li>
+     *   <li>{@code cache-dir} ({@code arete.policy.cache-dir}) — where fetched bundles are kept;</li>
+     *   <li>{@code policies-dir} ({@code arete.policy.policies-dir}) — extra {@code *.md} policies, default
+     *       {@code ~/.arete/policies}.</li>
+     * </ul>
+     * To embed the engine with explicit settings, use {@link #builder()} instead.
+     */
     public synchronized void configure(Map<String, String> config) {
-        bundle = bundleLoader.load(new ClasspathBundleResources(getClass().getClassLoader()),
-                loadUserPolicies(config));
+        List<PolicySource> sources = new ArrayList<>();
+        String configured = configOrProperty(config, "policy-sources", "arete.policy.sources");
+        if (configured != null && !configured.isBlank()) {
+            for (String spec : configured.split(",")) if (!spec.isBlank()) sources.add(PolicySource.parse(spec));
+        }
+        List<String> repositories = new ArrayList<>();
+        String repos = configOrProperty(config, "maven-repositories", "arete.policy.maven-repositories");
+        if (repos != null && !repos.isBlank()) for (String repo : repos.split(",")) if (!repo.isBlank()) repositories.add(repo.strip());
+        String cache = configOrProperty(config, "cache-dir", "arete.policy.cache-dir");
+        load(new Settings(sources, repositories,
+                "true".equalsIgnoreCase(configOrProperty(config, "require-pin", "arete.policy.require-pin")),
+                cache != null && !cache.isBlank() ? Path.of(cache.trim()) : defaultCacheDir(),
+                Map.of(), null, loadUserPolicies(config)));
+    }
+
+    private static Path defaultCacheDir() {
+        return Path.of(System.getProperty("user.home", ""), ".arete", "cache", "policies");
+    }
+
+    /** What an engine is built from: where its bundles come from and how they are checked. */
+    private record Settings(List<PolicySource> sources, List<String> mavenRepositories, boolean requirePin, Path cacheDir,
+            Map<String, String> headers, java.net.http.HttpClient http, List<PolicyBundleLoader.OverlayPolicy> overlays) { }
+
+    private void load(Settings settings) {
+        List<PolicySource> sources = settings.sources().isEmpty()
+                ? List.of(PolicySource.parse("classpath:api-policy")) : settings.sources();
+        PolicySourceResolver resolver = new PolicySourceResolver(settings.http(), settings.cacheDir(), settings.mavenRepositories(),
+                settings.headers(), settings.requirePin(), getClass().getClassLoader());
+        PolicyBundle loaded = null;
+        for (PolicySource source : sources) {
+            PolicyBundle next = bundleLoader.load(resolver.resolve(source), loaded, List.of());
+            if (source.version() != null && !source.version().equals(next.bundleVersion())) {
+                throw new BundleValidationException("policy source " + source.uri() + " is bundleVersion " + next.bundleVersion()
+                        + " but is pinned to " + source.version());
+            }
+            loaded = next;
+        }
+        bundle = bundleLoader.withOverlays(loaded, settings.overlays());
+    }
+
+    /** Starts building an engine with explicit policy sources; nothing is read from the user's home directory. */
+    public static Builder builder() { return new Builder(); }
+
+    /** Collects an engine's policy sources and how they are fetched and checked, then loads them in {@link #build()}. */
+    public static final class Builder {
+        private final List<PolicySource> sources = new ArrayList<>();
+        private final List<String> repositories = new ArrayList<>();
+        private final Map<String, String> headers = new LinkedHashMap<>();
+        private boolean requirePin;
+        private Path cacheDir = defaultCacheDir();
+        private Path userPolicies;
+        private java.net.http.HttpClient http;
+
+        /** Adds a source. Sources layer in the order added; with none, the bundle in the jar is used. */
+        public Builder policySource(PolicySource source) { sources.add(source); return this; }
+
+        public Builder policySource(String spec) { return policySource(PolicySource.parse(spec)); }
+
+        /** A Maven-layout repository (an https or {@code file:} base URL) for {@code maven:} sources. */
+        public Builder mavenRepository(String baseUrl) { repositories.add(baseUrl); return this; }
+
+        /** Refuse a remote source that has no {@code sha256} pin. */
+        public Builder requirePin(boolean require) { this.requirePin = require; return this; }
+
+        /** Where fetched bundles are kept, by digest; {@code null} turns the cache off. */
+        public Builder cacheDir(Path dir) { this.cacheDir = dir; return this; }
+
+        /** A directory of extra {@code *.md} policies, added after the sources. */
+        public Builder userPoliciesDir(Path dir) { this.userPolicies = dir; return this; }
+
+        /** A header sent with every fetch, for a repository that wants a token. */
+        public Builder requestHeader(String name, String value) { headers.put(name, value); return this; }
+
+        public Builder httpClient(java.net.http.HttpClient client) { this.http = client; return this; }
+
+        public Engine build() {
+            Engine engine = new Engine();
+            List<PolicyBundleLoader.OverlayPolicy> overlays = userPolicies == null ? List.of() : readPolicies(userPolicies);
+            engine.load(new Settings(List.copyOf(sources), List.copyOf(repositories), requirePin, cacheDir, Map.copyOf(headers), http, overlays));
+            return engine;
+        }
     }
 
     /**
@@ -106,8 +201,11 @@ public class Engine {
         Path dir = configured != null && !configured.isBlank()
                 ? Path.of(configured.trim())
                 : Path.of(System.getProperty("user.home", ""), ".arete", "policies");
-        if (!Files.isDirectory(dir)) return List.of();
+        return readPolicies(dir);
+    }
 
+    private static List<PolicyBundleLoader.OverlayPolicy> readPolicies(Path dir) {
+        if (!Files.isDirectory(dir)) return List.of();
         List<PolicyBundleLoader.OverlayPolicy> policies = new ArrayList<>();
         try (var entries = Files.list(dir)) {
             List<Path> files = entries
@@ -144,6 +242,15 @@ public class Engine {
     }
 
     public ScoringResult score(SpecInput input) {
+        return score(input, Overrides.none());
+    }
+
+    /**
+     * Scores {@code input} under its policy with a team's {@link Overrides} applied. Overrides that name an
+     * unknown rule, a locked rule, or parameters the rule's matcher does not take make the run fail with an
+     * error status rather than being ignored.
+     */
+    public ScoringResult score(SpecInput input, Overrides overrides) {
         PolicyBundle currentBundle;
         try {
             currentBundle = activeBundle();
@@ -156,7 +263,12 @@ public class Engine {
             return ScoringResult.parseError("OpenAPI parsing failed: " + detail);
         }
 
-        Policy policy = currentBundle.policyOrDefault(input.getPolicy());
+        Policy policy;
+        try {
+            policy = applyOverrides(currentBundle.policyOrDefault(input.getPolicy()), currentBundle, overrides);
+        } catch (BundleValidationException e) {
+            return ScoringResult.pluginError("Could not apply the overrides: " + e.getMessage());
+        }
         Map<String, Object> api = OpenApiMapAdapter.toMap(parsed.getOpenAPI(), parsed.getMessages(), input.getContent());
         List<net.dublinux.arete.engine.api.Diagnostic> diagnostics = new ArrayList<>();
         double deductions = 0;
@@ -203,6 +315,40 @@ public class Engine {
                 .rulesEvaluatedCount(rulesEvaluated).overallScore(effectiveScore)
                 .overallScoreWithoutBlockers(qualityScore)
                 .grade(policy.gradeFor(effectiveScore)).build();
+    }
+
+    /** The policy with a team's overrides applied; the bundle's own policy objects are never changed. */
+    private static Policy applyOverrides(Policy policy, PolicyBundle bundle, Overrides overrides) {
+        if (overrides == null || overrides.rules().isEmpty()) return policy;
+        Map<String, PolicyDisposition> dispositions = new LinkedHashMap<>(policy.dispositions());
+        for (Overrides.RuleOverride override : overrides.rules().values()) {
+            String id = override.ruleId();
+            PolicyRule rule = bundle.rules().get(id);
+            if (rule == null) throw new BundleValidationException("overrides." + id + ": no such rule");
+            if (policy.locked().contains(id)) {
+                throw new BundleValidationException("overrides." + id + ": the policy '" + policy.id() + "' locks this rule, so it cannot be overridden");
+            }
+            PolicyDisposition current = dispositions.get(id);
+            if (current == null) continue; // this policy does not run the rule; the override has nothing to change
+            if (override.disabled()) {
+                dispositions.remove(id);
+                continue;
+            }
+            Map<String, Object> parameters = new LinkedHashMap<>(current.parameters());
+            if (override.parameters() != null) {
+                Matcher matcher = bundle.matchers().get(rule.matcherId());
+                Map<String, Object> changes = override.parameters();
+                if (matcher != null) {
+                    PolicyBundleLoader.validateParameterOverrides(".arete.yaml", id, changes, matcher);
+                    changes = PolicyBundleLoader.coerceListValues(changes, matcher);
+                }
+                parameters.putAll(changes);
+            }
+            if (override.points() != null) dispositions.put(id, new Deduction(override.points(), parameters));
+            else if (current instanceof Prohibited) dispositions.put(id, new Prohibited(parameters));
+            else dispositions.put(id, new Deduction(((Deduction) current).points(), parameters));
+        }
+        return new Policy(policy.id(), dispositions, policy.scoreLevel(), policy.passingScore(), policy.grades(), policy.locked());
     }
 
     public ScoringResult testMatcher(MatcherTestRequest request) {
