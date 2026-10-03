@@ -1,13 +1,12 @@
 # Scoring
 
-Scoring in Areté is **on-demand and pluggable**. Opening a spec doesn't
-run anything by itself — you choose what runs and when.
+Scoring in Areté is **on-demand**. Opening a spec doesn't run anything by
+itself — you choose what runs and when.
 
-Areté ships one bundled plugin, the
-[**Areté Policy Engine**](policy-engine.md) (`generic-policy`), and
-discovers any additional plugin jars you drop in. Multiple plugins can run
-together — for example a general API-guidelines linter alongside a specialised,
-organisation-specific plugin such as a breaking-changes checker.
+Areté scores with one engine, the
+[**Areté Policy Engine**](policy-engine.md) (`generic-policy`), built into the
+app. What changes between teams is the policy, not the engine: policies, rules
+and matchers are plain text files.
 
 ![The scoring picker and findings](../assets/screenshot-scoring.png)
 
@@ -70,22 +69,12 @@ Areté Policy Engine exposes one policy per bundled [policy](policies.md):
     two or more elements has no iteration-order guarantee in Java, so policies
     would reshuffle on every restart. Keep the order stable across releases.
 
-## Where plugins come from
+## Where the engine comes from
 
-The core engine discovers each plugin from its shaded jar using Java's
-`ServiceLoader`. A plugin registers an implementation through
-`META-INF/services/net.dublinux.arete.scoring.spi.SpecScoringPlugin` and
-is loaded in an isolated classloader. This is the common plugin lifecycle; the
-Policy Engine is not special in this respect.
-
-Plugin `.jar` files are discovered from two folders at startup:
-
-- **`plugins/`, next to `arete.jar`** — where the release zip ships the
-  bundled [Areté Policy Engine](policy-engine.md). Not created
-  automatically if missing.
-- **`~/.arete/plugins`** — a stable location independent of where Areté
-  is installed, created automatically if it doesn't exist. Drop your own plugin
-  jars here.
+The engine is a dependency of the app, found on the classpath through Java's
+`ServiceLoader` (`META-INF/services/net.dublinux.arete.engine.api.SpecScoringPlugin`).
+There are no plugin jars to drop in and no plugin folders. The same engine is
+a plain library (`arete-engine`) that other programs can embed.
 
 Enable or disable individual plugins globally from **Settings**. A disabled
 plugin stays loaded but never appears in a spec's picker and is skipped during
@@ -99,5 +88,3 @@ a narrower, additional switch layered on top of the global setting.
 - [Rule Catalogue](rules.md) — every rule in the bundle and which policies use it.
 - [Policies](policies.md) — the bundled Enterprise Grade, Zalando, and Zalando
   Extended policies.
-- [Writing a Plugin](writing-a-plugin.md) — implement the `SpecScoringPlugin`
-  SPI.

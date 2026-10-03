@@ -5,7 +5,7 @@ The SPI is now published under these coordinates:
 ```xml
 <dependency>
   <groupId>net.dublinux.arete</groupId>
-  <artifactId>arete-scoring-spi</artifactId>
+  <artifactId>arete-engine-api</artifactId>
   <version>VERSION</version>
 </dependency>
 ```
@@ -33,7 +33,7 @@ existing consumers must migrate explicitly.
    - `GPG_PASSPHRASE`
 
 The `release` profile in
-[`arete-scoring-spi/pom.xml`](https://github.com/johnjoeallen/arete/blob/main/arete-scoring-spi/pom.xml)
+[`arete-engine-api/pom.xml`](https://github.com/johnjoeallen/arete/blob/main/arete-engine-api/pom.xml)
 creates the sources and Javadoc jars, signs all artifacts, and uploads them
 through the Central Publishing Portal.
 
@@ -68,7 +68,7 @@ SPI automatically.
    version by removing the leading `v`, imports the GPG key, and runs:
 
    ```bash
-   mvn --no-transfer-progress -pl arete-scoring-spi -Prelease deploy
+   mvn --no-transfer-progress -pl arete-engine-api -Prelease deploy
    ```
 
 5. Open [Central Portal deployments](https://central.sonatype.com/publishing/deployments),
@@ -90,7 +90,7 @@ with:
 
 ```xml
 <groupId>net.dublinux.arete</groupId>
-<artifactId>arete-scoring-spi</artifactId>
+<artifactId>arete-engine-api</artifactId>
 ```
 
 Consumers that import SPI classes must also change Java package imports from

@@ -2,8 +2,8 @@ package net.dublinux.arete.plugin;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.dublinux.arete.scoring.spi.Severity;
-import net.dublinux.arete.scoring.spi.Diagnostic;
+import net.dublinux.arete.engine.api.Severity;
+import net.dublinux.arete.engine.api.Diagnostic;
 
 import java.util.List;
 

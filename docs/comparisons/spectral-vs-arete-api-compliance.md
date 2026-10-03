@@ -427,4 +427,3 @@ scoring, lifecycle enforcement, breaking-change governance, and evidence.
 - [Areté scoring overview](/home/jallen/git/arete/docs/scoring/index.md)
 - [Areté Policy Engine](/home/jallen/git/arete/docs/scoring/policy-engine.md)
 - [Areté Distill reference](/home/jallen/git/arete/docs/scoring/distill.md)
-- [Writing an Areté plugin](/home/jallen/git/arete/docs/scoring/writing-a-plugin.md)

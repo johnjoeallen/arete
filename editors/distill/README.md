@@ -66,7 +66,7 @@ The `function-name` and `member-name` alternations in
 drift. After adding a builtin:
 
 ```sh
-mvn -pl arete-policy-plugin test -Dtest=DistillGrammarSnapshotTest -Dsnapshot.update=true
+mvn -pl arete-engine test -Dtest=DistillGrammarSnapshotTest -Dsnapshot.update=true
 ```
 
 and commit the regenerated grammar.

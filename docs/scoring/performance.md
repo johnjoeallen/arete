@@ -67,7 +67,7 @@ bytecode — which the rest of this page quantifies.
 
 None of this replaces Areté's plugin facility. A scoring plugin is
 arbitrary compiled Java loaded through the SPI and a child-first classloader;
-`arete-policy-plugin` is itself one. A plugin runs with full
+`arete-engine` is itself one. A plugin runs with full
 application privileges, so **installing one is a trust decision** — and
 building it from source does not remove that boundary, it only moves the
 audit to you: the plugin's own code, its transitive dependencies, and its

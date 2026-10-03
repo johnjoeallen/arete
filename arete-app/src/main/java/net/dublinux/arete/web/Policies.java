@@ -1,6 +1,6 @@
 package net.dublinux.arete.web;
 
-import net.dublinux.arete.scoring.spi.SpecScoringPlugin;
+import net.dublinux.arete.engine.api.SpecScoringPlugin;
 import net.dublinux.arete.web.api.Slugs;
 
 import java.util.List;

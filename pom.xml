@@ -13,8 +13,8 @@
     <description>Reactor build for Areté and its scoring plugin modules</description>
 
     <modules>
-        <module>arete-scoring-spi</module>
-        <module>arete-policy-plugin</module>
+        <module>arete-engine-api</module>
+        <module>arete-engine</module>
         <module>arete-app</module>
         <!-- Build-gate plugins. In the reactor so one checkout builds and
              integration-tests them against a freshly-built Areté, but they

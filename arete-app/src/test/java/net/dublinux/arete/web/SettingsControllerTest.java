@@ -8,8 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import net.dublinux.arete.scoring.spi.SpecFormat;
-import net.dublinux.arete.scoring.spi.SpecScoringPlugin;
+import net.dublinux.arete.engine.api.SpecFormat;
+import net.dublinux.arete.engine.api.SpecScoringPlugin;
 
 import java.nio.file.Path;
 import java.util.Map;
@@ -51,8 +51,6 @@ class SettingsControllerTest {
     @Test
     void listsLoadedPluginsWithTheirPersistedEnabledState() throws Exception {
         when(pluginRegistry.getPlugins()).thenReturn(java.util.List.of(stubPlugin("noop", "Noop Plugin")));
-        when(pluginRegistry.getInstallPluginsDir()).thenReturn(Path.of("/opt/arete/plugins"));
-        when(pluginRegistry.getUserPluginsDir()).thenReturn(Path.of("/home/user/.arete/plugins"));
         when(pluginSettingsService.isEnabled("noop")).thenReturn(false);
 
         mockMvc.perform(get("/settings"))
@@ -99,7 +97,7 @@ class SettingsControllerTest {
             }
 
             @Override
-            public net.dublinux.arete.scoring.spi.ScoringResult score(net.dublinux.arete.scoring.spi.SpecInput input) {
+            public net.dublinux.arete.engine.api.ScoringResult score(net.dublinux.arete.engine.api.SpecInput input) {
                 throw new UnsupportedOperationException();
             }
         };

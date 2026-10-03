@@ -2,12 +2,12 @@ package net.dublinux.arete.web;
 
 import net.dublinux.arete.plugin.PluginRegistry;
 import net.dublinux.arete.service.MarkdownRenderer;
-import net.dublinux.arete.scoring.spi.RuleDocumentation;
-import net.dublinux.arete.scoring.spi.RuleDocumentationProvider;
-import net.dublinux.arete.scoring.spi.SpecFormat;
-import net.dublinux.arete.scoring.spi.SpecInput;
-import net.dublinux.arete.scoring.spi.SpecScoringPlugin;
-import net.dublinux.arete.scoring.spi.ScoringResult;
+import net.dublinux.arete.engine.api.RuleDocumentation;
+import net.dublinux.arete.engine.api.RuleDocumentationProvider;
+import net.dublinux.arete.engine.api.SpecFormat;
+import net.dublinux.arete.engine.api.SpecInput;
+import net.dublinux.arete.engine.api.SpecScoringPlugin;
+import net.dublinux.arete.engine.api.ScoringResult;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;

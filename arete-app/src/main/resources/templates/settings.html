@@ -52,8 +52,7 @@
 
         <h3>Validator plugins</h3>
         <p th:if="${pluginRows.isEmpty()}" class="muted">
-            No scoring plugins are loaded. Drop a plugin jar into <code th:text="${installPluginsDir}"></code>
-            or <code th:text="${userPluginsDir}"></code> and restart.
+            No scoring engine is available on the classpath.
         </p>
         <table class="plugin-settings" th:if="${!pluginRows.isEmpty()}">
             <thead>

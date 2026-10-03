@@ -42,8 +42,6 @@ public class SettingsController {
         model.addAttribute("specId", null);
         model.addAttribute("pluginRows", pluginRows());
         model.addAttribute("namespaces", namespaceService.list());
-        model.addAttribute("installPluginsDir", pluginRegistry.getInstallPluginsDir().toString());
-        model.addAttribute("userPluginsDir", pluginRegistry.getUserPluginsDir().toString());
         return "settings";
     }
 

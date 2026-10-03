@@ -27,7 +27,7 @@ public final class EndpointFindings {
      * matching {@code EndpointView.method() + " " + EndpointView.path()}. A
      * diagnostic is attributed to every endpoint it names — its {@code
      * pointer}'s own operation, if any, plus every entry in {@link
-     * net.dublinux.arete.scoring.spi.Diagnostic#getPaths()} — so a
+     * net.dublinux.arete.engine.api.Diagnostic#getPaths()} — so a
      * rule a plugin reports once but flags as affecting several endpoints
      * (via {@code paths}, rather than emitting one {@code Diagnostic} per
      * endpoint) shows up on all of them, not just the one its {@code
@@ -49,7 +49,7 @@ public final class EndpointFindings {
     }
 
     /** Every endpoint key a diagnostic is attributable to — see {@link #byEndpoint}. */
-    private static Set<String> endpointKeys(net.dublinux.arete.scoring.spi.Diagnostic diagnostic) {
+    private static Set<String> endpointKeys(net.dublinux.arete.engine.api.Diagnostic diagnostic) {
         Set<String> keys = new LinkedHashSet<>();
         String pointerKey = endpointKey(diagnostic.getPointer());
         if (pointerKey != null) {

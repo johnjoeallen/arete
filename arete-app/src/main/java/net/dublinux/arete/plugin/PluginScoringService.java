@@ -3,11 +3,11 @@ package net.dublinux.arete.plugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import net.dublinux.arete.scoring.spi.SpecFormat;
-import net.dublinux.arete.scoring.spi.SpecInput;
-import net.dublinux.arete.scoring.spi.SpecScoringPlugin;
-import net.dublinux.arete.scoring.spi.ScoringResult;
-import net.dublinux.arete.scoring.spi.Diagnostic;
+import net.dublinux.arete.engine.api.SpecFormat;
+import net.dublinux.arete.engine.api.SpecInput;
+import net.dublinux.arete.engine.api.SpecScoringPlugin;
+import net.dublinux.arete.engine.api.ScoringResult;
+import net.dublinux.arete.engine.api.Diagnostic;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -9,7 +9,7 @@ import pathlib
 import yaml
 
 REPO = pathlib.Path(__file__).resolve().parents[2]
-BUNDLE = REPO / "arete-policy-plugin/src/main/resources/api-policy"
+BUNDLE = REPO / "arete-engine/src/main/resources/api-policy"
 OUT = REPO / "docs/scoring"
 
 manifest = yaml.safe_load((BUNDLE / "PolicyBundle.yaml").read_text())

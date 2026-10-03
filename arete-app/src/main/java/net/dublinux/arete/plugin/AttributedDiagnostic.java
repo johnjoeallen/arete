@@ -1,6 +1,6 @@
 package net.dublinux.arete.plugin;
 
-import net.dublinux.arete.scoring.spi.Diagnostic;
+import net.dublinux.arete.engine.api.Diagnostic;
 
 /**
  * A {@link Diagnostic} tagged with the plugin that produced it.

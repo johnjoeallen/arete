@@ -73,6 +73,5 @@ nav:
       - Distill reference: scoring/distill.md
       - Rule Catalogue: scoring/rules.md
       - Policies: scoring/policies.md
-      - Writing a Plugin: scoring/writing-a-plugin.md
   - Releasing: releasing.md
   - Publishing the SPI: publishing-spi.md

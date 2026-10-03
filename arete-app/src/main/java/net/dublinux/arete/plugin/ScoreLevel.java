@@ -1,6 +1,6 @@
 package net.dublinux.arete.plugin;
 
-import net.dublinux.arete.scoring.spi.Severity;
+import net.dublinux.arete.engine.api.Severity;
 
 /**
  * A pass level for automated gating, in the fixed grammar

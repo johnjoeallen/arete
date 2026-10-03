@@ -76,8 +76,8 @@ passes          = passingScore is unset, or overallScore ≥ passingScore
 
 ## SPI impact
 
-`arete-scoring-spi` (renamed from `arete-validation-spi`) is published to Maven
+`arete-engine-api` (renamed from `arete-validation-spi`) is published to Maven
 Central, so this is a **breaking change** for any external plugin: new
-coordinates (`net.dublinux.arete:arete-scoring-spi`), new package
-(`net.dublinux.arete.scoring.spi`), `SpecScoringPlugin` with `score(...)` and
-`getPolicies()`. The bundled `arete-policy-plugin` is the only known consumer.
+coordinates (`net.dublinux.arete:arete-engine-api`), new package
+(`net.dublinux.arete.engine.api`), `SpecScoringPlugin` with `score(...)` and
+`getPolicies()`. The bundled `arete-engine` is the only known consumer.

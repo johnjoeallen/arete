@@ -1,6 +1,6 @@
 package net.dublinux.arete.plugin;
 
-import net.dublinux.arete.scoring.spi.Severity;
+import net.dublinux.arete.engine.api.Severity;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -48,7 +48,7 @@ public record AggregatedScoringResult(
 
     /**
      * How many score points each {@link Severity} is currently costing —
-     * i.e. the sum of {@link net.dublinux.arete.scoring.spi.Diagnostic#getScoreImprovement()}
+     * i.e. the sum of {@link net.dublinux.arete.engine.api.Diagnostic#getScoreImprovement()}
      * across that severity's diagnostics, deduped by rule id first (since
      * that value is per-rule, not per-finding — see that method's javadoc).
      * A severity with no diagnostics, or whose diagnostics never report a

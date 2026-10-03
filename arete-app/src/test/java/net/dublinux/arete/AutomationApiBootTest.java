@@ -16,16 +16,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * Boots the whole app (so {@code SpecSchemaMigration} actually runs against
- * H2 and every bean wires) and exercises the API pipeline. No real plugin is
- * on the classpath, so a submit gets as far as "unknown validator" — which
- * still proves parse, store, and the (namespace, title) uniqueness path.
+ * H2 and every bean wires) and exercises the API pipeline: parse, store, score
+ * with the embedded policy engine, and the (namespace, title) uniqueness path.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestPropertySource(properties = {
         "spring.datasource.url=jdbc:h2:mem:arete-api-it;DB_CLOSE_DELAY=-1",
-        "arete.specs-dir=${java.io.tmpdir}/arete-api-it-specs",
-        "arete.plugins-dir=${java.io.tmpdir}/arete-api-it-plugins"
+        "arete.specs-dir=${java.io.tmpdir}/arete-api-it-specs"
 })
 class AutomationApiBootTest {
 
@@ -40,17 +38,18 @@ class AutomationApiBootTest {
     }
 
     @Test
-    void submitStoresTheSpecThenReportsTheUnknownValidator() throws Exception {
+    void submitStoresTheSpecAndScoresItWithTheEmbeddedEngine() throws Exception {
         String ns = "it-" + UUID.randomUUID().toString().substring(0, 8);
         String spec = "openapi: 3.0.0\ninfo: { title: Boot IT API, version: 1.0.0 }\npaths: {}\n";
 
-        mvc.perform(post("/api/v1/namespaces/" + ns + "/specs?run=generic-policy/x")
+        mvc.perform(post("/api/v1/namespaces/" + ns + "/specs?run=generic-policy/Zalando")
                         .cookie(new jakarta.servlet.http.Cookie("arete_submitter", "boot-it"))
                         .contentType("application/yaml").content(spec))
-                .andExpect(status().isUnprocessableEntity())
-                .andExpect(jsonPath("$.detail").value(org.hamcrest.Matchers.containsString("validator")));
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(jsonPath("$.results[0].validator").value("generic-policy"))
+                .andExpect(jsonPath("$.results[0].status").value("SUCCESS"));
 
-        // the spec itself was stored before scoring was attempted
+        // the spec itself was stored
         mvc.perform(get("/api/v1/namespaces/" + ns + "/specs"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].title").value("Boot IT API"))

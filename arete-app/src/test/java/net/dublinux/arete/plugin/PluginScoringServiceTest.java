@@ -1,11 +1,11 @@
 package net.dublinux.arete.plugin;
 
 import org.junit.jupiter.api.Test;
-import net.dublinux.arete.scoring.spi.SpecFormat;
-import net.dublinux.arete.scoring.spi.SpecInput;
-import net.dublinux.arete.scoring.spi.SpecScoringPlugin;
-import net.dublinux.arete.scoring.spi.ScoringResult;
-import net.dublinux.arete.scoring.spi.Diagnostic;
+import net.dublinux.arete.engine.api.SpecFormat;
+import net.dublinux.arete.engine.api.SpecInput;
+import net.dublinux.arete.engine.api.SpecScoringPlugin;
+import net.dublinux.arete.engine.api.ScoringResult;
+import net.dublinux.arete.engine.api.Diagnostic;
 
 import java.util.List;
 import java.util.Set;
@@ -50,7 +50,7 @@ class PluginScoringServiceTest {
     @Test
     void diagnosticsFromTheSelectedPluginAreTaggedWithItsId() {
         Diagnostic diagnostic = Diagnostic.builder()
-                .ruleId("no-empty-title").title("Title is empty").severity(net.dublinux.arete.scoring.spi.Severity.ERROR)
+                .ruleId("no-empty-title").title("Title is empty").severity(net.dublinux.arete.engine.api.Severity.ERROR)
                 .build();
         SpecScoringPlugin plugin = stubPlugin("linter-a", "Linter A");
         when(plugin.score(any())).thenReturn(ScoringResult.success(List.of(diagnostic), 10));

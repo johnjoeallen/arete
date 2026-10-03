@@ -54,11 +54,11 @@ endpoint with severity badges, JSON Pointer locations, and links to rule
 docs.
 
 The release bundles the **Areté Policy Engine**
-(`arete-policy-plugin`) — a policy-driven linter whose matchers,
+(`arete-engine`) — a policy-driven linter whose matchers,
 rules, and policies are plain text files, with matchers written in Distill,
 a safe-by-construction expression language. It ships the Enterprise Grade,
-Zalando, and Zalando Extended policies. Drop additional plugin jars into
-`~/.arete/plugins`.
+Zalando, and Zalando Extended policies. Add your own policies under
+`~/.arete/policies`.
 
 For CI, the **Automation API** (`/api/v1`) takes a spec inline or by URL, runs
 the validator/policy combinations you name, and returns findings plus a
@@ -72,15 +72,14 @@ protected boundary.
   — editor highlighting for VS Code / IntelliJ lives in [`editors/distill/`](editors/distill/)
 - [Rule catalogue](https://johnjoeallen.github.io/arete/scoring/rules/)
   and [policies](https://johnjoeallen.github.io/arete/scoring/policies/)
-- [Writing a plugin](https://johnjoeallen.github.io/arete/scoring/writing-a-plugin/)
 
 ## Modules
 
 | Module | Purpose |
 |---|---|
-| `arete-scoring-spi` | Plugin SPI, published to Maven Central (`net.dublinux.arete:arete-scoring-spi`). |
-| `arete-policy-plugin` | The bundled Areté Policy Engine. |
-| `arete-app` | The Spring Boot application. |
+| `arete-engine-api` | The engine's public types (findings, scores, severities, spec input). Published to Maven Central as `net.dublinux.arete:arete-engine-api`. |
+| `arete-engine` | The Areté Policy Engine: spec model, policy loading, Distill and scoring. A plain library with no Spring, database or UI. |
+| `arete-app` | The Spring Boot application, a local viewing and scoring UI over the engine. |
 
 ## Release
 

@@ -20,9 +20,8 @@ arete.bat         # Windows
 
 Then open <http://localhost:6809>.
 
-The release zip contains `arete.jar`, both launcher scripts, and a
-`plugins/` folder holding the bundled
-[Areté Policy Engine](scoring/policy-engine.md).
+The release zip contains `arete.jar` and both launcher scripts. The
+[Areté Policy Engine](scoring/policy-engine.md) is built into the jar.
 
 ## Build from source
 
@@ -32,15 +31,13 @@ mvn clean package
 
 This produces:
 
-- the runnable app jar at `arete-app/target/arete-<version>.jar`
-- the bundled plugin jar at
-  `arete-policy-plugin/target/arete-policy-plugin-<version>.jar`
+- the runnable app jar at `arete-app/target/arete-<version>.jar`, which includes
+  the engine (`arete-engine`)
 
 ### Quick start with the helper scripts
 
-`build.sh` / `build.bat` run the Maven build and copy both jars into
-`scripts/` (the plugin jar under `scripts/plugins/`) so the launcher has
-everything it needs:
+`build.sh` / `build.bat` run the Maven build and copy the app jar into
+`scripts/` so the launcher has everything it needs:
 
 === "Linux/macOS"
 

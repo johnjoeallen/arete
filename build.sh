@@ -10,17 +10,5 @@ if [ -z "$JAR" ]; then
   exit 1
 fi
 
-POLICY_BASED_PLUGIN_JAR=$(ls "$DIR"/arete-policy-plugin/target/arete-policy-plugin-*.jar 2>/dev/null | head -1)
-if [ -z "$POLICY_BASED_PLUGIN_JAR" ]; then
-  echo "Build succeeded but no plugin JAR found in arete-policy-plugin/target/" >&2
-  exit 1
-fi
-
 cp "$JAR" "$DIR/scripts/arete.jar"
-mkdir -p "$DIR/scripts/plugins"
-# Clear stale bundled plugin jars first — an old copy under a former name
-# (e.g. generic-policy-validation-plugin.jar) would load a second plugin with
-# the same id.
-rm -f "$DIR"/scripts/plugins/*.jar
-cp "$POLICY_BASED_PLUGIN_JAR" "$DIR/scripts/plugins/arete-policy-plugin.jar"
-echo "Built: scripts/arete.jar (+ bundled scoring plugins)"
+echo "Built: scripts/arete.jar"

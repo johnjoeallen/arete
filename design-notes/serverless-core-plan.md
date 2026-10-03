@@ -49,12 +49,12 @@ The CLI, third-party embedders and the server all call the same engine. The engi
 
 ## Core library and modules
 
-Most of the engine already exists as a Spring-free module, so this is an extraction and a rename, not a rewrite. `arete-policy-plugin` holds the bundle loader, the Distill evaluator, the OpenAPI adapter and scoring on `swagger-parser`, `snakeyaml`, `re2j` and Groovy. `arete-app` holds Spring, JPA, H2 and Thymeleaf.
+Most of the engine already exists as a Spring-free module, so this is an extraction and a rename, not a rewrite. `arete-engine` holds the bundle loader, the Distill evaluator, the OpenAPI adapter and scoring on `swagger-parser`, `snakeyaml`, `re2j` and Groovy. `arete-app` holds Spring, JPA, H2 and Thymeleaf.
 
 | Today | Becomes | Change |
 | --- | --- | --- |
-| `arete-scoring-spi` | `arete-engine-api` | Keep `Diagnostic`, `Severity`, `ScoringResult`. Add `Occurrence`, `GateResult`, `Report`. Drop the plugin-discovery framing. |
-| `arete-policy-plugin` | `arete-engine` | Remove the `SpecScoringPlugin` wrapper as the entry point. Expose a plain `Engine` API. Loader takes URIs (next section). |
+| `arete-engine-api` | `arete-engine-api` | Keep `Diagnostic`, `Severity`, `ScoringResult`. Add `Occurrence`, `GateResult`, `Report`. Drop the plugin-discovery framing. |
+| `arete-engine` | `arete-engine` | Remove the `SpecScoringPlugin` wrapper as the entry point. Expose a plain `Engine` API. Loader takes URIs (next section). |
 | `arete-ci-gate-core`, Maven and Gradle plugins | `arete-cli`, arete-maven-plugin, arete-gradle-plugin | The HTTP client to a service is retired. The Maven and Gradle plugins and the CLI call the engine in-process. |
 | `arete-app` | `arete-server` | Spring depends on `arete-engine`. Local developer UI: view and score specs, fix findings before commit. |
 
@@ -93,7 +93,7 @@ The plan:
 
 ## One mechanism and richer rule semantics
 
-**Policy engine only.** The scoring-plugin mechanism goes: no plugin discovery, registry or per-plugin settings, and no second validator type. The policy engine is the only way a spec is scored, and the `arete-scoring-spi` types become the engine's own API. This is separate from the Maven and Gradle build plugins, which stay as thin wrappers.
+**Policy engine only.** The scoring-plugin mechanism goes: no plugin discovery, registry or per-plugin settings, and no second validator type. The policy engine is the only way a spec is scored, and the `arete-engine-api` types become the engine's own API. This is separate from the Maven and Gradle build plugins, which stay as thin wrappers.
 
 **What a rule can say today.** A matcher finds problems. Any match is a violation, and the policy attaches either a flat deduction (charged once per rule, however many matches) or `PROHIBITED` (score forced to 0). Distill has no way to say "this must be present" or "deduct more for more matches".
 

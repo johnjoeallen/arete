@@ -1,6 +1,6 @@
 # Areté Policy Engine
 
-The **Areté Policy Engine** (`arete-policy-plugin`, plugin id
+The **Areté Policy Engine** (`arete-engine`, plugin id
 `generic-policy`) is the built-in, policy-driven scoring plugin. Instead of
 hard-coding checks in Java, it ships a **policy bundle**: a tree of Markdown +
 YAML files defining **matchers** (Distill programs that inspect the normalised
@@ -44,7 +44,7 @@ Distill is the only matcher language; there is no second runtime. See
 
 ## The policy bundle
 
-Everything lives under `arete-policy-plugin/src/main/resources/api-policy/`:
+Everything lives under `arete-engine/src/main/resources/api-policy/`:
 
 ```
 api-policy/
@@ -449,7 +449,7 @@ The result reports `overallScore` (`effectiveScore`) and
    `matchers:`.
 3. Add rules that use it.
 4. Regenerate the behaviour snapshots and review the diff:
-   `mvn -pl arete-policy-plugin test -Dtest=PolicySnapshotTest -Dsnapshot.update=true`.
+   `mvn -pl arete-engine test -Dtest=PolicySnapshotTest -Dsnapshot.update=true`.
 
 ### Behaviour snapshots
 
@@ -482,17 +482,16 @@ validated against the rule descriptor at bundle load time; unknown or
 incorrectly typed overrides fail fast. The shorthand remains equivalent to a
 declaration with no overrides.
 
-### Build & install
+### Build
 
 ```bash
-mvn -q -pl arete-policy-plugin -am package -DskipTests
-cp arete-policy-plugin/target/arete-policy-plugin-*.jar \
-   ~/.arete/plugins/
+mvn -q -pl arete-engine -am package -DskipTests
 ```
 
-`PolicyScoringPluginTest` / `...LoadIT` load the real bundle and will
-fail the build on any manifest, front-matter, scope, parameter, or
-rule-compile error.
+The bundle is part of the `arete-engine` jar; the app depends on it, so there
+is nothing to install. `PolicyScoringPluginTest` and the corpus tests load the
+real bundle and will fail the build on any manifest, front-matter, scope,
+parameter, or rule-compile error.
 
 ---
 

@@ -116,7 +116,7 @@
                                         <input type="checkbox" class="severity-filter-all" checked>
                                         All
                                     </label>
-                                    <label class="severity-filter-item" th:each="sev : ${T(net.dublinux.arete.scoring.spi.Severity).values()}">
+                                    <label class="severity-filter-item" th:each="sev : ${T(net.dublinux.arete.engine.api.Severity).values()}">
                                         <input type="checkbox" class="severity-filter-value" th:value="${sev.name()}" checked>
                                         <span th:text="${severityLabels.get(sev.name())}">Error</span>
                                         <th:block th:if="${severityScoreImpact != null and severityScoreImpact.containsKey(sev.name())}"

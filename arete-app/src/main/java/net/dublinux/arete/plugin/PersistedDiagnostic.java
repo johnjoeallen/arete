@@ -3,7 +3,7 @@ package net.dublinux.arete.plugin;
 import java.util.List;
 
 /**
- * JSON-serializable mirror of {@link net.dublinux.arete.scoring.spi.Diagnostic},
+ * JSON-serializable mirror of {@link net.dublinux.arete.engine.api.Diagnostic},
  * for storing a scoring run's findings in {@link SpecScoringResultEntity}.
  * A plain DTO rather than annotating the SPI class itself, so the SPI stays
  * free of any host-persistence concern. {@code scoreImprovement} is {@code

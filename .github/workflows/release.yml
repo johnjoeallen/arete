@@ -21,7 +21,7 @@ jobs:
           cache: maven
 
       - name: Set version from tag
-        # -DprocessAllModules is required: arete-scoring-spi, arete-policy-plugin
+        # -DprocessAllModules is required: arete-engine-api, arete-engine
         # and arete-app carry an explicit <version> and do not declare
         # arete-parent as their <parent> (arete-app parents to Spring Boot), so
         # without it versions:set never reaches them and the packaged jars keep
@@ -37,11 +37,10 @@ jobs:
       - name: Package zip
         run: |
           VERSION=${GITHUB_REF_NAME#v}
-          mkdir -p dist/arete/plugins
+          mkdir -p dist/arete
           cp arete-app/target/arete-${VERSION}.jar dist/arete/arete.jar
           cp scripts/arete.sh dist/arete/
           cp scripts/arete.bat dist/arete/
-          cp arete-policy-plugin/target/arete-policy-plugin-${VERSION}.jar dist/arete/plugins/arete-policy-plugin.jar
           chmod +x dist/arete/arete.sh
           ZIP="$(pwd)/arete-${VERSION}.zip"
           # Zip the folder contents, not the folder: no top-level arete/ in the archive.
@@ -73,7 +72,7 @@ jobs:
             --title "$GITHUB_REF_NAME" \
             --generate-notes
 
-      # Publishing arete-scoring-spi to Maven Central is NOT part of
+      # Publishing arete-engine-api to Maven Central is NOT part of
       # this workflow — it doesn't belong on every tag push. See
       # publish-spi.yml, triggered by hand from the Actions tab against a
       # specific tag once that release is ready to be published externally.
