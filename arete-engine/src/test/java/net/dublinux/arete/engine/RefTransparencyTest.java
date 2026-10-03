@@ -132,7 +132,7 @@ class RefTransparencyTest {
      * different places, and a definition used twice reports once, where inlining it twice reports twice.
      */
     private static Set<String> findings(String spec, String policy) {
-        PolicyScoringPlugin plugin = new PolicyScoringPlugin();
+        Engine plugin = new Engine();
         plugin.configure(Map.of());
         ScoringResult result = plugin.score(SpecInput.builder().content(spec).format(SpecFormat.OPENAPI3).policy(policy).build());
         assertEquals(ScoringResult.Status.SUCCESS, result.getStatus(), String.valueOf(result.getErrorMessage()));

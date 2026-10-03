@@ -93,7 +93,7 @@ class PolicySnapshotTest {
 
     @Test
     void policyScoresMatchSnapshot() {
-        PolicyScoringPlugin plugin = new PolicyScoringPlugin();
+        Engine plugin = new Engine();
         // Bundled policies only — ignore any ~/.arete/policies on the dev machine
         // so the snapshot is identical here and in CI.
         plugin.configure(Map.of("policies-dir", "target/no-such-policies-dir"));

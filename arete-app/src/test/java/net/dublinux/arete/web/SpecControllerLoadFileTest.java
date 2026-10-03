@@ -1,8 +1,7 @@
 package net.dublinux.arete.web;
 
 import net.dublinux.arete.domain.SpecEntity;
-import net.dublinux.arete.plugin.PluginRegistry;
-import net.dublinux.arete.plugin.PluginSettingsService;
+import net.dublinux.arete.engine.Engine;
 import net.dublinux.arete.plugin.PluginScoringService;
 import net.dublinux.arete.plugin.SpecPluginSettingsService;
 import net.dublinux.arete.plugin.SpecScoringResultService;
@@ -55,10 +54,7 @@ class SpecControllerLoadFileTest {
     private net.dublinux.arete.web.api.DeploymentMode deploymentMode;
 
     @MockitoBean
-    private PluginRegistry pluginRegistry;
-
-    @MockitoBean
-    private PluginSettingsService pluginSettingsService;
+    private Engine engine;
 
     @MockitoBean
     private SpecPluginSettingsService specPluginSettingsService;

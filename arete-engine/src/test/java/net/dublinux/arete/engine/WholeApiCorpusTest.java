@@ -42,14 +42,14 @@ class WholeApiCorpusTest {
     private static final boolean PRINT = Boolean.getBoolean("corpus.print");
     private static final Path ROOT = Path.of("src", "test", "resources", "corpus");
 
-    private static PolicyScoringPlugin plugin() {
-        PolicyScoringPlugin plugin = new PolicyScoringPlugin();
+    private static Engine plugin() {
+        Engine plugin = new Engine();
         // Bundled policies only, so a developer's ~/.arete/policies cannot change the result.
         plugin.configure(Map.of("policies-dir", "target/no-such-policies-dir"));
         return plugin;
     }
 
-    private static List<String> policies(PolicyScoringPlugin plugin) {
+    private static List<String> policies(Engine plugin) {
         List<String> policies = new ArrayList<>(plugin.getPolicies());
         policies.sort(String::compareTo);
         return policies;
@@ -68,7 +68,7 @@ class WholeApiCorpusTest {
         return name.substring(0, name.lastIndexOf('.'));
     }
 
-    private static ScoringResult score(PolicyScoringPlugin plugin, String policy, Path spec) {
+    private static ScoringResult score(Engine plugin, String policy, Path spec) {
         try {
             return plugin.score(SpecInput.builder().content(Files.readString(spec)).format(SpecFormat.OPENAPI3).policy(policy).build());
         } catch (IOException e) {
@@ -78,7 +78,7 @@ class WholeApiCorpusTest {
 
     @TestFactory
     Stream<DynamicTest> goodApisReportNothingBeyondTheirAllowedRules() throws IOException {
-        PolicyScoringPlugin plugin = plugin();
+        Engine plugin = plugin();
         return specs("good").stream().map(spec -> DynamicTest.dynamicTest(stem(spec), () -> {
             Path allowedFile = spec.resolveSibling(stem(spec) + ".allowed");
             Set<String> allowed = new TreeSet<>();
@@ -108,7 +108,7 @@ class WholeApiCorpusTest {
 
     @TestFactory
     Stream<DynamicTest> messyApisMatchTheirSnapshots() throws IOException {
-        PolicyScoringPlugin plugin = plugin();
+        Engine plugin = plugin();
         return specs("messy").stream().map(spec -> DynamicTest.dynamicTest(stem(spec), () -> {
             StringBuilder out = new StringBuilder("# findings and score by policy; regenerate with -Dcorpus.update=true\n");
             for (String policy : policies(plugin)) {

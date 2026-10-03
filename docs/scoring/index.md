@@ -12,19 +12,15 @@ and matchers are plain text files.
 
 ## Running scoring
 
-A **Scoring** picker on the spec's page lists every globally enabled plugin
-as its own row — a checkbox plus that plugin's own policy dropdown — so more
-than one plugin can run at once. Click **Score** to run every checked plugin;
-nothing runs until you do.
+A **Scoring** picker on the spec's page offers the engine with a policy
+dropdown. Click **Score** to run it; nothing runs until you do.
 
-Which plugins are checked is remembered **per spec** in the database, so
-re-opening a spec later starts from the same selection. (A plugin's global
-enabled/disabled state in **Settings** still governs whether it appears in the
-picker at all.)
+The selection (and the policy chosen) is remembered **per spec** in the
+database, so re-opening a spec later starts from the same choice.
 
 ## Reading findings
 
-Findings from every plugin that ran are merged into one view. Each endpoint
+Findings from the run are shown in one view. Each endpoint
 whose findings map to a specific operation shows a combined severity-count
 badge (❌ error, ⚠️ warning, ℹ️ info, 💡 hint) in its header; expanding the
 endpoint lists those findings in full:
@@ -71,19 +67,21 @@ Areté Policy Engine exposes one policy per bundled [policy](policies.md):
 
 ## Where the engine comes from
 
-The engine is a dependency of the app, found on the classpath through Java's
-`ServiceLoader` (`META-INF/services/net.dublinux.arete.engine.api.SpecScoringPlugin`).
-There are no plugin jars to drop in and no plugin folders. The same engine is
-a plain library (`arete-engine`) that other programs can embed.
+The engine is a dependency of the app: the application creates one `Engine`
+(from `arete-engine`) at startup and uses it for every run. There are no plugin
+jars to drop in and no plugin folders, and no global enable/disable switch. The
+same engine is a plain library that other programs can embed.
 
-Enable or disable individual plugins globally from **Settings**. A disabled
-plugin stays loaded but never appears in a spec's picker and is skipped during
-scoring, so re-enabling it doesn't need a restart. The per-spec checkbox is
-a narrower, additional switch layered on top of the global setting.
+```java
+Engine engine = new Engine();
+engine.configure(Map.of());
+ScoringResult result = engine.score(SpecInput.builder()
+        .content(yaml).format(SpecFormat.OPENAPI3).policy("Enterprise Grade").build());
+```
 
 ## Next
 
-- [Areté Policy Engine](policy-engine.md) — how the bundled plugin's
+- [Areté Policy Engine](policy-engine.md) — how the bundled
   matchers, rules, and policies work, and how to extend the bundle.
 - [Rule Catalogue](rules.md) — every rule in the bundle and which policies use it.
 - [Policies](policies.md) — the bundled Enterprise Grade, Zalando, and Zalando

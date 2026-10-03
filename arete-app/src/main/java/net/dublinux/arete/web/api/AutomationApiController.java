@@ -1,12 +1,11 @@
 package net.dublinux.arete.web.api;
 
+import net.dublinux.arete.engine.api.SpecInput;
 import net.dublinux.arete.domain.SpecEntity;
 import net.dublinux.arete.domain.SpecSource;
 import net.dublinux.arete.plugin.AggregatedScoringResult;
 import net.dublinux.arete.plugin.AttributedDiagnostic;
-import net.dublinux.arete.plugin.PluginRegistry;
 import net.dublinux.arete.plugin.PluginRunRequest;
-import net.dublinux.arete.plugin.PluginSettingsService;
 import net.dublinux.arete.plugin.PluginScoringService;
 import net.dublinux.arete.plugin.ScoreLevel;
 import net.dublinux.arete.plugin.SpecScoringResultService;
@@ -15,7 +14,7 @@ import net.dublinux.arete.service.ParsedSpec;
 import net.dublinux.arete.service.SpecParserService;
 import net.dublinux.arete.service.SpecStorageService;
 import net.dublinux.arete.engine.api.Severity;
-import net.dublinux.arete.engine.api.SpecScoringPlugin;
+import net.dublinux.arete.engine.Engine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -53,23 +52,21 @@ public class AutomationApiController {
     private final SpecParserService parser;
     private final SpecStorageService storage;
     private final PluginScoringService scoring;
-    private final PluginRegistry pluginRegistry;
-    private final PluginSettingsService pluginSettings;
+    private final Engine engine;
     private final SpecScoringResultService results;
     private final RemoteSpecFetcher fetcher;
     private final DeploymentMode deploymentMode;
     private final net.dublinux.arete.service.NamespaceService namespaces;
 
     public AutomationApiController(SpecParserService parser, SpecStorageService storage,
-            PluginScoringService scoring, PluginRegistry pluginRegistry,
-            PluginSettingsService pluginSettings, SpecScoringResultService results,
+            PluginScoringService scoring, Engine engine,
+            SpecScoringResultService results,
             RemoteSpecFetcher fetcher, DeploymentMode deploymentMode,
             net.dublinux.arete.service.NamespaceService namespaces) {
         this.parser = parser;
         this.storage = storage;
         this.scoring = scoring;
-        this.pluginRegistry = pluginRegistry;
-        this.pluginSettings = pluginSettings;
+        this.engine = engine;
         this.results = results;
         this.fetcher = fetcher;
         this.deploymentMode = deploymentMode;
@@ -247,7 +244,7 @@ public class AutomationApiController {
         List<PluginRunRequest> forPersistence = new ArrayList<>();
         boolean ok = true;
         for (RunCombination combo : combos) {
-            SpecScoringPlugin plugin = enabledPlugin(combo.validator());
+            Engine plugin = enabledPlugin(combo.validator());
             if (plugin == null) {
                 throw new ApiException(HttpStatus.UNPROCESSABLE_ENTITY,
                         "unknown or disabled validator '" + combo.validator() + "'");
@@ -279,17 +276,17 @@ public class AutomationApiController {
         }
     }
 
-    private List<String> safePolicies(SpecScoringPlugin plugin) {
+    private List<String> safePolicies(Engine plugin) {
         try {
             return List.copyOf(plugin.getPolicies());
         } catch (Throwable t) {
-            return List.of(SpecScoringPlugin.DEFAULT_POLICY);
+            return List.of(SpecInput.DEFAULT_POLICY);
         }
     }
 
     private record ResolvedLevel(ScoreLevel level, String source) { }
 
-    private ResolvedLevel resolveLevel(ScoreLevel forced, SpecScoringPlugin plugin, String policy) {
+    private ResolvedLevel resolveLevel(ScoreLevel forced, Engine plugin, String policy) {
         if (forced != null) {
             return new ResolvedLevel(forced, "request");
         }
@@ -304,7 +301,7 @@ public class AutomationApiController {
         return new ResolvedLevel(ScoreLevel.BLOCKER, "default");
     }
 
-    private static Optional<String> safeSuggestedLevel(SpecScoringPlugin plugin, String policy) {
+    private static Optional<String> safeSuggestedLevel(Engine plugin, String policy) {
         try {
             return plugin.getSuggestedScoreLevel(policy);
         } catch (Throwable t) {
@@ -343,7 +340,7 @@ public class AutomationApiController {
             for (String p : runParams) {
                 int slash = p.indexOf('/');
                 out.add(slash < 0
-                        ? new RunCombination(p.trim(), SpecScoringPlugin.DEFAULT_POLICY)
+                        ? new RunCombination(p.trim(), SpecInput.DEFAULT_POLICY)
                         : new RunCombination(p.substring(0, slash).trim(), p.substring(slash + 1).trim()));
             }
         }
@@ -400,16 +397,11 @@ public class AutomationApiController {
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "no namespace '" + namespace + "'"));
     }
 
-    private SpecScoringPlugin enabledPlugin(String id) {
+    private Engine enabledPlugin(String id) {
         if (id == null) {
             return null;
         }
-        for (SpecScoringPlugin plugin : pluginRegistry.getPlugins()) {
-            if (plugin.getId().equals(id.trim()) && pluginSettings.isEnabled(plugin.getId())) {
-                return plugin;
-            }
-        }
-        return null;
+        return Engine.ID.equals(id.trim()) ? engine : null;
     }
 
     private static ResponseEntity.BodyBuilder status(boolean ok, Integer httpStatusOnFail, boolean isNew) {

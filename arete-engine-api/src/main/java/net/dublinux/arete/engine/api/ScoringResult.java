@@ -5,31 +5,13 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * The outcome of a single {@link SpecScoringPlugin#validate} call.
+ * The outcome of scoring one spec.
  *
- * <p>Open question re: error handling — everything is represented as data
- * on this result rather than as checked exceptions thrown from
- * {@code score()}. Reasons:
- *
- * <ul>
- *   <li>A checked exception type would itself have to live in the
- *       interface module (to be catchable by the host across the
- *       classloader boundary per constraint #5) and cross that boundary on
- *       every failure path — but "spec didn't parse" and "engine hit a
- *       rule it couldn't evaluate" are routine, expected outcomes for a
- *       linter, not exceptional control flow. Modeling them as data keeps
- *       {@code score()}'s signature simple ({@code throws} nothing
- *       checked) and makes host-side handling a switch over
- *       {@link Status} instead of a try/catch ladder.</li>
- *   <li>Genuine plugin bugs (NPEs, engine crashes the adapter didn't
- *       anticipate) are a different case — see {@link
- *       SpecScoringPlugin#validate} javadoc: the host wraps the call in
- *       a defensive {@code catch (Throwable)} regardless, since a
- *       misbehaving plugin jar can never be allowed to take down the host
- *       process. {@code PLUGIN_ERROR} is for the case where the adapter
- *       itself catches an unexpected failure and wants to report it
- *       gracefully rather than propagate it.</li>
- * </ul>
+ * <p>Everything is data on this result rather than a checked exception: "the spec did not parse" and
+ * "a rule could not be evaluated" are routine outcomes for a linter, so the caller switches over
+ * {@link Status} instead of catching. A caller that embeds the engine should still guard the call
+ * against an unexpected runtime failure; {@code PLUGIN_ERROR} is for the engine reporting such a
+ * failure gracefully itself.
  */
 public final class ScoringResult {
 

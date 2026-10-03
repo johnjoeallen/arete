@@ -2,7 +2,10 @@
 
 2026-10-02
 
-> **Status: plan, not implemented.** Exported from the planning doc.
+> **Status: in progress.** Done on `merge/serverless-core`: false-positive and `$ref` fixes, the rule
+> corpus and whole-API specs, Groovy removed, `arete-engine-api` / `arete-engine` split with a plain
+> `Engine` class (no plugin SPI, no plugin jars, no global plugin settings). Not started: the URI policy
+> loader, `.arete.yaml`, the CLI, reports, the merge-gate and the Maven/Gradle wrappers.
 
 ## Goals and requirements
 
@@ -54,7 +57,7 @@ Most of the engine already exists as a Spring-free module, so this is an extract
 | Today | Becomes | Change |
 | --- | --- | --- |
 | `arete-engine-api` | `arete-engine-api` | Keep `Diagnostic`, `Severity`, `ScoringResult`. Add `Occurrence`, `GateResult`, `Report`. Drop the plugin-discovery framing. |
-| `arete-engine` | `arete-engine` | Remove the `SpecScoringPlugin` wrapper as the entry point. Expose a plain `Engine` API. Loader takes URIs (next section). |
+| `arete-engine` | `arete-engine` | Done: a plain `Engine` class is the entry point and the plugin interface is gone. Loader takes URIs (next section). |
 | `arete-ci-gate-core`, Maven and Gradle plugins | `arete-cli`, arete-maven-plugin, arete-gradle-plugin | The HTTP client to a service is retired. The Maven and Gradle plugins and the CLI call the engine in-process. |
 | `arete-app` | `arete-server` | Spring depends on `arete-engine`. Local developer UI: view and score specs, fix findings before commit. |
 

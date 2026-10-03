@@ -49,29 +49,6 @@
             <input type="text" name="name" placeholder="new namespace name…" maxlength="100" required>
             <button type="submit">Create</button>
         </form>
-
-        <h3>Validator plugins</h3>
-        <p th:if="${pluginRows.isEmpty()}" class="muted">
-            No scoring engine is available on the classpath.
-        </p>
-        <table class="plugin-settings" th:if="${!pluginRows.isEmpty()}">
-            <thead>
-                <tr><th>Plugin</th><th>ID</th><th>Status</th></tr>
-            </thead>
-            <tbody>
-                <tr th:each="row : ${pluginRows}">
-                    <td th:text="${row.name()}">Plugin name</td>
-                    <td><code th:text="${row.id()}">plugin-id</code></td>
-                    <td>
-                        <form method="post" th:action="@{/settings/plugins/{id}/toggle(id=${row.id()})}">
-                            <button type="submit" class="plugin-toggle-btn" th:classappend="${row.enabled()} ? ' is-enabled' : ' is-disabled'">
-                                <span th:text="${row.enabled()} ? 'Enabled' : 'Disabled'">Enabled</span>
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
     </div>
 </div>
 <script th:src="@{/js/tabs.js}" src="/js/tabs.js" defer></script>

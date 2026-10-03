@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class PolicyScoringPluginTest {
+class EngineTest {
     private static final String ACTION_PATH_SPEC = """
             openapi: 3.0.0
             info:
@@ -152,7 +152,7 @@ class PolicyScoringPluginTest {
 
     @Test
     void executesTheEnterpriseGradePolicyAndDeductsOnlyOncePerRule() {
-        PolicyScoringPlugin plugin = new PolicyScoringPlugin();
+        Engine plugin = new Engine();
         plugin.configure(Map.of());
 
         ScoringResult result = plugin.score(input(ACTION_PATH_SPEC));
@@ -177,7 +177,7 @@ class PolicyScoringPluginTest {
 
     @Test
     void returnsAFullScoreWhenNoRuleMatches() {
-        PolicyScoringPlugin plugin = new PolicyScoringPlugin();
+        Engine plugin = new Engine();
         plugin.configure(Map.of());
 
         ScoringResult result = plugin.score(input(COMPLIANT_STARTER_SPEC));
@@ -960,7 +960,7 @@ class PolicyScoringPluginTest {
 
     @Test
     void labelsErrorSeverityAsBlockerBecauseOnlyProhibitedRulesUseIt() {
-        PolicyScoringPlugin plugin = new PolicyScoringPlugin();
+        Engine plugin = new Engine();
 
         assertEquals("Blocker", plugin.getSeverityLabel(net.dublinux.arete.engine.api.Severity.ERROR));
         assertEquals("Warning", plugin.getSeverityLabel(net.dublinux.arete.engine.api.Severity.WARNING));
@@ -1106,7 +1106,7 @@ class PolicyScoringPluginTest {
     }
 
     private static void assertResource(String resource) {
-        try (InputStream stream = PolicyScoringPlugin.class.getClassLoader().getResourceAsStream(resource)) {
+        try (InputStream stream = Engine.class.getClassLoader().getResourceAsStream(resource)) {
             assertNotNull(stream, resource + " must be packaged");
         } catch (Exception e) {
             throw new AssertionError("Could not read " + resource, e);
@@ -1114,7 +1114,7 @@ class PolicyScoringPluginTest {
     }
 
     private static String readResource(String resource) {
-        try (InputStream stream = PolicyScoringPlugin.class.getClassLoader().getResourceAsStream(resource)) {
+        try (InputStream stream = Engine.class.getClassLoader().getResourceAsStream(resource)) {
             assertNotNull(stream, resource + " must be packaged");
             return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
         } catch (Exception e) {
@@ -1148,7 +1148,7 @@ class PolicyScoringPluginTest {
                 Replaces the bundled Enterprise Grade.
                 """);
 
-        PolicyScoringPlugin plugin = new PolicyScoringPlugin();
+        Engine plugin = new Engine();
         plugin.configure(Map.of("policies-dir", dir.toString()));
 
         assertTrue(plugin.getPolicies().contains("Lenient"));
@@ -1163,7 +1163,7 @@ class PolicyScoringPluginTest {
 
     @Test
     void ignoresAMissingUserPolicyDirectory() {
-        PolicyScoringPlugin plugin = new PolicyScoringPlugin();
+        Engine plugin = new Engine();
         plugin.configure(Map.of("policies-dir", "/no/such/arete/policies"));
         assertTrue(plugin.getPolicies().contains("Enterprise Grade"));
     }
@@ -1171,6 +1171,6 @@ class PolicyScoringPluginTest {
     /** Bundle pinned to the Distill runtime for tests that drive it directly. */
     private static PolicyBundle distillBundle() {
         return new PolicyBundleLoader().load(
-                new ClasspathBundleResources(PolicyScoringPluginTest.class.getClassLoader()));
+                new ClasspathBundleResources(EngineTest.class.getClassLoader()));
     }
 }

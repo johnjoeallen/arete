@@ -1,8 +1,7 @@
 package net.dublinux.arete.web;
 
 import net.dublinux.arete.domain.NamespaceEntity;
-import net.dublinux.arete.plugin.PluginRegistry;
-import net.dublinux.arete.plugin.PluginSettingsService;
+import net.dublinux.arete.engine.Engine;
 import net.dublinux.arete.plugin.PluginScoringService;
 import net.dublinux.arete.plugin.SpecPluginSettingsService;
 import net.dublinux.arete.plugin.SpecScoringResultService;
@@ -39,8 +38,7 @@ class SpecControllerNamespaceTest {
     @MockitoBean PluginScoringService pluginScoringService;
     @MockitoBean SpecFileWatcher specFileWatcher;
     @MockitoBean net.dublinux.arete.web.api.DeploymentMode deploymentMode;
-    @MockitoBean PluginRegistry pluginRegistry;
-    @MockitoBean PluginSettingsService pluginSettingsService;
+    @MockitoBean Engine engine;
     @MockitoBean SpecPluginSettingsService specPluginSettingsService;
     @MockitoBean SpecScoringResultService specScoringResultService;
     @MockitoBean NamespaceService namespaceService;
@@ -48,7 +46,8 @@ class SpecControllerNamespaceTest {
     @BeforeEach
     void wire() {
         lenient().when(specFileWatcher.getSpecsHome()).thenReturn(java.nio.file.Path.of("/tmp/specs"));
-        lenient().when(pluginRegistry.getPlugins()).thenReturn(List.of());
+        lenient().when(engine.getId()).thenReturn(Engine.ID);
+        lenient().when(engine.getName()).thenReturn("Areté Policy Engine");
         lenient().when(specStorageService.findByNamespace(anyString())).thenReturn(List.of());
         lenient().when(namespaceService.resolveKey(any())).thenAnswer(inv -> {
             String k = inv.getArgument(0);

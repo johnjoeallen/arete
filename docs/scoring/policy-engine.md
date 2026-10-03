@@ -489,7 +489,7 @@ mvn -q -pl arete-engine -am package -DskipTests
 ```
 
 The bundle is part of the `arete-engine` jar; the app depends on it, so there
-is nothing to install. `PolicyScoringPluginTest` and the corpus tests load the
+is nothing to install. `EngineTest` and the corpus tests load the
 real bundle and will fail the build on any manifest, front-matter, scope,
 parameter, or rule-compile error.
 

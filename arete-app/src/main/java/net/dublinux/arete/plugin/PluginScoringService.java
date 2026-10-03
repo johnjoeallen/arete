@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import net.dublinux.arete.engine.api.SpecFormat;
 import net.dublinux.arete.engine.api.SpecInput;
-import net.dublinux.arete.engine.api.SpecScoringPlugin;
+import net.dublinux.arete.engine.Engine;
 import net.dublinux.arete.engine.api.ScoringResult;
 import net.dublinux.arete.engine.api.Diagnostic;
 
@@ -13,35 +13,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Runs a single, caller-chosen <em>enabled</em> {@link SpecScoringPlugin}
- * against a raw spec. Scoring is on-demand and single-plugin by design:
- * the host never runs anything automatically, and never aggregates more
- * than one plugin's results into a single view — the caller (the spec view
- * page's Refresh control) picks exactly one plugin and policy per run.
- * Disabled plugins are never selectable in the first place (see
- * {@link PluginRegistry}), but this still refuses to run one defensively.
+ * Runs the {@link Engine} against a raw spec. Scoring is on-demand: the
+ * application never runs anything automatically, the caller (the spec view
+ * page's Refresh control, or the automation API) picks the policy per run.
+ * A request naming any other engine id is skipped.
  */
 @Service
 public class PluginScoringService {
 
     private static final Logger log = LoggerFactory.getLogger(PluginScoringService.class);
 
-    private final PluginRegistry pluginRegistry;
-    private final PluginSettingsService pluginSettingsService;
+    private final Engine engine;
 
-    public PluginScoringService(PluginRegistry pluginRegistry, PluginSettingsService pluginSettingsService) {
-        this.pluginRegistry = pluginRegistry;
-        this.pluginSettingsService = pluginSettingsService;
+    public PluginScoringService(Engine engine) {
+        this.engine = engine;
     }
 
     /**
-     * @param pluginId the {@link SpecScoringPlugin#getId()} to run; if
+     * @param pluginId the the engine's id to run; if
      *                  it isn't loaded or isn't enabled, the result is empty
      *                  (no summaries, no diagnostics) rather than an error —
      *                  there's nothing meaningful to report about a plugin
      *                  the caller couldn't legitimately have selected
-     * @param policy   one of that plugin's {@link SpecScoringPlugin#getPolicies()}
-     *                  values, or {@link SpecScoringPlugin#DEFAULT_POLICY}
+     * @param policy   one of that plugin's the engine's policies
+     *                  values, or {@link Engine#DEFAULT_POLICY}
      */
     public AggregatedScoringResult scoreOne(String rawSpec, String pluginId, String policy) {
         if (pluginId == null || pluginId.isBlank()) {
@@ -77,12 +72,12 @@ public class PluginScoringService {
         double passingScore = Double.NaN;
 
         for (PluginRunRequest request : requests) {
-            SpecScoringPlugin plugin = findEnabled(request.pluginId());
+            Engine plugin = findEnabled(request.pluginId());
             if (plugin == null) {
                 continue;
             }
             String policy = request.policy();
-            String resolvedPolicy = policy == null || policy.isBlank() ? SpecScoringPlugin.DEFAULT_POLICY : policy;
+            String resolvedPolicy = policy == null || policy.isBlank() ? SpecInput.DEFAULT_POLICY : policy;
             SpecInput input = SpecInput.builder().content(rawSpec).format(format).policy(resolvedPolicy).build();
             ScoringResult result = runOne(plugin, input);
             summaries.add(toSummary(plugin, result));
@@ -122,19 +117,14 @@ public class PluginScoringService {
         return total;
     }
 
-    private SpecScoringPlugin findEnabled(String pluginId) {
+    private Engine findEnabled(String pluginId) {
         if (pluginId == null || pluginId.isBlank()) {
             return null;
         }
-        for (SpecScoringPlugin plugin : pluginRegistry.getPlugins()) {
-            if (plugin.getId().equals(pluginId) && pluginSettingsService.isEnabled(plugin.getId())) {
-                return plugin;
-            }
-        }
-        return null;
+        return Engine.ID.equals(pluginId) ? engine : null;
     }
 
-    private static ScoringResult runOne(SpecScoringPlugin plugin, SpecInput input) {
+    private static ScoringResult runOne(Engine plugin, SpecInput input) {
         try {
             return plugin.score(input);
         } catch (Throwable t) {
@@ -145,7 +135,7 @@ public class PluginScoringService {
         }
     }
 
-    private static ScoringSummary toSummary(SpecScoringPlugin plugin, ScoringResult result) {
+    private static ScoringSummary toSummary(Engine plugin, ScoringResult result) {
         return switch (result.getStatus()) {
             case SUCCESS -> new ScoringSummary(
                     plugin.getName(), "SUCCESS", result.getDiagnostics().size(), null);

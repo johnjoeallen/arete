@@ -7,12 +7,9 @@ import jakarta.persistence.IdClass;
 import jakarta.persistence.Table;
 
 /**
- * Per-spec override of a validator plugin's enabled/disabled state — lets
- * one spec run a narrower (or wider) set of plugins than the global default
- * in {@link PluginSettingsEntity}, e.g. only running an org-specific
- * "breaking changes" plugin against the APIs it's relevant to. Keyed by
- * ({@code specId}, {@code pluginId}); absence of a row means "no override,
- * defer to the global setting" — see {@link SpecPluginSettingsService}.
+ * Per-spec choice for the engine: whether it is selected and the policy picked.
+ * Keyed by ({@code specId}, {@code pluginId}); absence of a row means "selected,
+ * default policy" — see {@link SpecPluginSettingsService}.
  */
 @Entity
 @Table(name = "spec_plugin_settings")

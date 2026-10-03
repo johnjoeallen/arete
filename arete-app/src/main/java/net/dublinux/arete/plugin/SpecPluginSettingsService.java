@@ -4,11 +4,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Persists a per-spec override of a validator plugin's enabled/disabled
- * state. A (specId, pluginId) pair the host has never seen an override for
- * defaults to enabled, mirroring {@link PluginSettingsService}'s own
- * default — so a plugin that's on globally is also on for every spec until
- * someone explicitly unchecks it there.
+ * Persists, per spec, whether the engine is selected and which policy was
+ * chosen. A (specId, pluginId) pair with no row defaults to selected.
  */
 @Service
 public class SpecPluginSettingsService {

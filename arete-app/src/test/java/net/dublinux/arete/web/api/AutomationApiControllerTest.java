@@ -2,8 +2,6 @@ package net.dublinux.arete.web.api;
 
 import net.dublinux.arete.plugin.AggregatedScoringResult;
 import net.dublinux.arete.plugin.AttributedDiagnostic;
-import net.dublinux.arete.plugin.PluginRegistry;
-import net.dublinux.arete.plugin.PluginSettingsService;
 import net.dublinux.arete.plugin.PluginScoringService;
 import net.dublinux.arete.plugin.SpecScoringResultService;
 import net.dublinux.arete.plugin.ScoringSummary;
@@ -14,7 +12,7 @@ import net.dublinux.arete.domain.SpecEntity;
 import net.dublinux.arete.domain.SpecSource;
 import net.dublinux.arete.engine.api.Diagnostic;
 import net.dublinux.arete.engine.api.Severity;
-import net.dublinux.arete.engine.api.SpecScoringPlugin;
+import net.dublinux.arete.engine.Engine;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,8 +48,7 @@ class AutomationApiControllerTest {
     @MockitoBean SpecParserService parser;
     @MockitoBean SpecStorageService storage;
     @MockitoBean PluginScoringService scoring;
-    @MockitoBean PluginRegistry pluginRegistry;
-    @MockitoBean PluginSettingsService pluginSettings;
+    @MockitoBean Engine engine;
     @MockitoBean SpecScoringResultService results;
     @MockitoBean RemoteSpecFetcher fetcher;
     @MockitoBean DeploymentMode deploymentMode;
@@ -68,12 +65,9 @@ class AutomationApiControllerTest {
         OpenAPI openApi = new OpenAPI().info(new Info().title("Widget API").version("1.0.0"));
         lenient().when(parser.parse(anyString())).thenReturn(new ParsedSpec(openApi, List.of()));
 
-        SpecScoringPlugin plugin = org.mockito.Mockito.mock(SpecScoringPlugin.class);
-        lenient().when(plugin.getId()).thenReturn("generic-policy");
-        lenient().when(plugin.getSuggestedScoreLevel(anyString())).thenReturn(Optional.of("score<90"));
-        lenient().when(plugin.getPassingScore(anyString())).thenReturn(java.util.OptionalDouble.of(90.0));
-        lenient().when(pluginRegistry.getPlugins()).thenReturn(List.of(plugin));
-        lenient().when(pluginSettings.isEnabled("generic-policy")).thenReturn(true);
+        lenient().when(engine.getId()).thenReturn(Engine.ID);
+        lenient().when(engine.getSuggestedScoreLevel(anyString())).thenReturn(Optional.of("score<90"));
+        lenient().when(engine.getPassingScore(anyString())).thenReturn(java.util.OptionalDouble.of(90.0));
 
         lenient().when(storage.saveOrReplace(eq("default"), eq("ci"), eq("Widget API"), anyString()))
                 .thenReturn(spec(1L, "default", "ci", "Widget API"));

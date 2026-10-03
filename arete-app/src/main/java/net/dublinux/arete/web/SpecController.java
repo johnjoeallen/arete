@@ -1,5 +1,6 @@
 package net.dublinux.arete.web;
 
+import net.dublinux.arete.engine.api.SpecInput;
 import net.dublinux.arete.domain.SpecEntity;
 import net.dublinux.arete.domain.SpecSource;
 import net.dublinux.arete.plugin.AggregatedScoringResult;
@@ -7,9 +8,7 @@ import net.dublinux.arete.plugin.CachedScoringResult;
 import net.dublinux.arete.plugin.ComponentFindings;
 import net.dublinux.arete.plugin.EndpointFindings;
 import net.dublinux.arete.plugin.GeneralFindings;
-import net.dublinux.arete.plugin.PluginRegistry;
 import net.dublinux.arete.plugin.PluginRunRequest;
-import net.dublinux.arete.plugin.PluginSettingsService;
 import net.dublinux.arete.plugin.PluginScoringService;
 import net.dublinux.arete.plugin.SpecPluginSettingsService;
 import net.dublinux.arete.plugin.SpecScoringResultService;
@@ -25,7 +24,7 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import net.dublinux.arete.engine.api.Severity;
-import net.dublinux.arete.engine.api.SpecScoringPlugin;
+import net.dublinux.arete.engine.Engine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -60,8 +59,7 @@ public class SpecController {
     private final SpecStorageService specStorageService;
     private final PluginScoringService pluginScoringService;
     private final SpecFileWatcher specFileWatcher;
-    private final PluginRegistry pluginRegistry;
-    private final PluginSettingsService pluginSettingsService;
+    private final Engine engine;
     private final SpecPluginSettingsService specPluginSettingsService;
     private final SpecScoringResultService specScoringResultService;
     private final net.dublinux.arete.web.api.DeploymentMode deploymentMode;
@@ -69,7 +67,7 @@ public class SpecController {
 
     public SpecController(SpecParserService specParserService, SpecStorageService specStorageService,
             PluginScoringService pluginScoringService, SpecFileWatcher specFileWatcher,
-            PluginRegistry pluginRegistry, PluginSettingsService pluginSettingsService,
+            Engine engine,
             SpecPluginSettingsService specPluginSettingsService, SpecScoringResultService specScoringResultService,
             net.dublinux.arete.web.api.DeploymentMode deploymentMode,
             net.dublinux.arete.service.NamespaceService namespaceService) {
@@ -77,8 +75,7 @@ public class SpecController {
         this.specStorageService = specStorageService;
         this.pluginScoringService = pluginScoringService;
         this.specFileWatcher = specFileWatcher;
-        this.pluginRegistry = pluginRegistry;
-        this.pluginSettingsService = pluginSettingsService;
+        this.engine = engine;
         this.specPluginSettingsService = specPluginSettingsService;
         this.specScoringResultService = specScoringResultService;
         this.deploymentMode = deploymentMode;
@@ -253,10 +250,7 @@ public class SpecController {
         long id = entity.getId();
         Set<String> checkedPluginIds = plugin == null ? Set.of() : Set.copyOf(plugin);
         List<PluginRunRequest> requests = new ArrayList<>();
-        for (SpecScoringPlugin candidate : pluginRegistry.getPlugins()) {
-            if (!pluginSettingsService.isEnabled(candidate.getId())) {
-                continue;
-            }
+        for (Engine candidate : List.of(engine)) {
             boolean enabledForSpec = checkedPluginIds.contains(candidate.getId());
             String submitted = allParams.get("policy_" + candidate.getId());
             String policyName = resolvePolicy(candidate.getId(), submitted);
@@ -278,7 +272,7 @@ public class SpecController {
 
     /** The position of {@code policyName} in its plugin's policies, or null if unknown — for the persisted picker choice. */
     private Integer policyIndex(String pluginId, String policyName) {
-        SpecScoringPlugin plugin = findEnabledPlugin(pluginId);
+        Engine plugin = findEnabledPlugin(pluginId);
         if (plugin == null) {
             return null;
         }
@@ -444,10 +438,7 @@ public class SpecController {
      */
     private List<SpecPluginRunChoice> pluginChoices(Long specId, Map<String, String> ignored) {
         List<SpecPluginRunChoice> choices = new ArrayList<>();
-        for (SpecScoringPlugin plugin : pluginRegistry.getPlugins()) {
-            if (!pluginSettingsService.isEnabled(plugin.getId())) {
-                continue;
-            }
+        for (Engine plugin : List.of(engine)) {
             List<String> policies = safePolicies(plugin);
             List<SpecPluginRunChoice.Policy> options = policies.stream()
                     .map(name -> new SpecPluginRunChoice.Policy(name, Policies.slug(name)))
@@ -463,44 +454,39 @@ public class SpecController {
     }
 
     /** Defensive: a plugin is untrusted, dynamically loaded code. Preserves its declared policy order. */
-    private List<String> safePolicies(SpecScoringPlugin plugin) {
+    private List<String> safePolicies(Engine plugin) {
         try {
             return List.copyOf(plugin.getPolicies());
         } catch (Throwable t) {
             log.warn("Scoring plugin '{}' threw from getPolicies(): {}", plugin.getId(), t.toString());
-            return List.of(SpecScoringPlugin.DEFAULT_POLICY);
+            return List.of(SpecInput.DEFAULT_POLICY);
         }
     }
 
     /** The picker submits {@code policy_<pluginId>} = a policy slug; map it back to the plugin's real name. */
     private String resolvePolicy(String pluginId, String slugOrName) {
-        SpecScoringPlugin plugin = findEnabledPlugin(pluginId);
+        Engine plugin = findEnabledPlugin(pluginId);
         return plugin == null
-                ? SpecScoringPlugin.DEFAULT_POLICY
+                ? SpecInput.DEFAULT_POLICY
                 : Policies.resolve(safePolicies(plugin), slugOrName);
     }
 
-    private SpecScoringPlugin findEnabledPlugin(String pluginId) {
-        for (SpecScoringPlugin plugin : pluginRegistry.getPlugins()) {
-            if (plugin.getId().equals(pluginId) && pluginSettingsService.isEnabled(plugin.getId())) {
-                return plugin;
-            }
-        }
-        return null;
+    private Engine findEnabledPlugin(String pluginId) {
+        return Engine.ID.equals(pluginId) ? engine : null;
     }
 
     /**
      * Display text for each of the four {@link Severity} levels. With
      * exactly one active plugin, uses that plugin's own vocabulary (e.g.
      * zally-core's Must/Should/May/Hint) — see {@link
-     * SpecScoringPlugin#getSeverityLabel}. With zero or several active
+     * Engine#getSeverityLabel}. With zero or several active
      * plugins there's no single vocabulary to prefer (two plugins may label
      * the same {@link Severity} differently), so this falls back to the
      * SPI's own default labels, same as for an absent/unknown/disabled
      * plugin or one that throws.
      */
     private Map<String, String> severityLabelsOf(List<String> activePluginIds) {
-        SpecScoringPlugin plugin = activePluginIds.size() == 1 ? findEnabledPlugin(activePluginIds.get(0)) : null;
+        Engine plugin = activePluginIds.size() == 1 ? findEnabledPlugin(activePluginIds.get(0)) : null;
         Map<String, String> labels = new LinkedHashMap<>();
         for (Severity severity : Severity.values()) {
             labels.put(severity.name(), safeSeverityLabel(plugin, severity));
@@ -515,7 +501,7 @@ public class SpecController {
         return impact;
     }
 
-    private String safeSeverityLabel(SpecScoringPlugin plugin, Severity severity) {
+    private String safeSeverityLabel(Engine plugin, Severity severity) {
         if (plugin != null) {
             try {
                 return plugin.getSeverityLabel(severity);

@@ -5,13 +5,9 @@ import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.parser.util.DeserializationUtils;
 import net.dublinux.arete.engine.api.Severity;
-import net.dublinux.arete.engine.api.SpecFormat;
 import net.dublinux.arete.engine.api.SpecInput;
-import net.dublinux.arete.engine.api.SpecScoringPlugin;
-import net.dublinux.arete.engine.api.MatcherTestProvider;
 import net.dublinux.arete.engine.api.MatcherTestRequest;
 import net.dublinux.arete.engine.api.RuleDocumentation;
-import net.dublinux.arete.engine.api.RuleDocumentationProvider;
 import net.dublinux.arete.engine.api.ScoringResult;
 
 import java.io.IOException;
@@ -21,22 +17,29 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.LinkedHashMap;
 import java.util.Optional;
 import java.util.Set;
 
-/** First working implementation of the bundled generic policy engine. */
-public final class PolicyScoringPlugin implements SpecScoringPlugin, RuleDocumentationProvider, MatcherTestProvider {
+/**
+ * The Areté engine: loads a policy bundle, scores a spec against one of its policies, and answers the
+ * questions a front end asks about the bundle (its policies, rule documentation, a matcher test run).
+ *
+ * <p>Create one, call {@link #configure(Map)} once, then share it: scoring is thread-safe once configured.
+ * It is not final so a test can stand in for it.
+ */
+public class Engine {
+    /** Identifier the application and the automation API use for this engine. */
+    public static final String ID = "generic-policy";
+
     private static final String DOCUMENTATION_BASE_URL = "http://localhost:6809/plugins/generic-policy/rules/";
     private static final int MAX_YAML_CODE_POINTS = 50 * 1024 * 1024;
-    private static final System.Logger LOG = System.getLogger(PolicyScoringPlugin.class.getName());
+    private static final System.Logger LOG = System.getLogger(Engine.class.getName());
 
     static {
-        // The plugin has its own classloader, so the host application's
-        // swagger-parser YAML configuration does not reach this parser.
+        // Parse large specs: raise swagger-parser's YAML size limit for every Engine in this JVM.
         DeserializationUtils.getOptions().setMaxYamlCodePoints(MAX_YAML_CODE_POINTS);
     }
 
@@ -44,31 +47,28 @@ public final class PolicyScoringPlugin implements SpecScoringPlugin, RuleDocumen
     private final PolicyBundleLoader bundleLoader = new PolicyBundleLoader();
     private final DistillMatcherEvaluator distillRuntime = new DistillMatcherEvaluator();
 
-    @Override public String getId() { return "generic-policy"; }
-    @Override public String getName() { return "Areté Policy Engine"; }
-    @Override public String getVersion() { return "0.1.0-SNAPSHOT"; }
+    public String getId() { return ID; }
+    public String getName() { return "Areté Policy Engine"; }
+    public String getVersion() { return "0.1.0-SNAPSHOT"; }
 
-    @Override
-    public Set<SpecFormat> getSupportedFormats() {
-        return EnumSet.of(SpecFormat.OPENAPI3, SpecFormat.SWAGGER2);
-    }
-
-    @Override
     public List<String> getPolicies() {
         return activeBundle().policies().keySet().stream().toList();
     }
 
     /**
-     * This plugin reports only {@code PROHIBITED} matches at {@code ERROR}; deductions are
+     * This engine reports only {@code PROHIBITED} matches at {@code ERROR}; deductions are
      * {@code WARNING}. Labelling ERROR "Blocker" makes the panel's severity filter show exactly
      * the rules that zero the score.
      */
-    @Override
     public String getSeverityLabel(Severity severity) {
-        return severity == Severity.ERROR ? "Blocker" : SpecScoringPlugin.super.getSeverityLabel(severity);
+        return switch (severity) {
+            case ERROR -> "Blocker";
+            case WARNING -> "Warning";
+            case INFO -> "Info";
+            case HINT -> "Hint";
+        };
     }
 
-    @Override
     public Optional<String> getSuggestedScoreLevel(String policyName) {
         Policy policy = activeBundle().policies().get(policyName);
         if (policy == null) {
@@ -81,7 +81,6 @@ public final class PolicyScoringPlugin implements SpecScoringPlugin, RuleDocumen
         return Optional.ofNullable(policy.scoreLevel());
     }
 
-    @Override
     public java.util.OptionalDouble getPassingScore(String policyName) {
         Policy policy = activeBundle().policies().get(policyName);
         return policy == null || policy.passingScore() == null
@@ -89,7 +88,6 @@ public final class PolicyScoringPlugin implements SpecScoringPlugin, RuleDocumen
                 : java.util.OptionalDouble.of(policy.passingScore());
     }
 
-    @Override
     public synchronized void configure(Map<String, String> config) {
         bundle = bundleLoader.load(new ClasspathBundleResources(getClass().getClassLoader()),
                 loadUserPolicies(config));
@@ -145,7 +143,6 @@ public final class PolicyScoringPlugin implements SpecScoringPlugin, RuleDocumen
         return options;
     }
 
-    @Override
     public ScoringResult score(SpecInput input) {
         PolicyBundle currentBundle;
         try {
@@ -208,7 +205,6 @@ public final class PolicyScoringPlugin implements SpecScoringPlugin, RuleDocumen
                 .grade(policy.gradeFor(effectiveScore)).build();
     }
 
-    @Override
     public ScoringResult testMatcher(MatcherTestRequest request) {
         try {
             SwaggerParseResult parsed = new OpenAPIV3Parser().readContents(request.spec(), null, parseOptions());
@@ -253,7 +249,6 @@ public final class PolicyScoringPlugin implements SpecScoringPlugin, RuleDocumen
         return current;
     }
 
-    @Override
     public Optional<RuleDocumentation> getRuleDocumentation(String matcherId) {
         PolicyRule rule = activeBundle().rules().get(matcherId);
         return rule == null ? Optional.empty() : Optional.of(new RuleDocumentation(rule.title(), interpolateDocumentation(rule.documentationMarkdown(), rule.parameters())));
