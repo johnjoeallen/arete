@@ -11,4 +11,4 @@ parameters:
 
 # Date-time naming rule
 
-Checks that date-time schema properties use a configured name suffix.
+Checks that date-time schema properties end in one of the configured name suffixes (the `suffix` parameter is a comma-separated list).

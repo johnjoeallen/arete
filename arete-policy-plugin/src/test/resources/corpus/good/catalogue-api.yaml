@@ -37,7 +37,7 @@ paths:
         '200':
           description: A page of products.
           content:
-            application/json:
+            application/vnd.acme.catalogue.v1+json:
               schema:
                 $ref: '#/components/schemas/ProductPage'
         '400': { $ref: '#/components/responses/InvalidInput' }
@@ -50,7 +50,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          application/vnd.acme.catalogue.v1+json:
             schema:
               $ref: '#/components/schemas/NewProduct'
       responses:
@@ -61,7 +61,7 @@ paths:
               description: URI of the new product.
               schema: { type: string, format: uri, maxLength: 2000 }
           content:
-            application/json:
+            application/vnd.acme.catalogue.v1+json:
               schema:
                 $ref: '#/components/schemas/Product'
         '400': { $ref: '#/components/responses/InvalidInput' }
@@ -78,7 +78,7 @@ paths:
         '200':
           description: The product.
           content:
-            application/json:
+            application/vnd.acme.catalogue.v1+json:
               schema:
                 $ref: '#/components/schemas/Product'
         '401': { $ref: '#/components/responses/Unauthorised' }
@@ -91,14 +91,14 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          application/vnd.acme.catalogue.v1+json:
             schema:
               $ref: '#/components/schemas/NewProduct'
       responses:
         '200':
           description: The replaced product.
           content:
-            application/json:
+            application/vnd.acme.catalogue.v1+json:
               schema:
                 $ref: '#/components/schemas/Product'
         '400': { $ref: '#/components/responses/InvalidInput' }
@@ -129,7 +129,7 @@ paths:
         '200':
           description: A page of categories.
           content:
-            application/json:
+            application/vnd.acme.catalogue.v1+json:
               schema:
                 $ref: '#/components/schemas/CategoryPage'
         '401': { $ref: '#/components/responses/Unauthorised' }

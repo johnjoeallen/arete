@@ -33,9 +33,10 @@ A rule with a `pending.txt` is a known gap, not a passing test. Today:
 `WholeApiCorpusTest` scores each spec under every bundled policy.
 
 - `good/<name>.yaml|json` is an API a reviewer would accept. It must report nothing, except the rules
-  listed in `<name>.allowed` (a rule id, then the reason). Every allowed rule must still fire, so the
-  list cannot go stale. The current exceptions are genuine conflicts inside a policy: `JSON011` against
-  `CASE001` for any timestamp, and `VERSION004` against `VERSION001`-`003` in Enterprise Grade.
+  listed in an optional `<name>.allowed` file (a rule id, then the reason). Every allowed rule must still
+  fire, so the list cannot go stale. No good spec needs one today: the two rule conflicts the first
+  specs exposed (`JSON011` against `CASE001`, and `VERSION004` against `VERSION001`-`003`) are fixed in
+  the bundle, so a new `.allowed` entry is a finding to look at, not a habit.
 - `messy/<name>.yaml` is an API with many problems. Findings and score under each policy are recorded in
   `<name>.snapshot`; a change shows as a diff to review. `deeply-nested` exercises references, nesting,
   composition and cycles.

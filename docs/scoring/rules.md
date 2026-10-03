@@ -269,5 +269,5 @@ There are **157 rules** across **20 categories**, built on
 |---|---|---|---|---|---|
 | `VERSION001` | Version appears in the URI | `versioning` | 0.5 | 0.5 | 0.5 |
 | `VERSION002` | Version appears in a header | `versioning` | 0.5 |  |  |
-| `VERSION003` | Version appears in the media type | `versioning` | 0.5 |  |  |
+| `VERSION003` | Version appears in the media type | `versioning` |  |  |  |
 | `VERSION004` | Interface is unversioned | `versioning` | 0.5 |  |  |

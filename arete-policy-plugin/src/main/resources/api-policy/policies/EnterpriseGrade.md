@@ -70,7 +70,6 @@ rules:
   BULK003: 0.5
   VERSION001: 0.5
   VERSION002: 0.5
-  VERSION003: 0.5
   VERSION004: 0.5
   COMPAT001: 0.5
   COMPAT002: 0.5
@@ -139,3 +138,10 @@ Each matched rule deducts half a point once, regardless of how many diagnostics
 it reports — a deliberately simple, uniform baseline. Organisations should
 publish their own policy with calibrated deductions and `PROHIBITED`
 dispositions rather than relying on this one unchanged.
+
+Versioning: the policy requires a version (`VERSION004`) and says where it may
+live. It forbids a version in the URI (`VERSION001`) and in a header
+(`VERSION002`), and leaves the media type (`VERSION003` is not enabled) as the
+one accepted place, for example `application/vnd.acme.orders.v1+json`. Enabling
+all four would make every API fail one of them, since any location is flagged
+and no location is flagged as unversioned.

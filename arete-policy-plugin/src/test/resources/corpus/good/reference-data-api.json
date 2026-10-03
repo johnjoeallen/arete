@@ -34,7 +34,7 @@
         "responses": {
           "200": {
             "description": "A page of countries.",
-            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CountryPage" } } }
+            "content": { "application/vnd.acme.reference-data.v1+json": { "schema": { "$ref": "#/components/schemas/CountryPage" } } }
           },
           "401": {
             "description": "Authentication is required.",
@@ -65,7 +65,7 @@
         "responses": {
           "200": {
             "description": "A page of currencies.",
-            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CurrencyPage" } } }
+            "content": { "application/vnd.acme.reference-data.v1+json": { "schema": { "$ref": "#/components/schemas/CurrencyPage" } } }
           },
           "401": {
             "description": "Authentication is required.",

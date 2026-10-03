@@ -17,7 +17,7 @@ effectiveScore = 0 if any PROHIBITED rule matched, else qualityScore
 
 The default policy: it enables every generally-applicable bundled rule, with a few rule parameters calibrated for a typical enterprise API (allow-listed proprietary headers, expected OAuth2 scopes, standard rate-limit headers).
 
-- **111** rules active
+- **110** rules active
 - passing score: **90** (the [automation API](../automation-api.md) fails below this unless overridden)
 - grades: A ≥ 95, B ≥ 90, C ≥ 80, D ≥ 70, else F
 
@@ -29,7 +29,7 @@ Parameter overrides:
 | `STANDARD008` | `allowed` = `X-Request-Id,X-Correlation-Id,X-Trace-Id` |
 | `STATUS007` | `headers` = `RateLimit-Limit,RateLimit-Remaining` |
 
-??? example "All 111 rules in Enterprise Grade"
+??? example "All 110 rules in Enterprise Grade"
 
     | Rule | Disposition | Title |
     |---|---|---|
@@ -90,7 +90,6 @@ Parameter overrides:
     | `BULK003` | −0.5 | Bulk mutation uses search criteria in PUT |
     | `VERSION001` | −0.5 | Version appears in the URI |
     | `VERSION002` | −0.5 | Version appears in a header |
-    | `VERSION003` | −0.5 | Version appears in the media type |
     | `VERSION004` | −0.5 | Interface is unversioned |
     | `COMPAT001` | −0.5 | Existing service or interface is removed |
     | `COMPAT002` | −0.5 | Existing field is removed |

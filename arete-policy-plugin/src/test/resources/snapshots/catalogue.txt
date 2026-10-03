@@ -137,9 +137,8 @@
   /components/schemas/CreateOrderRequest/properties/id  |  id  |  Common field has an inconsistent type or format
 
 ## JSON011  (date-time-name / property)
-  /components/schemas/CreateOrderRequest/properties/expiresAt  |  expiresAt  |  Date-time property name does not end with _at
-  /components/schemas/CreateOrderRequest/properties/startTime  |  startTime  |  Date-time property name does not end with _at
-  /components/schemas/order_response/properties/modified  |  modified  |  Date-time property name does not end with _at
+  /components/schemas/CreateOrderRequest/properties/startTime  |  startTime  |  Date-time property name does not end with one of: _at,At
+  /components/schemas/order_response/properties/modified  |  modified  |  Date-time property name does not end with one of: _at,At
 
 ## JSON012  (schema / property)
   /components/schemas/CreateOrderRequest/properties/id  |  id  |  Numeric property does not declare a format

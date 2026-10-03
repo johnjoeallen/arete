@@ -76,9 +76,9 @@ final class JavaMatchers {
         for (Map<String, Object> schema : list(api, "schemas")) {
             for (Map<String, Object> property : list(schema, "properties")) {
                 if ("string".equals(property.get("type")) && "date-time".equals(property.get("format"))
-                        && !String.valueOf(property.get("name")).endsWith(suffix)) {
+                        && java.util.Arrays.stream(suffix.split(",")).noneMatch(s -> String.valueOf(property.get("name")).endsWith(s.trim()))) {
                     out.add(new Diagnostic(str(property.get("pointer")), str(property.get("name")),
-                            "Date-time property name does not end with " + suffix));
+                            "Date-time property name does not end with one of: " + suffix));
                 }
             }
         }

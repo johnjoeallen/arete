@@ -1,1 +1,1 @@
-/components/schemas/Thing/properties/created  |  Date-time property name does not end with _at
+/components/schemas/Thing/properties/created  |  Date-time property name does not end with one of: _at,At

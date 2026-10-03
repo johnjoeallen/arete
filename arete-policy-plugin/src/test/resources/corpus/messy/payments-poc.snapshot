@@ -1,6 +1,6 @@
 # findings and score by policy; regenerate with -Dcorpus.update=true
 
-## Enterprise Grade  score=78.0  grade=D+  findings=78
+## Enterprise Grade  score=78.5  grade=D+  findings=77
   DOC006  /info  |  API metadata is missing contact email
   DOC006  /info  |  API metadata is missing semantic version
   DOC007  /  |  API metadata is missing x-api-id
@@ -78,7 +78,6 @@
   UPDATE001  /paths/~1v1~1payments~1{paymentId}~1refund/put  |  PUT appears to perform a partial update
   VERSION001  /paths/~1v1~1payments  |  Interface version is exposed through uri
   VERSION001  /paths/~1v1~1payments~1{paymentId}~1refund  |  Interface version is exposed through uri
-  VERSION003  /paths/~1v1~1payments  |  Interface version is exposed through media-type
 
 ## Zalando  score=91.0  grade=A-  findings=33
   DOC006  /info  |  API metadata is missing contact email
