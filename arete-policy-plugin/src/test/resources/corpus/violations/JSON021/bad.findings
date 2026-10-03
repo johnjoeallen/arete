@@ -1,0 +1,1 @@
+/components/schemas/Thing/properties/quantity  |  Numeric property does not declare both a minimum and a maximum

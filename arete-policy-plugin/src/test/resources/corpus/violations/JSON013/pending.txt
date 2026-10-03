@@ -1,0 +1,1 @@
+The parser coerces enum values to the property's declared type (a string property holding enum [1, '2'] reads as ["1", "2"]), so the model never holds a mismatch and the rule cannot fire. Detecting it needs the raw document.

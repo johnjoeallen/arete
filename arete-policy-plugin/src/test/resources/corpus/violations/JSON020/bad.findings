@@ -1,0 +1,2 @@
+/components/schemas/Thing/properties/age  |  Example exceeds maximum 120.0
+/components/schemas/Thing/properties/countryCode  |  Example does not match pattern ^[A-Z]{2}$

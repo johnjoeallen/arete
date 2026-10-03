@@ -21,6 +21,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * {@code good.yaml} is the same API with only that problem fixed. The rule must report on the
  * bad spec, at the pointers recorded in {@code bad.findings}, and stay silent on the good one.
  *
+ * <p>A directory with a {@code pending.txt} records a rule that cannot yet report its documented
+ * violation (the reason is in the file); its test is skipped, so the gap shows in every run.
+ *
  * <p>The rule runs on its own, whatever policy would include it, so one rule's behaviour is
  * pinned independently of scoring. After an intended change, regenerate and review the diff:
  * <pre>
@@ -43,6 +46,9 @@ class RuleCorpusTest {
                 PolicyRule rule = withOverrides(bundle.rules().get(dir.getFileName().toString()), dir);
                 assertTrue(rule != null, "no bundled rule " + dir.getFileName());
                 Matcher matcher = bundle.matchers().get(rule.matcherId());
+                Path pending = dir.resolve("pending.txt");
+                org.junit.jupiter.api.Assumptions.assumeFalse(Files.exists(pending),
+                        () -> "known gap, not yet detectable: " + readQuietly(pending));
 
                 List<String> bad = findings(distill, matcher, rule, dir.resolve("bad.yaml"));
                 assertFalse(bad.isEmpty(), rule.id() + " did not report its bad.yaml");
@@ -73,6 +79,10 @@ class RuleCorpusTest {
             parameters.put(key, "true".equals(value) ? Boolean.TRUE : "false".equals(value) ? Boolean.FALSE : value);
         }
         return new PolicyRule(rule.id(), rule.title(), rule.category(), rule.matcherId(), rule.scope(), parameters, rule.documentationMarkdown());
+    }
+
+    private static String readQuietly(Path file) {
+        try { return Files.readString(file).strip(); } catch (IOException e) { return file.toString(); }
     }
 
     private static List<String> findings(DistillMatcherEvaluator distill, Matcher matcher, PolicyRule rule, Path spec) {

@@ -1,0 +1,3 @@
+/components/schemas/Thing/properties/123status  |  Name contains unsupported characters
+/components/schemas/Thing/properties/customer.email  |  Name contains unsupported characters
+/components/schemas/Thing/properties/display name  |  Name contains unsupported characters
