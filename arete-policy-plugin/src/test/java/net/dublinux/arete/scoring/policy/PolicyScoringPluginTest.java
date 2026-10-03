@@ -159,7 +159,7 @@ class PolicyScoringPluginTest {
 
         assertEquals(ScoringResult.Status.SUCCESS, result.getStatus());
         assertEquals(111, result.getRulesEvaluatedCount());
-        assertEquals(32, result.getDiagnostics().size());
+        assertEquals(31, result.getDiagnostics().size());
         assertEquals("REST001", result.getDiagnostics().get(0).getRuleId());
         assertEquals(2, result.getDiagnostics().stream().filter(diagnostic -> diagnostic.getRuleId().equals("REST001")).count());
         assertEquals(92.5, result.getOverallScore());
@@ -184,7 +184,7 @@ class PolicyScoringPluginTest {
 
         assertEquals(ScoringResult.Status.SUCCESS, result.getStatus());
         assertEquals(111, result.getRulesEvaluatedCount());
-        assertEquals(19, result.getDiagnostics().size());
+        assertEquals(18, result.getDiagnostics().size());
         assertEquals("DOC006", result.getDiagnostics().get(0).getRuleId());
         assertEquals(94.5, result.getOverallScore());
     }

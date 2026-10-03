@@ -1,0 +1,7 @@
+openapi: 3.0.0
+info: { title: Corpus, version: 1.0.0, description: Corpus example. }
+paths:
+  /customers:
+    get:
+      summary: This is an unnecessarily long operation summary that should be shortened and moved into the operation description when it contains extensive explanation, caveats, examples, or workflow guidance for readers.
+      responses: { '200': { description: OK } }

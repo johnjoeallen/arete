@@ -11,6 +11,6 @@
         if (!(info[key] instanceof String) || info[key].trim().isEmpty()) missing << label
     }
     def version = info.version
-    if (!(version instanceof String) || !(version ==~ /0|[1-9][0-9]*\\.[0-9]+\\.[0-9]+(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?/)) missing << 'semantic version'
+    if (!(version instanceof String) || !(version ==~ /0|[1-9][0-9]*\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?/)) missing << 'semantic version'
     missing.collect { field -> [pointer: '/info', path: 'API', message: 'API metadata is missing ' + field] }
 }

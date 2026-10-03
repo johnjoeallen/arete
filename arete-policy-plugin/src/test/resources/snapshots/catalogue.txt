@@ -27,7 +27,6 @@
   /info  |  API  |  API metadata is missing contact email
   /info  |  API  |  API metadata is missing contact name
   /info  |  API  |  API metadata is missing description
-  /info  |  API  |  API metadata is missing semantic version
 
 ## DOC007  (metadata / api)
   /  |  API  |  API metadata is missing x-api-id
