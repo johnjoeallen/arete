@@ -23,4 +23,3 @@ A rule with a `pending.txt` is a known gap, not a passing test. Today:
 
 - `COMPAT001`–`COMPAT006` compare against a baseline spec, which the engine does not take yet.
 - `HTTP008` and `UPDATE003` are deliberately inert (a no-op vocabulary, and a manual-review rule).
-- `JSON013` cannot fire because the parser coerces enum values to the property's type.

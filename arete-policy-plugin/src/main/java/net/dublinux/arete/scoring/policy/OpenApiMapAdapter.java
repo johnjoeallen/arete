@@ -11,6 +11,10 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 
+import org.yaml.snakeyaml.LoaderOptions;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -55,7 +59,60 @@ final class OpenApiMapAdapter {
         }
         lint.put("refs", refs);
         result.put("lint", lint);
+        restoreEnumValueTypes(result, rawContent);
         return result;
+    }
+
+    /**
+     * The parser converts every enum value to the property's declared type (a string property holding
+     * {@code [1, '2']} reads as {@code ["1", "2"]}), so a value of the wrong type is gone before a rule
+     * sees it. Where the document can be read as written, enum values are restored from it, keeping
+     * their own types; anything unreadable keeps the parser's values.
+     */
+    @SuppressWarnings("unchecked")
+    private static void restoreEnumValueTypes(Map<String, Object> model, String rawContent) {
+        if (rawContent == null || rawContent.isBlank()) return;
+        Object document;
+        try {
+            LoaderOptions options = new LoaderOptions();
+            options.setMaxAliasesForCollections(50);
+            document = new Yaml(new SafeConstructor(options)).load(rawContent);
+        } catch (RuntimeException e) {
+            return;
+        }
+        if (!(document instanceof Map<?, ?>)) return;
+        for (Object property : (List<Object>) model.get("schemaProperties")) {
+            Map<String, Object> map = (Map<String, Object>) property;
+            if (!(map.get("pointer") instanceof String pointer) || !Boolean.TRUE.equals(map.get("enumPresent"))) continue;
+            Object node = at(document, pointer);
+            if (node instanceof Map<?, ?> schema && schema.get("enum") instanceof List<?> values) {
+                List<Object> written = new ArrayList<>();
+                for (Object value : values) written.add(rawScalar(value));
+                map.put("enumValues", written);
+            }
+        }
+    }
+
+    /** The node a JSON Pointer names in a document read as plain maps and lists, or null. */
+    private static Object at(Object document, String pointer) {
+        Object node = document;
+        for (String token : pointer.substring(pointer.startsWith("/") ? 1 : 0).split("/")) {
+            String key = token.replace("~1", "/").replace("~0", "~");
+            if (node instanceof Map<?, ?> map) node = map.get(key);
+            else if (node instanceof List<?> list) {
+                try { node = list.get(Integer.parseInt(key)); } catch (RuntimeException e) { return null; }
+            } else return null;
+            if (node == null) return null;
+        }
+        return node;
+    }
+
+    /** Scalars as rules see them: integers as Long, other numbers as Double, dates as their text. */
+    private static Object rawScalar(Object value) {
+        if (value instanceof Integer || value instanceof Long || value instanceof java.math.BigInteger) return ((Number) value).longValue();
+        if (value instanceof Number number) return number.doubleValue();
+        if (value instanceof java.util.Date date) return date.toInstant().toString();
+        return value;
     }
 
     static Map<String, Object> toMap(OpenAPI openApi) {
