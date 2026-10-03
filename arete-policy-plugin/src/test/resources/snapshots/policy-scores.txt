@@ -2,7 +2,7 @@
 # regenerate: mvn -pl arete-policy-plugin test -Dtest=PolicySnapshotTest -Dsnapshot.update=true
 
 ## Enterprise Grade
-  catalogue    status=SUCCESS  score=79.5   noBlockers=79.5   grade=D+   findings=102
+  catalogue    status=SUCCESS  score=79.5   noBlockers=79.5   grade=D+   findings=103
   lint         status=SUCCESS  score=91.5   noBlockers=91.5   grade=B-   findings=20
   house-style  status=SUCCESS  score=87     noBlockers=87     grade=C+   findings=33
   schema       status=SUCCESS  score=87     noBlockers=87     grade=C+   findings=47
@@ -16,7 +16,7 @@
   ops          status=SUCCESS  score=94.5   noBlockers=94.5   grade=A    findings=23
 
 ## Zalando Extended
-  catalogue    status=SUCCESS  score=87     noBlockers=87     grade=B+   findings=63
+  catalogue    status=SUCCESS  score=87     noBlockers=87     grade=B+   findings=65
   lint         status=SUCCESS  score=94.5   noBlockers=94.5   grade=A    findings=14
   house-style  status=SUCCESS  score=92     noBlockers=92     grade=A-   findings=20
   schema       status=SUCCESS  score=91     noBlockers=91     grade=A-   findings=26

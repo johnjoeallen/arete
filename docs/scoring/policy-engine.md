@@ -240,6 +240,29 @@ every `description` / `summary` in the document; `api.lint.refs` is every
 carry an `itemsPresent` flag. JSON Pointers are pre-escaped and safe to return
 verbatim as `pointer`.
 
+**`$ref` is transparent.** A same-document `$ref` to a component request body,
+response, header, parameter or schema reads like the thing it names, through
+chains of references, so a spec that defines something once under `components`
+scores the same as one that writes it inline. A property that is a `$ref` carries
+the type, format, constraints, enum and description of the schema it names (its
+own `description` and `example` win), plus the raw `ref` it was written as. A
+cycle, a chain longer than 32 links, or a target that does not exist stops at the
+stub and is listed in `api.refProblems` as `{ref, reason}` with reason `cycle`,
+`chain-too-long` or `missing`; it is never dropped silently.
+
+**Nested schemas are visible.** A schema's `properties` list holds its direct
+properties first, then those below them: properties of inline objects nested
+under a property, of `items`, of `additionalProperties` and of inline `allOf` /
+`anyOf` / `oneOf` members. Each entry carries its own `pointer` at the place it
+is declared and a `depth` counting property hops (composition members, `items`
+and `additionalProperties` add none). A referenced schema is not entered; it is
+a component and reports at its own definition, once, however many properties
+use it. Each schema also carries `nestingDepth`, the longest chain of property
+hops below it through `$ref`s (a scalar is 0, an object of scalars 1); a
+recursive schema stops where it recurs. `api.schemaProperties` also lists the
+properties of schemas written inline in a request body or response, and of
+those in component request bodies and responses.
+
 `api.operations`, `api.responses`, and `api.schemaProperties` are flat
 convenience views: every `operationDetails` entry across all paths, every
 response across all operations, and every property across all schemas, in one
