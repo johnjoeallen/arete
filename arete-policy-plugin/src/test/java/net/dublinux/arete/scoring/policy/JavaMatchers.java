@@ -55,7 +55,7 @@ final class JavaMatchers {
 
     // --- matchers -------------------------------------------------------
 
-    private static final Pattern LOWER_HYPHEN = Pattern.compile("[a-z0-9]+(?:-[a-z0-9]+)*");
+    private static final Pattern LOWER_HYPHEN = Pattern.compile("[a-z0-9]+(?:-[a-z0-9]+)*(?:\\.[a-z0-9]+(?:-[a-z0-9]+)*)*");
 
     /** api.servers whose host is not lowercase-hyphenated. */
     private static List<Diagnostic> hostname(Map<String, Object> api, Map<String, Object> rule) {

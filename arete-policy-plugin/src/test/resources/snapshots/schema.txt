@@ -124,7 +124,7 @@
   /components/schemas/Widget/properties/ratio  |  ratio  |  Numeric property does not declare a format
 
 ## JSON013  (schema / property)
-  (no findings)
+  /components/schemas/Widget/properties/status  |  status  |  Enum value type is inconsistent with the property type
 
 ## JSON014  (schema / property)
   /components/schemas/Widget/properties/status  |  status  |  Enum is not marked extensible

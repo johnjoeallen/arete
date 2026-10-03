@@ -1,0 +1,2 @@
+/paths/~1customers~1{customerId}/get  |  Path parameter 'id' has no matching {placeholder} in the path template
+/paths/~1customers~1{customerId}/get  |  Path template placeholder '{customerId}' has no matching path parameter

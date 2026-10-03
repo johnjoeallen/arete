@@ -1,0 +1,7 @@
+openapi: 3.0.0
+info: { title: Corpus, version: 1.0.0, description: Corpus example. }
+paths:
+  /customers/{customer_id}/bulk:
+    put:
+      summary: Bulk create customers
+      responses: { '200': { description: Created } }

@@ -1,0 +1,10 @@
+openapi: 3.0.0
+info: { title: Corpus, version: 1.0.0, description: Corpus example. }
+paths:
+  /orders:
+    get:
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string, enum: [open, closed] }
+      responses: { '200': { description: OK } }

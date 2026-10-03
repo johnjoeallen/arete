@@ -341,7 +341,15 @@ class DistillGroovyParityTest {
     }
 
     @Test void hostnameConvention() {
-        assertParity("hostname", "api", Map.of("convention", "lowercase-hyphenated"), true);
+        assertParity("hostname", "api", Map.of("convention", "lowercase-hyphenated"), true, """
+                openapi: 3.0.0
+                info: { title: Hosts, version: 1.0.0 }
+                servers:
+                  - url: https://Customer_API.example.com/v1
+                  - url: https://customer-api.example.com/v1
+                  - url: https://localhost:8080/v1
+                paths: {}
+                """);
     }
 
     @Test void serverUrlInternalHost() {

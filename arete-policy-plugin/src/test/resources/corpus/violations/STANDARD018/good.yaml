@@ -1,0 +1,6 @@
+openapi: 3.0.0
+info: { title: Corpus, version: 1.0.0, description: Corpus example., x-api-id: 11111111-2222-3333-4444-555555555555, x-audience: external-public }
+paths:
+  /customers:
+    get:
+      responses: { '200': { description: OK } }

@@ -1,0 +1,12 @@
+openapi: 3.0.0
+info: { title: Corpus, version: 1.0.0, description: Corpus example. }
+paths:
+  /customers:
+    post:
+      responses:
+        '201':
+          description: Customer created
+          headers:
+            Location:
+              description: URI of the newly created customer
+              schema: { type: string, format: uri }

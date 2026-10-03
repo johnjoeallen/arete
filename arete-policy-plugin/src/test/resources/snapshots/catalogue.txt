@@ -27,7 +27,6 @@
   /info  |  API  |  API metadata is missing contact email
   /info  |  API  |  API metadata is missing contact name
   /info  |  API  |  API metadata is missing description
-  /info  |  API  |  API metadata is missing semantic version
 
 ## DOC007  (metadata / api)
   /  |  API  |  API metadata is missing x-api-id
@@ -39,7 +38,7 @@
   /paths/~1bulk-create~1orders~1{batchId}/post  |  POST /bulk-create/orders/{batchId}  |  Operation summary is not action-oriented
 
 ## STANDARD001  (hostname / api)
-  /servers  |  https://api.example.com/v1  |  Server hostname is not lowercase hyphenated
+  (no findings)
 
 ## STANDARD002  (resource-path / path)
   (no findings)
@@ -446,6 +445,7 @@
   (no findings)
 
 ## DOC013  (documentation-completeness / property)
+  /components/schemas/Composed/allOf/1/properties/extra  |  Composed.extra  |  Composed.extra has no description or example
   /components/schemas/CreateOrderRequest/properties/created  |  CreateOrderRequest.created  |  CreateOrderRequest.created has no description or example
   /components/schemas/CreateOrderRequest/properties/expiresAt  |  CreateOrderRequest.expiresAt  |  CreateOrderRequest.expiresAt has no description or example
   /components/schemas/CreateOrderRequest/properties/id  |  CreateOrderRequest.id  |  CreateOrderRequest.id has no description or example
@@ -499,11 +499,13 @@
   /components/schemas/CreateOrderRequest/properties/id  |  id  |  Numeric property does not declare both a minimum and a maximum
 
 ## JSON022  (schema / property)
+  /components/schemas/Composed/allOf/1/properties/extra  |  extra  |  String property does not declare a maximum length
   /components/schemas/CreateOrderRequest/properties/created  |  created  |  String property does not declare a maximum length
   /components/schemas/CreateOrderRequest/properties/expiresAt  |  expiresAt  |  String property does not declare a maximum length
   /components/schemas/CreateOrderRequest/properties/password  |  password  |  String property does not declare a maximum length
   /components/schemas/CreateOrderRequest/properties/startTime  |  startTime  |  String property does not declare a maximum length
   /components/schemas/order_response/properties/modified  |  modified  |  String property does not declare a maximum length
+  /paths/~1things~1{thingKey}/get/responses/200/content/application~1json/schema/properties/a  |  a  |  String property does not declare a maximum length
 
 ## REST007  (path-prefix / api)
   (no findings)

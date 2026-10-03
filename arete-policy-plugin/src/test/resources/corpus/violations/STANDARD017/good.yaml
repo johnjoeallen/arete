@@ -1,0 +1,12 @@
+openapi: 3.0.0
+info: { title: Corpus, version: 1.0.0, description: Corpus example. }
+paths:
+  /customers:
+    get:
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-Rate-Limit:
+              description: Requests remaining
+              schema: { type: integer }

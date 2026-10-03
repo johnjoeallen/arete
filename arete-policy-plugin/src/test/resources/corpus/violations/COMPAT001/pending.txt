@@ -1,0 +1,1 @@
+A comparison rule: it reports a change against a baseline spec, and the engine has no baseline input yet. It comes alive with the merge-gate (base and head scored together).

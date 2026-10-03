@@ -1,0 +1,7 @@
+openapi: 3.0.0
+info:
+  title: Reporting API
+  version: 1.0.0
+  description: |
+    Usage notes for the reporting API.
+paths: {}

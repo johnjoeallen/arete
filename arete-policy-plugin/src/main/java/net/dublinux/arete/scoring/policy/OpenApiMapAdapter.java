@@ -4,12 +4,23 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.headers.Header;
+import io.swagger.v3.oas.models.media.Content;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 
+import org.yaml.snakeyaml.LoaderOptions;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.SafeConstructor;
+
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,11 +59,66 @@ final class OpenApiMapAdapter {
         }
         lint.put("refs", refs);
         result.put("lint", lint);
+        restoreEnumValueTypes(result, rawContent);
         return result;
     }
 
+    /**
+     * The parser converts every enum value to the property's declared type (a string property holding
+     * {@code [1, '2']} reads as {@code ["1", "2"]}), so a value of the wrong type is gone before a rule
+     * sees it. Where the document can be read as written, enum values are restored from it, keeping
+     * their own types; anything unreadable keeps the parser's values.
+     */
+    @SuppressWarnings("unchecked")
+    private static void restoreEnumValueTypes(Map<String, Object> model, String rawContent) {
+        if (rawContent == null || rawContent.isBlank()) return;
+        Object document;
+        try {
+            LoaderOptions options = new LoaderOptions();
+            options.setMaxAliasesForCollections(50);
+            document = new Yaml(new SafeConstructor(options)).load(rawContent);
+        } catch (RuntimeException e) {
+            return;
+        }
+        if (!(document instanceof Map<?, ?>)) return;
+        for (Object property : (List<Object>) model.get("schemaProperties")) {
+            Map<String, Object> map = (Map<String, Object>) property;
+            if (!(map.get("pointer") instanceof String pointer) || !Boolean.TRUE.equals(map.get("enumPresent"))) continue;
+            Object node = at(document, pointer);
+            if (node instanceof Map<?, ?> schema && schema.get("enum") instanceof List<?> values) {
+                List<Object> written = new ArrayList<>();
+                for (Object value : values) written.add(rawScalar(value));
+                map.put("enumValues", written);
+            }
+        }
+    }
+
+    /** The node a JSON Pointer names in a document read as plain maps and lists, or null. */
+    private static Object at(Object document, String pointer) {
+        Object node = document;
+        for (String token : pointer.substring(pointer.startsWith("/") ? 1 : 0).split("/")) {
+            String key = token.replace("~1", "/").replace("~0", "~");
+            if (node instanceof Map<?, ?> map) node = map.get(key);
+            else if (node instanceof List<?> list) {
+                try { node = list.get(Integer.parseInt(key)); } catch (RuntimeException e) { return null; }
+            } else return null;
+            if (node == null) return null;
+        }
+        return node;
+    }
+
+    /** Scalars as rules see them: integers as Long, other numbers as Double, dates as their text. */
+    private static Object rawScalar(Object value) {
+        if (value instanceof Integer || value instanceof Long || value instanceof java.math.BigInteger) return ((Number) value).longValue();
+        if (value instanceof Number number) return number.doubleValue();
+        if (value instanceof java.util.Date date) return date.toInstant().toString();
+        return value;
+    }
+
     static Map<String, Object> toMap(OpenAPI openApi) {
-        Components components = openApi.getComponents();
+        Refs refs = new Refs(openApi.getComponents());
+        // Properties of schemas written inline in a request body or response, which no component owns.
+        List<Map<String, Object>> inlineProperties = new ArrayList<>();
         List<Map<String, Object>> paths = new ArrayList<>();
         if (openApi.getPaths() != null) {
             for (Map.Entry<String, PathItem> entry : openApi.getPaths().entrySet()) {
@@ -86,7 +152,10 @@ final class OpenApiMapAdapter {
                         detail.put("operationId", operation == null ? null : operation.getOperationId());
                         detail.put("tags", operation == null || operation.getTags() == null ? List.of() : List.copyOf(operation.getTags()));
                         detail.put("extensionKeys", operation == null ? List.of() : extensionKeys(operation.getExtensions()));
-                        RequestBody requestBody = operation == null ? null : resolve(operation.getRequestBody(), components);
+                        RequestBody requestBody = operation == null ? null : refs.requestBody(operation.getRequestBody());
+                        if (operation != null && operation.getRequestBody() != null && operation.getRequestBody().get$ref() == null) {
+                            collectContent(refs, operation.getRequestBody().getContent(), detail.get("pointer") + "/requestBody", inlineProperties);
+                        }
                         detail.put("requestBodyPresent", operation != null && requestBody != null);
                         detail.put("requestBodyRequired", operation != null && requestBody != null
                                 && Boolean.TRUE.equals(requestBody.getRequired()));
@@ -101,8 +170,12 @@ final class OpenApiMapAdapter {
                         }
                         List<Map<String, Object>> responses = new ArrayList<>();
                         if (operation != null && operation.getResponses() != null) {
-                            for (Map.Entry<String, ?> responseEntry : operation.getResponses().entrySet()) {
-                                Object response = resolve(responseEntry.getValue(), components);
+                            for (Map.Entry<String, ApiResponse> responseEntry : operation.getResponses().entrySet()) {
+                                Object response = refs.response(responseEntry.getValue());
+                                if (responseEntry.getValue() != null && responseEntry.getValue().get$ref() == null) {
+                                    collectContent(refs, responseEntry.getValue().getContent(),
+                                            detail.get("pointer") + "/responses/" + escape(responseEntry.getKey()), inlineProperties);
+                                }
                                 Map<String, Object> responseMap = new LinkedHashMap<>();
                                 responseMap.put("status", responseEntry.getKey());
                                 // Operation context, so api.responses elements are self-locating.
@@ -115,8 +188,9 @@ final class OpenApiMapAdapter {
                                 List<Map<String, Object>> headerDetails = new ArrayList<>();
                                 if (headers instanceof Map<?, ?> map) {
                                     for (Map.Entry<?, ?> headerEntry : map.entrySet()) {
-                                        Object schema = responseProperty(headerEntry.getValue(), "getSchema");
-                                        Object content = responseProperty(headerEntry.getValue(), "getContent");
+                                        Object header = headerEntry.getValue() instanceof Header stub ? refs.header(stub) : headerEntry.getValue();
+                                        Object schema = responseProperty(header, "getSchema");
+                                        Object content = responseProperty(header, "getContent");
                                         headerDetails.add(Map.of(
                                                 "name", String.valueOf(headerEntry.getKey()),
                                                 "schemaPresent", schema != null || content != null));
@@ -129,7 +203,7 @@ final class OpenApiMapAdapter {
                                 if (content instanceof Map<?, ?> map) {
                                     responseMediaTypes.addAll(map.keySet().stream().map(Object::toString).toList());
                                     mediaTypes.addAll(responseMediaTypes);
-                                    map.values().forEach(media -> { Object schema = responseProperty(media, "getSchema"); Object type = responseProperty(schema, "getType"); if (type != null) schemaTypes.add(type.toString()); });
+                                    map.values().forEach(media -> { Object schema = responseProperty(media, "getSchema"); if (schema instanceof Schema<?> stub) schema = refs.schema(stub); Object type = responseProperty(schema, "getType"); if (type != null) schemaTypes.add(type.toString()); });
                                 }
                                 responseMap.put("schemaTypes", schemaTypes);
                                 responseMap.put("mediaTypes", responseMediaTypes);
@@ -156,8 +230,8 @@ final class OpenApiMapAdapter {
                         detail.put("mediaTypes", mediaTypes);
                         detail.put("requestMediaTypes", requestMediaTypes);
                         List<Map<String, Object>> parameters = new ArrayList<>();
-                        addParameters(parameters, entry.getValue().getParameters(), path.get("pointer") + "/parameters");
-                        if (operation != null) addParameters(parameters, operation.getParameters(), detail.get("pointer") + "/parameters");
+                        addParameters(refs, parameters, entry.getValue().getParameters(), path.get("pointer") + "/parameters");
+                        if (operation != null) addParameters(refs, parameters, operation.getParameters(), detail.get("pointer") + "/parameters");
                         detail.put("parameters", parameters);
                         operationDetails.add(detail);
                     }
@@ -168,11 +242,14 @@ final class OpenApiMapAdapter {
         }
         List<Map<String, Object>> schemas = new ArrayList<>();
         if (openApi.getComponents() != null && openApi.getComponents().getSchemas() != null) {
+            Map<String, Integer> nestingMemo = new HashMap<>();
             for (Map.Entry<String, Schema> entry : openApi.getComponents().getSchemas().entrySet()) {
-                Schema schema = entry.getValue();
+                // An alias (a component that is only a $ref) takes the shape of its target.
+                Schema schema = entry.getValue() == null ? null : refs.schema(entry.getValue());
                 Map<String, Object> schemaMap = new LinkedHashMap<>();
                 schemaMap.put("name", entry.getKey());
-                schemaMap.put("pointer", "/components/schemas/" + entry.getKey().replace("~", "~0").replace("/", "~1"));
+                String schemaPointer = "/components/schemas/" + entry.getKey().replace("~", "~0").replace("/", "~1");
+                schemaMap.put("pointer", schemaPointer);
                 schemaMap.put("type", schema == null ? null : schema.getType());
                 schemaMap.put("array", schema != null && "array".equals(schema.getType()));
                 schemaMap.put("maxItems", schema == null ? null : schema.getMaxItems());
@@ -190,34 +267,20 @@ final class OpenApiMapAdapter {
                     for (Object propertyEntryObject : schema.getProperties().entrySet()) {
                         Map.Entry<?, ?> propertyEntry = (Map.Entry<?, ?>) propertyEntryObject;
                         if (!(propertyEntry.getKey() instanceof String propertyName) || !(propertyEntry.getValue() instanceof Schema property)) continue;
-                        Map<String, Object> propertyMap = new LinkedHashMap<>();
-                        propertyMap.put("name", propertyName);
-                        propertyMap.put("pointer", schemaMap.get("pointer") + "/properties/" + propertyName.replace("~", "~0").replace("/", "~1"));
-                        propertyMap.put("type", property.getType());
-                        propertyMap.put("array", property != null && "array".equals(property.getType()));
-                        propertyMap.put("maxItems", property.getMaxItems());
-                        propertyMap.put("format", property.getFormat());
-                        propertyMap.put("description", property.getDescription());
-                        propertyMap.put("examplePresent", property.getExample() != null);
-                        propertyMap.put("example", plainValue(property.getExample()));
-                        propertyMap.put("pattern", property.getPattern());
-                        propertyMap.put("minLength", property.getMinLength());
-                        propertyMap.put("maxLength", property.getMaxLength());
-                        propertyMap.put("minimum", property.getMinimum() == null ? null : property.getMinimum().doubleValue());
-                        propertyMap.put("maximum", property.getMaximum() == null ? null : property.getMaximum().doubleValue());
-                        propertyMap.put("exclusiveMinimum", Boolean.TRUE.equals(property.getExclusiveMinimum()));
-                        propertyMap.put("exclusiveMaximum", Boolean.TRUE.equals(property.getExclusiveMaximum()));
-                        propertyMap.put("extensionKeys", extensionKeys(property.getExtensions()));
-                        propertyMap.put("nullable", Boolean.TRUE.equals(property.getNullable()));
-                        propertyMap.put("required", schema.getRequired() != null && schema.getRequired().contains(propertyName));
-                        propertyMap.put("enumPresent", property.getEnum() != null && !property.getEnum().isEmpty());
-                        propertyMap.put("enumValues", property.getEnum() == null ? List.of() : property.getEnum());
-                        propertyMap.put("extensibleEnum", property.getExtensions() != null && property.getExtensions().containsKey("x-extensible-enum"));
-                        propertyMap.put("itemsPresent", property.getItems() != null);
-                        properties.add(propertyMap);
+                        properties.add(propertyMap(refs, propertyName, property, schema, schemaPointer + "/properties/" + escape(propertyName), 1));
                     }
                 }
+                // Rules read a schema's properties to judge every property of the API, so the list holds
+                // the direct ones first and then those the direct list would miss: properties of inline
+                // composition members, of items, and of inline objects nested below a property. Referenced
+                // schemas are not entered; each is a component and reports at its own definition.
+                Set<Object> direct = new HashSet<>();
+                for (Map<String, Object> property : properties) direct.add(property.get("pointer"));
+                List<Map<String, Object>> everything = new ArrayList<>();
+                collectProperties(refs, schema, schemaPointer, 1, everything, 0);
+                for (Map<String, Object> property : everything) if (!direct.contains(property.get("pointer"))) properties.add(property);
                 schemaMap.put("properties", properties);
+                schemaMap.put("nestingDepth", schema == null ? 0 : nesting(refs, schema, new LinkedHashSet<>(List.of("#/components/schemas/" + entry.getKey())), nestingMemo).value());
                 schemas.add(schemaMap);
             }
         }
@@ -284,6 +347,26 @@ final class OpenApiMapAdapter {
             if (props != null) schemaProperties.addAll(props);
         }
 
+        // Component request bodies and responses own their schemas at their definition, however many
+        // operations refer to them.
+        if (openApi.getComponents() != null) {
+            if (openApi.getComponents().getRequestBodies() != null) {
+                for (Map.Entry<String, RequestBody> body : openApi.getComponents().getRequestBodies().entrySet()) {
+                    if (body.getValue() != null && body.getValue().get$ref() == null) {
+                        collectContent(refs, body.getValue().getContent(), "/components/requestBodies/" + escape(body.getKey()), inlineProperties);
+                    }
+                }
+            }
+            if (openApi.getComponents().getResponses() != null) {
+                for (Map.Entry<String, ApiResponse> response : openApi.getComponents().getResponses().entrySet()) {
+                    if (response.getValue() != null && response.getValue().get$ref() == null) {
+                        collectContent(refs, response.getValue().getContent(), "/components/responses/" + escape(response.getKey()), inlineProperties);
+                    }
+                }
+            }
+        }
+        schemaProperties.addAll(inlineProperties);
+
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("paths", paths);
         result.put("operations", operations);
@@ -295,6 +378,7 @@ final class OpenApiMapAdapter {
         result.put("tags", tags);
         result.put("components", Map.of("securitySchemes", securitySchemes));
         result.put("security", openApi.getSecurity() == null ? null : securityRequirements(openApi.getSecurity()));
+        result.put("refProblems", refs.problems);
         result.put("descriptions", collectDescriptions(result));
         return result;
     }
@@ -326,10 +410,10 @@ final class OpenApiMapAdapter {
         }
     }
 
-    private static void addParameters(List<Map<String, Object>> destination, List<Parameter> source, String pointer) {
+    private static void addParameters(Refs refs, List<Map<String, Object>> destination, List<Parameter> source, String pointer) {
         if (source == null) return;
         for (int index = 0; index < source.size(); index++) {
-            Parameter parameter = source.get(index);
+            Parameter parameter = source.get(index) == null ? null : refs.parameter(source.get(index));
             if (parameter == null || parameter.getName() == null || parameter.getIn() == null) continue;
             Map<String, Object> detail = new LinkedHashMap<>();
             detail.put("name", parameter.getName());
@@ -342,7 +426,7 @@ final class OpenApiMapAdapter {
                     || (parameter.getExamples() != null && !parameter.getExamples().isEmpty())
                     || (parameter.getSchema() != null && parameter.getSchema().getExample() != null));
             detail.put("extensionKeys", extensionKeys(parameter.getExtensions()));
-            detail.put("style", parameter.getStyle());
+            detail.put("style", parameter.getStyle() == null ? null : parameter.getStyle().toString());
             detail.put("explode", parameter.getExplode());
             detail.put("schemaType", parameter.getSchema() == null ? null : parameter.getSchema().getType());
             detail.put("schemaMaximum", parameter.getSchema() == null ? null : parameter.getSchema().getMaximum());
@@ -442,23 +526,195 @@ final class OpenApiMapAdapter {
         return result;
     }
 
-    /** Follows a same-document {@code #/components/requestBodies/X} ref, which the parser leaves as a stub. */
-    private static RequestBody resolve(RequestBody body, Components components) {
-        if (body == null || body.get$ref() == null || components == null || components.getRequestBodies() == null) return body;
-        RequestBody target = components.getRequestBodies().get(refName(body.get$ref()));
-        return target == null || target == body ? body : resolve(target, components);
+    private static String escape(String segment) {
+        return segment.replace("~", "~0").replace("/", "~1");
     }
 
-    /** Follows a same-document {@code #/components/responses/X} ref; non-{@link ApiResponse} values pass through. */
-    private static Object resolve(Object response, Components components) {
-        if (!(response instanceof ApiResponse stub) || stub.get$ref() == null
-                || components == null || components.getResponses() == null) return response;
-        ApiResponse target = components.getResponses().get(refName(stub.get$ref()));
-        return target == null || target == stub ? response : resolve(target, components);
+    /** One property, described from its resolved schema so a {@code $ref} property reads like the schema it names. */
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private static Map<String, Object> propertyMap(Refs refs, String name, Schema property, Schema owner, String pointer, int depth) {
+        Schema shape = refs.schema(property);
+        if (shape == null) shape = property;
+        Map<String, Object> propertyMap = new LinkedHashMap<>();
+        propertyMap.put("name", name);
+        propertyMap.put("pointer", pointer);
+        propertyMap.put("type", shape.getType());
+        propertyMap.put("array", "array".equals(shape.getType()));
+        propertyMap.put("maxItems", shape.getMaxItems());
+        propertyMap.put("format", shape.getFormat());
+        propertyMap.put("description", property.getDescription() != null ? property.getDescription() : shape.getDescription());
+        Object example = property.getExample() != null ? property.getExample() : shape.getExample();
+        propertyMap.put("examplePresent", example != null);
+        propertyMap.put("example", plainValue(example));
+        propertyMap.put("pattern", shape.getPattern());
+        propertyMap.put("minLength", shape.getMinLength());
+        propertyMap.put("maxLength", shape.getMaxLength());
+        propertyMap.put("minimum", shape.getMinimum() == null ? null : shape.getMinimum().doubleValue());
+        propertyMap.put("maximum", shape.getMaximum() == null ? null : shape.getMaximum().doubleValue());
+        propertyMap.put("exclusiveMinimum", Boolean.TRUE.equals(shape.getExclusiveMinimum()));
+        propertyMap.put("exclusiveMaximum", Boolean.TRUE.equals(shape.getExclusiveMaximum()));
+        List<String> extensions = new ArrayList<>(extensionKeys((Map<String, Object>) property.getExtensions()));
+        if (shape != property) {
+            List<String> shapeKeys = extensionKeys((Map<String, Object>) shape.getExtensions());
+            for (String key : shapeKeys) if (!extensions.contains(key)) extensions.add(key);
+        }
+        propertyMap.put("extensionKeys", extensions);
+        propertyMap.put("nullable", Boolean.TRUE.equals(property.getNullable()) || Boolean.TRUE.equals(shape.getNullable()));
+        propertyMap.put("required", owner != null && owner.getRequired() != null && owner.getRequired().contains(name));
+        propertyMap.put("enumPresent", shape.getEnum() != null && !shape.getEnum().isEmpty());
+        propertyMap.put("enumValues", shape.getEnum() == null ? List.of() : shape.getEnum());
+        propertyMap.put("extensibleEnum", extensions.contains("x-extensible-enum"));
+        propertyMap.put("itemsPresent", shape.getItems() != null);
+        propertyMap.put("ref", property.get$ref());
+        propertyMap.put("depth", depth);
+        return propertyMap;
     }
 
-    private static String refName(String ref) {
-        return ref.substring(ref.lastIndexOf('/') + 1);
+    /**
+     * Adds the properties declared on {@code schema} and on the inline schemas below it. {@code depth}
+     * counts property hops: items, {@code additionalProperties} and composition members add none.
+     */
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private static void collectProperties(Refs refs, Schema schema, String pointer, int depth, List<Map<String, Object>> out, int guard) {
+        if (schema == null || schema.get$ref() != null || guard > 4 * MAX_REF_CHAIN) return;
+        if (schema.getProperties() != null) {
+            for (Object propertyEntryObject : schema.getProperties().entrySet()) {
+                Map.Entry<?, ?> propertyEntry = (Map.Entry<?, ?>) propertyEntryObject;
+                if (!(propertyEntry.getKey() instanceof String name) || !(propertyEntry.getValue() instanceof Schema property)) continue;
+                String propertyPointer = pointer + "/properties/" + escape(name);
+                out.add(propertyMap(refs, name, property, schema, propertyPointer, depth));
+                collectProperties(refs, property, propertyPointer, depth + 1, out, guard + 1);
+            }
+        }
+        collectProperties(refs, schema.getItems(), pointer + "/items", depth, out, guard + 1);
+        if (schema.getAdditionalProperties() instanceof Schema additional) {
+            collectProperties(refs, additional, pointer + "/additionalProperties", depth, out, guard + 1);
+        }
+        collectMembers(refs, schema.getAllOf(), pointer + "/allOf/", depth, out, guard);
+        collectMembers(refs, schema.getAnyOf(), pointer + "/anyOf/", depth, out, guard);
+        collectMembers(refs, schema.getOneOf(), pointer + "/oneOf/", depth, out, guard);
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private static void collectContent(Refs refs, Content content, String pointer, List<Map<String, Object>> out) {
+        if (content == null) return;
+        for (Map.Entry<String, io.swagger.v3.oas.models.media.MediaType> media : content.entrySet()) {
+            if (media.getValue() == null) continue;
+            collectProperties(refs, media.getValue().getSchema(), pointer + "/content/" + escape(media.getKey()) + "/schema", 1, out, 0);
+        }
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private static void collectMembers(Refs refs, List<Schema> members, String pointer, int depth, List<Map<String, Object>> out, int guard) {
+        if (members == null) return;
+        for (int index = 0; index < members.size(); index++) collectProperties(refs, members.get(index), pointer + index, depth, out, guard + 1);
+    }
+
+    /** Nesting depth of a schema graph; {@code cut} marks a result that depended on stopping at a cycle, so it is not memoised. */
+    private record Nesting(int value, boolean cut) { }
+
+    /**
+     * Longest chain of property hops below {@code schema}, following {@code $ref}s. A scalar is 0, an object
+     * of scalars 1, an object holding such an object 2. A recursive schema stops at the point it recurs.
+     */
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private static Nesting nesting(Refs refs, Schema schema, Set<String> path, Map<String, Integer> memo) {
+        if (schema == null) return new Nesting(0, false);
+        String ref = schema.get$ref();
+        if (ref != null) {
+            if (memo.containsKey(ref)) return new Nesting(memo.get(ref), false);
+            if (!path.add(ref)) return new Nesting(0, true);
+            Schema target = refs.schema(schema);
+            Nesting result = target == schema ? new Nesting(0, false) : nesting(refs, target, path, memo);
+            path.remove(ref);
+            if (!result.cut()) memo.put(ref, result.value());
+            return result;
+        }
+        int deepest = 0;
+        boolean cut = false;
+        if (schema.getProperties() != null) {
+            for (Object child : schema.getProperties().values()) {
+                if (!(child instanceof Schema childSchema)) continue;
+                Nesting below = nesting(refs, childSchema, path, memo);
+                deepest = Math.max(deepest, 1 + below.value());
+                cut |= below.cut();
+            }
+        }
+        List<Object> sameLevel = new ArrayList<>();
+        sameLevel.add(schema.getItems());
+        if (schema.getAdditionalProperties() instanceof Schema additional) sameLevel.add(additional);
+        for (List<Schema> members : new List[] {schema.getAllOf(), schema.getAnyOf(), schema.getOneOf()}) if (members != null) sameLevel.addAll(members);
+        for (Object child : sameLevel) {
+            if (!(child instanceof Schema childSchema)) continue;
+            Nesting below = nesting(refs, childSchema, path, memo);
+            deepest = Math.max(deepest, below.value());
+            cut |= below.cut();
+        }
+        return new Nesting(deepest, cut);
+    }
+
+    /** Longest chain of {@code $ref}s followed before giving up and recording a problem. */
+    static final int MAX_REF_CHAIN = 32;
+
+    /**
+     * Follows same-document component {@code $ref}s, which the parser leaves as stubs for
+     * request bodies, responses, headers and schemas. A cycle, a dangling target or a chain
+     * longer than {@link #MAX_REF_CHAIN} stops the walk at the stub and is recorded in
+     * {@link #problems}, never silently dropped.
+     */
+    private static final class Refs {
+        private static final String COMPONENTS = "#/components/";
+
+        final Components components;
+        final List<Map<String, Object>> problems = new ArrayList<>();
+        private final Set<String> reported = new HashSet<>();
+
+        Refs(Components components) { this.components = components; }
+
+        RequestBody requestBody(RequestBody stub) {
+            return follow(stub, RequestBody::get$ref, COMPONENTS + "requestBodies/", components == null ? null : components.getRequestBodies());
+        }
+
+        ApiResponse response(ApiResponse stub) {
+            return follow(stub, ApiResponse::get$ref, COMPONENTS + "responses/", components == null ? null : components.getResponses());
+        }
+
+        Header header(Header stub) {
+            return follow(stub, Header::get$ref, COMPONENTS + "headers/", components == null ? null : components.getHeaders());
+        }
+
+        Parameter parameter(Parameter stub) {
+            return follow(stub, Parameter::get$ref, COMPONENTS + "parameters/", components == null ? null : components.getParameters());
+        }
+
+        @SuppressWarnings({"unchecked", "rawtypes"})
+        Schema<?> schema(Schema<?> stub) {
+            return follow((Schema) stub, s -> ((Schema<?>) s).get$ref(), COMPONENTS + "schemas/", components == null ? null : (Map) components.getSchemas());
+        }
+
+        private <T> T follow(T start, Function<T, String> refOf, String prefix, Map<String, T> registry) {
+            if (start == null) return null;
+            T current = start;
+            Set<String> seen = new LinkedHashSet<>();
+            while (refOf.apply(current) != null) {
+                String ref = refOf.apply(current);
+                if (!ref.startsWith(prefix)) return current;   // external, or a different kind of component
+                if (!seen.add(ref)) { problem(ref, "cycle"); return start; }
+                if (seen.size() > MAX_REF_CHAIN) { problem(ref, "chain-too-long"); return start; }
+                T target = registry == null ? null : registry.get(unescape(ref.substring(prefix.length())));
+                if (target == null) { problem(ref, "missing"); return current; }
+                current = target;
+            }
+            return current;
+        }
+
+        private void problem(String ref, String reason) {
+            if (reported.add(reason + ref)) problems.add(Map.of("ref", ref, "reason", reason));
+        }
+
+        private static String unescape(String segment) {
+            return segment.replace("~1", "/").replace("~0", "~");
+        }
     }
 
     /** Reads parser response properties without exposing parser response types to rules. */

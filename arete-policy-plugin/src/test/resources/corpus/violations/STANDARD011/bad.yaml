@@ -1,0 +1,17 @@
+openapi: 3.0.0
+info: { title: Corpus, version: 1.0.0, description: Corpus example. }
+paths:
+  /reports:
+    get:
+      parameters:
+        - { name: p0, in: query, schema: { type: string } }
+        - { name: p1, in: query, schema: { type: string } }
+        - { name: p2, in: query, schema: { type: string } }
+        - { name: p3, in: query, schema: { type: string } }
+        - { name: p4, in: query, schema: { type: string } }
+        - { name: p5, in: query, schema: { type: string } }
+        - { name: p6, in: query, schema: { type: string } }
+        - { name: p7, in: query, schema: { type: string } }
+        - { name: p8, in: query, schema: { type: string } }
+        - { name: p9, in: query, schema: { type: string } }
+      responses: { '200': { description: OK } }
