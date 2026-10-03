@@ -1,0 +1,18 @@
+openapi: 3.0.0
+info: { title: Corpus, version: 1.0.0, description: Corpus example. }
+paths:
+  /customers:
+    get:
+      responses:
+        '400':
+          description: Invalid request
+          content:
+            application/problem+json:
+              schema: { type: object }
+              example: { title: "Invalid request", status: 400 }
+        '404':
+          description: Not found
+          content:
+            application/problem+json:
+              schema: { type: object }
+              example: { title: "Not found", status: 400 }
