@@ -31,7 +31,7 @@ distill(api, rule) {
                 && (rule.parameters["match"] == "semantic-conflict"
                     ? (parseInt(resp.status, -1) >= 200 && parseInt(resp.status, -1) < 300
                         && "{{resp.description}}"
-                            ==~ /(?i).*\\b(error|failure|failed|invalid)\\b.*/)
+                            ==~ /(?i).*\b(error|failure|failed|invalid)\b.*/)
                     : rule.parameters["status"] != null) }
             .map { resp -> occurrence(operation.pointer, "{{operation.method}} {{path.path}}",
                 rule.parameters["match"] == "semantic-conflict"

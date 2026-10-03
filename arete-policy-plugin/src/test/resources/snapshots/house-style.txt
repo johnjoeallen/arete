@@ -332,7 +332,7 @@
   (no findings)
 
 ## STATUS005  (response-code / response)
-  (no findings)
+  /paths/~1v2~1Payments/get  |  GET /v2/Payments  |  Status code conflicts with response semantics
 
 ## STANDARD011  (parameter / operation)
   (no findings)
