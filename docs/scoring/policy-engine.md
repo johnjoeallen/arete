@@ -499,7 +499,7 @@ loaded in order and layered: a later source adds to the earlier ones, or replace
 entry with the same id, and may use any matcher or rule an earlier one defines. An
 organisation's own standards live in a bundle of their own, apart from the public tool.
 
-A source is a URI with an optional pin, `<uri>[#sha256=<hex>][&version=<v>]`:
+A source is a URI with optional pins, `<uri>[#sha256=<hex>][&version=<v>][&ref=<ref>][&path=<folder>]`:
 
 | Source | Example |
 |---|---|
@@ -507,11 +507,19 @@ A source is a URI with an optional pin, `<uri>[#sha256=<hex>][&version=<v>]`:
 | Directory or zip on disk | `file:./policy/`, `file:./policy-2.3.1.zip` |
 | Zip over HTTPS | `https://host/policy-2.3.1.zip` (plain HTTP only for loopback) |
 | Maven coordinate | `maven:org.acme:api-policy:2.3.1` (a zip; add `:jar` for a jar) |
+| Git repository | `git:https://git.acme.com/api/policy.git#ref=v2.3.1&path=bundle` |
 
 A Maven coordinate is looked up in Maven layout
 (`org/acme/api-policy/2.3.1/api-policy-2.3.1.zip`) in the repositories you give the engine
 (`mavenRepository(url)`, an `https:` or `file:` base URL) and, if you ask for it, those in your
 Maven `settings.xml`. A zip may hold its files at the root or inside one folder.
+
+A **git** source is read with the `git` program, so it uses the credentials the machine already has (an ssh key, a
+credential helper, a CI job token in the URL's environment). The repository is `https://`, `ssh://`, `file://` or
+`user@host:path`. `ref` is a branch, tag or full commit id (the default branch if left out) and `path` is the folder
+holding `PolicyBundle.yaml` (the repository root if left out). Only that ref is fetched, shallowly, into a scratch
+folder that is deleted afterwards; hooks and the `ext::` transport are off, and a symbolic link in the bundle is refused.
+Every pin is optional: `git:https://git.acme.com/api/policy.git` alone follows the default branch.
 
 **Maven settings.** CI already says where artifacts live and who may fetch them in
 `settings.xml`, so the engine reads it instead of asking again. `Engine.builder().mavenSettings()`
@@ -536,9 +544,12 @@ A placeholder that is not set is an error when its server is used, never a blank
 Without the builder, `maven-settings` (`default`, or a path) and `maven-profiles` do the same in
 `configure(Map)`. Nothing reads `settings.xml` unless asked.
 
-**Pins.** `sha256` is the digest of the archive; `version` is the bundle's `bundleVersion`.
+**Pins.** `sha256` is the digest of the archive (for a git source, of the zip Areté makes from the bundle folder, which is
+the same for the same files whatever the commit); `version` is the bundle's `bundleVersion`. A mismatch message states the
+digest it found, so the first run can tell you what to pin.
 A source that does not match its pin fails the load, so a bundle cannot change under you.
-With `requirePin`, a remote source with no `sha256` is refused before anything is downloaded.
+With `requirePin`, a remote source with no `sha256` is refused before anything is downloaded. A git source is also
+accepted when its `ref` is a full commit id, which names one set of files for ever.
 Fetched archives are kept in a cache by digest (`~/.arete/cache/policies` by default), so a
 pinned source is read from there on later runs, with no network. Every archive is bounded
 in size and entry count.

@@ -110,7 +110,7 @@ arete score spec.yaml \
 `--policy-source` is repeatable and layers: see [policy sources](scoring/policy-engine.md#policy-sources). With no
 source the public bundle in the jar is used. `--maven-settings default|<path>` reads repositories, mirrors,
 credentials and proxies from `settings.xml`, as the rest of CI does; `--maven-profile <id>` activates a profile;
-`--require-pin` refuses a remote source without a `sha256`; `--cache-dir` / `--no-cache` control where fetched
+`--require-pin` refuses a remote source without a `sha256` (a git source with a full commit `ref` also counts as pinned); `--cache-dir` / `--no-cache` control where fetched
 bundles are kept; `--user-policies <dir>` adds `*.md` policies.
 
 ## Team overrides

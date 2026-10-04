@@ -53,14 +53,15 @@ final class PolicySourceResolver {
             return fromFile(localPath(uri), source);
         }
         if (source.isRemote()) {
-            if (requirePin && source.sha256() == null) {
-                throw new BundleValidationException("policy source " + uri + " has no sha256 pin, and pins are required");
+            if (requirePin && source.sha256() == null && !GitPolicyFetcher.pinnedByCommit(source)) {
+                throw new BundleValidationException("policy source " + uri + " has no sha256 pin"
+                        + (uri.startsWith("git:") ? " or commit ref" : "") + ", and pins are required");
             }
             byte[] archive = archiveFor(source);
             return ZipBundleResources.of(archive, uri);
         }
         throw new BundleValidationException("unsupported policy source '" + uri
-                + "'; use classpath:, file:, https: or maven:");
+                + "'; use classpath:, file:, https:, maven: or git:");
     }
 
     private BundleResources fromFile(Path path, PolicySource source) {
@@ -82,7 +83,9 @@ final class PolicySourceResolver {
                 // A damaged cache entry is not trusted; fall through and fetch again.
             }
         }
-        byte[] bytes = source.uri().startsWith("maven:") ? fetchMaven(source.uri()) : fetch(URI.create(source.uri()), Map.of());
+        byte[] bytes = source.uri().startsWith("maven:") ? fetchMaven(source.uri())
+                : source.uri().startsWith("git:") ? GitPolicyFetcher.fetch(source)
+                : fetch(URI.create(source.uri()), Map.of());
         verifyPin(source, bytes);
         if (cacheDir != null) store(sha256(bytes), bytes);
         return bytes;
