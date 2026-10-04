@@ -1,1 +1,1 @@
-/paths/~1customers~1{customerId}/get/parameters/0  |  Path parameter 'customerId' is not marked required
+/paths/~1customers~1{customerId}/get/parameters/path:customerId  |  Path parameter 'customerId' is not marked required

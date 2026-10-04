@@ -11,7 +11,7 @@ distill(api, rule) {
             .filter { header -> (header.lower().startsWith("x-") || header.lower().startsWith("x_"))
                 && !tokenise(",", "{{rule.parameters["allowed"]}}")
                         .any { a -> a.trim().lower() == header.lower() } }
-            .map { header -> occurrence(operation.pointer, "{{operation.method}} {{path.path}}",
+            .map { header -> occurrence("{{resp.pointer}}/headers/{{header}}", "{{operation.method}} {{path.path}}",
                 "Proprietary response header is not allow-listed: {{header}}") } }
     } };
 }

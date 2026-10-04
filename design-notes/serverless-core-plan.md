@@ -7,8 +7,8 @@
 > `Engine` class (no plugin SPI, no plugin jars, no global plugin settings). Also done: the policy
 > loader (file, https and Maven sources with pin, checksum and cache; layering), `locked` rules and
 > `.arete.yaml` overrides. Also done: the `arete` CLI (`score`, `diff`, `report`, `policy verify`) and the
-> JSON, markdown and SARIF writers, with line numbers. Not started: git sources, stable pointers, the
-> merge-gate (`gate`) and the Maven/Gradle wrappers.
+> JSON, markdown and SARIF writers, with line numbers. Stable pointers too (parameters by `in:name`, responses
+> by status, tags by name). Not started: git sources, the merge-gate (`gate`) and the Maven/Gradle wrappers.
 
 ## Goals and requirements
 

@@ -1,1 +1,1 @@
-/paths/~1customers/get/parameters/0  |  Pagination parameter does not meet the configured constraint: limit
+/paths/~1customers/get/parameters/query:limit  |  Pagination parameter does not meet the configured constraint: limit

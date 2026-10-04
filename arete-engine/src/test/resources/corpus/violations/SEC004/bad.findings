@@ -1,1 +1,1 @@
-/paths/~1customers/get/parameters/0  |  Search query parameter may carry sensitive data: q
+/paths/~1customers/get/parameters/query:q  |  Search query parameter may carry sensitive data: q

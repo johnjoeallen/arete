@@ -1,1 +1,1 @@
-/paths/~1customers/get  |  Documents a server-error (500) response; these should be omitted from the contract
+/paths/~1customers/get/responses/500  |  Documents a server-error (500) response; these should be omitted from the contract

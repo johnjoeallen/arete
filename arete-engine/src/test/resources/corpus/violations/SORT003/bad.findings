@@ -1,1 +1,1 @@
-/paths/~1customers/get/parameters/0  |  Collection query capability does not use the configured representation: sort_fields
+/paths/~1customers/get/parameters/query:sort_fields  |  Collection query capability does not use the configured representation: sort_fields

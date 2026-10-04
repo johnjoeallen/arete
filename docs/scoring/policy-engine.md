@@ -238,6 +238,17 @@ every `description` / `summary` in the document; `api.lint.refs` is every
 carry an `itemsPresent` flag. JSON Pointers are pre-escaped and safe to return
 verbatim as `pointer`.
 
+**Pointers are stable.** A finding is named by what it is about, not by where it sits in a list, so adding a
+parameter, a tag or a response does not make every later finding look new. A parameter is
+`.../parameters/<in>:<name>` (a second one with the same `in` and `name`, itself a finding, is
+`.../parameters/<in>:<name>#2`); a response is `.../responses/<status>`, and a response header
+`.../responses/<status>/headers/<name>`; a tag is `/tags/<name>`; the metadata fields are
+`/info/description`, `/info/contact/name` and so on. Two findings of one rule are the same finding in two runs when their
+rule, pointer and subject (the rule's own label, such as `GET /orders` or a server's URL) match, whatever the message
+says. The one place a pointer still counts position is a member of an inline `allOf`, `anyOf` or `oneOf`, which has no
+name (`.../allOf/1/...`). Reports find these pointers' lines in the spec text, so a pointer that names a parameter or tag
+still lands on its line.
+
 **`$ref` is transparent.** A same-document `$ref` to a component request body,
 response, header, parameter or schema reads like the thing it names, through
 chains of references, so a spec that defines something once under `components`

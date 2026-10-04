@@ -40,6 +40,7 @@ public record ScoreReport(String file, String policy, String status, String erro
             PointerLocator.Location at = locator.locate(d.getPointer());
             double impact = Double.isNaN(d.getScoreImprovement()) ? 0 : d.getScoreImprovement();
             findings.add(new Finding(d.getRuleId(), d.getTitle(), d.getSeverity().name(), engine.getSeverityLabel(d.getSeverity()), d.getPointer(),
+                    d.getPaths().isEmpty() ? null : d.getPaths().get(0),
                     d.getDescription() == null ? d.getTitle() : d.getDescription(),
                     at == null ? null : at.line(), at == null ? null : at.column(), impact));
         }

@@ -21,7 +21,7 @@
   (no findings)
 
 ## DOC006  (metadata / api)
-  /info  |  API  |  API metadata is missing semantic version
+  /info/version  |  API  |  API metadata is missing semantic version
 
 ## DOC007  (metadata / api)
   /  |  API  |  API metadata is missing x-api-id
@@ -54,7 +54,7 @@
   (no findings)
 
 ## STANDARD008  (proprietary-header / header)
-  /paths/~1widgets/post  |  POST /widgets  |  Proprietary response header is not allow-listed: X-Widget-Token
+  /paths/~1widgets/post/responses/201/headers/X-Widget-Token  |  POST /widgets  |  Proprietary response header is not allow-listed: X-Widget-Token
 
 ## STANDARD009  (query-collection / query-parameter)
   (no findings)
@@ -148,8 +148,8 @@
   (no findings)
 
 ## CONTENT002  (media-type / media-type)
-  /paths/~1widgets/get  |  GET /widgets  |  Response 200 media type absent
-  /paths/~1widgets/post  |  POST /widgets  |  Response 201 media type absent
+  /paths/~1widgets/get/responses/200  |  GET /widgets  |  Response 200 media type absent
+  /paths/~1widgets/post/responses/201  |  POST /widgets  |  Response 201 media type absent
 
 ## CONTENT003  (media-type / media-type)
   (no findings)
@@ -247,7 +247,7 @@
   (no findings)
 
 ## PAGE005  (pagination / response)
-  /paths/~1widgets/get  |  GET /widgets  |  Successful paginated response lacks a Link header
+  /paths/~1widgets/get/responses/200  |  GET /widgets  |  Successful paginated response lacks a Link header
 
 ## PAGE006  (pagination / query-parameter)
   (no findings)
@@ -326,7 +326,7 @@
   (no findings)
 
 ## STATUS002  (response-header / response)
-  /paths/~1widgets/post  |  POST /widgets  |  Response 201 lacks one or more required headers: Location
+  /paths/~1widgets/post/responses/201  |  POST /widgets  |  Response 201 lacks one or more required headers: Location
 
 ## STATUS003  (response-code / response)
   (no findings)
@@ -356,7 +356,7 @@
   (no findings)
 
 ## STANDARD017  (header-schema / response)
-  /paths/~1widgets/post  |  POST /widgets 201  |  Response header 'X-Widget-Token' defines neither a schema nor content
+  /paths/~1widgets/post/responses/201/headers/X-Widget-Token  |  POST /widgets 201  |  Response header 'X-Widget-Token' defines neither a schema nor content
 
 ## HTTP009  (request-body / operation)
   (no findings)

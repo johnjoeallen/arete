@@ -1,1 +1,1 @@
-/paths/~1customers/get/parameters/0  |  Parameter name may expose sensitive data: password
+/paths/~1customers/get/parameters/query:password  |  Parameter name may expose sensitive data: password

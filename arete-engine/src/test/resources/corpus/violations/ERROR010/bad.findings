@@ -1,1 +1,1 @@
-/paths/~1customers/get  |  Authorization response must not include WWW-Authenticate
+/paths/~1customers/get/responses/403  |  Authorization response must not include WWW-Authenticate

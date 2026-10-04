@@ -19,6 +19,6 @@ distill(api, rule) {
             .filter { resp -> operation.method == "GET" && !path.path.contains("{")
                 && parseInt(resp.status, -1) >= 200 && parseInt(resp.status, -1) < 300
                 && !resp.headers.any { h -> h.lower() == "link" } }
-            .map { resp -> occurrence(operation.pointer, "{{operation.method}} {{path.path}}",
+            .map { resp -> occurrence(resp.pointer, "{{operation.method}} {{path.path}}",
                 "Successful paginated response lacks a Link header") } } };
 }

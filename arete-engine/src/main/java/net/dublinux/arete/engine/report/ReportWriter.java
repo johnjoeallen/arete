@@ -208,6 +208,7 @@ public final class ReportWriter {
         n.put("severity", f.severity());
         n.put("severityLabel", f.severityLabel());
         if (f.pointer() != null) n.put("pointer", f.pointer());
+        if (f.path() != null) n.put("path", f.path());
         n.put("message", f.message());
         if (f.line() != null) n.put("line", f.line());
         if (f.column() != null) n.put("column", f.column());

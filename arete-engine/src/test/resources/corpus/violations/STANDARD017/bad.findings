@@ -1,1 +1,1 @@
-/paths/~1customers/get  |  Response header 'X-Rate-Limit' defines neither a schema nor content
+/paths/~1customers/get/responses/200/headers/X-Rate-Limit  |  Response header 'X-Rate-Limit' defines neither a schema nor content

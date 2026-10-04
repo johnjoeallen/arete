@@ -1,4 +1,4 @@
-/info  |  API metadata is missing contact email
-/info  |  API metadata is missing contact name
-/info  |  API metadata is missing description
-/info  |  API metadata is missing semantic version
+/info/contact/email  |  API metadata is missing contact email
+/info/contact/name  |  API metadata is missing contact name
+/info/description  |  API metadata is missing description
+/info/version  |  API metadata is missing semantic version

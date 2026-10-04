@@ -181,7 +181,7 @@ final class OpenApiMapAdapter {
                                 // Operation context, so api.responses elements are self-locating.
                                 responseMap.put("method", operationEntry.getKey().name());
                                 responseMap.put("path", entry.getKey());
-                                responseMap.put("pointer", detail.get("pointer"));
+                                responseMap.put("pointer", detail.get("pointer") + "/responses/" + escape(responseEntry.getKey()));
                                 responseMap.put("description", responseProperty(response, "getDescription"));
                                 Object headers = responseProperty(response, "getHeaders");
                                 responseMap.put("headers", headers instanceof Map<?, ?> map ? new ArrayList<>(map.keySet()) : List.of());
@@ -316,7 +316,7 @@ final class OpenApiMapAdapter {
                 Map<String, Object> tagMap = new LinkedHashMap<>();
                 tagMap.put("name", tag.getName());
                 tagMap.put("description", tag.getDescription());
-                tagMap.put("pointer", "/tags/" + index);
+                tagMap.put("pointer", "/tags/" + escape(String.valueOf(tag.getName())));
                 tags.add(tagMap);
             }
         }
@@ -412,13 +412,18 @@ final class OpenApiMapAdapter {
 
     private static void addParameters(Refs refs, List<Map<String, Object>> destination, List<Parameter> source, String pointer) {
         if (source == null) return;
+        Map<String, Integer> seen = new HashMap<>();
         for (int index = 0; index < source.size(); index++) {
             Parameter parameter = source.get(index) == null ? null : refs.parameter(source.get(index));
             if (parameter == null || parameter.getName() == null || parameter.getIn() == null) continue;
+            // A parameter is named by what it is, not where it sits in the list: inserting one must not move the rest.
+            // A second parameter with the same in and name (itself a finding) is told apart by a suffix.
+            String key = parameter.getIn() + ":" + parameter.getName();
+            int occurrence = seen.merge(key, 1, Integer::sum);
             Map<String, Object> detail = new LinkedHashMap<>();
             detail.put("name", parameter.getName());
             detail.put("in", parameter.getIn());
-            detail.put("pointer", pointer + "/" + index);
+            detail.put("pointer", pointer + "/" + escape(key) + (occurrence > 1 ? "#" + occurrence : ""));
             detail.put("required", Boolean.TRUE.equals(parameter.getRequired()));
             detail.put("schemaPresent", parameter.getSchema() != null || parameter.getContent() != null);
             detail.put("description", parameter.getDescription());

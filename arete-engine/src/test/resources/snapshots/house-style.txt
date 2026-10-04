@@ -20,10 +20,10 @@
   (no findings)
 
 ## DOC006  (metadata / api)
-  /info  |  API  |  API metadata is missing contact email
-  /info  |  API  |  API metadata is missing contact name
-  /info  |  API  |  API metadata is missing description
-  /info  |  API  |  API metadata is missing semantic version
+  /info/contact/email  |  API  |  API metadata is missing contact email
+  /info/contact/name  |  API  |  API metadata is missing contact name
+  /info/description  |  API  |  API metadata is missing description
+  /info/version  |  API  |  API metadata is missing semantic version
 
 ## DOC007  (metadata / api)
   /  |  API  |  API metadata is missing x-api-id
@@ -59,7 +59,7 @@
   (no findings)
 
 ## STANDARD009  (query-collection / query-parameter)
-  /paths/~1v2~1Payments/get/parameters/0  |  GET /v2/Payments  |  Collection query parameter tags does not use form serialization with explode=true
+  /paths/~1v2~1Payments/get/parameters/query:tags  |  GET /v2/Payments  |  Collection query parameter tags does not use form serialization with explode=true
 
 ## SECURITY001  (security / operation)
   /paths/~1v2~1Payments/get  |  GET /v2/Payments  |  Operation does not require security scheme bearerAuth
@@ -131,14 +131,14 @@
   (no findings)
 
 ## JSON016  (response-code / response)
-  /paths/~1v2~1Payments  |  GET /v2/Payments  |  Successful response is not a JSON object
+  /paths/~1v2~1Payments/get/responses/200  |  GET /v2/Payments  |  Successful response is not a JSON object
 
 ## STATUS006  (response-code / response)
-  /paths/~1v2~1Payments  |  GET /v2/Payments  |  Error response does not declare application/problem+json
-  /paths/~1v2~1Payments  |  GET /v2/Payments  |  Error response does not declare application/problem+json
+  /paths/~1v2~1Payments/get/responses/429  |  GET /v2/Payments  |  Error response does not declare application/problem+json
+  /paths/~1v2~1Payments/get/responses/500  |  GET /v2/Payments  |  Error response does not declare application/problem+json
 
 ## STATUS007  (response-header / response)
-  /paths/~1v2~1Payments/get  |  GET /v2/Payments  |  Response 429 lacks one or more required headers: RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset
+  /paths/~1v2~1Payments/get/responses/429  |  GET /v2/Payments  |  Response 429 lacks one or more required headers: RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset
 
 ## STANDARD010  (openapi-version / api)
   (no findings)
@@ -147,8 +147,8 @@
   (no findings)
 
 ## CONTENT002  (media-type / media-type)
-  /paths/~1v2~1Payments/get  |  GET /v2/Payments  |  Response 429 media type absent
-  /paths/~1v2~1Payments/get  |  GET /v2/Payments  |  Response 500 media type absent
+  /paths/~1v2~1Payments/get/responses/429  |  GET /v2/Payments  |  Response 429 media type absent
+  /paths/~1v2~1Payments/get/responses/500  |  GET /v2/Payments  |  Response 500 media type absent
 
 ## CONTENT003  (media-type / media-type)
   (no findings)
@@ -169,8 +169,8 @@
   (no findings)
 
 ## ERROR005  (error-response / response)
-  /paths/~1v2~1Payments/get  |  GET /v2/Payments  |  Error response does not declare application/problem+json
-  /paths/~1v2~1Payments/get  |  GET /v2/Payments  |  Error response does not declare application/problem+json
+  /paths/~1v2~1Payments/get/responses/429  |  GET /v2/Payments  |  Error response does not declare application/problem+json
+  /paths/~1v2~1Payments/get/responses/500  |  GET /v2/Payments  |  Error response does not declare application/problem+json
 
 ## ERROR006  (error-response / response)
   (no findings)
@@ -245,7 +245,7 @@
   (no findings)
 
 ## PAGE005  (pagination / response)
-  /paths/~1v2~1Payments/get  |  GET /v2/Payments  |  Successful paginated response lacks a Link header
+  /paths/~1v2~1Payments/get/responses/200  |  GET /v2/Payments  |  Successful paginated response lacks a Link header
 
 ## PAGE006  (pagination / query-parameter)
   (no findings)
@@ -332,7 +332,7 @@
   (no findings)
 
 ## STATUS005  (response-code / response)
-  /paths/~1v2~1Payments/get  |  GET /v2/Payments  |  Status code conflicts with response semantics
+  /paths/~1v2~1Payments/get/responses/200  |  GET /v2/Payments  |  Status code conflicts with response semantics
 
 ## STANDARD011  (parameter / operation)
   (no findings)
@@ -398,10 +398,10 @@
   (no findings)
 
 ## DOC014  (documentation-completeness / parameter)
-  /paths/~1v2~1Payments/get/parameters/0  |  GET /v2/Payments tags  |  GET /v2/Payments tags has no description or example
+  /paths/~1v2~1Payments/get/parameters/query:tags  |  GET /v2/Payments tags  |  GET /v2/Payments tags has no description or example
 
 ## STATUS008  (status-class / response)
-  /paths/~1v2~1Payments/get  |  GET /v2/Payments 500  |  Documents a server-error (500) response; these should be omitted from the contract
+  /paths/~1v2~1Payments/get/responses/500  |  GET /v2/Payments 500  |  Documents a server-error (500) response; these should be omitted from the contract
 
 ## CASE007  (schema-name / schema)
   (no findings)

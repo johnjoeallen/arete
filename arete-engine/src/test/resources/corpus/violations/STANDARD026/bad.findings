@@ -1,1 +1,1 @@
-/paths/~1orders~1{orderId}/get/parameters/0  |  Parameter 'orderId' in path is declared more than once
+/paths/~1orders~1{orderId}/get/parameters/path:orderId  |  Parameter 'orderId' in path is declared more than once

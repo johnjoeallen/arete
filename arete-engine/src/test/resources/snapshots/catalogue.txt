@@ -24,9 +24,9 @@
   (no findings)
 
 ## DOC006  (metadata / api)
-  /info  |  API  |  API metadata is missing contact email
-  /info  |  API  |  API metadata is missing contact name
-  /info  |  API  |  API metadata is missing description
+  /info/contact/email  |  API  |  API metadata is missing contact email
+  /info/contact/name  |  API  |  API metadata is missing contact name
+  /info/description  |  API  |  API metadata is missing description
 
 ## DOC007  (metadata / api)
   /  |  API  |  API metadata is missing x-api-id
@@ -59,9 +59,9 @@
   (no findings)
 
 ## STANDARD008  (proprietary-header / header)
-  /paths/~1orders/post  |  POST /orders  |  Proprietary response header is not allow-listed: X-Count
-  /paths/~1orders/post  |  POST /orders  |  Proprietary response header is not allow-listed: X-Trace
-  /paths/~1orders~1{orderId}/get/parameters/2  |  GET /orders/{orderId}  |  Proprietary request header is not allow-listed: X-SSN
+  /paths/~1orders/post/responses/200/headers/X-Count  |  POST /orders  |  Proprietary response header is not allow-listed: X-Count
+  /paths/~1orders/post/responses/200/headers/X-Trace  |  POST /orders  |  Proprietary response header is not allow-listed: X-Trace
+  /paths/~1orders~1{orderId}/get/parameters/header:X-SSN  |  GET /orders/{orderId}  |  Proprietary request header is not allow-listed: X-SSN
 
 ## STANDARD009  (query-collection / query-parameter)
   (no findings)
@@ -88,8 +88,8 @@
   (no findings)
 
 ## CASE002  (naming / path-parameter)
-  /paths/~1orders~1{orderId}/get/parameters/0  |  orderId  |  Name does not use the configured convention
-  /paths/~1things~1{thingKey}/get/parameters/0  |  thingId  |  Name does not use the configured convention
+  /paths/~1orders~1{orderId}/get/parameters/path:orderId  |  orderId  |  Name does not use the configured convention
+  /paths/~1things~1{thingKey}/get/parameters/path:thingId  |  thingId  |  Name does not use the configured convention
 
 ## CASE003  (naming / query-parameter)
   (no findings)
@@ -153,10 +153,10 @@
   (no findings)
 
 ## JSON016  (response-code / response)
-  /paths/~1orders~1{orderId}  |  GET /orders/{orderId}  |  Successful response is not a JSON object
+  /paths/~1orders~1{orderId}/get/responses/200  |  GET /orders/{orderId}  |  Successful response is not a JSON object
 
 ## STATUS006  (response-code / response)
-  /paths/~1things~1{thingKey}  |  GET /things/{thingKey}  |  Error response does not declare application/problem+json
+  /paths/~1things~1{thingKey}/get/responses/500  |  GET /things/{thingKey}  |  Error response does not declare application/problem+json
 
 ## STATUS007  (response-header / response)
   (no findings)
@@ -168,18 +168,18 @@
   (no findings)
 
 ## CONTENT002  (media-type / media-type)
-  /paths/~1bulk-create~1orders~1{batchId}/post  |  POST /bulk-create/orders/{batchId}  |  Response 200 media type absent
-  /paths/~1catalog~1searchByName/put  |  PUT /catalog/searchByName  |  Response 200 media type absent
-  /paths/~1orders/delete  |  DELETE /orders  |  Response 204 media type absent
-  /paths/~1orders/post  |  POST /orders  |  Response 200 media type absent
-  /paths/~1reports/get  |  GET /reports  |  Response 200 media type absent
-  /paths/~1things~1{thingKey}/get  |  GET /things/{thingKey}  |  Response 500 media type absent
+  /paths/~1bulk-create~1orders~1{batchId}/post/responses/200  |  POST /bulk-create/orders/{batchId}  |  Response 200 media type absent
+  /paths/~1catalog~1searchByName/put/responses/200  |  PUT /catalog/searchByName  |  Response 200 media type absent
+  /paths/~1orders/delete/responses/204  |  DELETE /orders  |  Response 204 media type absent
+  /paths/~1orders/post/responses/200  |  POST /orders  |  Response 200 media type absent
+  /paths/~1reports/get/responses/200  |  GET /reports  |  Response 200 media type absent
+  /paths/~1things~1{thingKey}/get/responses/500  |  GET /things/{thingKey}  |  Response 500 media type absent
 
 ## CONTENT003  (media-type / media-type)
-  /paths/~1orders~1{orderId}/get  |  GET /orders/{orderId}  |  Response 200 media type wildcard
+  /paths/~1orders~1{orderId}/get/responses/200  |  GET /orders/{orderId}  |  Response 200 media type wildcard
 
 ## CONTENT004  (media-type / media-type)
-  /paths/~1orders~1{orderId}/get  |  GET /orders/{orderId}  |  Response 200 media type not-allowed
+  /paths/~1orders~1{orderId}/get/responses/200  |  GET /orders/{orderId}  |  Response 200 media type not-allowed
 
 ## ERROR001  (error-response / operation)
   (no findings)
@@ -205,7 +205,7 @@
   (no findings)
 
 ## ERROR005  (error-response / response)
-  /paths/~1things~1{thingKey}/get  |  GET /things/{thingKey}  |  Error response does not declare application/problem+json
+  /paths/~1things~1{thingKey}/get/responses/500  |  GET /things/{thingKey}  |  Error response does not declare application/problem+json
 
 ## ERROR006  (error-response / response)
   (no findings)
@@ -226,16 +226,16 @@
   /components/schemas/CreateOrderRequest/properties/password  |  password  |  Schema property name may contain sensitive data: password
 
 ## SEC002  (sensitive-data / query-parameter)
-  /paths/~1orders~1{orderId}/get/parameters/1  |  GET /orders/{orderId}  |  Parameter name may expose sensitive data: api_key
+  /paths/~1orders~1{orderId}/get/parameters/query:api_key  |  GET /orders/{orderId}  |  Parameter name may expose sensitive data: api_key
 
 ## SEC003  (sensitive-data / path-parameter)
   (no findings)
 
 ## SEC008  (sensitive-data / header)
-  /paths/~1orders~1{orderId}/get/parameters/2  |  GET /orders/{orderId}  |  Parameter name may expose sensitive data: X-SSN
+  /paths/~1orders~1{orderId}/get/parameters/header:X-SSN  |  GET /orders/{orderId}  |  Parameter name may expose sensitive data: X-SSN
 
 ## SEC004  (sensitive-search / query-parameter)
-  /paths/~1reports/get/parameters/0  |  GET /reports  |  Search query parameter may carry sensitive data: search
+  /paths/~1reports/get/parameters/query:search  |  GET /reports  |  Search query parameter may carry sensitive data: search
 
 ## SEC005  (sensitive-search / operation)
   (no findings)
@@ -280,7 +280,7 @@
   (no findings)
 
 ## PAGE005  (pagination / response)
-  /paths/~1reports/get  |  GET /reports  |  Successful paginated response lacks a Link header
+  /paths/~1reports/get/responses/200  |  GET /reports  |  Successful paginated response lacks a Link header
 
 ## PAGE006  (pagination / query-parameter)
   (no findings)
@@ -375,7 +375,7 @@
   (no findings)
 
 ## STANDARD012  (parameter / parameter)
-  /paths/~1things~1{thingKey}/get/parameters/0  |  GET /things/{thingKey} thingId  |  Path parameter 'thingId' is not marked required
+  /paths/~1things~1{thingKey}/get/parameters/path:thingId  |  GET /things/{thingKey} thingId  |  Path parameter 'thingId' is not marked required
 
 ## STANDARD013  (parameter / parameter)
   /paths/~1bulk-create~1orders~1{batchId}/post  |  POST /bulk-create/orders/{batchId}  |  Path template placeholder '{batchId}' has no matching path parameter
@@ -383,7 +383,7 @@
   /paths/~1things~1{thingKey}/get  |  GET /things/{thingKey}  |  Path template placeholder '{thingKey}' has no matching path parameter
 
 ## STANDARD014  (parameter / parameter)
-  /paths/~1things~1{thingKey}/get/parameters/1  |  GET /things/{thingKey} verbose  |  Parameter 'verbose' defines neither a schema nor content
+  /paths/~1things~1{thingKey}/get/parameters/query:verbose  |  GET /things/{thingKey} verbose  |  Parameter 'verbose' defines neither a schema nor content
 
 ## STANDARD015  (request-body / operation)
   /paths/~1orders/delete  |  DELETE /orders  |  Request body is present but not marked required: true
@@ -392,7 +392,7 @@
   (no findings)
 
 ## STANDARD017  (header-schema / response)
-  /paths/~1orders/post  |  POST /orders 200  |  Response header 'X-Trace' defines neither a schema nor content
+  /paths/~1orders/post/responses/200/headers/X-Trace  |  POST /orders 200  |  Response header 'X-Trace' defines neither a schema nor content
 
 ## HTTP009  (request-body / operation)
   /paths/~1orders/delete  |  DELETE /orders  |  DELETE operation declares a request body
@@ -453,16 +453,16 @@
   /components/schemas/order_response/properties/modified  |  order_response.modified  |  order_response.modified has no description or example
 
 ## DOC014  (documentation-completeness / parameter)
-  /paths/~1orders~1{orderId}/get/parameters/0  |  GET /orders/{orderId} orderId  |  GET /orders/{orderId} orderId has no description or example
-  /paths/~1orders~1{orderId}/get/parameters/1  |  GET /orders/{orderId} api_key  |  GET /orders/{orderId} api_key has no description or example
-  /paths/~1orders~1{orderId}/get/parameters/2  |  GET /orders/{orderId} X-SSN  |  GET /orders/{orderId} X-SSN has no description or example
-  /paths/~1reports/get/parameters/0  |  GET /reports search  |  GET /reports search has no description or example
-  /paths/~1reports/get/parameters/1  |  GET /reports fields  |  GET /reports fields has no description or example
-  /paths/~1things~1{thingKey}/get/parameters/0  |  GET /things/{thingKey} thingId  |  GET /things/{thingKey} thingId has no description or example
-  /paths/~1things~1{thingKey}/get/parameters/1  |  GET /things/{thingKey} verbose  |  GET /things/{thingKey} verbose has no description or example
+  /paths/~1orders~1{orderId}/get/parameters/header:X-SSN  |  GET /orders/{orderId} X-SSN  |  GET /orders/{orderId} X-SSN has no description or example
+  /paths/~1orders~1{orderId}/get/parameters/path:orderId  |  GET /orders/{orderId} orderId  |  GET /orders/{orderId} orderId has no description or example
+  /paths/~1orders~1{orderId}/get/parameters/query:api_key  |  GET /orders/{orderId} api_key  |  GET /orders/{orderId} api_key has no description or example
+  /paths/~1reports/get/parameters/query:fields  |  GET /reports fields  |  GET /reports fields has no description or example
+  /paths/~1reports/get/parameters/query:search  |  GET /reports search  |  GET /reports search has no description or example
+  /paths/~1things~1{thingKey}/get/parameters/path:thingId  |  GET /things/{thingKey} thingId  |  GET /things/{thingKey} thingId has no description or example
+  /paths/~1things~1{thingKey}/get/parameters/query:verbose  |  GET /things/{thingKey} verbose  |  GET /things/{thingKey} verbose has no description or example
 
 ## STATUS008  (status-class / response)
-  /paths/~1things~1{thingKey}/get  |  GET /things/{thingKey} 500  |  Documents a server-error (500) response; these should be omitted from the contract
+  /paths/~1things~1{thingKey}/get/responses/500  |  GET /things/{thingKey} 500  |  Documents a server-error (500) response; these should be omitted from the contract
 
 ## CASE007  (schema-name / schema)
   /components/schemas/order_response  |  order_response  |  Schema name 'order_response' is a request/response object but is not PascalCase

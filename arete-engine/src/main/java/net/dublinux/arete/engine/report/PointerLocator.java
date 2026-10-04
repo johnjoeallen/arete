@@ -22,6 +22,72 @@ public final class PointerLocator {
 
     private final Node root;
 
+    /**
+     * An element of a list. Pointers name list elements by what they are, not where they sit, so that adding one
+     * does not move the rest: a number is an index (as in plain JSON Pointer); {@code in:name} (and
+     * {@code in:name#2} for a repeat) is a parameter; any other text matches an element's {@code name} (a tag) or
+     * {@code url} (a server). A parameter written as a {@code $ref} is matched by the parameter it points to.
+     */
+    private Node element(SequenceNode sequence, String key) {
+        try {
+            int index = Integer.parseInt(key);
+            return index >= 0 && index < sequence.getValue().size() ? sequence.getValue().get(index) : null;
+        } catch (NumberFormatException notAnIndex) {
+            // fall through to naming
+        }
+        String wanted = key;
+        int wantedOccurrence = 1;
+        int hash = key.lastIndexOf('#');
+        if (hash > 0 && key.substring(hash + 1).matches("[0-9]+")) {
+            wanted = key.substring(0, hash);
+            wantedOccurrence = Integer.parseInt(key.substring(hash + 1));
+        }
+        int seen = 0;
+        for (Node item : sequence.getValue()) {
+            if (!(item instanceof MappingNode mapping)) continue;
+            MappingNode described = mapping;
+            String ref = scalar(mapping, "$ref");
+            if (ref != null && ref.startsWith("#/")) {
+                Node target = byPointer(ref.substring(1));
+                if (target instanceof MappingNode targetMapping) described = targetMapping;
+            }
+            String in = scalar(described, "in");
+            String name = scalar(described, "name");
+            String url = scalar(described, "url");
+            if (in != null && name != null) {
+                if ((in + ":" + name).equals(wanted) && ++seen == wantedOccurrence) return item;
+            } else if (wanted.equals(name) || wanted.equals(url)) {
+                return item;
+            }
+        }
+        return null;
+    }
+
+    private Node byPointer(String pointer) {
+        Node node = root;
+        for (String token : pointer.substring(pointer.startsWith("/") ? 1 : 0).split("/", -1)) {
+            String key = token.replace("~1", "/").replace("~0", "~");
+            if (node instanceof MappingNode mapping) {
+                Node next = null;
+                for (NodeTuple tuple : mapping.getValue()) {
+                    if (tuple.getKeyNode() instanceof ScalarNode scalar && scalar.getValue().equals(key)) next = tuple.getValueNode();
+                }
+                if (next == null) return null;
+                node = next;
+            } else {
+                return null;
+            }
+        }
+        return node;
+    }
+
+    private static String scalar(MappingNode mapping, String key) {
+        for (NodeTuple tuple : mapping.getValue()) {
+            if (tuple.getKeyNode() instanceof ScalarNode k && k.getValue().equals(key) && tuple.getValueNode() instanceof ScalarNode v) return v.getValue();
+        }
+        return null;
+    }
+
     private PointerLocator(Node root) { this.root = root; }
 
     /** Reads {@code text}; if it cannot be read, every lookup answers null. */
@@ -59,14 +125,9 @@ public final class PointerLocator {
                     if (next == null) break;
                     node = next;
                 } else if (node instanceof SequenceNode sequence) {
-                    int index;
-                    try {
-                        index = Integer.parseInt(key);
-                    } catch (NumberFormatException e) {
-                        break;
-                    }
-                    if (index < 0 || index >= sequence.getValue().size()) break;
-                    node = sequence.getValue().get(index);
+                    Node item = element(sequence, key);
+                    if (item == null) break;
+                    node = item;
                     mark = node.getStartMark();
                 } else {
                     break;

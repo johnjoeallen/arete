@@ -1,1 +1,1 @@
-/paths/~1customers/get  |  Response 200 contains an unexpected headers: Link
+/paths/~1customers/get/responses/200  |  Response 200 contains an unexpected headers: Link

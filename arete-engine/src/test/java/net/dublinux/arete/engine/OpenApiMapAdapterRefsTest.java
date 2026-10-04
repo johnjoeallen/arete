@@ -191,4 +191,30 @@ class OpenApiMapAdapterRefsTest {
         assertEquals(levels + 1, byName(schemas, "L0").get("nestingDepth"));
         assertTrue((System.nanoTime() - start) / 1_000_000 < 5_000, "2^40 paths would never finish");
     }
+
+    @Test
+    void aParameterIsNamedByInAndNameAndARepeatIsToldApartBySuffix() {
+        String spec = """
+                openapi: 3.0.0
+                info: { title: T, version: 1.0.0 }
+                paths:
+                  /orders:
+                    get:
+                      parameters:
+                        - { name: limit, in: query, schema: { type: integer } }
+                        - { name: limit, in: query, schema: { type: integer } }
+                        - { name: limit, in: header, schema: { type: integer } }
+                      responses:
+                        '200': { description: OK }
+                        '404': { description: Missing }
+                """;
+        List<Map<String, Object>> operations = list(model(spec).get("operations"));
+        List<Map<String, Object>> parameters = list(operations.get(0).get("parameters"));
+        assertEquals(List.of("/paths/~1orders/get/parameters/query:limit", "/paths/~1orders/get/parameters/query:limit#2",
+                "/paths/~1orders/get/parameters/header:limit"), parameters.stream().map(p -> p.get("pointer")).toList());
+
+        List<Map<String, Object>> responses = list(operations.get(0).get("responses"));
+        assertEquals(List.of("/paths/~1orders/get/responses/200", "/paths/~1orders/get/responses/404"),
+                responses.stream().map(r -> r.get("pointer")).toList());
+    }
 }

@@ -3,12 +3,16 @@ package net.dublinux.arete.engine.report;
 /**
  * One finding in a report. {@code severity} is the stable name (ERROR, WARNING, INFO, HINT); {@code severityLabel} is
  * what the engine calls it (an ERROR is a "Blocker" in the policy engine). {@code line} and {@code column} are 1-based and null when the spec's text could not
- * be read. {@code scoreImpact} is the points the finding's rule costs (0 for a {@code PROHIBITED} rule, whose
+ * be read. {@code path} is the rule's label for the subject, such as {@code GET /orders}. {@code scoreImpact} is the points the finding's rule costs (0 for a {@code PROHIBITED} rule, whose
  * cost is the whole score).
  */
-public record Finding(String ruleId, String title, String severity, String severityLabel, String pointer, String message,
-        Integer line, Integer column, double scoreImpact) {
+public record Finding(String ruleId, String title, String severity, String severityLabel, String pointer, String path,
+        String message, Integer line, Integer column, double scoreImpact) {
 
-    /** What makes two findings the same finding in two runs: the rule and the place, not the wording. */
-    public String identity() { return ruleId + "|" + pointer; }
+    /**
+     * What makes two findings the same finding in two runs: the rule and the place, not the wording. The place is
+     * the pointer plus the rule's own label for the subject ("GET /orders", a server's URL), which tells apart the
+     * findings of one rule that share a pointer.
+     */
+    public String identity() { return ruleId + "|" + pointer + "|" + (path == null ? "" : path); }
 }

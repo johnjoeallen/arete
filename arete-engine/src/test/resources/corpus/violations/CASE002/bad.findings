@@ -1,1 +1,1 @@
-/paths/~1customers~1{customerId}/get/parameters/0  |  Name does not use the configured convention
+/paths/~1customers~1{customerId}/get/parameters/path:customerId  |  Name does not use the configured convention

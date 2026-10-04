@@ -71,10 +71,10 @@ class ReportsTest {
 
     @Test
     void aDiffClassifiesFindingsByRuleAndPointerNotMessage() {
-        Finding a = new Finding("R1", "t", "WARNING", "Warning", "/p", "one", 1, 1, 0.5);
-        Finding aReworded = new Finding("R1", "t", "WARNING", "Warning", "/p", "two (3 of 9)", 4, 1, 0.5);
-        Finding b = new Finding("R2", "t", "ERROR", "Blocker", "/q", "gone", 2, 1, 0);
-        Finding c = new Finding("R3", "t", "ERROR", "Blocker", "/r", "new", 3, 1, 0);
+        Finding a = new Finding("R1", "t", "WARNING", "Warning", "/p", null, "one", 1, 1, 0.5);
+        Finding aReworded = new Finding("R1", "t", "WARNING", "Warning", "/p", null, "two (3 of 9)", 4, 1, 0.5);
+        Finding b = new Finding("R2", "t", "ERROR", "Blocker", "/q", null, "gone", 2, 1, 0);
+        Finding c = new Finding("R3", "t", "ERROR", "Blocker", "/r", null, "new", 3, 1, 0);
         ScoreReport base = new ScoreReport("f.yaml", "P", "SUCCESS", null, 99, 99, "A", 90.0, 3, List.of(a, b), List.of());
         ScoreReport head = new ScoreReport("f.yaml", "P", "SUCCESS", null, 95, 95, "A", 90.0, 3, List.of(aReworded, c), List.of());
 
@@ -92,7 +92,7 @@ class ReportsTest {
 
     @Test
     void findingsThatShareARuleAndPointerPairOffOneForOne() {
-        Finding f = new Finding("R", "t", "WARNING", "Warning", "/op", "m", 1, 1, 0.5);
+        Finding f = new Finding("R", "t", "WARNING", "Warning", "/op", null, "m", 1, 1, 0.5);
         ScoreReport base = new ScoreReport("f", "P", "SUCCESS", null, 99, 99, "A", null, 1, List.of(f, f), List.of());
         ScoreReport head = new ScoreReport("f", "P", "SUCCESS", null, 98, 98, "A", null, 1, List.of(f, f, f), List.of());
 
@@ -105,8 +105,8 @@ class ReportsTest {
 
     @Test
     void markdownIsOneLinePerFindingNewFirstAndEscapesPipes() {
-        Finding oldOne = new Finding("R1", "t", "WARNING", "Warning", "/p", "stays | here", 1, 1, 0.5);
-        Finding newOne = new Finding("R3", "t", "ERROR", "Blocker", "/r", "arrived", 3, 1, 0);
+        Finding oldOne = new Finding("R1", "t", "WARNING", "Warning", "/p", null, "stays | here", 1, 1, 0.5);
+        Finding newOne = new Finding("R3", "t", "ERROR", "Blocker", "/r", null, "arrived", 3, 1, 0);
         ScoreReport base = new ScoreReport("f.yaml", "P", "SUCCESS", null, 99.5, 99.5, "A", 90.0, 3, List.of(oldOne), List.of());
         ScoreReport head = new ScoreReport("f.yaml", "P", "SUCCESS", null, 0, 99.5, "F", 90.0, 3, List.of(oldOne, newOne), List.of());
 
@@ -128,7 +128,7 @@ class ReportsTest {
     @Test
     void aLongRunOfUnchangedFindingsIsCappedInTheComment() {
         List<Finding> many = new java.util.ArrayList<>();
-        for (int i = 0; i < ReportWriter.MAX_EXISTING_IN_COMMENT + 5; i++) many.add(new Finding("R", "t", "WARNING", "Warning", "/p" + i, "m", i + 1, 1, 0.5));
+        for (int i = 0; i < ReportWriter.MAX_EXISTING_IN_COMMENT + 5; i++) many.add(new Finding("R", "t", "WARNING", "Warning", "/p" + i, null, "m", i + 1, 1, 0.5));
         ScoreReport report = new ScoreReport("f", "P", "SUCCESS", null, 90, 90, "B", null, 1, many, List.of());
 
         String comment = ReportWriter.markdown(ScoreDiff.of(report, report));
@@ -171,8 +171,8 @@ class ReportsTest {
 
     @Test
     void aDiffsSarifListsOnlyWhatTheChangeIntroduced() throws Exception {
-        Finding oldOne = new Finding("R1", "t", "WARNING", "Warning", "/p", "m", 1, 1, 0.5);
-        Finding newOne = new Finding("R3", "t", "ERROR", "Blocker", "/r", "m", 3, 1, 0);
+        Finding oldOne = new Finding("R1", "t", "WARNING", "Warning", "/p", null, "m", 1, 1, 0.5);
+        Finding newOne = new Finding("R3", "t", "ERROR", "Blocker", "/r", null, "m", 3, 1, 0);
         ScoreReport base = new ScoreReport("f.yaml", "P", "SUCCESS", null, 99, 99, "A", null, 2, List.of(oldOne), List.of());
         ScoreReport head = new ScoreReport("f.yaml", "P", "SUCCESS", null, 0, 99, "F", null, 2, List.of(oldOne, newOne), List.of());
 
