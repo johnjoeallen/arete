@@ -76,4 +76,27 @@ class ValueMeasureTest {
         ScoringResult result = engine.score(SpecInput.builder().content("openapi: 3.0.0\ninfo: { title: T, version: 1.0.0 }\npaths:\n  /m:\n    get:\n      responses: { '200': { description: OK } }\n").format(SpecFormat.OPENAPI3).policy("NoValue").build());
         assertEquals(ScoringResult.Status.PLUGIN_ERROR, result.getStatus());
     }
+
+    private static String operationWith(int parameters) {
+        StringBuilder text = new StringBuilder("openapi: 3.0.0\ninfo: { title: T, version: 1.0.0 }\npaths:\n  /reports:\n    get:\n      summary: S\n      parameters:\n");
+        for (int i = 0; i < parameters; i++) text.append("        - { name: p").append(i).append(", in: query, schema: { type: string } }\n");
+        text.append("      responses: { '200': { description: OK } }\n");
+        return text.toString();
+    }
+
+    @Test
+    void aPolicyCanTierStandard011ByParameterCountFromBelowItsDefaultMaximum(@TempDir Path tmp) throws IOException {
+        Path dir = tmp.resolve("policies");
+        Files.createDirectories(dir);
+        // maximum: 0 makes the matcher report every operation with parameters; the tiers then decide what is tolerated.
+        Files.writeString(dir.resolve("p.md"), "---\nid: Params\nformat: 2\nrules:\n  STANDARD011:\n    measure: value\n    tiers: { 5: 0.5, 9: 1, 13: 3 }\n    parameters: { maximum: 0 }\n---\n\n# Params\n");
+        Engine engine = Engine.builder().cacheDir(null).userPoliciesDir(dir).build();
+
+        java.util.function.IntFunction<ScoringResult> run = n -> engine.score(
+                SpecInput.builder().content(operationWith(n)).format(SpecFormat.OPENAPI3).policy("Params").build());
+        assertEquals(null, run.apply(4).getRuleOutcomes().stream().filter(o -> o.ruleId().equals("STANDARD011")).findFirst().orElse(null));
+        assertEquals(99.5, run.apply(5).getOverallScore());
+        assertEquals(99.0, run.apply(9).getOverallScore());
+        assertEquals(97.0, run.apply(14).getOverallScore());
+    }
 }
