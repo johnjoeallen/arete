@@ -20,7 +20,7 @@ lines or hours. A stage is 100% only when everything the plan lists for it is bu
 | 4 | Publish the engine, API and plugins | 40% |
 | Extras | Extended rule semantics, Distill values | 70% |
 
-Overall: roughly 80%. The software is largely built. What is left is the first publish and a few trials
+Overall: roughly 83% (the mean of the six rows above). The software is largely built. What is left is the first publish and a few trials
 against real material.
 
 ## Stage 0: fix false positives (95%)
