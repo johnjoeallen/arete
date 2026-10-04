@@ -67,6 +67,7 @@ jobs:
         run: |
           gh release create "$GITHUB_REF_NAME" \
             arete-${GITHUB_REF_NAME#v}.zip \
+            arete-cli/target/arete-cli-${GITHUB_REF_NAME#v}.jar \
             distill-syntax-${EXT_VERSION}.zip \
             distill-syntax-${EXT_VERSION}.vsix \
             --title "$GITHUB_REF_NAME" \

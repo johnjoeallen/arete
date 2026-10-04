@@ -15,6 +15,7 @@
     <modules>
         <module>arete-engine-api</module>
         <module>arete-engine</module>
+        <module>arete-cli</module>
         <module>arete-app</module>
         <!-- Build-gate plugins. In the reactor so one checkout builds and
              integration-tests them against a freshly-built Areté, but they

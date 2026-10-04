@@ -64,6 +64,7 @@ nav:
   - Home: index.md
   - Getting Started: getting-started.md
   - Configuration: configuration.md
+  - Command line: cli.md
   - Automation API: automation-api.md
   - History: history.md
   - Scoring:

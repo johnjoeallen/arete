@@ -10,7 +10,7 @@
     <packaging>jar</packaging>
 
     <name>arete-engine</name>
-    <description>Generic API policy scoring plugin for Areté</description>
+    <description>The Areté engine: spec model, policy loading, Distill matchers, scoring and reports</description>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>

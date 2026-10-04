@@ -69,6 +69,15 @@ public class Engine {
         };
     }
 
+    /** What the loaded bundle holds, for a tool that wants to say so. */
+    public record BundleInfo(String bundleId, String bundleVersion, List<String> policies, int rules, int matchers) { }
+
+    public BundleInfo bundleInfo() {
+        PolicyBundle current = activeBundle();
+        return new BundleInfo(current.bundleId(), current.bundleVersion(), List.copyOf(current.policies().keySet()),
+                current.rules().size(), current.matchers().size());
+    }
+
     public Optional<String> getSuggestedScoreLevel(String policyName) {
         Policy policy = activeBundle().policies().get(policyName);
         if (policy == null) {
