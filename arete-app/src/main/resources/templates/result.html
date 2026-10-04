@@ -59,23 +59,13 @@
                     <div th:if="${engineChoices != null and !engineChoices.isEmpty() and specRef != null}" class="scoring-picker-wrapper">
                         <h2>Scoring</h2>
                         <form method="post" th:action="@{/spec/{ref}/score(ref=${specRef})}" class="scoring-picker" id="scoring-picker-form">
-                            <table class="engine-picker-table">
-                                <thead>
-                                    <tr><th></th><th>Engine</th><th>Policy</th></tr>
-                                </thead>
-                                <tbody>
-                                    <tr th:each="pc : ${engineChoices}">
-                                        <td><input type="checkbox" name="engine" th:value="${pc.engineId()}" th:checked="${pc.enabled()}"></td>
-                                        <td th:text="${pc.engineName()}"></td>
-                                        <td>
-                                            <select th:name="'policy_' + ${pc.engineId()}">
-                                                <option th:each="rs : ${pc.policies()}" th:value="${rs.slug()}" th:text="${rs.name()}"
-                                                        th:selected="${rs.slug() == pc.selectedSlug()}"></option>
-                                            </select>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <label class="policy-picker" th:each="pc : ${engineChoices}">
+                                Policy
+                                <select th:name="'policy_' + ${pc.engineId()}">
+                                    <option th:each="rs : ${pc.policies()}" th:value="${rs.slug()}" th:text="${rs.name()}"
+                                            th:selected="${rs.slug() == pc.selectedSlug()}"></option>
+                                </select>
+                            </label>
                             <button type="submit">Score</button>
                         </form>
                     </div>
@@ -90,7 +80,7 @@
                             <div class="scoring-results">
                                 <p th:if="${resultFromCache}" class="scoring-summary-line scoring-cached-note">Showing results from the last Score run.</p>
                                 <p th:if="${scoring.rulesEvaluatedCount() >= 0}" class="scoring-summary-line"
-                                   th:text="${scoring.rulesEvaluatedCount()} + ' rule(s) checked across ' + ${scoring.engineSummaries().size()} + ' validator(s).'"></p>
+                                   th:text="${scoring.rulesEvaluatedCount()} + ' rule(s) checked.'"></p>
                                 <p th:if="${!T(java.lang.Double).isNaN(scoring.overallScore())}" class="scoring-summary-line scoring-score-line">
                                     Score: <span th:text="${#numbers.formatDecimal(scoring.overallScore(), 1, 1)}"></span>%
                                     <span th:if="${scoring.grade() != null}" class="scoring-grade"
@@ -105,10 +95,8 @@
                                 </p>
                                 <p th:if="${scoring.diagnostics().isEmpty()}" class="scoring-summary-line scoring-clean-note">No issues found.</p>
                                 <ul class="engine-outcomes">
-                                    <li th:each="s : ${scoring.engineSummaries()}">
-                                        <span th:text="${s.engineName()}"></span>:
-                                        <span th:if="${s.status() == 'SUCCESS'}" th:text="${s.diagnosticCount()} + ' diagnostic(s)'"></span>
-                                        <span th:unless="${s.status() == 'SUCCESS'}" class="engine-error" th:text="${s.status()} + ' - ' + ${s.errorMessage()}"></span>
+                                    <li th:each="s : ${scoring.engineSummaries()}" th:unless="${s.status() == 'SUCCESS'}">
+                                        <span class="engine-error" th:text="${s.status()} + ' - ' + ${s.errorMessage()}"></span>
                                     </li>
                                 </ul>
                                 <div class="severity-filter">

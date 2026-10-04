@@ -239,10 +239,8 @@ a:hover { color: var(--link-hover); }
 .scoring-picker button { padding: 0.4em 0.9em; border: 1px solid var(--link); border-radius: 4px; background: var(--link); color: #fff; cursor: pointer; }
 .scoring-picker button:hover:not(:disabled) { background: var(--link-hover); border-color: var(--link-hover); }
 .scoring-picker button:disabled { background: var(--surface-alt); border-color: var(--border); color: var(--muted-fg); cursor: not-allowed; }
-.engine-picker-table { border-collapse: collapse; font-size: 0.9em; }
-.engine-picker-table th { text-align: left; color: var(--muted-fg); font-weight: 600; padding: 0.2em 0.8em 0.2em 0; }
-.engine-picker-table td { padding: 0.25em 0.8em 0.25em 0; vertical-align: middle; }
-.engine-picker-table select { padding: 0.3em 0.5em; background: var(--bg); color: var(--fg); border: 1px solid var(--border); border-radius: 4px; }
+.policy-picker { display: inline-flex; align-items: center; gap: 0.6em; margin-right: 0.8em; font-size: 0.9em; color: var(--muted-fg); font-weight: 600; }
+.policy-picker select { padding: 0.3em 0.5em; background: var(--bg); color: var(--fg); border: 1px solid var(--border); border-radius: 4px; }
 
 .tag-group { margin-bottom: 2em; }
 .tag-group-header { display: flex; align-items: center; justify-content: space-between; gap: 1em; }

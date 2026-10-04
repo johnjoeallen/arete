@@ -243,30 +243,21 @@ public class SpecController {
      * the run parameters never appear in the address bar.
      */
     @PostMapping("/spec/{ref}/score")
-    public String score(@PathVariable String ref, @RequestParam(name = "engine", required = false) List<String> checkedEngines,
-            @RequestParam Map<String, String> allParams) {
+    public String score(@PathVariable String ref, @RequestParam Map<String, String> allParams) {
         SpecEntity entity = specStorageService.findByRef(ref)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Spec not found"));
         long id = entity.getId();
-        Set<String> checkedEngineIds = checkedEngines == null ? Set.of() : Set.copyOf(checkedEngines);
         List<EngineRunRequest> requests = new ArrayList<>();
         for (Engine candidate : List.of(engine)) {
-            boolean enabledForSpec = checkedEngineIds.contains(candidate.getId());
             String submitted = allParams.get("policy_" + candidate.getId());
             String policyName = resolvePolicy(candidate.getId(), submitted);
-            specEngineSettingsService.setSelection(id, candidate.getId(), enabledForSpec,
+            specEngineSettingsService.setSelection(id, candidate.getId(), true,
                     policyIndex(candidate.getId(), policyName));
-            if (enabledForSpec) {
-                requests.add(new EngineRunRequest(candidate.getId(), policyName));
-            }
+            requests.add(new EngineRunRequest(candidate.getId(), policyName));
         }
-        if (requests.isEmpty()) {
-            specScoringResultService.deleteForSpec(id);
-        } else {
-            AggregatedScoringResult scoring = engineScoringService.scoreMany(entity.getRawContent(), requests);
-            specScoringResultService.save(id, SpecScoringResultService.contentHashOf(entity.getRawContent()),
-                    scoring, requests.stream().map(EngineRunRequest::engineId).toList());
-        }
+        AggregatedScoringResult scoring = engineScoringService.scoreMany(entity.getRawContent(), requests);
+        specScoringResultService.save(id, SpecScoringResultService.contentHashOf(entity.getRawContent()),
+                scoring, requests.stream().map(EngineRunRequest::engineId).toList());
         return "redirect:/spec/" + ref + "?scored";
     }
 
