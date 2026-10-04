@@ -25,10 +25,7 @@ jobs:
         # and arete-app carry an explicit <version> and do not declare
         # arete-parent as their <parent> (arete-app parents to Spring Boot), so
         # without it versions:set never reaches them and the packaged jars keep
-        # the SNAPSHOT name. It also stamps the arete-ci-gate-* modules with this
-        # tag's version, which is harmless here — this workflow neither zips nor
-        # publishes them, and their real releases run from ci-gate-v* tags via
-        # publish-ci-gate.yml, which sets their version itself.
+        # the SNAPSHOT name.
         run: mvn --no-transfer-progress versions:set -DnewVersion=${GITHUB_REF_NAME#v} -DgenerateBackupPoms=false -DprocessAllModules=true
 
       - name: Build

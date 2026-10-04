@@ -76,4 +76,4 @@ nav:
       - Rule Catalogue: scoring/rules.md
       - Policies: scoring/policies.md
   - Releasing: releasing.md
-  - Publishing the SPI: publishing-spi.md
+  - Publishing to Maven Central: publishing.md

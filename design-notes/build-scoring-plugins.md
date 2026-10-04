@@ -1,6 +1,9 @@
 # Areté CI Gate — Maven & Gradle build-gate plugins
 
-> **v1 implemented.** Modules `arete-ci-gate-core`,
+> **Superseded and removed.** The `arete-ci-gate-*` modules this describes were retired in favour of in-process plugins
+> (`arete-maven-plugin`, `arete-gradle-plugin`) over the embeddable engine; see `serverless-core-plan.md`. Kept as history.
+>
+> **v1 implemented (historical).** Modules `arete-ci-gate-core`,
 > `arete-ci-gate-maven-plugin`, `arete-ci-gate-gradle-plugin` are in the
 > reactor. Still to do: the `ci-gate-it.yml` integration job (real Areté +
 > TestKit) and the first `ci-gate-v1.0.0` publish. This document remains the

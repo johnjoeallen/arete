@@ -46,7 +46,22 @@ credentials from `<servers>` and proxies come from there, as they do for the res
 
 ## Gradle
 
+The plugin is published to Maven Central, not the Gradle Plugin Portal, so tell Gradle where to find it:
+
 ```groovy
+// settings.gradle
+pluginManagement {
+    repositories { mavenCentral(); gradlePluginPortal() }
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id == 'net.dublinux.arete') useModule("net.dublinux.arete:arete-gradle-plugin:${requested.version}")
+        }
+    }
+}
+```
+
+```groovy
+// build.gradle
 plugins { id 'net.dublinux.arete' version '0.1.0' }
 
 arete {
@@ -70,8 +85,3 @@ Neither is wired into `check`: run the gate as its own CI job so it can be a req
 The plugin jar bundles the engine's libraries and moves them aside (Jackson, Guava, SnakeYAML and the rest are relocated
 under `net.dublinux.arete.shaded`), because a Gradle plugin shares a classpath with every other build plugin. It uses
 Gradle's own SLF4J.
-
-## The older gate plugins
-
-`arete-ci-gate-maven-plugin` and `arete-ci-gate-gradle-plugin` submit a spec to a running Areté server and read its
-verdict. They are deprecated in favour of these and will be removed after one release.

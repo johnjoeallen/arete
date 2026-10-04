@@ -1,18 +1,19 @@
-# Publishing the SPI to Maven Central
+# Publishing to Maven Central
 
-The SPI is now published under these coordinates:
+Four artifacts are published, because a build or an embedder depends on them:
 
-```xml
-<dependency>
-  <groupId>net.dublinux.arete</groupId>
-  <artifactId>arete-engine-api</artifactId>
-  <version>VERSION</version>
-</dependency>
-```
+| Artifact | For |
+|---|---|
+| `net.dublinux.arete:arete-engine-api` | The engine's public types (findings, scores, severities, spec input). |
+| `net.dublinux.arete:arete-engine` | The embeddable policy engine. |
+| `net.dublinux.arete:arete-maven-plugin` | `arete:gate` and `arete:score` in a Maven build. |
+| `net.dublinux.arete:arete-gradle-plugin` | `areteGate` and `areteScore` in a Gradle build (a self-contained jar). |
 
-The previous coordinates, `net.dublinux.speculate:speculate-scoring-spi`,
-are a different Maven artifact. Maven Central does not rename artifacts, so
-existing consumers must migrate explicitly.
+The `arete-parent` pom they inherit from is uploaded with them. The command line jar and the local UI app are not on
+Central: they are GitHub release assets (see [Releasing](releasing.md)). The old `arete-ci-gate-*` artifacts are retired.
+
+The previous coordinates, `net.dublinux.speculate:speculate-scoring-spi`, are a different Maven artifact. Maven Central
+does not rename artifacts, so existing consumers must migrate explicitly.
 
 ## One-time setup
 
@@ -32,15 +33,14 @@ existing consumers must migrate explicitly.
    - `GPG_PRIVATE_KEY` — the ASCII-armoured private key
    - `GPG_PASSPHRASE`
 
-The `release` profile in
-[`arete-engine-api/pom.xml`](https://github.com/johnjoeallen/arete/blob/main/arete-engine-api/pom.xml)
+The `release` profile in the parent
+[`pom.xml`](https://github.com/johnjoeallen/arete/blob/main/pom.xml)
 creates the sources and Javadoc jars, signs all artifacts, and uploads them
 through the Central Publishing Portal.
 
 ## Prepare a release
 
-1. Make sure the new coordinates are present in the SPI POM and that the
-   working tree is clean.
+1. Make sure the working tree is clean.
 2. Run the tests and package check locally:
 
    ```bash
@@ -56,25 +56,26 @@ through the Central Publishing Portal.
    git push origin main vX.Y.Z
    ```
 
-The tag triggers the application release workflow, but it does not publish the
-SPI automatically.
+The tag triggers the application release workflow, but it does not publish to
+Central automatically.
 
-## Publish the SPI
+## Publish
 
 1. Open the repository's **Actions** tab.
-2. Select **Publish SPI to Maven Central**.
+2. Select **Publish to Maven Central**.
 3. Choose **Run workflow** and enter the tag, for example `vX.Y.Z`.
 4. Wait for the workflow to finish. It checks out that tag, derives the Maven
-   version by removing the leading `v`, imports the GPG key, and runs:
+   version by removing the leading `v`, runs the tests, imports the GPG key, and runs:
 
    ```bash
-   mvn --no-transfer-progress -pl arete-engine-api -Prelease deploy
+   mvn --no-transfer-progress -Prelease -DskipTests \
+     -pl .,arete-engine-api,arete-engine,arete-maven-plugin,arete-gradle-plugin deploy
    ```
 
 5. Open [Central Portal deployments](https://central.sonatype.com/publishing/deployments),
    inspect the pending deployment, and publish it manually. The workflow has
    `autoPublish` disabled deliberately.
-6. After Central finishes processing, verify the artifact and its sources and
+6. After Central finishes processing, verify the artifacts and their sources and
    Javadoc jars under the new coordinates.
 
 ## Migrating consumers

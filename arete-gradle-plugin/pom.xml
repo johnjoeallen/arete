@@ -16,15 +16,6 @@
 
     <name>arete-gradle-plugin</name>
     <description>Score OpenAPI specs and gate a change against its base, in process, from Gradle</description>
-    <url>https://github.com/johnjoeallen/arete</url>
-
-    <licenses>
-        <license>
-            <name>Apache License, Version 2.0</name>
-            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
-        </license>
-    </licenses>
-
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
