@@ -13,7 +13,7 @@ lines or hours. A stage is 100% only when everything the plan lists for it is bu
 
 | Stage | Goal | Complete |
 | --- | --- | --- |
-| 0 | Fix false positives and deep `$ref` | 90% |
+| 0 | Fix false positives and deep `$ref` | 95% |
 | 1 | Rule corpus (parity with other tools is out of scope for now) | 100% |
 | 2 | Extract the engine, policy loader, CLI, reports | 95% |
 | 3 | Merge-gate and thin build plugins | 95% |
@@ -23,7 +23,7 @@ lines or hours. A stage is 100% only when everything the plan lists for it is bu
 Overall: roughly 80%. The software is largely built. What is left is the first publish and a few trials
 against real material.
 
-## Stage 0: fix false positives (90%)
+## Stage 0: fix false positives (95%)
 
 | Item | State |
 | --- | --- |
@@ -32,11 +32,11 @@ against real material.
 | Rule corpus: bad and good pair for every bundled rule | Done |
 | Whole-API corpus: good and messy specs | Done |
 | Cycle detection, depth limit, ref-to-ref chains | Done for the model; JSON025 measures nesting depth |
-| "Reached via" path on a shared-schema finding | Not done |
+| "Reached via" routes on a shared-schema finding | Done: one route per operation that reaches the definition, in the markdown (first three and a count), JSON and SARIF reports; not part of finding identity |
 | External (relative file and URL) refs resolved against the base commit in the gate | Partly: head resolves; base resolution against the merge-base for multi-file specs needs a trial |
 | Known gaps recorded in the corpus | JSON013 is now fixed; none outstanding |
 
-Remaining: "reached via" reporting and a multi-file spec trial through the gate.
+Remaining: a multi-file spec trial through the gate. Routes follow same-document `$ref`s only.
 
 ## Stage 1: rule corpus (100%)
 
@@ -105,6 +105,5 @@ Comparison with other linters is out of scope for now.
 1. Run `publish.yml` once and confirm the engine, API and both plugins resolve from the published location.
 2. Try the gate on a multi-file spec with external refs, and fix base-side resolution if needed.
 3. See a SARIF file render inline in GitLab and in GitHub.
-4. Add "reached via" paths to findings on shared schemas.
-5. Remove the deprecated automation API.
-6. Optional: signature checking, `--annotate-changed-only`, Distill combinators.
+4. Remove the deprecated automation API.
+5. Optional: signature checking, `--annotate-changed-only`, Distill combinators.

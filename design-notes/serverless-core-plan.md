@@ -93,7 +93,7 @@ The plan:
 1. **A resolved schema graph.** Each schema node carries both views: the raw `$ref` (so inline-schema rules still work) and the resolved target. Resolution follows ref-to-ref chains, memoises by target, detects cycles and has a configurable depth limit. Hitting the limit raises a finding, never a silent truncation.
 2. **Walk everything.** Properties recursively, `items`, `additionalProperties`, composition members (with an `allOf` merged view), and parameters, headers, responses and request bodies, including component refs.
 3. **External refs.** Relative file and URL refs resolve against the spec's base. For the merge-gate the base spec must resolve against the base commit (`git show` for each referenced file, or the raw URL at the merge-base SHA), never the head checkout, or the comparison mixes versions.
-4. **Report once, at the definition.** A finding on a shared schema points at its definition pointer, with an optional "reached via" path, so one defect reached through ten paths is one occurrence. This also keeps occurrence identity stable.
+4. **Report once, at the definition.** A finding on a shared schema points at its definition pointer, with the routes in from each operation that reaches it ("reached via"), so one defect reached through ten paths is one occurrence. This also keeps occurrence identity stable.
 5. **Nesting rules.** Add rules for maximum schema nesting depth and maximum `$ref` chain length, with configurable limits in the policy, so the pet hate becomes a measurable finding.
 6. **Tests.** A corpus with deep nesting, cycles, ref-to-ref chains and external files, run before any parity numbers are trusted.
 
@@ -179,7 +179,7 @@ The gate scores the head spec and the base spec with the same policy, then judge
 - **Stable pointers do the matching.** The keyed pointers (parameters by name, responses by status) let a finding keep its identity when lines move, while the line mapping shows where it is now.
 - **Reasons carry locations.** A failed gate says which rule and where: "3 NEW errors: STATUS001 at POST /orders (line 142), ...". A score drop is attributed to the findings that caused it, so "score fell 4.5" comes with the NEW findings and the deduction each cost. A worsened count rule lists the new hits.
 - **Inline annotations.** The SARIF file gets real `physicalLocation` entries (file path relative to the repo root, line and column), so GitLab and GitHub can place each NEW finding on the changed line in the MR or PR. The markdown summary links `path:line` for the same findings.
-- **Moved or deleted places.** A NEW finding on a definition not in the diff (for example a shared schema reached through a changed operation) is reported at the definition with its "reached via" path from the deep `$ref` work. Specs with external refs map the pointer to the file that actually contains it.
+- **Moved or deleted places.** A NEW finding on a definition not in the diff (for example a shared schema reached through a changed operation) is reported at the definition with its "reached via" routes from the deep `$ref` work. Specs with external refs map the pointer to the file that actually contains it.
 - **Changed lines only, optional.** A `--annotate-changed-only` option limits inline annotations to lines the MR touched, to keep comments short. The full report still lists everything.
 
 ## Output files and exit codes
