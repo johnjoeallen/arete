@@ -304,14 +304,14 @@ public final class Main {
               arete score  <spec>... [options]     score one or more specs
               arete diff   <base> <head> [options] score two versions of a spec and say what changed
               arete report <spec>... [options]     write a full markdown report
-              arete gate [options]                 judge the specs a change touched against their base: the merge-gate
+              arete gate [options]                 score every spec and judge a change against its base: the merge-gate
               arete policy verify [options]        check that the policy sources load, match their pins and compile
               arete help | --version
 
             Policy:
               --policy <name>               the policy to use (default: the .arete.yaml's, else the bundle's first)
               --policy-source <source>      a policy bundle; repeat to layer them. <uri>[#sha256=<hex>][&version=<v>]
-                                            with classpath:, file:, https: or maven:group:artifact:version
+                                            with classpath:, file:, https:, maven:group:artifact:version or git:<repo>[#ref=..&path=..]
               --maven-repository <url>      a Maven-layout repository (https or file:) for maven: sources
               --maven-settings <path|default>  read repositories, mirrors, credentials and proxies from settings.xml
               --maven-profile <id>          activate a settings.xml profile
@@ -328,7 +328,7 @@ public final class Main {
               --format text|json|md|sarif   (default text)
               --out <file>                  write the output to a file instead of the terminal
 
-            Gate (run in a git repository; the specs a change touched, each against its base):
+            Gate (run in a git repository; every spec is scored, a changed one against its base):
               --target <ref>                the branch it merges into (default origin/main); the base is the merge-base
               --base-sha <sha>              the base commit itself (e.g. GitLab CI_MERGE_REQUEST_DIFF_BASE_SHA)
               --paths <glob>                spec files to look at, repeatable (default **/openapi.yaml, .yml, .json)

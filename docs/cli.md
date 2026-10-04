@@ -14,7 +14,7 @@ java -jar arete-cli.jar score apis/orders/openapi.yaml
 | `arete score <spec>...` | Scores each spec and prints the score, grade and findings with their file and line. |
 | `arete diff <base> <head>` | Scores two versions of a spec with the same policy and says which findings are **NEW**, **EXISTING** or **RESOLVED**, and how the score moved. |
 | `arete report <spec>...` | Writes a full markdown report: the score, then every finding grouped under its rule, and the overrides applied. |
-| `arete gate` | The merge-gate: finds the specs a change touched, reads each one's base, and judges the change rather than the spec. |
+| `arete gate` | The merge-gate: scores every spec, reads each changed spec's base, and judges the change rather than the spec. |
 | `arete policy verify` | Loads the policy sources, checks their pins and compiles every matcher; says what the bundle holds. |
 
 ## The merge-gate
@@ -43,7 +43,7 @@ arete gate --target origin/main \
 
 - **The base** is the merge-base of `HEAD` and `--target` (default `origin/main`), or `--base-sha` when the CI system
   provides it (GitLab's `CI_MERGE_REQUEST_DIFF_BASE_SHA`). In git mode it is read with `git show <base>:<path>`: no
-  checkout, and only for specs the change touched. Specs are the files matching `--paths` (default `**/openapi.yaml`,
+  checkout, and only for specs that changed. Specs are the files matching `--paths` (default `**/openapi.yaml`,
   `.yml` and `.json`), found per folder, each with its own `.arete.yaml`.
 - **Shallow clones** do not hold the base commit. Either fetch the history (`GIT_DEPTH: 0` on GitLab, `fetch-depth: 0`
   on GitHub), or read the base from the code host: `--base-source raw --base-sha <sha> --raw-url '<url with {path} and
@@ -57,6 +57,10 @@ arete gate --target origin/main \
   `--report-sarif` the findings the change introduced, with file and line. A separate step posts them: Areté never calls
   GitLab or GitHub.
 - **`--report-only`** writes the same files and always exits 0, for a trial period before the job is made required.
+- **Adopting on a repository with legacy specs.** Every spec is judged, and an unchanged one has to meet the pass mark and have
+  no blockers, so a legacy spec below the pass mark fails every merge until it is fixed. Start with `--report-only` to see
+  the damage, then either fix those specs, limit `--paths` to the specs that are ready, or give a legacy spec a policy of its
+  own in its `.arete.yaml` (a lower `passingScore`) and tighten it over time.
 
 ```yaml
 # GitLab
