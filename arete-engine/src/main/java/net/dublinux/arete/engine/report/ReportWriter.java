@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import net.dublinux.arete.engine.Overrides;
+import net.dublinux.arete.engine.gate.GateResult;
+import net.dublinux.arete.engine.gate.SpecResult;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -280,6 +282,106 @@ public final class ReportWriter {
         }
         if (f.pointer() != null) location.putArray("logicalLocations").addObject().put("fullyQualifiedName", f.pointer());
         return result;
+    }
+
+    // ---- gate ---------------------------------------------------------------------------------------------
+
+    public static String text(GateResult gate) {
+        StringBuilder out = new StringBuilder("gate: ").append(gate.passed() ? "PASSED" : "FAILED").append("  ").append(gate.specs().size())
+                .append(gate.specs().size() == 1 ? " spec" : " specs").append(" checked, ").append(gate.skipped().size()).append(" unchanged  (base ")
+                .append(gate.baseDescription()).append(")\n");
+        for (SpecResult spec : gate.specs()) {
+            out.append(spec.passed() ? "  PASS  " : "  FAIL  ").append(spec.file()).append(spec.isNew() ? "  (new spec)" : "").append('\n');
+            for (String reason : spec.reasons()) out.append("        ").append(reason).append('\n');
+            if (spec.warning() != null) out.append("        note: ").append(spec.warning()).append('\n');
+        }
+        return out.toString();
+    }
+
+    /** The merge-request comment: the verdict and why, then each spec's score line and one line per finding, new first. */
+    public static String markdown(GateResult gate) {
+        StringBuilder out = new StringBuilder("## Areté gate: ").append(gate.passed() ? "PASSED" : "FAILED").append("\n\n")
+                .append(gate.specs().size()).append(gate.specs().size() == 1 ? " spec" : " specs").append(" checked");
+        if (!gate.skipped().isEmpty()) out.append(", ").append(gate.skipped().size()).append(" unchanged");
+        out.append(". Base: ").append(gate.baseDescription()).append(".\n\n");
+        if (!gate.passed()) {
+            out.append("**Why it failed**\n\n");
+            for (String reason : gate.reasons()) out.append(reason.startsWith("  ") ? "  - " + reason.strip() : "- " + reason).append('\n');
+            out.append('\n');
+        }
+        for (SpecResult spec : gate.specs()) {
+            out.append("### ").append(spec.file()).append(" — ").append(spec.isNew() ? "new spec, " : "").append(spec.passed() ? "passed" : "failed").append("\n\n");
+            if (spec.warning() != null) out.append("_Note: ").append(spec.warning()).append("._\n\n");
+            if (!spec.head().succeeded()) {
+                out.append("> ").append(spec.head().status()).append(": ").append(spec.head().errorMessage()).append("\n\n");
+                continue;
+            }
+            if (spec.isNew()) {
+                out.append(headline(spec.head())).append("\n\n");
+                for (Finding f : spec.head().findings()) {
+                    out.append("- **NEW** ").append(f.severityLabel()).append(" `").append(f.ruleId()).append("` `").append(f.pointer()).append("` (")
+                            .append(where(spec.head(), f)).append(") — ").append(oneLine(f.message())).append('\n');
+                }
+                if (spec.head().findings().isEmpty()) out.append("No findings.\n");
+                out.append('\n');
+            } else {
+                String comment = markdown(spec.diff());
+                out.append(comment.substring(comment.indexOf("\n\n") + 2).stripLeading()).append('\n');
+            }
+        }
+        return out.toString();
+    }
+
+    public static String json(GateResult gate) {
+        ObjectNode root = envelope("gate");
+        root.put("passed", gate.passed());
+        root.put("base", gate.baseDescription());
+        ArrayNode reasons = root.putArray("reasons");
+        for (String reason : gate.reasons()) reasons.add(reason);
+        ArrayNode skipped = root.putArray("unchanged");
+        for (String file : gate.skipped()) skipped.add(file);
+        ArrayNode specs = root.putArray("specs");
+        for (SpecResult spec : gate.specs()) {
+            ObjectNode node = specs.addObject();
+            node.put("file", spec.file());
+            node.put("newSpec", spec.isNew());
+            node.put("passed", spec.passed());
+            ArrayNode why = node.putArray("reasons");
+            for (String reason : spec.reasons()) why.add(reason);
+            if (spec.warning() != null) node.put("warning", spec.warning());
+            node.set("head", reportNode(spec.head()));
+            if (spec.base() != null) node.set("base", reportNode(spec.base()));
+            if (spec.diff() != null) {
+                node.put("scoreDelta", spec.diff().scoreDelta());
+                ObjectNode counts = node.putObject("counts");
+                for (ScoreDiff.Kind kind : ScoreDiff.Kind.values()) counts.put(kind.name().toLowerCase(Locale.ROOT), spec.diff().count(kind));
+                ArrayNode changes = node.putArray("changes");
+                for (ScoreDiff.Change change : spec.diff().changes()) {
+                    ObjectNode c = findingNode(change.finding());
+                    c.put("kind", change.kind().name());
+                    changes.add(c);
+                }
+            }
+        }
+        return write(root);
+    }
+
+    /** SARIF of what the change introduced: the new findings of changed specs, and every finding of a new spec. */
+    public static String sarif(GateResult gate) {
+        ObjectNode root = sarifRoot();
+        ArrayNode results = ((ObjectNode) root.withArray("runs").get(0)).putArray("results");
+        Map<String, Finding> rules = new LinkedHashMap<>();
+        for (SpecResult spec : gate.specs()) {
+            List<Finding> introduced = new ArrayList<>();
+            if (spec.isNew()) introduced.addAll(spec.head().findings());
+            else if (spec.diff() != null) for (ScoreDiff.Change change : spec.diff().of(ScoreDiff.Kind.NEW)) introduced.add(change.finding());
+            for (Finding f : introduced) {
+                rules.putIfAbsent(f.ruleId(), f);
+                results.add(sarifResult(spec.file(), f));
+            }
+        }
+        addSarifRules(root, rules);
+        return write(root);
     }
 
     // ---- shared -------------------------------------------------------------------------------------------

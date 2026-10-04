@@ -99,6 +99,25 @@ public final class Overrides {
         return new Overrides(policy, rules);
     }
 
+    /**
+     * The nearest {@code .arete.yaml} from the spec's folder up to {@code root} (inclusive), parsed; none if there is no
+     * such file. The nearest wins outright: files are not merged.
+     */
+    public static Overrides discover(java.nio.file.Path spec, java.nio.file.Path root) {
+        java.nio.file.Path top = root.toAbsolutePath().normalize();
+        for (java.nio.file.Path dir = spec.toAbsolutePath().normalize().getParent(); dir != null && dir.startsWith(top); dir = dir.getParent()) {
+            java.nio.file.Path file = dir.resolve(".arete.yaml");
+            if (java.nio.file.Files.isRegularFile(file)) {
+                try {
+                    return parse(java.nio.file.Files.readString(file, java.nio.charset.StandardCharsets.UTF_8));
+                } catch (java.io.IOException e) {
+                    throw new BundleValidationException(file + " could not be read: " + e.getMessage());
+                }
+            }
+        }
+        return NONE;
+    }
+
     /** The policy the folder asks for, or null. */
     public String policy() { return policy; }
 

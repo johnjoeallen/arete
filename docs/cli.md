@@ -14,7 +14,60 @@ java -jar arete-cli.jar score apis/orders/openapi.yaml
 | `arete score <spec>...` | Scores each spec and prints the score, grade and findings with their file and line. |
 | `arete diff <base> <head>` | Scores two versions of a spec with the same policy and says which findings are **NEW**, **EXISTING** or **RESOLVED**, and how the score moved. |
 | `arete report <spec>...` | Writes a full markdown report: the score, then every finding grouped under its rule, and the overrides applied. |
+| `arete gate` | The merge-gate: finds the specs a change touched, reads each one's base, and judges the change rather than the spec. |
 | `arete policy verify` | Loads the policy sources, checks their pins and compiles every matcher; says what the bundle holds. |
+
+## The merge-gate
+
+`arete gate` is the CI step. It does not re-argue debt a spec already has: it scores each changed spec as it is now
+and as it was at the base, with the same policy and overrides, and judges the difference.
+
+| Case | The gate fails when |
+|---|---|
+| A changed spec | it has a **new blocker** (an error-level finding, from a `PROHIBITED` rule), or its **score is lower** than the base's. |
+| A new spec (no base) | it scores below the policy's pass mark, or has any blocker: it has to stand on its own. |
+| A deleted spec | never: it is skipped. |
+| An unchanged spec | never: it is skipped, which keeps CI fast. |
+| A head that does not parse | always. |
+| A base that does not parse | it is judged as a new spec, with a note. |
+
+A failure says why and where: the rule, the file and line, and, for a lower score, which newly violated rules caused it.
+A moved spec is compared with its old self. Count-based rules (limits that fail only when newly exceeded) arrive with the
+richer rule semantics; until then a new finding is judged as above.
+
+```bash
+arete gate --target origin/main \
+  --policy-source "maven:org.acme:api-policy:2.3.1#sha256=9f2c…" --maven-settings default --require-pin \
+  --report-md gate.md --report-json gate.json --report-sarif gate.sarif
+```
+
+- **The base** is the merge-base of `HEAD` and `--target` (default `origin/main`), or `--base-sha` when the CI system
+  provides it (GitLab's `CI_MERGE_REQUEST_DIFF_BASE_SHA`). In git mode it is read with `git show <base>:<path>`: no
+  checkout, and only for specs the change touched. Specs are the files matching `--paths` (default `**/openapi.yaml`,
+  `.yml` and `.json`), found per folder, each with its own `.arete.yaml`.
+- **Shallow clones** do not hold the base commit. Either fetch the history (`GIT_DEPTH: 0` on GitLab, `fetch-depth: 0`
+  on GitHub), or read the base from the code host: `--base-source raw --base-sha <sha> --raw-url '<url with {path} and
+  {ref}>' --raw-header 'PRIVATE-TOKEN: $TOKEN'` (`$TOKEN` comes from the environment). Pin the base to the merge-base
+  SHA, not the tip of the branch, or changes main made since the branch was cut show up as the branch's own. Raw mode
+  compares every spec found with its base and drops the identical ones; `--changed-files <file>` limits it to a list.
+  When the base cannot be reached the command says what to change and exits 2: that is a configuration problem, not a
+  verdict.
+- **Reports** are written alongside the main output: `--report-md` is the merge-request comment (the verdict, why it
+  failed, then a score line and one line per finding per spec, new ones first), `--report-json` the full record, and
+  `--report-sarif` the findings the change introduced, with file and line. A separate step posts them: Areté never calls
+  GitLab or GitHub.
+- **`--report-only`** writes the same files and always exits 0, for a trial period before the job is made required.
+
+```yaml
+# GitLab
+api-gate:
+  stage: test
+  variables: { GIT_DEPTH: "0" }
+  script:
+    - git fetch origin "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
+    - java -jar arete-cli.jar gate --target "origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" --maven-settings default --report-md gate.md
+  artifacts: { when: always, paths: [gate.md] }
+```
 
 ## The exit code is the decision
 

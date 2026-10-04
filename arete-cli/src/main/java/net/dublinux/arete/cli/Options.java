@@ -10,7 +10,9 @@ import java.util.Set;
 final class Options {
     /** Options that take a value; every other {@code --flag} is a switch. */
     private static final Set<String> VALUED = Set.of("--policy", "--policy-source", "--maven-repository", "--maven-settings",
-            "--maven-profile", "--cache-dir", "--user-policies", "--overrides", "--format", "--out", "--fail-under");
+            "--maven-profile", "--cache-dir", "--user-policies", "--overrides", "--format", "--out", "--fail-under",
+            "--target", "--base-sha", "--paths", "--base-source", "--raw-url", "--raw-header", "--changed-files", "--repo",
+            "--report-json", "--report-md", "--report-sarif");
 
     final List<String> positional = new ArrayList<>();
     private final Map<String, List<String>> values = new LinkedHashMap<>();
@@ -39,7 +41,7 @@ final class Options {
                     value = args.get(++i);
                 }
                 options.values.computeIfAbsent(name, k -> new ArrayList<>()).add(value);
-            } else if (Set.of("--require-pin", "--no-cache", "--no-overrides", "--fail-on-regression", "--help", "--version").contains(name)) {
+            } else if (Set.of("--require-pin", "--no-cache", "--no-overrides", "--fail-on-regression", "--report-only", "--help", "--version").contains(name)) {
                 if (inline != null) throw new UsageException(name + " takes no value");
                 options.switches.add(name);
             } else {

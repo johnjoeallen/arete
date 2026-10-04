@@ -3,6 +3,10 @@ package net.dublinux.arete.cli;
 import net.dublinux.arete.engine.BundleValidationException;
 import net.dublinux.arete.engine.Engine;
 import net.dublinux.arete.engine.Overrides;
+import net.dublinux.arete.engine.gate.GateException;
+import net.dublinux.arete.engine.gate.GateRequest;
+import net.dublinux.arete.engine.gate.GateResult;
+import net.dublinux.arete.engine.gate.GateRunner;
 import net.dublinux.arete.engine.report.ReportWriter;
 import net.dublinux.arete.engine.report.ScoreDiff;
 import net.dublinux.arete.engine.report.ScoreReport;
@@ -68,6 +72,7 @@ public final class Main {
                 case "score" -> score(options, out, cwd, false);
                 case "report" -> score(options, out, cwd, true);
                 case "diff" -> diff(options, out, cwd);
+                case "gate" -> gate(options, out, cwd);
                 case "policy" -> policy(options, out, cwd);
                 default -> throw new UsageException("unknown command '" + command + "'");
             };
@@ -75,7 +80,7 @@ public final class Main {
             err.println("arete: " + e.getMessage());
             err.println("Run 'arete help' for usage.");
             return ERROR;
-        } catch (BundleValidationException e) {
+        } catch (BundleValidationException | GateException e) {
             err.println("arete: " + e.getMessage());
             return ERROR;
         } catch (IOException e) {
@@ -157,6 +162,74 @@ public final class Main {
         return OK;
     }
 
+    // ---- gate ---------------------------------------------------------------------------------------------
+
+    private static int gate(Options options, PrintStream out, Path cwd) throws IOException {
+        if (!options.positional.isEmpty()) throw new UsageException("gate takes no arguments; name the base with --target or --base-sha");
+        Path repo = options.value("--repo") == null ? cwd : cwd.resolve(options.value("--repo"));
+        GateRequest.Builder request = GateRequest.builder();
+        if (options.value("--target") != null) request.target(options.value("--target"));
+        if (options.value("--base-sha") != null) request.baseSha(options.value("--base-sha"));
+        for (String glob : options.all("--paths")) request.glob(glob);
+        if (options.value("--policy") != null) request.policy(options.value("--policy"));
+        String source = options.value("--base-source") == null ? "git" : options.value("--base-source");
+        switch (source) {
+            case "git" -> { }
+            case "raw" -> {
+                if (options.value("--raw-url") == null) throw new UsageException("--base-source raw needs --raw-url, a URL with {path} and {ref}");
+                java.util.Map<String, String> headers = new java.util.LinkedHashMap<>();
+                for (String header : options.all("--raw-header")) {
+                    int colon = header.indexOf(':');
+                    if (colon <= 0) throw new UsageException("--raw-header must be 'Name: value'");
+                    headers.put(header.substring(0, colon).strip(), expandEnvironment(header.substring(colon + 1).strip()));
+                }
+                request.raw(options.value("--raw-url"), headers);
+                if (options.value("--changed-files") != null) {
+                    request.changedFiles(Files.readAllLines(cwd.resolve(options.value("--changed-files"))).stream().map(String::strip).filter(l -> !l.isEmpty()).toList());
+                }
+            }
+            default -> throw new UsageException("--base-source must be git or raw");
+        }
+        Engine engine = engine(options, cwd);
+        GateResult result = GateRunner.run(engine, repo, request.build());
+
+        String format = options.value("--format") == null ? "text" : options.value("--format");
+        String rendered = switch (format) {
+            case "text" -> ReportWriter.text(result);
+            case "json" -> ReportWriter.json(result);
+            case "md", "markdown" -> ReportWriter.markdown(result);
+            case "sarif" -> ReportWriter.sarif(result);
+            default -> throw new UsageException("--format must be text, json, md or sarif");
+        };
+        emit(options, out, cwd, rendered);
+        if (options.value("--report-json") != null) write(cwd, options.value("--report-json"), ReportWriter.json(result));
+        if (options.value("--report-md") != null) write(cwd, options.value("--report-md"), ReportWriter.markdown(result));
+        if (options.value("--report-sarif") != null) write(cwd, options.value("--report-sarif"), ReportWriter.sarif(result));
+
+        if (result.hasEngineError()) return ERROR;
+        if (options.has("--report-only")) return OK;   // write the files, never block: a trial before enforcement
+        return result.passed() ? OK : FAILED;
+    }
+
+    /** {@code $NAME} and {@code ${NAME}} in a header value come from the environment, so a token never sits in a script. */
+    private static String expandEnvironment(String value) {
+        java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("\\$\\{?([A-Za-z_][A-Za-z0-9_]*)}?").matcher(value);
+        StringBuilder out = new StringBuilder();
+        while (matcher.find()) {
+            String resolved = System.getenv(matcher.group(1));
+            if (resolved == null) throw new UsageException("the environment variable " + matcher.group(1) + " (named in a --raw-header) is not set");
+            matcher.appendReplacement(out, java.util.regex.Matcher.quoteReplacement(resolved));
+        }
+        matcher.appendTail(out);
+        return out.toString();
+    }
+
+    private static void write(Path cwd, String target, String content) throws IOException {
+        Path path = cwd.resolve(target);
+        if (path.getParent() != null) Files.createDirectories(path.getParent());
+        Files.writeString(path, content, StandardCharsets.UTF_8);
+    }
+
     // ---- policy verify ------------------------------------------------------------------------------------
 
     private static int policy(Options options, PrintStream out, Path cwd) {
@@ -233,6 +306,7 @@ public final class Main {
               arete score  <spec>... [options]     score one or more specs
               arete diff   <base> <head> [options] score two versions of a spec and say what changed
               arete report <spec>... [options]     write a full markdown report
+              arete gate [options]                 judge the specs a change touched against their base: the merge-gate
               arete policy verify [options]        check that the policy sources load, match their pins and compile
               arete help | --version
 
@@ -256,10 +330,22 @@ public final class Main {
               --format text|json|md|sarif   (default text)
               --out <file>                  write the output to a file instead of the terminal
 
+            Gate (run in a git repository; the specs a change touched, each against its base):
+              --target <ref>                the branch it merges into (default origin/main); the base is the merge-base
+              --base-sha <sha>              the base commit itself (e.g. GitLab CI_MERGE_REQUEST_DIFF_BASE_SHA)
+              --paths <glob>                spec files to look at, repeatable (default **/openapi.yaml, .yml, .json)
+              --base-source git|raw         git reads the base with git show (needs history); raw fetches it from the code host
+              --raw-url <url>               raw mode: a URL with {path} and {ref}; --raw-header 'Name: $TOKEN' (repeatable)
+              --changed-files <file>        raw mode: the files to consider, one per line (default: every spec found)
+              --report-json|--report-md|--report-sarif <file>   write these as well as the main output
+              --report-only                 write the files and always exit 0: a trial before enforcement
+              --repo <dir>                  the repository (default: the current directory)
+
             Checks (the exit code carries the decision):
               --fail-under <n|policy>       score: exit 1 if the score is below n, or below the policy's pass mark
               --fail-on-regression          diff: exit 1 if the score fell or a new blocker appeared
 
-            Exit codes: 0 ok, 1 the check failed, 2 the command or its configuration is wrong.
+            Exit codes: 0 ok, 1 the check failed, 2 the command or its configuration is wrong
+            (including a base that cannot be reached, which names the setting to fix).
             """;
 }
