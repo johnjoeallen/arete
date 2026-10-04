@@ -18,7 +18,7 @@ lines or hours. A stage is 100% only when everything the plan lists for it is bu
 | 2 | Extract the engine, policy loader, CLI, reports | 95% |
 | 3 | Merge-gate and thin build plugins | 95% |
 | 4 | Publish the engine, API and plugins | 40% |
-| Extras | Extended rule semantics, Distill values, publishing | 70% |
+| Extras | Extended rule semantics, Distill values | 70% |
 
 Overall: roughly 80%. The software is largely built. What is left is the first publish and a few trials
 against real material.
