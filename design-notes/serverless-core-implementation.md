@@ -102,8 +102,13 @@ Comparison with other linters is out of scope for now.
 
 ## What is left, in order
 
-1. Run `publish.yml` once and confirm the engine, API and both plugins resolve from the published location.
-2. Try the gate on a multi-file spec with external refs, and fix base-side resolution if needed.
-3. See a SARIF file render inline in GitLab and in GitHub.
-4. Remove the deprecated automation API.
-5. Optional: signature checking, `--annotate-changed-only`, Distill combinators.
+Publishing goes last, after enough local testing.
+
+1. Try the gate on a multi-file spec with external refs, and fix base-side resolution if needed.
+2. See a SARIF file render inline in GitLab and in GitHub.
+3. Fix the two deferred matcher issues (resource-path sub-delimiters, nullable haystacks).
+4. Run the Maven plugin, Gradle plugin and CLI from a local install against one repository and check they agree.
+5. Merge to `main`.
+6. Run `publish.yml` once and confirm the engine, API and both plugins resolve from the published location.
+7. Remove the deprecated automation API.
+8. Optional: signature checking, `--annotate-changed-only`, Distill combinators.
