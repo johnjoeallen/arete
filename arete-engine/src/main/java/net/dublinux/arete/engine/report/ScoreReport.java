@@ -44,6 +44,7 @@ public record ScoreReport(String file, String policy, String status, String erro
         SpecFormat format = text.contains("\"swagger\"") || text.matches("(?s).*(^|\\n)\\s*swagger\\s*:.*") ? SpecFormat.SWAGGER2 : SpecFormat.OPENAPI3;
         ScoringResult result = engine.score(SpecInput.builder().content(text).format(format).policy(policyName).build(), overrides);
         PointerLocator locator = PointerLocator.of(text);
+        RefPaths routes = RefPaths.of(text);
         List<Finding> findings = new ArrayList<>();
         for (Diagnostic d : result.getDiagnostics()) {
             PointerLocator.Location at = locator.locate(d.getPointer());
@@ -51,7 +52,7 @@ public record ScoreReport(String file, String policy, String status, String erro
             findings.add(new Finding(d.getRuleId(), d.getTitle(), d.getSeverity().name(), engine.getSeverityLabel(d.getSeverity()), d.getPointer(),
                     d.getPaths().isEmpty() ? null : d.getPaths().get(0),
                     d.getDescription() == null ? d.getTitle() : d.getDescription(),
-                    at == null ? null : at.line(), at == null ? null : at.column(), impact));
+                    at == null ? null : at.line(), at == null ? null : at.column(), impact, routes.routeTo(d.getPointer())));
         }
         findings.sort(Comparator.comparing((Finding f) -> f.line() == null ? Integer.MAX_VALUE : f.line())
                 .thenComparing(Finding::ruleId).thenComparing(f -> String.valueOf(f.pointer())));

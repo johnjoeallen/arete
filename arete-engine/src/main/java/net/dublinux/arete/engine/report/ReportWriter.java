@@ -84,7 +84,7 @@ public final class ReportWriter {
                     out.append(first.severityLabel()).append(", ").append(rule.getValue().size()).append(rule.getValue().size() == 1 ? " finding" : " findings")
                             .append(first.scoreImpact() > 0 ? ", costs " + number(first.scoreImpact()) + " once" : "").append("\n\n");
                     for (Finding f : rule.getValue()) {
-                        out.append("- ").append(where(report, f)).append(" `").append(f.pointer()).append("` — ").append(oneLine(f.message())).append('\n');
+                        out.append("- ").append(where(report, f)).append(" `").append(f.pointer()).append("` — ").append(oneLine(f.message())).append(via(f)).append('\n');
                     }
                     out.append('\n');
                 }
@@ -92,7 +92,7 @@ public final class ReportWriter {
                 out.append("| Where | Severity | Rule | Message |\n| --- | --- | --- | --- |\n");
                 for (Finding f : report.findings()) {
                     out.append("| ").append(where(report, f)).append(" | ").append(f.severityLabel()).append(" | `").append(f.ruleId())
-                            .append("` | ").append(cell(f.message())).append(" |\n");
+                            .append("` | ").append(cell(f.message() + via(f))).append(" |\n");
                 }
                 out.append('\n');
             }
@@ -120,7 +120,7 @@ public final class ReportWriter {
                 ScoreReport source = kind == ScoreDiff.Kind.RESOLVED ? diff.base() : diff.head();
                 Finding f = change.finding();
                 out.append("- **").append(kind).append("** ").append(f.severityLabel()).append(" `").append(f.ruleId()).append("` `")
-                        .append(f.pointer()).append("` (").append(where(source, f)).append(") — ").append(oneLine(f.message())).append('\n');
+                        .append(f.pointer()).append("` (").append(where(source, f)).append(") — ").append(oneLine(f.message())).append(via(f)).append('\n');
             }
         }
         if (existing > MAX_EXISTING_IN_COMMENT) {
@@ -224,6 +224,10 @@ public final class ReportWriter {
         if (f.line() != null) n.put("line", f.line());
         if (f.column() != null) n.put("column", f.column());
         n.put("scoreImpact", f.scoreImpact());
+        if (!f.reachedVia().isEmpty()) {
+            com.fasterxml.jackson.databind.node.ArrayNode route = n.putArray("reachedVia");
+            f.reachedVia().forEach(route::add);
+        }
         return n;
     }
 
@@ -290,6 +294,7 @@ public final class ReportWriter {
             if (f.column() != null) region.put("startColumn", f.column());
         }
         if (f.pointer() != null) location.putArray("logicalLocations").addObject().put("fullyQualifiedName", f.pointer());
+        if (!f.reachedVia().isEmpty()) result.putObject("properties").put("reachedVia", f.reachedViaText());
         return result;
     }
 
@@ -329,7 +334,7 @@ public final class ReportWriter {
                 out.append(headline(spec.head())).append("\n\n");
                 for (Finding f : spec.head().findings()) {
                     out.append(spec.isNew() ? "- **NEW** " : "- ").append(f.severityLabel()).append(" `").append(f.ruleId()).append("` `").append(f.pointer()).append("` (")
-                            .append(where(spec.head(), f)).append(") — ").append(oneLine(f.message())).append('\n');
+                            .append(where(spec.head(), f)).append(") — ").append(oneLine(f.message())).append(via(f)).append('\n');
                 }
                 if (spec.head().findings().isEmpty()) out.append("No findings.\n");
                 out.append('\n');
@@ -424,6 +429,11 @@ public final class ReportWriter {
         out.append("  ").append(diff.count(ScoreDiff.Kind.NEW)).append(" new, ").append(diff.count(ScoreDiff.Kind.EXISTING))
                 .append(" existing, ").append(diff.count(ScoreDiff.Kind.RESOLVED)).append(" resolved");
         return out.toString();
+    }
+
+    /** The route to a shared definition, as a suffix for a finding's line; empty when there is none. */
+    private static String via(Finding f) {
+        return f.reachedVia().isEmpty() ? "" : " _(reached via " + f.reachedViaText() + ")_";
     }
 
     private static String where(ScoreReport report, Finding f) {
