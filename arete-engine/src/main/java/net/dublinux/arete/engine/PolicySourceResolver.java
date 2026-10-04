@@ -28,12 +28,12 @@ final class PolicySourceResolver {
 
     private final HttpClient http;
     private final Path cacheDir;
-    private final List<String> mavenRepositories;
+    private final List<MavenSettings.Repository> mavenRepositories;
     private final Map<String, String> headers;
     private final boolean requirePin;
     private final ClassLoader classLoader;
 
-    PolicySourceResolver(HttpClient http, Path cacheDir, List<String> mavenRepositories, Map<String, String> headers,
+    PolicySourceResolver(HttpClient http, Path cacheDir, List<MavenSettings.Repository> mavenRepositories, Map<String, String> headers,
             boolean requirePin, ClassLoader classLoader) {
         this.http = http != null ? http : HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(10)).followRedirects(HttpClient.Redirect.NORMAL).build();
@@ -82,7 +82,7 @@ final class PolicySourceResolver {
                 // A damaged cache entry is not trusted; fall through and fetch again.
             }
         }
-        byte[] bytes = source.uri().startsWith("maven:") ? fetchMaven(source.uri()) : fetch(URI.create(source.uri()));
+        byte[] bytes = source.uri().startsWith("maven:") ? fetchMaven(source.uri()) : fetch(URI.create(source.uri()), Map.of());
         verifyPin(source, bytes);
         if (cacheDir != null) store(sha256(bytes), bytes);
         return bytes;
@@ -106,15 +106,15 @@ final class PolicySourceResolver {
         String packaging = parts.length == 4 ? parts[3] : "zip";
         String path = parts[0].replace('.', '/') + "/" + parts[1] + "/" + parts[2] + "/" + parts[1] + "-" + parts[2] + "." + packaging;
         BundleValidationException last = null;
-        for (String repository : mavenRepositories) {
-            String base = repository.endsWith("/") ? repository : repository + "/";
+        for (MavenSettings.Repository repository : mavenRepositories) {
+            String base = repository.url().endsWith("/") ? repository.url() : repository.url() + "/";
             try {
                 if (base.startsWith("file:")) {
                     Path file = localPath(base + path);
                     if (Files.isRegularFile(file)) return readFile(file);
-                    last = new BundleValidationException("not found in " + repository);
+                    last = new BundleValidationException("not found in " + repository.url());
                 } else {
-                    return fetch(URI.create(base + path));
+                    return fetch(URI.create(base + path), repository.headers());
                 }
             } catch (BundleValidationException e) {
                 last = e;
@@ -124,13 +124,14 @@ final class PolicySourceResolver {
                 + (last == null ? "" : " (" + last.getMessage() + ")"));
     }
 
-    private byte[] fetch(URI uri) {
+    private byte[] fetch(URI uri, Map<String, String> extraHeaders) {
         boolean loopback = "localhost".equalsIgnoreCase(uri.getHost()) || "127.0.0.1".equals(uri.getHost()) || "::1".equals(uri.getHost());
         if (!"https".equalsIgnoreCase(uri.getScheme()) && !("http".equalsIgnoreCase(uri.getScheme()) && loopback)) {
             throw new BundleValidationException("policy source " + uri + " must use https");
         }
         HttpRequest.Builder request = HttpRequest.newBuilder(uri).timeout(Duration.ofSeconds(60)).GET();
         headers.forEach(request::header);
+        extraHeaders.forEach(request::header);
         try {
             HttpResponse<InputStream> response = http.send(request.build(), HttpResponse.BodyHandlers.ofInputStream());
             try (InputStream body = response.body()) {

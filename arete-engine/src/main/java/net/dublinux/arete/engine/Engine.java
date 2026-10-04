@@ -98,6 +98,8 @@ public class Engine {
      *       for {@code maven:} sources;</li>
      *   <li>{@code require-pin} ({@code arete.policy.require-pin}) — {@code true} to refuse a remote source
      *       without a {@code sha256};</li>
+     *   <li>{@code maven-settings} ({@code arete.policy.maven-settings}) — a settings.xml path, or {@code default} for the
+     *       usual locations, read for repositories, mirrors, credentials and proxies; {@code maven-profiles} activates profiles;</li>
      *   <li>{@code cache-dir} ({@code arete.policy.cache-dir}) — where fetched bundles are kept;</li>
      *   <li>{@code policies-dir} ({@code arete.policy.policies-dir}) — extra {@code *.md} policies, default
      *       {@code ~/.arete/policies}.</li>
@@ -117,7 +119,21 @@ public class Engine {
         load(new Settings(sources, repositories,
                 "true".equalsIgnoreCase(configOrProperty(config, "require-pin", "arete.policy.require-pin")),
                 cache != null && !cache.isBlank() ? Path.of(cache.trim()) : defaultCacheDir(),
-                Map.of(), null, loadUserPolicies(config)));
+                Map.of(), null, loadUserPolicies(config), mavenSettingsFrom(config), profilesFrom(config)));
+    }
+
+    /** {@code maven-settings}: a path to a settings.xml, or {@code default} for the usual locations; unset reads none. */
+    private static MavenSettings mavenSettingsFrom(Map<String, String> config) {
+        String configured = configOrProperty(config, "maven-settings", "arete.policy.maven-settings");
+        if (configured == null || configured.isBlank()) return null;
+        return "default".equals(configured.strip()) ? MavenSettings.load() : MavenSettings.load(Path.of(configured.strip()));
+    }
+
+    private static Set<String> profilesFrom(Map<String, String> config) {
+        String configured = configOrProperty(config, "maven-profiles", "arete.policy.maven-profiles");
+        Set<String> profiles = new java.util.LinkedHashSet<>();
+        if (configured != null) for (String id : configured.split(",")) if (!id.isBlank()) profiles.add(id.strip());
+        return profiles;
     }
 
     private static Path defaultCacheDir() {
@@ -126,12 +142,32 @@ public class Engine {
 
     /** What an engine is built from: where its bundles come from and how they are checked. */
     private record Settings(List<PolicySource> sources, List<String> mavenRepositories, boolean requirePin, Path cacheDir,
-            Map<String, String> headers, java.net.http.HttpClient http, List<PolicyBundleLoader.OverlayPolicy> overlays) { }
+            Map<String, String> headers, java.net.http.HttpClient http, List<PolicyBundleLoader.OverlayPolicy> overlays,
+            MavenSettings mavenSettings, Set<String> mavenProfiles) { }
 
     private void load(Settings settings) {
         List<PolicySource> sources = settings.sources().isEmpty()
                 ? List.of(PolicySource.parse("classpath:api-policy")) : settings.sources();
-        PolicySourceResolver resolver = new PolicySourceResolver(settings.http(), settings.cacheDir(), settings.mavenRepositories(),
+        List<MavenSettings.Repository> repositories = new ArrayList<>();
+        java.net.http.HttpClient http = settings.http();
+        MavenSettings maven = settings.mavenSettings();
+        if (maven != null) {
+            // Maven looks in its local repository first, then the repositories the settings name.
+            repositories.add(new MavenSettings.Repository(maven.localRepository().toUri().toString(), Map.of()));
+        }
+        for (String url : settings.mavenRepositories()) repositories.add(new MavenSettings.Repository(url, Map.of()));
+        if (maven != null) {
+            repositories.addAll(maven.repositories(settings.mavenProfiles()));
+            if (http == null && maven.proxySelector() != null) {
+                java.net.http.HttpClient.Builder client = java.net.http.HttpClient.newBuilder()
+                        .connectTimeout(java.time.Duration.ofSeconds(10))
+                        .followRedirects(java.net.http.HttpClient.Redirect.NORMAL)
+                        .proxy(maven.proxySelector());
+                if (maven.proxyAuthenticator() != null) client.authenticator(maven.proxyAuthenticator());
+                http = client.build();
+            }
+        }
+        PolicySourceResolver resolver = new PolicySourceResolver(http, settings.cacheDir(), repositories,
                 settings.headers(), settings.requirePin(), getClass().getClassLoader());
         PolicyBundle loaded = null;
         for (PolicySource source : sources) {
@@ -157,6 +193,8 @@ public class Engine {
         private Path cacheDir = defaultCacheDir();
         private Path userPolicies;
         private java.net.http.HttpClient http;
+        private MavenSettings mavenSettings;
+        private final java.util.Set<String> mavenProfiles = new java.util.LinkedHashSet<>();
 
         /** Adds a source. Sources layer in the order added; with none, the bundle in the jar is used. */
         public Builder policySource(PolicySource source) { sources.add(source); return this; }
@@ -180,10 +218,24 @@ public class Engine {
 
         public Builder httpClient(java.net.http.HttpClient client) { this.http = client; return this; }
 
+        /**
+         * Reads the usual Maven settings ({@code ~/.m2/settings.xml} over {@code $MAVEN_HOME/conf/settings.xml}) for
+         * where {@code maven:} sources are fetched from: the local repository, mirrors, server credentials, proxies and
+         * the repositories of active profiles. After the local repository, repositories given with {@link #mavenRepository} are tried before the settings'.
+         */
+        public Builder mavenSettings() { this.mavenSettings = MavenSettings.load(); return this; }
+
+        /** As {@link #mavenSettings()} but from one file, as {@code mvn -s file} does. The file must exist. */
+        public Builder mavenSettings(Path settingsXml) { this.mavenSettings = MavenSettings.load(settingsXml); return this; }
+
+        /** Activates a settings.xml profile, as {@code mvn -P id} does. */
+        public Builder mavenProfile(String id) { mavenProfiles.add(id); return this; }
+
         public Engine build() {
             Engine engine = new Engine();
             List<PolicyBundleLoader.OverlayPolicy> overlays = userPolicies == null ? List.of() : readPolicies(userPolicies);
-            engine.load(new Settings(List.copyOf(sources), List.copyOf(repositories), requirePin, cacheDir, Map.copyOf(headers), http, overlays));
+            engine.load(new Settings(List.copyOf(sources), List.copyOf(repositories), requirePin, cacheDir, Map.copyOf(headers), http, overlays,
+                    mavenSettings, java.util.Set.copyOf(mavenProfiles)));
             return engine;
         }
     }

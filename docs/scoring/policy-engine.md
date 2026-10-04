@@ -432,11 +432,33 @@ A source is a URI with an optional pin, `<uri>[#sha256=<hex>][&version=<v>]`:
 | Zip over HTTPS | `https://host/policy-2.3.1.zip` (plain HTTP only for loopback) |
 | Maven coordinate | `maven:org.acme:api-policy:2.3.1` (a zip; add `:jar` for a jar) |
 
-A Maven coordinate is looked up in the repositories you configure, in Maven layout
-(`org/acme/api-policy/2.3.1/api-policy-2.3.1.zip`). A repository is an `https:` or
-`file:` base URL, so a local `~/.m2/repository` works offline. The engine does not read
-Maven settings: pass the repository (and any token header) to it. A zip may hold its
-files at the root or inside one folder.
+A Maven coordinate is looked up in Maven layout
+(`org/acme/api-policy/2.3.1/api-policy-2.3.1.zip`) in the repositories you give the engine
+(`mavenRepository(url)`, an `https:` or `file:` base URL) and, if you ask for it, those in your
+Maven `settings.xml`. A zip may hold its files at the root or inside one folder.
+
+**Maven settings.** CI already says where artifacts live and who may fetch them in
+`settings.xml`, so the engine reads it instead of asking again. `Engine.builder().mavenSettings()`
+reads `~/.m2/settings.xml` over `$MAVEN_HOME/conf/settings.xml`; `mavenSettings(path)` reads one
+file, as `mvn -s` does; `mavenProfile("id")` activates a profile, as `mvn -P` does. From it the
+engine uses:
+
+- the **local repository** (`<localRepository>`, else `~/.m2/repository`), looked at first;
+- the **repositories of active profiles** (listed in `<activeProfiles>`, active by default, or
+  activated by a system property), then Maven Central;
+- **mirrors**, matched by `mirrorOf` (`*`, `external:*`, ids, `!id`) and replacing the repository
+  URL, so a corporate Nexus that mirrors everything is used instead of Central;
+- **servers**, for credentials: a `<username>`/`<password>` becomes Basic authentication, and
+  `<httpHeaders>` are sent as they are (for a bearer token). Credentials are looked up by the id of
+  the repository, or of the mirror that replaced it;
+- an active **proxy**, with its `nonProxyHosts` and credentials.
+
+`${env.NAME}` and system properties are substituted, so a secret can live in a CI variable. An
+encrypted password (`{…}`) is not supported and is refused with a message; use `${env.NAME}`.
+A placeholder that is not set is an error when its server is used, never a blank password.
+
+Without the builder, `maven-settings` (`default`, or a path) and `maven-profiles` do the same in
+`configure(Map)`. Nothing reads `settings.xml` unless asked.
 
 **Pins.** `sha256` is the digest of the archive; `version` is the bundle's `bundleVersion`.
 A source that does not match its pin fails the load, so a bundle cannot change under you.
@@ -449,7 +471,7 @@ in size and entry count.
 Engine engine = Engine.builder()
         .policySource("classpath:api-policy")
         .policySource("maven:org.acme:api-policy:2.3.1#sha256=9f2c…")
-        .mavenRepository("https://repo.acme.com/maven")
+        .mavenSettings()                       // repositories, mirrors and credentials from settings.xml
         .requirePin(true)
         .build();
 ```
@@ -457,7 +479,7 @@ Engine engine = Engine.builder()
 Without the builder, `new Engine().configure(Map)` reads the same settings from the keys
 `policy-sources`, `maven-repositories`, `require-pin`, `cache-dir` and `policies-dir`, or from
 system properties `arete.policy.sources`, `arete.policy.maven-repositories`,
-`arete.policy.require-pin`, `arete.policy.cache-dir` and `arete.policy.policies-dir`.
+`arete.policy.maven-settings`, `arete.policy.maven-profiles`, `arete.policy.require-pin`, `arete.policy.cache-dir` and `arete.policy.policies-dir`.
 
 ### Locked rules
 
