@@ -96,7 +96,7 @@ Comparison with other linters is out of scope for now.
 | Distill values: `occurrence(..., value)` with `measure: value` tiers; gate compares the worst value | Done |
 | JSON025 nesting depth; STATUS001, STANDARD011 tiered | Done |
 | Distill combinators and whole-spec scope | Deferred (see `distill-extensions.md`) |
-| Resource-path segment sub-delimiters; nullable haystacks in operation semantics | Deferred |
+| Resource-path segment sub-delimiters; nullable haystacks in operation semantics | Deferred: two small matcher fixes. `resource-path` should split the last path segment on `:` and `.` so `/orders:batchGet` is seen as a verb. `operation-semantics` joins path and summary with `+`, so a missing summary becomes the word "null"; it needs explicit null handling |
 | Rule documentation links use the application's own URL | Done |
 | Scoring panel picks the policy only | Done |
 
