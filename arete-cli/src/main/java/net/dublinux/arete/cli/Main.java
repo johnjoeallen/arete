@@ -24,7 +24,7 @@ import java.util.Locale;
  *
  * <p>Exit codes: {@code 0} everything passed; {@code 1} the check failed (a score under the threshold, a
  * regression, a spec that does not parse); {@code 2} the command or its configuration is wrong (bad options,
- * an unreadable file, a policy source that cannot be loaded or fails its pin). The decision is the exit
+ * an unreadable file, a policy source that cannot be loaded). The decision is the exit
  * code: nothing here posts to a code host.
  */
 public final class Main {
@@ -305,17 +305,16 @@ public final class Main {
               arete diff   <base> <head> [options] score two versions of a spec and say what changed
               arete report <spec>... [options]     write a full markdown report
               arete gate [options]                 score every spec and judge a change against its base: the merge-gate
-              arete policy verify [options]        check that the policy sources load, match their pins and compile
+              arete policy verify [options]        check that the policy sources load and compile
               arete help | --version
 
             Policy:
               --policy <name>               the policy to use (default: the .arete.yaml's, else the bundle's first)
-              --policy-source <source>      a policy bundle; repeat to layer them. <uri>[#sha256=<hex>][&version=<v>]
+              --policy-source <source>      a policy bundle; repeat to layer them. <uri>
                                             with classpath:, file:, https:, maven:group:artifact:version or git:<repo>[#ref=..&path=..]
               --maven-repository <url>      a Maven-layout repository (https or file:) for maven: sources
               --maven-settings <path|default>  read repositories, mirrors, credentials and proxies from settings.xml
               --maven-profile <id>          activate a settings.xml profile
-              --require-pin                 refuse a remote policy source without a sha256
               --cache-dir <dir> | --no-cache   where fetched bundles are kept (default ~/.arete/cache/policies)
               --user-policies <dir>         extra *.md policies
 

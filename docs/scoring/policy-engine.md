@@ -499,7 +499,7 @@ loaded in order and layered: a later source adds to the earlier ones, or replace
 entry with the same id, and may use any matcher or rule an earlier one defines. An
 organisation's own standards live in a bundle of their own, apart from the public tool.
 
-A source is a URI with optional pins, `<uri>[#sha256=<hex>][&version=<v>][&ref=<ref>][&path=<folder>]`:
+A source is a URI, optionally with `#ref=<ref>&path=<folder>` for a git source:
 
 | Source | Example |
 |---|---|
@@ -519,7 +519,7 @@ credential helper, a CI job token in the URL's environment). The repository is `
 `user@host:path`. `ref` is a branch, tag or full commit id (the default branch if left out) and `path` is the folder
 holding `PolicyBundle.yaml` (the repository root if left out). Only that ref is fetched, shallowly, into a scratch
 folder that is deleted afterwards; hooks and the `ext::` transport are off, and a symbolic link in the bundle is refused.
-Every pin is optional: `git:https://git.acme.com/api/policy.git` alone follows the default branch.
+`git:https://git.acme.com/api/policy.git` alone follows the default branch.
 
 **Maven settings.** CI already says where artifacts live and who may fetch them in
 `settings.xml`, so the engine reads it instead of asking again. `Engine.builder().mavenSettings()`
@@ -544,12 +544,11 @@ A placeholder that is not set is an error when its server is used, never a blank
 Without the builder, `maven-settings` (`default`, or a path) and `maven-profiles` do the same in
 `configure(Map)`. Nothing reads `settings.xml` unless asked.
 
-**Pins.** `sha256` is the digest of the archive (for a git source, of the zip Areté makes from the bundle folder, which is
-the same for the same files whatever the commit); `version` is the bundle's `bundleVersion`. A mismatch message states the
-digest it found, so the first run can tell you what to pin.
-A source that does not match its pin fails the load, so a bundle cannot change under you.
-With `requirePin`, a remote source with no `sha256` is refused before anything is downloaded. A git source is also
-accepted when its `ref` is a full commit id, which names one set of files for ever.
+**Pins (optional, not yet a security boundary).** A source can carry `#sha256=<hex>` (the digest of the archive) and
+`&version=<v>` (the bundle's `bundleVersion`); a mismatch fails the load, and `requirePin` refuses a remote source with no
+`sha256`. This only detects a bundle that changed since the pin was written. Where the first digest comes from, and who
+vouches for a bundle, is not settled, so the examples do not use pins; signature checking is planned.
+
 Fetched archives are kept in a cache by digest (`~/.arete/cache/policies` by default), so a
 pinned source is read from there on later runs, with no network. Every archive is bounded
 in size and entry count.
@@ -557,9 +556,8 @@ in size and entry count.
 ```java
 Engine engine = Engine.builder()
         .policySource("classpath:api-policy")
-        .policySource("maven:org.acme:api-policy:2.3.1#sha256=9f2c…")
+        .policySource("maven:org.acme:api-policy:2.3.1")
         .mavenSettings()                       // repositories, mirrors and credentials from settings.xml
-        .requirePin(true)
         .build();
 ```
 

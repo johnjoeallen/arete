@@ -19,9 +19,8 @@ judges a change, for shallow clones, and for the raw base source.
     <target>origin/main</target>
     <policySources>
       <policySource>classpath:api-policy</policySource>
-      <policySource>maven:org.acme:api-policy:2.3.1#sha256=9f2c…</policySource>
+      <policySource>maven:org.acme:api-policy:2.3.1</policySource>
     </policySources>
-    <requirePin>true</requirePin>
   </configuration>
 </plugin>
 ```
@@ -36,7 +35,7 @@ mvn net.dublinux.arete:arete-maven-plugin:gate -Darete.target=origin/main
 | `arete:score` | Scores `specs` and fails under `failUnder` (a number, or `policy` for the policy's pass mark). |
 
 Parameters (each also a property such as `-Darete.target`): `target`, `baseSha`, `paths`, `policy`, `policySources`,
-`mavenRepositories`, `requirePin`, `cacheDir`, `userPolicies`, `rawUrl` and `rawHeaders` (the base from the code host, for a
+`mavenRepositories`, `cacheDir`, `userPolicies`, `rawUrl` and `rawHeaders` (the base from the code host, for a
 shallow clone), `reportDirectory` (default `target/arete`), `reportOnly`, `skip`.
 
 **`settings.xml` is read for you.** `useMavenSettings` (on by default) reads the settings files the build was started with,
@@ -66,10 +65,9 @@ plugins { id 'net.dublinux.arete' version '0.1.0' }
 
 arete {
     target = 'origin/main'
-    policySources = ['classpath:api-policy', 'maven:org.acme:api-policy:2.3.1#sha256=9f2c…']
+    policySources = ['classpath:api-policy', 'maven:org.acme:api-policy:2.3.1']
     mavenRepositories = ['https://repo.acme.com/maven']
     mavenSettings = file('ci/settings.xml')     // optional: or useMavenSettings = true for ~/.m2/settings.xml
-    requirePin = true
     specs.from('apis/orders/openapi.yaml')       // for areteScore
 }
 ```

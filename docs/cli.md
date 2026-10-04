@@ -15,7 +15,7 @@ java -jar arete-cli.jar score apis/orders/openapi.yaml
 | `arete diff <base> <head>` | Scores two versions of a spec with the same policy and says which findings are **NEW**, **EXISTING** or **RESOLVED**, and how the score moved. |
 | `arete report <spec>...` | Writes a full markdown report: the score, then every finding grouped under its rule, and the overrides applied. |
 | `arete gate` | The merge-gate: scores every spec, reads each changed spec's base, and judges the change rather than the spec. |
-| `arete policy verify` | Loads the policy sources, checks their pins and compiles every matcher; says what the bundle holds. |
+| `arete policy verify` | Loads the policy sources and compiles every matcher; says what the bundle holds. |
 
 ## The merge-gate
 
@@ -37,7 +37,7 @@ richer rule semantics; until then a new finding is judged as above.
 
 ```bash
 arete gate --target origin/main \
-  --policy-source "maven:org.acme:api-policy:2.3.1#sha256=9f2c…" --maven-settings default --require-pin \
+  --policy-source "maven:org.acme:api-policy:2.3.1" --maven-settings default \
   --report-md gate.md --report-json gate.json --report-sarif gate.sarif
 ```
 
@@ -79,7 +79,7 @@ api-gate:
 |---|---|
 | `0` | Everything passed. |
 | `1` | The check failed: a score under the threshold, a regression, a spec that does not parse. |
-| `2` | The command or its configuration is wrong: bad options, an unreadable file, a policy source that cannot be loaded or fails its pin, bad `.arete.yaml`. |
+| `2` | The command or its configuration is wrong: bad options, an unreadable file, a policy source that cannot be loaded, bad `.arete.yaml`. |
 
 `score` fails with `--fail-under <n>` (a number) or `--fail-under policy` (the policy's own pass mark).
 `diff` fails with `--fail-on-regression` (the score fell, or a new blocker appeared). Without those flags the
@@ -107,14 +107,14 @@ not there) is placed on the thing that should have it.
 arete score spec.yaml --policy "Zalando"
 arete score spec.yaml \
   --policy-source classpath:api-policy \
-  --policy-source "maven:org.acme:api-policy:2.3.1#sha256=9f2c…" \
-  --maven-settings default --require-pin
+  --policy-source "maven:org.acme:api-policy:2.3.1" \
+  --maven-settings default
 ```
 
 `--policy-source` is repeatable and layers: see [policy sources](scoring/policy-engine.md#policy-sources). With no
 source the public bundle in the jar is used. `--maven-settings default|<path>` reads repositories, mirrors,
 credentials and proxies from `settings.xml`, as the rest of CI does; `--maven-profile <id>` activates a profile;
-`--require-pin` refuses a remote source without a `sha256` (a git source with a full commit `ref` also counts as pinned); `--cache-dir` / `--no-cache` control where fetched
+`--cache-dir` / `--no-cache` control where fetched
 bundles are kept; `--user-policies <dir>` adds `*.md` policies.
 
 ## Team overrides
