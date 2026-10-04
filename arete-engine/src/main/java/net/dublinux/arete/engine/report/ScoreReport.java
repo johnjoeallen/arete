@@ -3,6 +3,7 @@ package net.dublinux.arete.engine.report;
 import net.dublinux.arete.engine.Engine;
 import net.dublinux.arete.engine.Overrides;
 import net.dublinux.arete.engine.api.Diagnostic;
+import net.dublinux.arete.engine.api.RuleOutcome;
 import net.dublinux.arete.engine.api.ScoringResult;
 import net.dublinux.arete.engine.api.SpecFormat;
 import net.dublinux.arete.engine.api.SpecInput;
@@ -14,11 +15,19 @@ import java.util.List;
 /** The result of scoring one spec, in the shape the report writers and the diff work from. */
 public record ScoreReport(String file, String policy, String status, String errorMessage, double score,
         double scoreWithoutBlockers, String grade, Double passingScore, int rulesEvaluated,
-        List<Finding> findings, List<Overrides.RuleOverride> overridesApplied) {
+        List<Finding> findings, List<Overrides.RuleOverride> overridesApplied, List<RuleOutcome> ruleOutcomes) {
 
     public ScoreReport {
         findings = List.copyOf(findings);
         overridesApplied = List.copyOf(overridesApplied);
+        ruleOutcomes = List.copyOf(ruleOutcomes);
+    }
+
+    /** A report without per-rule counts, for engines that do not give them. */
+    public ScoreReport(String file, String policy, String status, String errorMessage, double score,
+            double scoreWithoutBlockers, String grade, Double passingScore, int rulesEvaluated,
+            List<Finding> findings, List<Overrides.RuleOverride> overridesApplied) {
+        this(file, policy, status, errorMessage, score, scoreWithoutBlockers, grade, passingScore, rulesEvaluated, findings, overridesApplied, List.of());
     }
 
     public boolean succeeded() { return "SUCCESS".equals(status); }
@@ -51,6 +60,6 @@ public record ScoreReport(String file, String policy, String status, String erro
         Double passing = engine.getPassingScore(resolvedPolicy).isPresent() ? engine.getPassingScore(resolvedPolicy).getAsDouble() : null;
         return new ScoreReport(file, resolvedPolicy, result.getStatus().name(), result.getErrorMessage(),
                 result.getOverallScore(), result.getOverallScoreWithoutBlockers(), result.getGrade(), passing,
-                result.getRulesEvaluatedCount(), findings, List.copyOf(overrides.rules().values()));
+                result.getRulesEvaluatedCount(), findings, List.copyOf(overrides.rules().values()), result.getRuleOutcomes());
     }
 }

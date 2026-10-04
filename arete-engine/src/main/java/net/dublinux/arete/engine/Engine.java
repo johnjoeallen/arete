@@ -4,6 +4,7 @@ import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.parser.util.DeserializationUtils;
+import net.dublinux.arete.engine.api.RuleOutcome;
 import net.dublinux.arete.engine.api.Severity;
 import net.dublinux.arete.engine.api.SpecInput;
 import net.dublinux.arete.engine.api.MatcherTestRequest;
@@ -341,6 +342,7 @@ public class Engine {
         double deductions = 0;
         boolean prohibitedMatched = false;
         int rulesEvaluated = 0;
+        List<RuleOutcome> outcomes = new ArrayList<>();
 
         for (Map.Entry<String, PolicyDisposition> policyRule : policy.dispositions().entrySet()) {
             PolicyRule rule = currentBundle.rules().get(policyRule.getKey());
@@ -358,17 +360,35 @@ public class Engine {
             } catch (MatcherEvaluationException e) {
                 return ScoringResult.pluginError("Matcher '" + rule.matcherId() + "' failed for " + rule.id() + ": " + e.getMessage());
             }
-            if (matches.isEmpty()) continue;
-
             PolicyDisposition disposition = policyRule.getValue();
-            if (disposition instanceof Deduction deduction) deductions += deduction.points();
-            else prohibitedMatched = true;
+            int count = matches.size();
+            boolean violated;
+            List<net.dublinux.arete.engine.Diagnostic> reported;
+            if (disposition.expectMatch()) {
+                // The matcher looks for something that should be there; finding nothing is the violation.
+                violated = count == 0;
+                count = violated ? 1 : 0;
+                reported = violated
+                        ? List.of(new net.dublinux.arete.engine.Diagnostic("/", "API", "Expected at least one match but found none: " + rule.title()))
+                        : List.of();
+            } else {
+                violated = disposition instanceof Graduated graduated ? graduated.violatedAt(count) : count > 0;
+                reported = violated ? matches : List.of();
+            }
+            if (!violated) continue;
 
-            for (net.dublinux.arete.engine.Diagnostic match : matches) {
+            double cost = 0;
+            if (disposition instanceof Deduction deduction) cost = deduction.points();
+            else if (disposition instanceof Graduated graduated) cost = graduated.costAt(count);
+            else prohibitedMatched = true;
+            deductions += cost;
+            outcomes.add(new RuleOutcome(rule.id(), count, cost, disposition instanceof Graduated, disposition instanceof Prohibited));
+
+            for (net.dublinux.arete.engine.Diagnostic match : reported) {
                 net.dublinux.arete.engine.api.Diagnostic.Builder diagnostic = net.dublinux.arete.engine.api.Diagnostic.builder()
                         .ruleId(rule.id()).title(rule.title()).description(match.message())
                         .severity(disposition instanceof Prohibited ? Severity.ERROR : Severity.WARNING)
-                        .scoreImprovement(disposition instanceof Deduction deduction ? deduction.points() : 0)
+                        .scoreImprovement(cost)
                         .documentationUrl(DOCUMENTATION_BASE_URL + rule.id());
                 if (match.pointer() != null) diagnostic.pointer(match.pointer());
                 if (match.path() != null) diagnostic.paths(List.of(match.path()));
@@ -380,7 +400,7 @@ public class Engine {
         double effectiveScore = prohibitedMatched ? 0 : qualityScore;
         return ScoringResult.builder().status(ScoringResult.Status.SUCCESS).diagnostics(diagnostics)
                 .rulesEvaluatedCount(rulesEvaluated).overallScore(effectiveScore)
-                .overallScoreWithoutBlockers(qualityScore)
+                .overallScoreWithoutBlockers(qualityScore).ruleOutcomes(outcomes)
                 .grade(policy.gradeFor(effectiveScore)).build();
     }
 
@@ -411,9 +431,8 @@ public class Engine {
                 }
                 parameters.putAll(changes);
             }
-            if (override.points() != null) dispositions.put(id, new Deduction(override.points(), parameters));
-            else if (current instanceof Prohibited) dispositions.put(id, new Prohibited(parameters));
-            else dispositions.put(id, new Deduction(((Deduction) current).points(), parameters));
+            if (override.points() != null) dispositions.put(id, new Deduction(override.points(), parameters, current.expectMatch()));
+            else dispositions.put(id, current.withParameters(parameters));
         }
         return new Policy(policy.id(), dispositions, policy.scoreLevel(), policy.passingScore(), policy.grades(), policy.locked());
     }

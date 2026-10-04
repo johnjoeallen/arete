@@ -427,6 +427,51 @@ policies.
 Two ready-made examples, `Lenient` (every rule, 0.1 each) and `Pedantic` (every
 rule, 2.0 each, security rules `PROHIBITED`), make good starting points.
 
+### How a rule is charged (policy format 2)
+
+By default a rule that matches costs its `points` once, however many times it matches, and a match is the violation. A
+policy that declares **`format: 2`** can say more about a rule:
+
+| Setting | Meaning |
+|---|---|
+| `points: N` | A flat cost, charged once. As before. |
+| `per-match: N` and `max: M` | Charge `N` for each match, up to `M` in all. Without `max` the only limit is the score floor of 0. |
+| `tiers: { 2: 1, 5: 3, 20: 8 }` | Charge the points of the highest tier the match count reaches: 2 or more costs 1, 5 or more costs 3, 20 or more costs 8. **Below the lowest tier the rule is not violated**: it reports nothing, so a tier map also expresses "up to N is fine". |
+| `expect: match` | The opposite sense: the matcher looks for something that should be there, and **finding nothing** is the violation. It is reported once, at the spec root, with a message that nothing was found. |
+| `expect: no-match` | The default, as before. |
+| `points: PROHIBITED` | Unchanged: any violation forces the score to 0. Works with `expect: match`. |
+
+Exactly one of `points`, `per-match` and `tiers` is given; `max` goes only with `per-match`. A policy without
+`format: 2` that uses the new keys is rejected, so a policy file never changes meaning silently. For example:
+
+```yaml
+---
+id: Strict Pagination
+format: 2
+rules:
+  PAGE004:
+    per-match: 0.5        # each unbounded page size costs half a point...
+    max: 3                # ...but never more than 3
+  JSON022:
+    tiers: { 6: 1, 21: 3 }   # five unbounded strings are tolerated; more cost 1, then 3
+---
+```
+
+`expect: match` only makes sense with a matcher written to find evidence of something wanted. Every bundled matcher reports
+*violations*, so none of the bundled rules is used that way; it is for your own matchers, for example one that matches an
+operation declaring a `Link` header, with `expect: match, points: 2` meaning "somewhere in the API a paginated response must
+declare one".
+
+Every finding of a rule scored this way is still listed, and each carries the rule's whole cost. The result also records, per
+rule, how many times it matched and what it cost (`rules` in the JSON report), because for a rule scored by count the
+**merge-gate** compares the count: it fails when the count rose (or the rule was newly violated), even where the cost did
+not move because a cap or a tier absorbed it. A rule charged a flat cost is judged as before: more findings of a rule the
+base already violated is existing debt.
+
+`expect: match` is whole-spec today: "at least one match anywhere". Asking that *every* operation or schema match needs a
+matcher that reports what it looked at as well as what it found, which is part of the [Distill extensions](../../design-notes/distill-extensions.md)
+still to be designed.
+
 ### Policy sources
 
 The bundle in the jar is only the default. An engine takes a list of **sources**,

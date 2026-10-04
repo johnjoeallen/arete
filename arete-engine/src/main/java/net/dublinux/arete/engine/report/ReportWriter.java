@@ -192,6 +192,14 @@ public final class ReportWriter {
         }
         ArrayNode findings = node.putArray("findings");
         for (Finding finding : report.findings()) findings.add(findingNode(finding));
+        ArrayNode rules = node.putArray("rules");
+        for (net.dublinux.arete.engine.api.RuleOutcome outcome : report.ruleOutcomes()) {
+            ObjectNode r = rules.addObject();
+            r.put("rule", outcome.ruleId());
+            r.put("count", outcome.count());
+            r.put("cost", outcome.cost());
+            r.put("graduated", outcome.graduated());
+        }
         ArrayNode overrides = node.putArray("overridesApplied");
         for (Overrides.RuleOverride o : report.overridesApplied()) {
             ObjectNode n = overrides.addObject();

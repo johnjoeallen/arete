@@ -83,21 +83,67 @@ record Policy(String id, Map<String, PolicyDisposition> dispositions, String sco
         return "F";
     }
 }
-sealed interface PolicyDisposition permits Deduction, Prohibited {
+/**
+ * What a policy does with a rule. {@code expectMatch} flips the rule: instead of a match being the violation, finding
+ * nothing is (the matcher looks for something that should be there).
+ */
+sealed interface PolicyDisposition permits Deduction, Prohibited, Graduated {
     Map<String, Object> parameters();
+    boolean expectMatch();
+    PolicyDisposition withParameters(Map<String, Object> parameters);
 }
-record Deduction(double points, Map<String, Object> parameters) implements PolicyDisposition {
+
+/** A flat cost, charged once however many times the rule matches. */
+record Deduction(double points, Map<String, Object> parameters, boolean expectMatch) implements PolicyDisposition {
     Deduction {
         parameters = Map.copyOf(parameters);
     }
-    Deduction(double points) { this(points, Map.of()); }
+    Deduction(double points, Map<String, Object> parameters) { this(points, parameters, false); }
+    Deduction(double points) { this(points, Map.of(), false); }
+    @Override public Deduction withParameters(Map<String, Object> changed) { return new Deduction(points, changed, expectMatch); }
 }
-record Prohibited(Map<String, Object> parameters) implements PolicyDisposition {
+
+/** Any violation forces the score to 0. */
+record Prohibited(Map<String, Object> parameters, boolean expectMatch) implements PolicyDisposition {
     Prohibited {
         parameters = Map.copyOf(parameters);
     }
-    Prohibited() { this(Map.of()); }
+    Prohibited(Map<String, Object> parameters) { this(parameters, false); }
+    Prohibited() { this(Map.of(), false); }
+    @Override public Prohibited withParameters(Map<String, Object> changed) { return new Prohibited(changed, expectMatch); }
 }
+
+/**
+ * A cost that depends on how many times the rule matches: {@code perMatch} points each up to {@code max}, or the
+ * points of the highest {@link Tier} the count reaches (below the lowest tier the rule is not violated at all).
+ */
+record Graduated(double perMatch, Double max, List<Tier> tiers, Map<String, Object> parameters, boolean expectMatch) implements PolicyDisposition {
+    Graduated {
+        tiers = List.copyOf(tiers);
+        parameters = Map.copyOf(parameters);
+    }
+
+    /** True when the rule is scored by tier and the count is below the first one, so it is not a violation yet. */
+    boolean violatedAt(int count) {
+        return tiers.isEmpty() ? count > 0 : count >= tiers.get(0).minimum();
+    }
+
+    /** The cost of {@code count} matches. */
+    double costAt(int count) {
+        if (!tiers.isEmpty()) {
+            double points = 0;
+            for (Tier tier : tiers) if (count >= tier.minimum()) points = tier.points();
+            return points;
+        }
+        double raw = perMatch * count;
+        return max == null ? raw : Math.min(max, raw);
+    }
+
+    @Override public Graduated withParameters(Map<String, Object> changed) { return new Graduated(perMatch, max, tiers, changed, expectMatch); }
+}
+
+/** At {@code minimum} matches or more, the rule costs {@code points}. */
+record Tier(int minimum, double points) { }
 record Diagnostic(String pointer, String path, String message) { }
 
 final class MatcherEvaluationException extends RuntimeException {

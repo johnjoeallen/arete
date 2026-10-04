@@ -159,7 +159,12 @@ final class PolicyBundleLoader {
 
     private Policy parsePolicy(String path, String content, Map<String, PolicyRule> rules, Map<String, Matcher> matchers) {
         Map<String, Object> data = frontMatter(path, content);
-        rejectUnknown(path, data, Set.of("id", "rules", "scoring", "passingScore", "grades"));
+        rejectUnknown(path, data, Set.of("id", "format", "rules", "scoring", "passingScore", "grades"));
+        int format = 1;
+        if (data.containsKey("format")) {
+            if (!(data.get("format") instanceof Integer declared) || (declared != 1 && declared != 2)) throw new BundleValidationException(path + ": format must be 1 or 2");
+            format = declared;
+        }
         Set<String> locked = new java.util.LinkedHashSet<>();
         String scoreLevel = data.containsKey("scoring") ? scoreLevel(path, data.get("scoring")) : null;
         Double passingScore = data.containsKey("passingScore") ? score(path, "passingScore", data.get("passingScore")) : null;
@@ -176,10 +181,15 @@ final class PolicyBundleLoader {
                 dispositions.put(entry.getKey(), new Prohibited());
             } else if (value instanceof Map<?, ?> raw) {
                 Map<String, Object> declaration = map(path, "rules." + entry.getKey(), raw);
-                rejectUnknown(path, declaration, Set.of("points", "parameters", "locked"));
+                rejectUnknown(path, declaration, Set.of("points", "parameters", "locked", "expect", "per-match", "max", "tiers"));
                 if (declaration.containsKey("locked")) {
                     if (!(declaration.get("locked") instanceof Boolean flag)) throw new BundleValidationException(path + ": " + entry.getKey() + ".locked must be true or false");
                     if (flag) locked.add(entry.getKey());
+                }
+                for (String extended : List.of("expect", "per-match", "max", "tiers")) {
+                    if (declaration.containsKey(extended) && format < 2) {
+                        throw new BundleValidationException(path + ": " + entry.getKey() + "." + extended + " needs format: 2 in the policy's front matter");
+                    }
                 }
                 Object points = declaration.get("points");
                 Map<String, Object> overrides = declaration.containsKey("parameters")
@@ -191,12 +201,64 @@ final class PolicyBundleLoader {
                     validateParameterOverrides(path, entry.getKey(), overrides, matcher);
                     overrides = coerceListValues(overrides, matcher);
                 }
-                if ("PROHIBITED".equals(points)) dispositions.put(entry.getKey(), new Prohibited(overrides));
-                else if (points instanceof Number number && validPoints(number)) dispositions.put(entry.getKey(), new Deduction(number.doubleValue(), overrides));
-                else throw new BundleValidationException(path + ": " + entry.getKey() + ".points must be a number from 0 to 100 or PROHIBITED");
+                boolean expectMatch = false;
+                if (declaration.containsKey("expect")) {
+                    Object expect = declaration.get("expect");
+                    if ("match".equals(expect)) expectMatch = true;
+                    else if (!"no-match".equals(expect)) throw new BundleValidationException(path + ": " + entry.getKey() + ".expect must be match or no-match");
+                }
+                String where = path + ": " + entry.getKey();
+                int ways = (declaration.containsKey("points") ? 1 : 0) + (declaration.containsKey("per-match") ? 1 : 0) + (declaration.containsKey("tiers") ? 1 : 0);
+                if (ways != 1) throw new BundleValidationException(where + " needs exactly one of points, per-match or tiers");
+                if (declaration.containsKey("max") && !declaration.containsKey("per-match")) throw new BundleValidationException(where + ".max only goes with per-match");
+                if (declaration.containsKey("per-match")) {
+                    if (!(declaration.get("per-match") instanceof Number each) || !(each.doubleValue() > 0) || !validPoints(each)) {
+                        throw new BundleValidationException(where + ".per-match must be a number above 0 and up to 100");
+                    }
+                    Double max = null;
+                    if (declaration.containsKey("max")) {
+                        if (!(declaration.get("max") instanceof Number cap) || !(cap.doubleValue() > 0) || !validPoints(cap)) {
+                            throw new BundleValidationException(where + ".max must be a number above 0 and up to 100");
+                        }
+                        max = cap.doubleValue();
+                    }
+                    dispositions.put(entry.getKey(), new Graduated(each(declaration.get("per-match")), max, List.of(), overrides, expectMatch));
+                } else if (declaration.containsKey("tiers")) {
+                    dispositions.put(entry.getKey(), new Graduated(0, null, tiers(where, declaration.get("tiers")), overrides, expectMatch));
+                } else if ("PROHIBITED".equals(points)) {
+                    dispositions.put(entry.getKey(), new Prohibited(overrides, expectMatch));
+                } else if (points instanceof Number number && validPoints(number)) {
+                    dispositions.put(entry.getKey(), new Deduction(number.doubleValue(), overrides, expectMatch));
+                } else {
+                    throw new BundleValidationException(path + ": " + entry.getKey() + ".points must be a number from 0 to 100 or PROHIBITED");
+                }
             } else throw new BundleValidationException(path + ": " + entry.getKey() + " must be a number, PROHIBITED, or a declaration with points and parameters");
         }
         return new Policy(requiredString(path, "id", data.get("id")), dispositions, scoreLevel, passingScore, grades, locked);
+    }
+
+    private static double each(Object value) { return ((Number) value).doubleValue(); }
+
+    /** {@code tiers:} a map from a count to the points charged at that count or more, kept in ascending order. */
+    private static List<Tier> tiers(String where, Object value) {
+        if (!(value instanceof Map<?, ?> raw) || raw.isEmpty()) throw new BundleValidationException(where + ".tiers must be a map from a count to points");
+        java.util.TreeMap<Integer, Double> sorted = new java.util.TreeMap<>();
+        for (Map.Entry<?, ?> tier : raw.entrySet()) {
+            int count;
+            try {
+                count = Integer.parseInt(String.valueOf(tier.getKey()).strip());
+            } catch (NumberFormatException e) {
+                throw new BundleValidationException(where + ".tiers has the key '" + tier.getKey() + "', which is not a count");
+            }
+            if (count < 1) throw new BundleValidationException(where + ".tiers keys must be 1 or more");
+            if (!(tier.getValue() instanceof Number points) || !validPoints(points)) {
+                throw new BundleValidationException(where + ".tiers." + count + " must be a number from 0 to 100");
+            }
+            if (sorted.put(count, points.doubleValue()) != null) throw new BundleValidationException(where + ".tiers has " + count + " twice");
+        }
+        List<Tier> tiers = new ArrayList<>();
+        sorted.forEach((count, points) -> tiers.add(new Tier(count, points)));
+        return tiers;
     }
 
     private static double score(String path, String field, Object value) {

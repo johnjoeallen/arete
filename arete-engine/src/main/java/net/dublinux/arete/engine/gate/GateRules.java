@@ -1,5 +1,6 @@
 package net.dublinux.arete.engine.gate;
 
+import net.dublinux.arete.engine.api.RuleOutcome;
 import net.dublinux.arete.engine.report.Finding;
 import net.dublinux.arete.engine.report.ScoreDiff;
 import net.dublinux.arete.engine.report.ScoreReport;
@@ -44,6 +45,17 @@ final class GateRules {
         ScoreDiff diff = ScoreDiff.of(base, head);
         for (ScoreDiff.Change change : diff.of(ScoreDiff.Kind.NEW)) {
             if ("ERROR".equals(change.finding().severity())) reasons.add("new blocker: " + describe(file, change.finding()));
+        }
+        // A rule scored by count (per match, or by tier) can get worse without a new kind of finding: compare its count.
+        Map<String, Integer> baseCounts = new LinkedHashMap<>();
+        for (RuleOutcome outcome : base.ruleOutcomes()) baseCounts.put(outcome.ruleId(), outcome.count());
+        for (RuleOutcome outcome : head.ruleOutcomes()) {
+            if (!outcome.graduated()) continue;
+            int before = baseCounts.getOrDefault(outcome.ruleId(), 0);
+            if (outcome.count() > before) {
+                reasons.add(outcome.ruleId() + " got worse: " + before + " -> " + outcome.count() + (before == 0 ? " (newly violated)" : "")
+                        + ", costing " + number(outcome.cost()));
+            }
         }
         if (diff.regressed()) {
             reasons.add("score fell from " + number(base.score()) + " to " + number(head.score()) + " (" + number(diff.scoreDelta()) + ")" + caused(diff));

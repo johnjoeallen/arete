@@ -31,6 +31,7 @@ public final class ScoringResult {
     private final double overallScore;
     private final double overallScoreWithoutBlockers;
     private final String grade;
+    private final List<RuleOutcome> ruleOutcomes;
 
     private ScoringResult(Builder b) {
         this.status = Objects.requireNonNull(b.status, "status must not be null");
@@ -40,6 +41,7 @@ public final class ScoringResult {
         this.overallScore = b.overallScore;
         this.overallScoreWithoutBlockers = b.overallScoreWithoutBlockers;
         this.grade = b.grade;
+        this.ruleOutcomes = b.ruleOutcomes == null ? Collections.emptyList() : List.copyOf(b.ruleOutcomes);
     }
 
     public Status getStatus() {
@@ -107,6 +109,11 @@ public final class ScoringResult {
      * label over the numeric score; callers that gate on a threshold should
      * still use the number.
      */
+    /** What each rule that fired did (its count and cost); empty when the engine does not report it. */
+    public List<RuleOutcome> getRuleOutcomes() {
+        return ruleOutcomes;
+    }
+
     public String getGrade() {
         return grade;
     }
@@ -139,6 +146,7 @@ public final class ScoringResult {
         private double overallScore = Double.NaN;
         private double overallScoreWithoutBlockers = Double.NaN;
         private String grade;
+        private List<RuleOutcome> ruleOutcomes;
 
         public Builder status(Status status) {
             this.status = status;
@@ -175,6 +183,12 @@ public final class ScoringResult {
         /** See {@link ScoringResult#getGrade()}. Defaults to {@code null} if never called. */
         public Builder grade(String grade) {
             this.grade = grade;
+            return this;
+        }
+
+        /** See {@link ScoringResult#getRuleOutcomes()}. */
+        public Builder ruleOutcomes(List<RuleOutcome> ruleOutcomes) {
+            this.ruleOutcomes = ruleOutcomes;
             return this;
         }
 

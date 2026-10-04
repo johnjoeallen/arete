@@ -63,6 +63,13 @@ for pid, rel in manifest["policies"].items():
     for k, v in (fm.get("rules") or {}).items():
         if isinstance(v, dict):
             pts = v.get("points")
+            # format 2: charged by how often the rule matches, and/or "must match" instead of "must not"
+            if "per-match" in v:
+                pts = f"{v['per-match']} per match" + (f", at most {v['max']}" if "max" in v else "")
+            elif "tiers" in v:
+                pts = "by count (" + ", ".join(f"{c}+ costs {p}" for c, p in sorted(v["tiers"].items())) + ")"
+            if v.get("expect") == "match":
+                pts = f"must match: {pts}"
             disp[k] = ("PROHIBITED" if pts == "PROHIBITED" else pts, v.get("parameters") or {})
         elif v == "PROHIBITED":
             disp[k] = ("PROHIBITED", {})
@@ -156,7 +163,7 @@ for pid, pol in policies.items():
     lines += [f'??? example "All {len(active)} rules in {pol["id"]}"', "",
               "    | Rule | Disposition | Title |", "    |---|---|---|"]
     for k, d in active.items():
-        disp = "PROHIBITED" if d[0] == "PROHIBITED" else f"−{d[0]}"
+        disp = "PROHIBITED" if d[0] == "PROHIBITED" else (f"−{d[0]}" if isinstance(d[0], (int, float)) else str(d[0]))
         lines.append(f"    | `{k}` | {disp} | {title_tail(rules.get(k, {}).get('title', ''))} |")
     lines.append("")
 (OUT / "policies.md").write_text("\n".join(lines))
