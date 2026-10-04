@@ -169,8 +169,7 @@ class EngineTest {
         assertEquals("score<90", plugin.getSuggestedScoreLevel("Enterprise Grade").orElseThrow());
         assertEquals(0.5, result.getDiagnostics().get(0).getScoreImprovement());
         assertEquals(0.5, result.getDiagnostics().get(1).getScoreImprovement());
-        assertEquals("http://localhost:6809/plugins/generic-policy/rules/REST001",
-                result.getDiagnostics().get(0).getDocumentationUrl());
+        assertEquals(null, result.getDiagnostics().get(0).getDocumentationUrl(), "no documentation site is assumed");
         assertTrue(plugin.getRuleDocumentation("REST001").orElseThrow().markdown().contains("GET /customers"));
         assertTrue(plugin.getRuleDocumentation("STANDARD005").orElseThrow().markdown().contains("2 nested resource levels"));
     }
@@ -1175,5 +1174,17 @@ class EngineTest {
     private static PolicyBundle distillBundle() {
         return new PolicyBundleLoader().load(
                 new ClasspathBundleResources(EngineTest.class.getClassLoader()));
+    }
+
+    @Test
+    void findingsLinkToRuleDocumentationOnlyWhenABaseUrlIsSet() {
+        String spec = "openapi: 3.0.0\ninfo: { title: T, version: 1.0.0 }\npaths:\n  /m:\n    get:\n      responses: { '200': { description: OK } }\n";
+        SpecInput input = SpecInput.builder().content(spec).format(SpecFormat.OPENAPI3).policy("Enterprise Grade").build();
+        Engine engine = Engine.builder().cacheDir(null).documentationBaseUrl("https://arete.acme.com/engines/generic-policy/rules").build();
+
+        String url = engine.score(input).getDiagnostics().get(0).getDocumentationUrl();
+
+        assertTrue(url.matches("https://arete\\.acme\\.com/engines/generic-policy/rules/[A-Z]+\\d+"), url);
+        assertEquals(null, Engine.builder().cacheDir(null).build().score(input).getDiagnostics().get(0).getDocumentationUrl());
     }
 }

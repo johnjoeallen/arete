@@ -1,0 +1,17 @@
+openapi: 3.0.0
+info: { title: Corpus, version: 1.0.0, description: Corpus example. }
+paths: {}
+components:
+  schemas:
+    Thing:
+      type: object
+      properties:
+        age:
+          type: integer
+          minimum: 0
+          maximum: 120
+          example: 34
+        countryCode:
+          type: string
+          pattern: '^[A-Z]{2}$'
+          example: US

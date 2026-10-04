@@ -35,7 +35,8 @@ public class Engine {
     /** Identifier the application and the automation API use for this engine. */
     public static final String ID = "generic-policy";
 
-    private static final String DOCUMENTATION_BASE_URL = "http://localhost:6809/plugins/generic-policy/rules/";
+    /** Where a rule's documentation page is, as a base URL ending in "/"; null when nothing serves one (a build, the CLI). */
+    private volatile String documentationBaseUrl;
     private static final int MAX_YAML_CODE_POINTS = 50 * 1024 * 1024;
     private static final System.Logger LOG = System.getLogger(Engine.class.getName());
 
@@ -112,11 +113,15 @@ public class Engine {
      *       usual locations, read for repositories, mirrors, credentials and proxies; {@code maven-profiles} activates profiles;</li>
      *   <li>{@code cache-dir} ({@code arete.policy.cache-dir}) — where fetched bundles are kept;</li>
      *   <li>{@code policies-dir} ({@code arete.policy.policies-dir}) — extra {@code *.md} policies, default
-     *       {@code ~/.arete/policies}.</li>
+     *       {@code ~/.arete/policies};</li>
+     *   <li>{@code documentation-base-url} ({@code arete.policy.documentation-base-url}) — where rule documentation is
+     *       served, so each finding can link to it; unset, findings carry no link.</li>
      * </ul>
      * To embed the engine with explicit settings, use {@link #builder()} instead.
      */
     public synchronized void configure(Map<String, String> config) {
+        String documentation = configOrProperty(config, "documentation-base-url", "arete.policy.documentation-base-url");
+        if (documentation != null && !documentation.isBlank()) setDocumentationBaseUrl(documentation.strip());
         List<PolicySource> sources = new ArrayList<>();
         String configured = configOrProperty(config, "policy-sources", "arete.policy.sources");
         if (configured != null && !configured.isBlank()) {
@@ -194,6 +199,14 @@ public class Engine {
     /** Starts building an engine with explicit policy sources; nothing is read from the user's home directory. */
     public static Builder builder() { return new Builder(); }
 
+    /**
+     * Where rule documentation is served, a base URL the rule id is appended to. Findings link to it; with none (the
+     * default) they carry no link, which is right for a build or a CLI run that has no documentation site.
+     */
+    public void setDocumentationBaseUrl(String baseUrl) {
+        this.documentationBaseUrl = baseUrl == null || baseUrl.isBlank() ? null : baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
+    }
+
     /** Collects an engine's policy sources and how they are fetched and checked, then loads them in {@link #build()}. */
     public static final class Builder {
         private final List<PolicySource> sources = new ArrayList<>();
@@ -205,6 +218,7 @@ public class Engine {
         private java.net.http.HttpClient http;
         private MavenSettings mavenSettings;
         private final java.util.Set<String> mavenProfiles = new java.util.LinkedHashSet<>();
+        private String documentationBaseUrl;
 
         /** Adds a source. Sources layer in the order added; with none, the bundle in the jar is used. */
         public Builder policySource(PolicySource source) { sources.add(source); return this; }
@@ -247,11 +261,15 @@ public class Engine {
         /** Activates a settings.xml profile, as {@code mvn -P id} does. */
         public Builder mavenProfile(String id) { mavenProfiles.add(id); return this; }
 
+        /** Where rule documentation is served; see {@link Engine#setDocumentationBaseUrl}. */
+        public Builder documentationBaseUrl(String baseUrl) { this.documentationBaseUrl = baseUrl; return this; }
+
         public Engine build() {
             Engine engine = new Engine();
             List<PolicyBundleLoader.OverlayPolicy> overlays = userPolicies == null ? List.of() : readPolicies(userPolicies);
             engine.load(new Settings(List.copyOf(sources), List.copyOf(repositories), requirePin, cacheDir, Map.copyOf(headers), http, overlays,
                     mavenSettings, java.util.Set.copyOf(mavenProfiles)));
+            engine.setDocumentationBaseUrl(documentationBaseUrl);
             return engine;
         }
     }
@@ -401,8 +419,8 @@ public class Engine {
                 net.dublinux.arete.engine.api.Diagnostic.Builder diagnostic = net.dublinux.arete.engine.api.Diagnostic.builder()
                         .ruleId(rule.id()).title(rule.title()).description(match.message())
                         .severity(disposition instanceof Prohibited ? Severity.ERROR : Severity.WARNING)
-                        .scoreImprovement(cost)
-                        .documentationUrl(DOCUMENTATION_BASE_URL + rule.id());
+                        .scoreImprovement(cost);
+                if (documentationBaseUrl != null) diagnostic.documentationUrl(documentationBaseUrl + rule.id());
                 if (match.pointer() != null) diagnostic.pointer(match.pointer());
                 if (match.path() != null) diagnostic.paths(List.of(match.path()));
                 if (match.value() != null) diagnostic.value(match.value());
