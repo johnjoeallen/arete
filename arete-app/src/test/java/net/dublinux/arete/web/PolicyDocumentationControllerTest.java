@@ -23,21 +23,31 @@ class PolicyDocumentationControllerTest {
     @MockitoBean private MarkdownRenderer markdownRenderer;
 
     @Test
-    void rendersDocumentationFromAPluginAtItsStableUrl() throws Exception {
+    void rendersDocumentationFromAnEngineAtItsStableUrl() throws Exception {
         documented();
         when(markdownRenderer.render("# REST001\n\nRule text.")).thenReturn("<h1>REST001</h1><p>Rule text.</p>");
 
-        mockMvc.perform(get("/plugins/generic-policy/rules/REST001"))
+        mockMvc.perform(get("/engines/generic-policy/rules/REST001"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("Rule text.")))
                 .andExpect(content().string(org.hamcrest.Matchers.containsString("openapi-viewer:theme")));
     }
 
     @Test
+    void theOldPluginsUrlStillWorks() throws Exception {
+        documented();
+        when(markdownRenderer.render("# REST001\n\nRule text.")).thenReturn("<h1>REST001</h1><p>Rule text.</p>");
+
+        mockMvc.perform(get("/plugins/generic-policy/rules/REST001"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Rule text.")));
+    }
+
+    @Test
     void returnsNotFoundForAnUnknownRule() throws Exception {
         documented();
 
-        mockMvc.perform(get("/plugins/generic-policy/rules/MISSING"))
+        mockMvc.perform(get("/engines/generic-policy/rules/MISSING"))
                 .andExpect(status().isNotFound());
     }
 

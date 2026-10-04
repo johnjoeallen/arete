@@ -56,19 +56,19 @@
                 </div>
 
                 <div class="tab-panel" th:classappend="${activateScore} ? ' active'">
-                    <div th:if="${pluginChoices != null and !pluginChoices.isEmpty() and specRef != null}" class="scoring-picker-wrapper">
+                    <div th:if="${engineChoices != null and !engineChoices.isEmpty() and specRef != null}" class="scoring-picker-wrapper">
                         <h2>Scoring</h2>
                         <form method="post" th:action="@{/spec/{ref}/score(ref=${specRef})}" class="scoring-picker" id="scoring-picker-form">
-                            <table class="plugin-picker-table">
+                            <table class="engine-picker-table">
                                 <thead>
-                                    <tr><th></th><th>Plugin</th><th>Policy</th></tr>
+                                    <tr><th></th><th>Engine</th><th>Policy</th></tr>
                                 </thead>
                                 <tbody>
-                                    <tr th:each="pc : ${pluginChoices}">
-                                        <td><input type="checkbox" name="plugin" th:value="${pc.pluginId()}" th:checked="${pc.enabled()}"></td>
-                                        <td th:text="${pc.pluginName()}"></td>
+                                    <tr th:each="pc : ${engineChoices}">
+                                        <td><input type="checkbox" name="engine" th:value="${pc.engineId()}" th:checked="${pc.enabled()}"></td>
+                                        <td th:text="${pc.engineName()}"></td>
                                         <td>
-                                            <select th:name="'policy_' + ${pc.pluginId()}">
+                                            <select th:name="'policy_' + ${pc.engineId()}">
                                                 <option th:each="rs : ${pc.policies()}" th:value="${rs.slug()}" th:text="${rs.name()}"
                                                         th:selected="${rs.slug() == pc.selectedSlug()}"></option>
                                             </select>
@@ -90,7 +90,7 @@
                             <div class="scoring-results">
                                 <p th:if="${resultFromCache}" class="scoring-summary-line scoring-cached-note">Showing results from the last Score run.</p>
                                 <p th:if="${scoring.rulesEvaluatedCount() >= 0}" class="scoring-summary-line"
-                                   th:text="${scoring.rulesEvaluatedCount()} + ' rule(s) checked across ' + ${scoring.pluginSummaries().size()} + ' validator(s).'"></p>
+                                   th:text="${scoring.rulesEvaluatedCount()} + ' rule(s) checked across ' + ${scoring.engineSummaries().size()} + ' validator(s).'"></p>
                                 <p th:if="${!T(java.lang.Double).isNaN(scoring.overallScore())}" class="scoring-summary-line scoring-score-line">
                                     Score: <span th:text="${#numbers.formatDecimal(scoring.overallScore(), 1, 1)}"></span>%
                                     <span th:if="${scoring.grade() != null}" class="scoring-grade"
@@ -104,11 +104,11 @@
                                           th:text="' (' + ${#numbers.formatDecimal(scoring.overallScoreWithoutBlockers(), 1, 1)} + '% without blockers)'"></span>
                                 </p>
                                 <p th:if="${scoring.diagnostics().isEmpty()}" class="scoring-summary-line scoring-clean-note">No issues found.</p>
-                                <ul class="plugin-outcomes">
-                                    <li th:each="s : ${scoring.pluginSummaries()}">
-                                        <span th:text="${s.pluginName()}"></span>:
+                                <ul class="engine-outcomes">
+                                    <li th:each="s : ${scoring.engineSummaries()}">
+                                        <span th:text="${s.engineName()}"></span>:
                                         <span th:if="${s.status() == 'SUCCESS'}" th:text="${s.diagnosticCount()} + ' diagnostic(s)'"></span>
-                                        <span th:unless="${s.status() == 'SUCCESS'}" class="plugin-error" th:text="${s.status()} + ' - ' + ${s.errorMessage()}"></span>
+                                        <span th:unless="${s.status() == 'SUCCESS'}" class="engine-error" th:text="${s.status()} + ' - ' + ${s.errorMessage()}"></span>
                                     </li>
                                 </ul>
                                 <div class="severity-filter">

@@ -42,7 +42,7 @@
                        class="diagnostic-doc-link">Learn more &#8599;</a>
                 </td>
                 <td th:text="${@jsonPointers.toDisplayPath(av.diagnostic().getPointer())}"></td>
-                <td><span class="diagnostic-source" th:text="${av.pluginName()}"></span></td>
+                <td><span class="diagnostic-source" th:text="${av.engineName()}"></span></td>
             </tr>
         </tbody>
     </table>

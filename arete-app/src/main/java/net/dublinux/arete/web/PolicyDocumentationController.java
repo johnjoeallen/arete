@@ -12,7 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
-/** Serves rule documentation owned by a loaded plugin at a stable local URL. */
+/** Serves rule documentation owned by a loaded engine at a stable local URL. */
 @Controller
 public class PolicyDocumentationController {
     private final Engine engine;
@@ -23,10 +23,11 @@ public class PolicyDocumentationController {
         this.markdownRenderer = markdownRenderer;
     }
 
-    @GetMapping("/plugins/{pluginId}/rules/{ruleId}")
-    public String rule(@PathVariable String pluginId, @PathVariable String ruleId, Model model) {
+    // /plugins/... is the old URL, kept so existing links keep working.
+    @GetMapping({"/engines/{engineId}/rules/{ruleId}", "/plugins/{engineId}/rules/{ruleId}"})
+    public String rule(@PathVariable String engineId, @PathVariable String ruleId, Model model) {
         RuleDocumentation documentation = Optional.of(engine)
-                .filter(candidate -> candidate.getId().equals(pluginId))
+                .filter(candidate -> candidate.getId().equals(engineId))
                 .flatMap(candidate -> candidate.getRuleDocumentation(ruleId))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         model.addAttribute("documentationTitle", documentation.title());

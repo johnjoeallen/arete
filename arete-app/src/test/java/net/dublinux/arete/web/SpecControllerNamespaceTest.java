@@ -2,9 +2,9 @@ package net.dublinux.arete.web;
 
 import net.dublinux.arete.domain.NamespaceEntity;
 import net.dublinux.arete.engine.Engine;
-import net.dublinux.arete.plugin.PluginScoringService;
-import net.dublinux.arete.plugin.SpecPluginSettingsService;
-import net.dublinux.arete.plugin.SpecScoringResultService;
+import net.dublinux.arete.scoring.EngineScoringService;
+import net.dublinux.arete.scoring.SpecEngineSettingsService;
+import net.dublinux.arete.scoring.SpecScoringResultService;
 import net.dublinux.arete.service.NamespaceService;
 import net.dublinux.arete.service.SpecFileWatcher;
 import net.dublinux.arete.service.SpecParserService;
@@ -35,11 +35,11 @@ class SpecControllerNamespaceTest {
 
     @MockitoBean SpecParserService specParserService;
     @MockitoBean SpecStorageService specStorageService;
-    @MockitoBean PluginScoringService pluginScoringService;
+    @MockitoBean EngineScoringService engineScoringService;
     @MockitoBean SpecFileWatcher specFileWatcher;
     @MockitoBean net.dublinux.arete.web.api.DeploymentMode deploymentMode;
     @MockitoBean Engine engine;
-    @MockitoBean SpecPluginSettingsService specPluginSettingsService;
+    @MockitoBean SpecEngineSettingsService specEngineSettingsService;
     @MockitoBean SpecScoringResultService specScoringResultService;
     @MockitoBean NamespaceService namespaceService;
 

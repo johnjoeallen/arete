@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Policy (policy) names can contain spaces and mixed case ("Enterprise
  * Grade"). URLs and form fields carry a slug ("enterprise-grade"); this maps
- * between the two against a plugin's own the engine's policies.
+ * between the two against a engine's own the engine's policies.
  */
 public final class Policies {
 
@@ -23,7 +23,7 @@ public final class Policies {
 
     /**
      * Resolves a slug (or an exact name, or a legacy positional index) back to
-     * the plugin's real policy name. Falls back to
+     * the engine's real policy name. Falls back to
      * {@link Engine#DEFAULT_POLICY} for anything unrecognised.
      */
     public static String resolve(List<String> policyNames, String value) {

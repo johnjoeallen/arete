@@ -1,10 +1,10 @@
 package net.dublinux.arete.web.api;
 
-import net.dublinux.arete.plugin.AggregatedScoringResult;
-import net.dublinux.arete.plugin.AttributedDiagnostic;
-import net.dublinux.arete.plugin.PluginScoringService;
-import net.dublinux.arete.plugin.SpecScoringResultService;
-import net.dublinux.arete.plugin.ScoringSummary;
+import net.dublinux.arete.scoring.AggregatedScoringResult;
+import net.dublinux.arete.scoring.AttributedDiagnostic;
+import net.dublinux.arete.scoring.EngineScoringService;
+import net.dublinux.arete.scoring.SpecScoringResultService;
+import net.dublinux.arete.scoring.ScoringSummary;
 import net.dublinux.arete.service.ParsedSpec;
 import net.dublinux.arete.service.SpecParserService;
 import net.dublinux.arete.service.SpecStorageService;
@@ -47,7 +47,7 @@ class AutomationApiControllerTest {
 
     @MockitoBean SpecParserService parser;
     @MockitoBean SpecStorageService storage;
-    @MockitoBean PluginScoringService scoring;
+    @MockitoBean EngineScoringService scoring;
     @MockitoBean Engine engine;
     @MockitoBean SpecScoringResultService results;
     @MockitoBean RemoteSpecFetcher fetcher;

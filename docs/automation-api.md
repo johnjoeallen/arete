@@ -151,8 +151,8 @@ the combination is judged against its own policy's bar (`level.source` =
 `?failOn=error` / `score<NN` etc. overrides every combination
 (`level.source` = `"request"`).
 
-Plugins other than the policy engine can expose a bar via the SPI methods
-`getPassingScore(policy)` and `getSuggestedScoreLevel(policy)`.
+The policy engine supplies the bar through `getPassingScore(policy)` and
+`getSuggestedScoreLevel(policy)`.
 
 ## Remote fetch
 

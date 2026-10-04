@@ -27,7 +27,7 @@
             not a security boundary. The name keeps your casing; <code>Payments</code> and
             <code>payments</code> are the same namespace.
         </p>
-        <table class="plugin-settings">
+        <table class="engine-settings">
             <thead>
                 <tr><th>Name</th><th>Key</th><th>Specs</th><th></th></tr>
             </thead>
@@ -39,7 +39,7 @@
                     <td>
                         <form th:if="${ns.specCount == 0 and ns.key != 'default'}" method="post"
                               th:action="@{/settings/namespaces/{key}/delete(key=${ns.key})}">
-                            <button type="submit" class="plugin-toggle-btn is-disabled">Delete</button>
+                            <button type="submit" class="engine-toggle-btn is-disabled">Delete</button>
                         </form>
                     </td>
                 </tr>
