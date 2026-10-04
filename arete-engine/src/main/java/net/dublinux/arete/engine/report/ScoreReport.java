@@ -52,7 +52,7 @@ public record ScoreReport(String file, String policy, String status, String erro
             findings.add(new Finding(d.getRuleId(), d.getTitle(), d.getSeverity().name(), engine.getSeverityLabel(d.getSeverity()), d.getPointer(),
                     d.getPaths().isEmpty() ? null : d.getPaths().get(0),
                     d.getDescription() == null ? d.getTitle() : d.getDescription(),
-                    at == null ? null : at.line(), at == null ? null : at.column(), impact, routes.routeTo(d.getPointer())));
+                    at == null ? null : at.line(), at == null ? null : at.column(), impact, routes.routesTo(d.getPointer())));
         }
         findings.sort(Comparator.comparing((Finding f) -> f.line() == null ? Integer.MAX_VALUE : f.line())
                 .thenComparing(Finding::ruleId).thenComparing(f -> String.valueOf(f.pointer())));

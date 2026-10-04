@@ -22,7 +22,7 @@ import java.util.Set;
 
 /**
  * How a shared definition is reached. A finding on a component (a schema, a response) is reported once, at the
- * component, however many operations lead to it; this names the shortest route from an operation, such as
+ * component, however many operations lead to it; this lists the routes in from each operation, such as
  * {@code POST /orders → Order → Address}, so the reader can see why it matters. Built from the same reading of the
  * text as {@link PointerLocator}, following same-document {@code $ref}s only.
  */
@@ -78,26 +78,28 @@ final class RefPaths {
     }
 
     /**
-     * The shortest route from an operation (or a path's shared parameters) to the component that holds
-     * {@code pointer}, as readable labels, first the operation and last the component. Empty when the pointer is not
-     * inside a component, or nothing reachable from a path refers to it.
+     * Every way into the component that holds {@code pointer}: one route per operation (or path's shared
+     * parameters) that reaches it, each the shortest from that operation, as readable labels with the operation
+     * first and the component last. Shortest routes come first. Empty when the pointer is not inside a component,
+     * or nothing reachable from a path refers to it.
      */
-    List<String> routeTo(String pointer) {
+    List<List<String>> routesTo(String pointer) {
         String start = owner(pointer);
         if (start == null || !start.startsWith("/components/")) return List.of();
         Map<String, String> next = new HashMap<>();   // owner to the owner it leads towards
         Deque<String> queue = new ArrayDeque<>(List.of(start));
         Set<String> seen = new LinkedHashSet<>(List.of(start));
+        List<List<String>> routes = new ArrayList<>();
         while (!queue.isEmpty()) {
             String current = queue.poll();
             for (String referrer : referrers.getOrDefault(current, Set.of())) {
                 if (!seen.add(referrer)) continue;
                 next.put(referrer, current);
-                if (referrer.startsWith("/paths/")) return route(referrer, next);
-                queue.add(referrer);
+                if (referrer.startsWith("/paths/")) routes.add(route(referrer, next));
+                else queue.add(referrer);
             }
         }
-        return List.of();
+        return Collections.unmodifiableList(routes);
     }
 
     private static List<String> route(String from, Map<String, String> next) {

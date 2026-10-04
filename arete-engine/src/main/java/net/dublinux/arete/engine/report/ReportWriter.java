@@ -224,9 +224,12 @@ public final class ReportWriter {
         if (f.line() != null) n.put("line", f.line());
         if (f.column() != null) n.put("column", f.column());
         n.put("scoreImpact", f.scoreImpact());
-        if (!f.reachedVia().isEmpty()) {
-            com.fasterxml.jackson.databind.node.ArrayNode route = n.putArray("reachedVia");
-            f.reachedVia().forEach(route::add);
+        if (!f.routes().isEmpty()) {
+            ArrayNode routes = n.putArray("reachedVia");
+            for (List<String> route : f.routes()) {
+                ArrayNode steps = routes.addArray();
+                route.forEach(steps::add);
+            }
         }
         return n;
     }
@@ -294,7 +297,10 @@ public final class ReportWriter {
             if (f.column() != null) region.put("startColumn", f.column());
         }
         if (f.pointer() != null) location.putArray("logicalLocations").addObject().put("fullyQualifiedName", f.pointer());
-        if (!f.reachedVia().isEmpty()) result.putObject("properties").put("reachedVia", f.reachedViaText());
+        if (!f.routes().isEmpty()) {
+            ArrayNode routes = result.putObject("properties").putArray("reachedVia");
+            f.routes().forEach(route -> routes.add(Finding.routeText(route)));
+        }
         return result;
     }
 
@@ -431,9 +437,15 @@ public final class ReportWriter {
         return out.toString();
     }
 
-    /** The route to a shared definition, as a suffix for a finding's line; empty when there is none. */
+    /** Most routes named on a finding's line; the JSON report lists them all. */
+    static final int MAX_ROUTES_SHOWN = 3;
+
+    /** The routes to a shared definition, as a suffix for a finding's line; empty when there are none. */
     private static String via(Finding f) {
-        return f.reachedVia().isEmpty() ? "" : " _(reached via " + f.reachedViaText() + ")_";
+        if (f.routes().isEmpty()) return "";
+        List<String> shown = f.routes().stream().limit(MAX_ROUTES_SHOWN).map(Finding::routeText).toList();
+        int more = f.routes().size() - shown.size();
+        return " _(reached via " + String.join("; ", shown) + (more > 0 ? "; and " + more + " more" : "") + ")_";
     }
 
     private static String where(ScoreReport report, Finding f) {
