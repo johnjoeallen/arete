@@ -7,8 +7,8 @@ by category. A rule is only evaluated when a [policy](policies.md) references
 it. See [the policy engine](policy-engine.md) for how matchers, rules, and
 policies fit together.
 
-There are **157 rules** across **20 categories**, built on
-**52 matchers**.
+There are **158 rules** across **20 categories**, built on
+**53 matchers**.
 
 !!! note "Reading the policy columns"
     A number is the point deduction applied once if the rule matches;
@@ -120,7 +120,7 @@ There are **157 rules** across **20 categories**, built on
 
 | Rule | Title | Matcher | Enterprise | Zalando | Zal. Ext. |
 |---|---|---|---|---|---|
-| `STATUS001` | Creation operation lacks an appropriate success status | `response-code` | 0.5 | 0.5 | 0.5 |
+| `STATUS001` | Creation operation lacks an appropriate success status | `response-code` | by count (1+ costs 0.5, 3+ costs 1, 6+ costs 2) | 0.5 | 0.5 |
 | `STATUS002` | Created resource response lacks location information | `response-header` | 0.5 | 0.5 | 0.5 |
 | `STATUS003` | Authentication failure uses an inappropriate status | `response-code` | 0.5 | 0.5 | 0.5 |
 | `STATUS004` | Resource retrieval lacks a not-found response | `response-code` | 0.5 | 0.5 | 0.5 |
@@ -158,6 +158,7 @@ There are **157 rules** across **20 categories**, built on
 | `JSON021` | Numeric property has no minimum and maximum | `schema` |  |  | 0.5 |
 | `JSON022` | String property has no maximum length | `schema` |  |  | 0.5 |
 | `JSON023` | Array schema declares no items | `array-items` | 0.5 |  | 0.5 |
+| `JSON025` | Schema nests too deeply | `schema-depth` | by value (5+ costs 0.5, 7+ costs 1.5) |  |  |
 
 ## Naming
 
@@ -230,7 +231,7 @@ There are **157 rules** across **20 categories**, built on
 | `STANDARD008` | Proprietary header is not allow-listed | `proprietary-header` | 0.5 | 0.5 | 0.5 |
 | `STANDARD009` | Collection query parameter uses the wrong serialization | `query-collection` | 0.5 | 0.5 | 0.5 |
 | `STANDARD010` | OpenAPI version is unsupported or missing | `openapi-version` | 0.5 | 0.5 | 0.5 |
-| `STANDARD011` | Operation declares too many parameters | `parameter` | 0.5 |  |  |
+| `STANDARD011` | Operation declares too many parameters | `parameter` | by value (9+ costs 0.5, 13+ costs 1.5) |  |  |
 | `STANDARD012` | Path parameter is not marked required | `parameter` | 0.5 |  | 0.5 |
 | `STANDARD013` | Path parameter does not match the path template | `parameter` | 0.5 |  | 0.5 |
 | `STANDARD014` | Parameter has no schema or content | `parameter` | 0.5 |  | 0.5 |

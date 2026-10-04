@@ -47,7 +47,7 @@ class ValueMeasureTest {
 
     @Test
     void tiersChargeByTheDeepestValueNotByHowManySchemasMatch(@TempDir Path tmp) throws IOException {
-        Engine engine = engine(tmp, "{ measure: value, tiers: { 4: 1, 6: 3 } }");
+        Engine engine = engine(tmp, "{ measure: value, tiers: { 4: 1, 6: 3 }, parameters: { minimum: 4 } }");
 
         assertEquals(null, outcome(score(engine, 3)), "below the first tier nothing is reported");
         ScoringResult four = score(engine, 4);

@@ -1,6 +1,6 @@
 # findings and score by policy; regenerate with -Dcorpus.update=true
 
-## Enterprise Grade  score=78.5  grade=D+  findings=77
+## Enterprise Grade  score=77.5  grade=D+  findings=77
   DOC006  /info/contact/email  |  API metadata is missing contact email
   DOC006  /info/version  |  API metadata is missing semantic version
   DOC007  /  |  API metadata is missing x-api-id

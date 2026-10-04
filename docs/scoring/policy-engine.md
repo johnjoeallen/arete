@@ -466,7 +466,7 @@ format: 2
 rules:
   JSON025:                         # schema nesting depth; each occurrence carries its depth
     measure: value
-    tiers: { 4: 0.5, 6: 1.5 }      # 4 or 5 levels deep costs 0.5, 6 or more costs 1.5
+    tiers: { 5: 0.5, 7: 1.5 }      # 5 or 6 levels deep costs 0.5, 7 or more costs 1.5
   STANDARD011:                     # parameters per operation; each occurrence carries the count
     measure: value
     tiers: { 9: 1, 13: 3 }

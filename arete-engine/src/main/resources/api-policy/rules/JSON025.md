@@ -3,7 +3,7 @@ id: JSON025
 category: JSON
 matcher: schema-depth
 scope: schema
-parameters: { minimum: 4 }
+parameters: { minimum: 5 }
 ---
 
 # JSON025 — Schema nests too deeply
@@ -26,6 +26,6 @@ Keep the chain below the minimum, or flatten it with identifiers instead of embe
 
 ## Configuration and limitations
 
-`minimum` (default 4 here) is the shallowest depth reported. Depth counts property hops, following `$ref`s; a
+`minimum` (default 5 here) is the shallowest depth reported. Depth counts property hops, following `$ref`s; a
 recursive schema stops where it recurs. The rule is not part of a bundled policy: a policy opts in with a
-`format: 2` entry such as `JSON025: { measure: value, tiers: { 4: 0.5, 6: 1.5 } }`.
+`format: 2` entry such as `JSON025: { measure: value, tiers: { 5: 0.5, 7: 1.5 } }`.

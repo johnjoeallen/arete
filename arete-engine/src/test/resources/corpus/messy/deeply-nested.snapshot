@@ -1,6 +1,6 @@
 # findings and score by policy; regenerate with -Dcorpus.update=true
 
-## Enterprise Grade  score=92.0  grade=B  findings=36
+## Enterprise Grade  score=91.5  grade=B-  findings=37
   BULK002  /components/schemas/Document/properties/body/properties/sections  |  Array property has no maximum item count
   BULK002  /components/schemas/Document/properties/body/properties/sections/items/properties/blocks  |  Array property has no maximum item count
   BULK002  /components/schemas/Document/properties/body/properties/sections/items/properties/blocks/items/properties/runs  |  Array property has no maximum item count
@@ -32,6 +32,7 @@
   JSON014  /components/schemas/Document/properties/body/properties/sections/items/properties/blocks/items/properties/kind  |  Enum is not marked extensible
   JSON015  /components/schemas/Document/properties/body/properties/sections/items/properties/blocks/items/properties/kind  |  Enum value is not UPPER_SNAKE_CASE
   JSON023  /components/schemas/Document/properties/revisions  |  Array property 'revisions' declares no items
+  JSON025  /components/schemas/Document  |  Schema 'Document' nests 6 levels deep
   SECURITY001  /paths/~1documents~1{document_id}/get  |  Operation does not require security scheme bearerAuth
   SECURITY002  /paths/~1documents~1{document_id}/get  |  Operation does not require security scheme bearerAuth with scopes read, write
   STANDARD019  /components/schemas/Style  |  Style uses allOf with inline members instead of $ref

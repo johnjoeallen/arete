@@ -1,5 +1,6 @@
 ---
 id: Enterprise Grade
+format: 2
 passingScore: 90
 grades:
   A: 95
@@ -77,7 +78,8 @@ rules:
   COMPAT004: 0.5
   COMPAT005: 0.5
   COMPAT006: 0.5
-  STATUS001: 0.5
+  STATUS001:
+    tiers: { 1: 0.5, 3: 1, 6: 2 }   # a few POSTs without a 201 cost little; many cost more
   STATUS002: 0.5
   STATUS003: 0.5
   STATUS004: 0.5
@@ -88,7 +90,9 @@ rules:
     parameters:
       headers: RateLimit-Limit,RateLimit-Remaining
   STANDARD010: 0.5
-  STANDARD011: 0.5
+  STANDARD011:
+    measure: value
+    tiers: { 9: 0.5, 13: 1.5 }      # by the operation with the most parameters (limit 8)
   STANDARD012: 0.5
   STANDARD013: 0.5
   STANDARD014: 0.5
@@ -117,6 +121,9 @@ rules:
   DOC016: 0.5
   ERROR011: 0.5
   JSON023: 0.5
+  JSON025:
+    measure: value
+    tiers: { 5: 0.5, 7: 1.5 }        # by the deepest schema, in levels of nesting
   SECURITY003: 0.5
   SECURITY004: 0.5
   STANDARD025: 0.5
@@ -135,7 +142,10 @@ few rule parameters calibrated for a typical enterprise API (allow-listed
 proprietary headers, expected OAuth2 scopes, standard rate-limit headers).
 
 Each matched rule deducts half a point once, regardless of how many diagnostics
-it reports — a deliberately simple, uniform baseline. Organisations should
+it reports — a deliberately simple, uniform baseline. Three rules are charged by
+size instead (the values are a starting point and will want tuning): `STATUS001`
+by how many creation operations lack a 201, `STANDARD011` by the most
+parameters on one operation, and `JSON025` by the deepest schema. Organisations should
 publish their own policy with calibrated deductions and `PROHIBITED`
 dispositions rather than relying on this one unchanged.
 
