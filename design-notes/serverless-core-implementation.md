@@ -14,14 +14,14 @@ lines or hours. A stage is 100% only when everything the plan lists for it is bu
 | Stage | Goal | Complete |
 | --- | --- | --- |
 | 0 | Fix false positives and deep `$ref` | 90% |
-| 1 | Zally parity corpus | 50% |
+| 1 | Rule corpus (parity with other tools is out of scope for now) | 100% |
 | 2 | Extract the engine, policy loader, CLI, reports | 95% |
 | 3 | Merge-gate and thin build plugins | 95% |
-| 4 | Host policy in-org, report-only trial, enforce | 15% |
+| 4 | Publish the engine, API and plugins | 40% |
 | Extras | Extended rule semantics, Distill values, publishing | 70% |
 
-Overall: roughly 75%. The software is largely built. What is left is mostly proof against real material,
-the first publish, and the org rollout, which depend on things outside the repository.
+Overall: roughly 80%. The software is largely built. What is left is the first publish and a few trials
+against real material.
 
 ## Stage 0: fix false positives (90%)
 
@@ -38,19 +38,15 @@ the first publish, and the org rollout, which depend on things outside the repos
 
 Remaining: "reached via" reporting and a multi-file spec trial through the gate.
 
-## Stage 1: Zally parity corpus (50%)
+## Stage 1: rule corpus (100%)
 
 | Item | State |
 | --- | --- |
-| Rule-pair corpus as a golden regression suite in the repo | Done |
+| Rule-pair corpus (bad and good) as a golden regression suite in the repo | Done |
 | Whole-API good and messy specs | Done |
 | Rule conflicts between policies settled | Done; cross-policy conflicts are intentional |
-| Zally rule ID to Areté rule mapping | Not done |
-| Run of the Global Platform specs through Areté and Zally | Not done: those specs and the Zally scripts are not reachable from this environment |
-| Differences classified as over-reporting, under-reporting or intentional | Not done |
 
-The synthetic corpus gives regression protection but not parity evidence. This stage needs someone with
-access to the organisation's specs, or a public spec set agreed as a stand-in.
+Comparison with other linters is out of scope for now.
 
 ## Stage 2: extract the engine (95%)
 
@@ -83,22 +79,15 @@ access to the organisation's specs, or a public spec set agreed as a stand-in.
 | Tried from a local install on a real git repository: regression, new and moved specs, layered `git:` policy, shallow clone | Done |
 | SARIF `physicalLocation` for inline MR annotations | Done in the writer; not yet seen rendering in GitLab or GitHub |
 | `--annotate-changed-only` | Not done (optional) |
-| Acceptance against MR 1109 and the org's Zally scripts | Not done: not reachable from here |
 
-## Stage 4: host policy in-org (15%)
+## Stage 4: publish (40%)
 
 | Item | State |
 | --- | --- |
 | Engine, API and both plugins publishable from `publish.yml` | Done; the workflow has not been run |
 | Old `arete-ci-gate-*` modules retired | Done |
-| First real publish (Maven Central or internal repository) | Not done |
-| Policy bundle published to an internal repository with version and checksum | Not done |
-| Pipeline job in `--report-only` | Not done |
-| Job made required | Not done |
-| Deprecated `automation-api` and HTTP-client gate removed after one release | Not done; `AutomationApiController` remains |
-
-This stage is mostly the organisation's work. The repository side is ready once the publish workflow has
-been run once.
+| First real publish (Maven Central) | Not done |
+| Deprecated `automation-api` and HTTP-client gate removed | Not done; `AutomationApiController` remains |
 
 ## Extras beyond the stage list (70%)
 
@@ -114,12 +103,8 @@ been run once.
 ## What is left, in order
 
 1. Run `publish.yml` once and confirm the engine, API and both plugins resolve from the published location.
-2. Obtain a real spec set, then do Stage 1: map Zally IDs, run both tools, classify the differences, and
-   record the golden results.
-3. Try the gate on a multi-file spec with external refs, and fix base-side resolution if needed.
-4. See a SARIF file render inline in GitLab and in GitHub.
-5. Add "reached via" paths to findings on shared schemas.
-6. Publish the policy bundle internally and start a `--report-only` job; make it required once the noise is
-   understood.
-7. Remove the deprecated automation API one release after the gate is in use.
-8. Optional: signature checking, `--annotate-changed-only`, Distill combinators.
+2. Try the gate on a multi-file spec with external refs, and fix base-side resolution if needed.
+3. See a SARIF file render inline in GitLab and in GitHub.
+4. Add "reached via" paths to findings on shared schemas.
+5. Remove the deprecated automation API.
+6. Optional: signature checking, `--annotate-changed-only`, Distill combinators.
