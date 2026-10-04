@@ -46,14 +46,14 @@ final class GateRules {
         for (ScoreDiff.Change change : diff.of(ScoreDiff.Kind.NEW)) {
             if ("ERROR".equals(change.finding().severity())) reasons.add("new blocker: " + describe(file, change.finding()));
         }
-        // A rule scored by count (per match, or by tier) can get worse without a new kind of finding: compare its count.
-        Map<String, Integer> baseCounts = new LinkedHashMap<>();
-        for (RuleOutcome outcome : base.ruleOutcomes()) baseCounts.put(outcome.ruleId(), outcome.count());
+        // A rule scored by count (per match, or by tier) can get worse without a new kind of finding: compare its count, or the value it measures.
+        Map<String, Double> baseCounts = new LinkedHashMap<>();
+        for (RuleOutcome outcome : base.ruleOutcomes()) baseCounts.put(outcome.ruleId(), outcome.measure());
         for (RuleOutcome outcome : head.ruleOutcomes()) {
             if (!outcome.graduated()) continue;
-            int before = baseCounts.getOrDefault(outcome.ruleId(), 0);
-            if (outcome.count() > before) {
-                reasons.add(outcome.ruleId() + " got worse: " + before + " -> " + outcome.count() + (before == 0 ? " (newly violated)" : "")
+            double before = baseCounts.getOrDefault(outcome.ruleId(), 0.0);
+            if (outcome.measure() > before) {
+                reasons.add(outcome.ruleId() + " got worse: " + number(before) + " -> " + number(outcome.measure()) + (before == 0 ? " (newly violated)" : "")
                         + ", costing " + number(outcome.cost()));
             }
         }

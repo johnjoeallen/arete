@@ -437,11 +437,12 @@ policy that declares **`format: 2`** can say more about a rule:
 | `points: N` | A flat cost, charged once. As before. |
 | `per-match: N` and `max: M` | Charge `N` for each match, up to `M` in all. Without `max` the only limit is the score floor of 0. |
 | `tiers: { 2: 1, 5: 3, 20: 8 }` | Charge the points of the highest tier the match count reaches: 2 or more costs 1, 5 or more costs 3, 20 or more costs 8. **Below the lowest tier the rule is not violated**: it reports nothing, so a tier map also expresses "up to N is fine". |
+| `measure: value` | With `tiers`: tier on the **value** the matcher reports with each occurrence (the deepest schema, the operation with the most parameters), taking the worst one, not on how many occurrences there are. `measure: count` is the default. See below. |
 | `expect: match` | The opposite sense: the matcher looks for something that should be there, and **finding nothing** is the violation. It is reported once, at the spec root, with a message that nothing was found. |
 | `expect: no-match` | The default, as before. |
 | `points: PROHIBITED` | Unchanged: any violation forces the score to 0. Works with `expect: match`. |
 
-Exactly one of `points`, `per-match` and `tiers` is given; `max` goes only with `per-match`. A policy without
+Exactly one of `points`, `per-match` and `tiers` is given; `max` goes only with `per-match`; `measure` only with `tiers`. A policy without
 `format: 2` that uses the new keys is rejected, so a policy file never changes meaning silently. For example:
 
 ```yaml
@@ -456,6 +457,25 @@ rules:
     tiers: { 6: 1, 21: 3 }   # five unbounded strings are tolerated; more cost 1, then 3
 ---
 ```
+
+A rule can be charged by what the matcher *measured* rather than how often it matched. A matcher reports a value as
+an optional fourth argument of `occurrence(...)`, and the policy opts in with `measure: value`:
+
+```yaml
+format: 2
+rules:
+  JSON025:                         # schema nesting depth; each occurrence carries its depth
+    measure: value
+    tiers: { 4: 0.5, 6: 1.5 }      # 4 or 5 levels deep costs 0.5, 6 or more costs 1.5
+  STANDARD011:                     # parameters per operation; each occurrence carries the count
+    measure: value
+    tiers: { 9: 1, 13: 3 }
+```
+
+The cost follows the **largest** value among the occurrences. Every occurrence is still reported as a finding, with the
+value on it. A rule charged by value whose matcher reports no value is a scoring error, not a silent zero. The merge
+gate compares the worst value too, so a schema getting deeper fails even when the number of findings is unchanged
+(`JSON025 got worse: 5 -> 7`). `measure` goes only with `tiers`.
 
 `expect: match` only makes sense with a matcher written to find evidence of something wanted. Every bundled matcher reports
 *violations*, so none of the bundled rules is used that way; it is for your own matchers, for example one that matches an

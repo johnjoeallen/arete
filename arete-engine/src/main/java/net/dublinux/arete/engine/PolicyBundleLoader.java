@@ -181,12 +181,12 @@ final class PolicyBundleLoader {
                 dispositions.put(entry.getKey(), new Prohibited());
             } else if (value instanceof Map<?, ?> raw) {
                 Map<String, Object> declaration = map(path, "rules." + entry.getKey(), raw);
-                rejectUnknown(path, declaration, Set.of("points", "parameters", "locked", "expect", "per-match", "max", "tiers"));
+                rejectUnknown(path, declaration, Set.of("points", "parameters", "locked", "expect", "per-match", "max", "tiers", "measure"));
                 if (declaration.containsKey("locked")) {
                     if (!(declaration.get("locked") instanceof Boolean flag)) throw new BundleValidationException(path + ": " + entry.getKey() + ".locked must be true or false");
                     if (flag) locked.add(entry.getKey());
                 }
-                for (String extended : List.of("expect", "per-match", "max", "tiers")) {
+                for (String extended : List.of("expect", "per-match", "max", "tiers", "measure")) {
                     if (declaration.containsKey(extended) && format < 2) {
                         throw new BundleValidationException(path + ": " + entry.getKey() + "." + extended + " needs format: 2 in the policy's front matter");
                     }
@@ -208,6 +208,13 @@ final class PolicyBundleLoader {
                     else if (!"no-match".equals(expect)) throw new BundleValidationException(path + ": " + entry.getKey() + ".expect must be match or no-match");
                 }
                 String where = path + ": " + entry.getKey();
+                boolean byValue = false;
+                if (declaration.containsKey("measure")) {
+                    Object measure = declaration.get("measure");
+                    if ("value".equals(measure)) byValue = true;
+                    else if (!"count".equals(measure)) throw new BundleValidationException(where + ".measure must be count or value");
+                    if (byValue && !declaration.containsKey("tiers")) throw new BundleValidationException(where + ".measure: value goes only with tiers");
+                }
                 int ways = (declaration.containsKey("points") ? 1 : 0) + (declaration.containsKey("per-match") ? 1 : 0) + (declaration.containsKey("tiers") ? 1 : 0);
                 if (ways != 1) throw new BundleValidationException(where + " needs exactly one of points, per-match or tiers");
                 if (declaration.containsKey("max") && !declaration.containsKey("per-match")) throw new BundleValidationException(where + ".max only goes with per-match");
@@ -222,9 +229,9 @@ final class PolicyBundleLoader {
                         }
                         max = cap.doubleValue();
                     }
-                    dispositions.put(entry.getKey(), new Graduated(each(declaration.get("per-match")), max, List.of(), overrides, expectMatch));
+                    dispositions.put(entry.getKey(), new Graduated(each(declaration.get("per-match")), max, List.of(), overrides, expectMatch, false));
                 } else if (declaration.containsKey("tiers")) {
-                    dispositions.put(entry.getKey(), new Graduated(0, null, tiers(where, declaration.get("tiers")), overrides, expectMatch));
+                    dispositions.put(entry.getKey(), new Graduated(0, null, tiers(where, declaration.get("tiers")), overrides, expectMatch, byValue));
                 } else if ("PROHIBITED".equals(points)) {
                     dispositions.put(entry.getKey(), new Prohibited(overrides, expectMatch));
                 } else if (points instanceof Number number && validPoints(number)) {

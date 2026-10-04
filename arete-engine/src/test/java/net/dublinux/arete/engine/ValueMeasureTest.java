@@ -1,0 +1,79 @@
+package net.dublinux.arete.engine;
+
+import net.dublinux.arete.engine.api.RuleOutcome;
+import net.dublinux.arete.engine.api.ScoringResult;
+import net.dublinux.arete.engine.api.SpecFormat;
+import net.dublinux.arete.engine.api.SpecInput;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+/** A matcher can report a measured value with an occurrence, and a policy can charge tiers by it. */
+class ValueMeasureTest {
+    private static String policy(String rule) {
+        return "---\nid: Depth\nformat: 2\nrules:\n  JSON025: " + rule + "\n---\n\n# Depth\n";
+    }
+
+    private static Engine engine(Path tmp, String rule) throws IOException {
+        Path dir = tmp.resolve("policies");
+        Files.createDirectories(dir);
+        Files.writeString(dir.resolve("depth.md"), policy(rule));
+        return Engine.builder().cacheDir(null).userPoliciesDir(dir).build();
+    }
+
+    /** A chain of {@code levels} schemas, the first holding the next by reference: the first nests {@code levels} deep. */
+    private static String chain(int levels) {
+        StringBuilder text = new StringBuilder("openapi: 3.0.0\ninfo: { title: T, version: 1.0.0 }\npaths: {}\ncomponents:\n  schemas:\n");
+        for (int i = 0; i < levels; i++) {
+            text.append("    S").append(i).append(":\n      type: object\n      properties:\n");
+            text.append(i + 1 < levels ? "        next: { $ref: '#/components/schemas/S" + (i + 1) + "' }\n" : "        leaf: { type: string }\n");
+        }
+        return text.toString();
+    }
+
+    private static ScoringResult score(Engine engine, int levels) {
+        return engine.score(SpecInput.builder().content(chain(levels)).format(SpecFormat.OPENAPI3).policy("Depth").build());
+    }
+
+    private static RuleOutcome outcome(ScoringResult result) {
+        return result.getRuleOutcomes().stream().filter(o -> o.ruleId().equals("JSON025")).findFirst().orElse(null);
+    }
+
+    @Test
+    void tiersChargeByTheDeepestValueNotByHowManySchemasMatch(@TempDir Path tmp) throws IOException {
+        Engine engine = engine(tmp, "{ measure: value, tiers: { 4: 1, 6: 3 } }");
+
+        assertEquals(null, outcome(score(engine, 3)), "below the first tier nothing is reported");
+        ScoringResult four = score(engine, 4);
+        assertEquals(99.0, four.getOverallScore());
+        assertEquals(4.0, outcome(four).measure());
+        // seven schemas: S0..S3 are at least 4 deep (7, 6, 5, 4), so four matches, and the worst is 7
+        ScoringResult seven = score(engine, 7);
+        assertEquals(97.0, seven.getOverallScore());
+        assertEquals(7.0, outcome(seven).measure());
+        assertEquals(4, outcome(seven).count());
+        assertEquals(7.0, seven.getDiagnostics().get(0).getValue() == null ? -1 : seven.getDiagnostics().stream().mapToDouble(d -> d.getValue()).max().orElse(-1));
+    }
+
+    @Test
+    void measureValueNeedsTiersAndAKnownName(@TempDir Path tmp) {
+        assertThrows(Exception.class, () -> engine(tmp.resolve("a"), "{ measure: value, per-match: 1 }"));
+        assertThrows(Exception.class, () -> engine(tmp.resolve("b"), "{ measure: size, tiers: { 1: 1 } }"));
+    }
+
+    @Test
+    void aRuleChargedByValueNeedsAMatcherThatReportsOne(@TempDir Path tmp) throws IOException {
+        Path dir = tmp.resolve("policies");
+        Files.createDirectories(dir);
+        Files.writeString(dir.resolve("bad.md"), "---\nid: NoValue\nformat: 2\nrules:\n  DOC001: { measure: value, tiers: { 1: 1 } }\n---\n\n# NoValue\n");
+        Engine engine = Engine.builder().cacheDir(null).userPoliciesDir(dir).build();
+        ScoringResult result = engine.score(SpecInput.builder().content("openapi: 3.0.0\ninfo: { title: T, version: 1.0.0 }\npaths:\n  /m:\n    get:\n      responses: { '200': { description: OK } }\n").format(SpecFormat.OPENAPI3).policy("NoValue").build());
+        assertEquals(ScoringResult.Status.PLUGIN_ERROR, result.getStatus());
+    }
+}

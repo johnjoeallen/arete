@@ -4,7 +4,7 @@ distill(api, rule) {
             ? ((rule.parameters.maximum != null && count(operation.parameters) > rule.parameters.maximum)
                 ? tokenise(",", "x").map { u -> occurrence(operation.pointer,
                     "{{operation.method}} {{path.path}}",
-                    "Operation declares {{count(operation.parameters)}} parameters, more than the maximum of {{rule.parameters.maximum}}") }
+                    "Operation declares {{count(operation.parameters)}} parameters, more than the maximum of {{rule.parameters.maximum}}", count(operation.parameters)) }
                 : tokenise(",", "x").filter { u -> false })
         : rule.parameters.check == "path-required"
             ? operation.parameters

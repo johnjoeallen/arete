@@ -197,6 +197,7 @@ public final class ReportWriter {
             ObjectNode r = rules.addObject();
             r.put("rule", outcome.ruleId());
             r.put("count", outcome.count());
+            r.put("measure", outcome.measure());
             r.put("cost", outcome.cost());
             r.put("graduated", outcome.graduated());
         }

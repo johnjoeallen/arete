@@ -402,7 +402,10 @@ public final class DistillMatcherEvaluator {
                 if (value instanceof Iterable<?>) yield "list";
                 yield "object";
             }
-            case "occurrence" -> new Diagnostic(string(args, 0), string(args, 1), string(args, 2));
+            case "occurrence" -> {
+                if (args.size() == 4 && !(args.get(3) instanceof Number)) throw new IllegalArgumentException("occurrence's fourth argument is a measured value, a number");
+                yield new Diagnostic(string(args, 0), string(args, 1), string(args, 2), args.size() == 4 ? ((Number) args.get(3)).doubleValue() : null);
+            }
             case "operationMessage" -> operationMessage(args.get(0));
             default -> throw new IllegalArgumentException("unknown function: " + name);
         };
@@ -822,7 +825,7 @@ public final class DistillMatcherEvaluator {
             "headerDetails", "headers", "in", "info", "inlineCompositionMembers", "isBlank", "itemsPresent", "keys", "length", "licenseName",
             "licenseUrl", "lint",
             "location", "lower", "map", "match", "maxItems", "maxLength", "maximum", "mediaTypes", "method",
-            "methods", "minLength", "minimum", "name", "nullable", "numericStatusKeys", "openapiVersion",
+            "methods", "minLength", "minimum", "name", "nestingDepth", "nullable", "numericStatusKeys", "openapiVersion",
             "operationDetails", "operationId", "operations", "parameters", "parserMessages", "path", "paths",
             "pattern", "pointer", "properties", "refs", "requestBodyInlineObject", "requestBodyPresent",
             "requestBodyRequired", "requestMediaTypes", "require", "required", "requiredFields", "responses",

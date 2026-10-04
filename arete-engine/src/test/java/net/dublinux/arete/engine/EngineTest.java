@@ -1016,6 +1016,9 @@ class EngineTest {
             }
         }
         resources.put("rules/STANDARD010.md", readResource("api-policy/rules/STANDARD010.md"));
+        resources.put("rules/JSON025.md", readResource("api-policy/rules/JSON025.md"));
+        resources.put("matchers/schema-depth/Matcher.md", readResource("api-policy/matchers/schema-depth/Matcher.md"));
+        resources.put("matchers/schema-depth/Matcher.distill", readResource("api-policy/matchers/schema-depth/Matcher.distill"));
         resources.put("matchers/openapi-version/Matcher.md", readResource("api-policy/matchers/openapi-version/Matcher.md"));
         resources.put("rules/CONTENT001.md", readResource("api-policy/rules/CONTENT001.md"));
         resources.put("rules/CONTENT002.md", readResource("api-policy/rules/CONTENT002.md"));

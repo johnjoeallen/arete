@@ -150,6 +150,7 @@ rules:
   DOC018: rules/DOC018.md
   STANDARD024: rules/STANDARD024.md
   JSON023: rules/JSON023.md
+  JSON025: rules/JSON025.md
   SECURITY003: rules/SECURITY003.md
   SECURITY004: rules/SECURITY004.md
   STANDARD025: rules/STANDARD025.md
@@ -208,6 +209,7 @@ matchers:
   extensions: matchers/extensions/Matcher.md
   documentation-completeness: matchers/documentation-completeness/Matcher.md
   schema-composition: matchers/schema-composition/Matcher.md
+  schema-depth: matchers/schema-depth/Matcher.md
   document-lint: matchers/document-lint/Matcher.md
   status-class: matchers/status-class/Matcher.md
   example-validity: matchers/example-validity/Matcher.md

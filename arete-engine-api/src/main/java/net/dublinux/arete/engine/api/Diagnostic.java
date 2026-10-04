@@ -42,6 +42,7 @@ public final class Diagnostic {
     private final Integer lineNumber;
     private final String documentationUrl;
     private final double scoreImprovement;
+    private final Double value;
 
     private Diagnostic(Builder b) {
         this.ruleId = Objects.requireNonNull(b.ruleId, "ruleId must not be null");
@@ -53,6 +54,7 @@ public final class Diagnostic {
         this.lineNumber = b.lineNumber;
         this.documentationUrl = b.documentationUrl;
         this.scoreImprovement = b.scoreImprovement;
+        this.value = b.value;
     }
 
     public String getRuleId() {
@@ -151,6 +153,14 @@ public final class Diagnostic {
         return scoreImprovement;
     }
 
+    /**
+     * What the rule measured to find this (a parameter count, a nesting depth), when its matcher reports one; null
+     * otherwise. A policy can charge by it.
+     */
+    public Double getValue() {
+        return value;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -165,6 +175,7 @@ public final class Diagnostic {
         private Integer lineNumber;
         private String documentationUrl;
         private double scoreImprovement = Double.NaN;
+        private Double value;
 
         public Builder ruleId(String ruleId) {
             this.ruleId = ruleId;
@@ -209,6 +220,11 @@ public final class Diagnostic {
         /** See {@link Diagnostic#getScoreImprovement()}. Defaults to {@link Double#NaN} ("not computed") if never called. */
         public Builder scoreImprovement(double scoreImprovement) {
             this.scoreImprovement = scoreImprovement;
+            return this;
+        }
+
+        public Builder value(Double value) {
+            this.value = value;
             return this;
         }
 

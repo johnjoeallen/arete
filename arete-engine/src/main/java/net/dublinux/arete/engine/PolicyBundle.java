@@ -117,34 +117,41 @@ record Prohibited(Map<String, Object> parameters, boolean expectMatch) implement
  * A cost that depends on how many times the rule matches: {@code perMatch} points each up to {@code max}, or the
  * points of the highest {@link Tier} the count reaches (below the lowest tier the rule is not violated at all).
  */
-record Graduated(double perMatch, Double max, List<Tier> tiers, Map<String, Object> parameters, boolean expectMatch) implements PolicyDisposition {
+record Graduated(double perMatch, Double max, List<Tier> tiers, Map<String, Object> parameters, boolean expectMatch, boolean byValue) implements PolicyDisposition {
     Graduated {
         tiers = List.copyOf(tiers);
         parameters = Map.copyOf(parameters);
     }
 
-    /** True when the rule is scored by tier and the count is below the first one, so it is not a violation yet. */
-    boolean violatedAt(int count) {
-        return tiers.isEmpty() ? count > 0 : count >= tiers.get(0).minimum();
+    Graduated(double perMatch, Double max, List<Tier> tiers, Map<String, Object> parameters, boolean expectMatch) {
+        this(perMatch, max, tiers, parameters, expectMatch, false);
     }
 
-    /** The cost of {@code count} matches. */
-    double costAt(int count) {
+    /** True when the rule is scored by tier and the measure is below the first one, so it is not a violation yet. */
+    boolean violatedAt(double measure) {
+        return tiers.isEmpty() ? measure > 0 : measure >= tiers.get(0).minimum();
+    }
+
+    /** The cost of a measure: the match count, or (when {@link #byValue()}) the largest value the matcher reported. */
+    double costAt(double measure) {
         if (!tiers.isEmpty()) {
             double points = 0;
-            for (Tier tier : tiers) if (count >= tier.minimum()) points = tier.points();
+            for (Tier tier : tiers) if (measure >= tier.minimum()) points = tier.points();
             return points;
         }
-        double raw = perMatch * count;
+        double raw = perMatch * measure;
         return max == null ? raw : Math.min(max, raw);
     }
 
-    @Override public Graduated withParameters(Map<String, Object> changed) { return new Graduated(perMatch, max, tiers, changed, expectMatch); }
+    @Override public Graduated withParameters(Map<String, Object> changed) { return new Graduated(perMatch, max, tiers, changed, expectMatch, byValue); }
 }
 
 /** At {@code minimum} matches or more, the rule costs {@code points}. */
 record Tier(int minimum, double points) { }
-record Diagnostic(String pointer, String path, String message) { }
+/** A matcher's occurrence: where, about what, saying what, and (optionally) a measured value a policy may charge by. */
+record Diagnostic(String pointer, String path, String message, Double value) {
+    Diagnostic(String pointer, String path, String message) { this(pointer, path, message, null); }
+}
 
 final class MatcherEvaluationException extends RuntimeException {
     MatcherEvaluationException(String message) { super(message); }

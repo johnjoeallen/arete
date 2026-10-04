@@ -49,4 +49,20 @@ class GateRulesTest {
         // The same warning rule firing in two more places costs nothing more, so it is existing debt, not a regression.
         assertTrue(GateRules.evaluate("f.yaml", report(99, 5, false), report(99, 2, false), null).passed());
     }
+
+    /** A rule charged by value: the count of matches stays the same, the worst value rises. */
+    private static ScoreReport byValue(double score, double worst) {
+        List<Finding> findings = List.of(new Finding("DEPTH", "t", "WARNING", "Warning", "/s", null, "m", 1, 1, 1.0));
+        List<RuleOutcome> outcomes = List.of(new RuleOutcome("DEPTH", 1, worst, 1.0, true, false));
+        return new ScoreReport("f.yaml", "P", "SUCCESS", null, score, score, "A", 90.0, 1, findings, List.of(), outcomes);
+    }
+
+    @Test
+    void aValueThatRisesFailsEvenWhenTheCountAndTheCostDoNot() {
+        SpecResult result = GateRules.evaluate("f.yaml", byValue(99, 7), byValue(99, 5), null);
+
+        assertFalse(result.passed());
+        assertEquals("DEPTH got worse: 5 -> 7, costing 1", result.reasons().get(0));
+        assertTrue(GateRules.evaluate("f.yaml", byValue(99, 5), byValue(99, 5), null).passed());
+    }
 }

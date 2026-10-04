@@ -362,27 +362,40 @@ public class Engine {
             }
             PolicyDisposition disposition = policyRule.getValue();
             int count = matches.size();
+            double measure = count;
             boolean violated;
             List<net.dublinux.arete.engine.Diagnostic> reported;
             if (disposition.expectMatch()) {
                 // The matcher looks for something that should be there; finding nothing is the violation.
                 violated = count == 0;
                 count = violated ? 1 : 0;
+                measure = count;
                 reported = violated
                         ? List.of(new net.dublinux.arete.engine.Diagnostic("/", "API", "Expected at least one match but found none: " + rule.title()))
                         : List.of();
             } else {
-                violated = disposition instanceof Graduated graduated ? graduated.violatedAt(count) : count > 0;
+                if (disposition instanceof Graduated byValue && byValue.byValue()) {
+                    // Charged by what the matcher measured: the worst value among its occurrences.
+                    measure = 0;
+                    for (net.dublinux.arete.engine.Diagnostic match : matches) {
+                        if (match.value() == null) {
+                            return ScoringResult.pluginError("Rule " + rule.id() + " is charged by value (measure: value) but its matcher '"
+                                    + rule.matcherId() + "' reports occurrences without one");
+                        }
+                        measure = Math.max(measure, match.value());
+                    }
+                }
+                violated = disposition instanceof Graduated graduated ? graduated.violatedAt(measure) : count > 0;
                 reported = violated ? matches : List.of();
             }
             if (!violated) continue;
 
             double cost = 0;
             if (disposition instanceof Deduction deduction) cost = deduction.points();
-            else if (disposition instanceof Graduated graduated) cost = graduated.costAt(count);
+            else if (disposition instanceof Graduated graduated) cost = graduated.costAt(measure);
             else prohibitedMatched = true;
             deductions += cost;
-            outcomes.add(new RuleOutcome(rule.id(), count, cost, disposition instanceof Graduated, disposition instanceof Prohibited));
+            outcomes.add(new RuleOutcome(rule.id(), count, measure, cost, disposition instanceof Graduated, disposition instanceof Prohibited));
 
             for (net.dublinux.arete.engine.Diagnostic match : reported) {
                 net.dublinux.arete.engine.api.Diagnostic.Builder diagnostic = net.dublinux.arete.engine.api.Diagnostic.builder()
@@ -392,6 +405,7 @@ public class Engine {
                         .documentationUrl(DOCUMENTATION_BASE_URL + rule.id());
                 if (match.pointer() != null) diagnostic.pointer(match.pointer());
                 if (match.path() != null) diagnostic.paths(List.of(match.path()));
+                if (match.value() != null) diagnostic.value(match.value());
                 diagnostics.add(diagnostic.build());
             }
         }

@@ -67,7 +67,7 @@ for pid, rel in manifest["policies"].items():
             if "per-match" in v:
                 pts = f"{v['per-match']} per match" + (f", at most {v['max']}" if "max" in v else "")
             elif "tiers" in v:
-                pts = "by count (" + ", ".join(f"{c}+ costs {p}" for c, p in sorted(v["tiers"].items())) + ")"
+                pts = ("by value (" if v.get("measure") == "value" else "by count (") + ", ".join(f"{c}+ costs {p}" for c, p in sorted(v["tiers"].items())) + ")"
             if v.get("expect") == "match":
                 pts = f"must match: {pts}"
             disp[k] = ("PROHIBITED" if pts == "PROHIBITED" else pts, v.get("parameters") or {})

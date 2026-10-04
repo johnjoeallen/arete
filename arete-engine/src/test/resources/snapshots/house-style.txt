@@ -451,6 +451,9 @@
 ## JSON023  (array-items / api)
   (no findings)
 
+## JSON025  (schema-depth / schema)
+  (no findings)
+
 ## SECURITY003  (security-scheme / api)
   (no findings)
 

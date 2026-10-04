@@ -1,0 +1,7 @@
+distill(api, rule) {
+    return api.schemas
+        .filter { schema -> schema.nestingDepth >= (rule.parameters.minimum ?: 1) }
+        .map { schema -> occurrence(schema.pointer, schema.name,
+            "Schema '{{schema.name}}' nests {{schema.nestingDepth}} levels deep",
+            schema.nestingDepth) };
+}

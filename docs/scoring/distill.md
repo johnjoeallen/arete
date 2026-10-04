@@ -85,6 +85,16 @@ occurrence("/info/title", api.info.title,
 schema.name ==~ /{{rule.parameters["prefix"]}}[A-Z][A-Za-z0-9]*/
 ```
 
+**An occurrence may carry a measured value.** `occurrence(pointer, path, message, value)` takes an optional fourth
+argument, a number: the nesting depth, the parameter count. It does nothing unless a policy charges the rule with
+`measure: value` (see "How a rule is charged"); then the cost follows the largest value reported. A non-number fourth
+argument is a matcher error.
+
+```java
+.map { schema -> occurrence(schema.pointer, schema.name,
+    "Schema '{{schema.name}}' nests {{schema.nestingDepth}} levels deep", schema.nestingDepth) }
+```
+
 **Literal braces next to a hole need no escape.** The `{{` / `}}` closest to
 the content are the hole; any extra adjacent braces are literal, in any number:
 
