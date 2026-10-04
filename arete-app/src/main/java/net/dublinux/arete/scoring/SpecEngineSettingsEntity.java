@@ -12,9 +12,7 @@ import jakarta.persistence.Table;
  * default policy" — see {@link SpecEngineSettingsService}.
  */
 @Entity
-// The table and column keep their original names (spec_plugin_settings, plugin_id): the schema is managed by
-// ddl-auto=update, which cannot rename, and a rename would orphan every spec's saved policy choice.
-@Table(name = "spec_plugin_settings")
+@Table(name = "spec_engine_settings")
 @IdClass(SpecEngineSettingsId.class)
 public class SpecEngineSettingsEntity {
 
@@ -23,7 +21,7 @@ public class SpecEngineSettingsEntity {
     private Long specId;
 
     @Id
-    @Column(name = "plugin_id", nullable = false)
+    @Column(name = "engine_id", nullable = false)
     private String engineId;
 
     @Column(nullable = false)

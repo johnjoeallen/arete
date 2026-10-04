@@ -26,15 +26,15 @@ class ScoringResultSnapshotCodecTest {
     }
 
     @Test
-    void aSnapshotFromBeforeTheEngineRenameAndBeforeGradesStillReloads() throws Exception {
+    void aPreGradeSnapshotReloadsWithNoGradeRatherThanFailing() throws Exception {
         String legacyJson = """
-                {"activePluginIds":["generic-policy"],"pluginSummaries":[{"pluginName":"Areté","status":"SUCCESS","diagnosticCount":0,"errorMessage":null}],"diagnostics":[],
+                {"activeEngineIds":["generic-policy"],"engineSummaries":[{"engineName":"Areté","status":"SUCCESS","diagnosticCount":0,"errorMessage":null}],"diagnostics":[],
                  "rulesEvaluatedCount":111,"overallScore":92.5,"overallScoreWithoutBlockers":92.5}
                 """;
 
         AggregatedScoringResult reloaded = ScoringResultSnapshotCodec.fromJson(mapper, legacyJson).result();
 
-        assertThat(reloaded.engineSummaries().get(0).engineName()).isEqualTo("Areté");   // stored under the old pluginName key
+        assertThat(reloaded.engineSummaries().get(0).engineName()).isEqualTo("Areté");
         assertThat(reloaded.grade()).isNull();
         assertThat(Double.isNaN(reloaded.passingScore())).isTrue();
     }

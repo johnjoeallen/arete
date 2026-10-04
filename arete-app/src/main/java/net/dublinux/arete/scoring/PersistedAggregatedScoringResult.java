@@ -1,7 +1,5 @@
 package net.dublinux.arete.scoring;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
-
 import java.util.List;
 
 /**
@@ -14,8 +12,8 @@ import java.util.List;
  * Double#NaN} ("not computed") — see {@link ScoringResultSnapshotCodec}.
  */
 public record PersistedAggregatedScoringResult(
-        @JsonAlias("activePluginIds") List<String> activeEngineIds,
-        @JsonAlias("pluginSummaries") List<PersistedScoringSummary> engineSummaries,
+        List<String> activeEngineIds,
+        List<PersistedScoringSummary> engineSummaries,
         List<PersistedAttributedDiagnostic> diagnostics,
         int rulesEvaluatedCount,
         Double overallScore,
