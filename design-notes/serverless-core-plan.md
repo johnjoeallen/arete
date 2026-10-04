@@ -125,7 +125,7 @@ The names and syntax are a proposal. A policy file declares a format version, so
 
 **Effects on the gate.** A must-match failure reports at a stable scope pointer, so it has a normal occurrence identity. Count-based and tiered rules are compared by deduction and count, not by individual hits: they fail only if newly violated or worse than base. The report records the effective expectation and the count for each rule.
 
-**Order of work.** These change scores, so they land after the Zally parity corpus is captured. Old and new semantics then run side by side on the golden corpus, and the corpus records any intended difference.
+**Order of work.** These change scores, so they land after the golden corpus is captured. Old and new semantics then run side by side on that corpus, and the corpus records any intended difference.
 
 ## Policy content from any URI
 
@@ -225,9 +225,9 @@ The `automation-api` endpoints and the existing HTTP-client gate stay supported 
 False positives come first, because parity numbers mean nothing until `$ref` resolution is right.
 
 1. **Stage 0: fix false positives.** Start with the content type defined through `$ref`. Add regression tests per fix, and include deep and cyclic ref resolution (see the section on deep refs).
-2. **Stage 1: Zally parity batch.** Run a reference set of specs through Areté and Zally. Map Zally rule IDs to Areté rules and classify each difference as over-reporting, under-reporting or intentional. Keep the results as a golden regression corpus in the repo.
+2. **Stage 1: golden rule corpus.** Write a bad and a good spec for every rule, plus whole-API good and messy specs. Keep them as a golden regression corpus in the repo.
 3. **Stage 2: extract the engine.** Create `arete-engine-api` and `arete-engine`, move the server onto them, and remove Groovy. Add the URI policy loader, report writers, `.arete.yaml` overrides and the `score`, `diff` and `report` CLI commands. Remove the scoring-plugin mechanism so the policy engine is the only one. Parity corpus must still pass. Extended rule semantics (own section) come after that, as a new policy format version.
-4. **Stage 3: merge-gate.** Add stable pointers, pointer-to-line mapping, occurrence matching, `gate` and the gate rules. Rebuild the Maven and Gradle plugins as thin wrappers. Use the existing Zally scripts and MR 1109 as the acceptance cases.
+4. **Stage 3: merge-gate.** Add stable pointers, pointer-to-line mapping, occurrence matching, `gate` and the gate rules. Rebuild the Maven and Gradle plugins as thin wrappers.
 5. **Stage 4: host policy in-org.** Publish the policy bundle to an internal repository with a pinned version and checksum. Make the policy bundle the only supported content source. Run in `--report-only` first, then make the job required.
 
 ## Governance and risks
@@ -238,7 +238,7 @@ Areté provides the mechanism. Enforcement belongs to the organisation and its p
 - **Teams own `.arete.yaml`.** Reviewed overrides with a reason, living next to the spec.
 - **Locked rules cannot be bypassed.** The engine refuses an override of a locked rule. A team that needs different rules must select a different profile.
 - **Policy bundle locations are not enforced by Areté.** It loads whatever URI and pin it is given. Developers are expected to comply with org requirements, and review of the build configuration catches deviations.
-- **Adoption.** Nothing is deployed, so there is no service approval. The org still signs off on ownership, maintenance and supply chain, and has two ways to consume Areté: use the releases published on GitHub, or fork and publish its own release internally, as it did with Zally. A fork is a convenience for supply-chain control, not a divergence: changes made in the fork are pushed back upstream, so the public project stays the single line of development.
+- **Adoption.** Nothing is deployed, so there is no service approval. The org still signs off on ownership, maintenance and supply chain, and has two ways to consume Areté: use the releases published on GitHub, or fork and publish its own release internally A fork is a convenience for supply-chain control, not a divergence: changes made in the fork are pushed back upstream, so the public project stays the single line of development.
 
 | Risk | Mitigation |
 | --- | --- |
