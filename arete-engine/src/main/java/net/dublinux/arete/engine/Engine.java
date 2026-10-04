@@ -323,7 +323,7 @@ public class Engine {
         try {
             currentBundle = activeBundle();
         } catch (BundleValidationException e) {
-            return ScoringResult.pluginError("Could not load generic policy bundle: " + e.getMessage());
+            return ScoringResult.engineError("Could not load generic policy bundle: " + e.getMessage());
         }
         SwaggerParseResult parsed = new OpenAPIV3Parser().readContents(input.getContent(), null, parseOptions());
         if (parsed.getOpenAPI() == null) {
@@ -335,7 +335,7 @@ public class Engine {
         try {
             policy = applyOverrides(currentBundle.policyOrDefault(input.getPolicy()), currentBundle, overrides);
         } catch (BundleValidationException e) {
-            return ScoringResult.pluginError("Could not apply the overrides: " + e.getMessage());
+            return ScoringResult.engineError("Could not apply the overrides: " + e.getMessage());
         }
         Map<String, Object> api = OpenApiMapAdapter.toMap(parsed.getOpenAPI(), parsed.getMessages(), input.getContent());
         List<net.dublinux.arete.engine.api.Diagnostic> diagnostics = new ArrayList<>();
@@ -351,14 +351,14 @@ public class Engine {
             try {
                 Matcher matcher = currentBundle.matchers().get(rule.matcherId());
                 if (matcher == null) {
-                    return ScoringResult.pluginError("Matcher '" + rule.matcherId() + "' required by " + rule.id() + " is not available in this bundle");
+                    return ScoringResult.engineError("Matcher '" + rule.matcherId() + "' required by " + rule.id() + " is not available in this bundle");
                 }
                 Map<String, Object> parameters = new LinkedHashMap<>(rule.parameters());
                 parameters.putAll(policyRule.getValue().parameters());
                 PolicyRule effectiveRule = new PolicyRule(rule.id(), rule.title(), rule.category(), rule.matcherId(), rule.scope(), parameters, rule.documentationMarkdown());
                 matches = distillRuntime.execute(matcher, api, effectiveRule);
             } catch (MatcherEvaluationException e) {
-                return ScoringResult.pluginError("Matcher '" + rule.matcherId() + "' failed for " + rule.id() + ": " + e.getMessage());
+                return ScoringResult.engineError("Matcher '" + rule.matcherId() + "' failed for " + rule.id() + ": " + e.getMessage());
             }
             PolicyDisposition disposition = policyRule.getValue();
             int count = matches.size();
@@ -379,7 +379,7 @@ public class Engine {
                     measure = 0;
                     for (net.dublinux.arete.engine.Diagnostic match : matches) {
                         if (match.value() == null) {
-                            return ScoringResult.pluginError("Rule " + rule.id() + " is charged by value (measure: value) but its matcher '"
+                            return ScoringResult.engineError("Rule " + rule.id() + " is charged by value (measure: value) but its matcher '"
                                     + rule.matcherId() + "' reports occurrences without one");
                         }
                         measure = Math.max(measure, match.value());
@@ -478,9 +478,9 @@ public class Engine {
             }).toList();
             return ScoringResult.success(diagnostics, 1);
         } catch (MatcherEvaluationException | BundleValidationException e) {
-            return ScoringResult.pluginError(e.getMessage());
+            return ScoringResult.engineError(e.getMessage());
         } catch (RuntimeException e) {
-            return ScoringResult.pluginError("Matcher test failed: " + e.getMessage());
+            return ScoringResult.engineError("Matcher test failed: " + e.getMessage());
         }
     }
 

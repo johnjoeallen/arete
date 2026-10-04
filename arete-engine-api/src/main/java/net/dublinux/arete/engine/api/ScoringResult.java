@@ -10,7 +10,7 @@ import java.util.Objects;
  * <p>Everything is data on this result rather than a checked exception: "the spec did not parse" and
  * "a rule could not be evaluated" are routine outcomes for a linter, so the caller switches over
  * {@link Status} instead of catching. A caller that embeds the engine should still guard the call
- * against an unexpected runtime failure; {@code PLUGIN_ERROR} is for the engine reporting such a
+ * against an unexpected runtime failure; {@code ENGINE_ERROR} is for the engine reporting such a
  * failure gracefully itself.
  */
 public final class ScoringResult {
@@ -21,7 +21,7 @@ public final class ScoringResult {
         /** The input was not parseable as the declared {@link SpecFormat} at all. */
         PARSE_ERROR,
         /** The plugin/engine itself failed unexpectedly while validating. */
-        PLUGIN_ERROR
+        ENGINE_ERROR
     }
 
     private final Status status;
@@ -48,12 +48,12 @@ public final class ScoringResult {
         return status;
     }
 
-    /** Never null. Empty on PARSE_ERROR/PLUGIN_ERROR, or on a fully compliant spec. */
+    /** Never null. Empty on PARSE_ERROR/ENGINE_ERROR, or on a fully compliant spec. */
     public List<Diagnostic> getDiagnostics() {
         return diagnostics;
     }
 
-    /** Human-readable detail for PARSE_ERROR/PLUGIN_ERROR; nullable otherwise. */
+    /** Human-readable detail for PARSE_ERROR/ENGINE_ERROR; nullable otherwise. */
     public String getErrorMessage() {
         return errorMessage;
     }
@@ -134,8 +134,8 @@ public final class ScoringResult {
         return builder().status(Status.PARSE_ERROR).errorMessage(message).build();
     }
 
-    public static ScoringResult pluginError(String message) {
-        return builder().status(Status.PLUGIN_ERROR).errorMessage(message).build();
+    public static ScoringResult engineError(String message) {
+        return builder().status(Status.ENGINE_ERROR).errorMessage(message).build();
     }
 
     public static final class Builder {

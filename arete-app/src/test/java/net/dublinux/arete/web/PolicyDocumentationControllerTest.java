@@ -34,16 +34,6 @@ class PolicyDocumentationControllerTest {
     }
 
     @Test
-    void theOldPluginsUrlStillWorks() throws Exception {
-        documented();
-        when(markdownRenderer.render("# REST001\n\nRule text.")).thenReturn("<h1>REST001</h1><p>Rule text.</p>");
-
-        mockMvc.perform(get("/plugins/generic-policy/rules/REST001"))
-                .andExpect(status().isOk())
-                .andExpect(content().string(org.hamcrest.Matchers.containsString("Rule text.")));
-    }
-
-    @Test
     void returnsNotFoundForAnUnknownRule() throws Exception {
         documented();
 

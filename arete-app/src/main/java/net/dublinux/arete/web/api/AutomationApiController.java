@@ -421,7 +421,7 @@ public class AutomationApiController {
     }
 
     private static String statusOf(AggregatedScoringResult r) {
-        return r.engineSummaries().stream().findFirst().map(ScoringSummary::status).orElse("PLUGIN_ERROR");
+        return r.engineSummaries().stream().findFirst().map(ScoringSummary::status).orElse("ENGINE_ERROR");
     }
 
     private static String errorOf(AggregatedScoringResult r) {

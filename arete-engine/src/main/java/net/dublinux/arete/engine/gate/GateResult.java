@@ -17,7 +17,7 @@ public record GateResult(String baseDescription, List<SpecResult> specs) {
 
     /** True when the engine could not score something (a configuration problem, not a verdict). */
     public boolean hasEngineError() {
-        return specs.stream().anyMatch(s -> "PLUGIN_ERROR".equals(s.head().status()));
+        return specs.stream().anyMatch(s -> "ENGINE_ERROR".equals(s.head().status()));
     }
 
     public List<String> reasons() {

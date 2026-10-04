@@ -106,7 +106,7 @@ class OverridesTest {
         Engine engine = engine(tmp, true);
 
         ScoringResult locked = score(engine, Overrides.parse("overrides:\n  DOC001:\n    reason: Please.\n    disable: true\n"));
-        assertEquals(ScoringResult.Status.PLUGIN_ERROR, locked.getStatus());
+        assertEquals(ScoringResult.Status.ENGINE_ERROR, locked.getStatus());
         assertTrue(locked.getErrorMessage().contains("locks this rule"), locked.getErrorMessage());
 
         // The unlocked rule beside it can be.
@@ -119,12 +119,12 @@ class OverridesTest {
         Engine engine = engine(tmp, false);
 
         ScoringResult unknown = score(engine, Overrides.parse("overrides:\n  NOPE001:\n    reason: Typo.\n    disable: true\n"));
-        assertEquals(ScoringResult.Status.PLUGIN_ERROR, unknown.getStatus());
+        assertEquals(ScoringResult.Status.ENGINE_ERROR, unknown.getStatus());
         assertTrue(unknown.getErrorMessage().contains("no such rule"), unknown.getErrorMessage());
 
         ScoringResult badParameter = score(engine, Overrides.parse(
                 "overrides:\n  DOC001:\n    reason: Because.\n    parameters: { method: FETCH }\n"));
-        assertEquals(ScoringResult.Status.PLUGIN_ERROR, badParameter.getStatus());
+        assertEquals(ScoringResult.Status.ENGINE_ERROR, badParameter.getStatus());
     }
 
     @Test

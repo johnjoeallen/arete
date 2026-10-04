@@ -77,7 +77,7 @@ public abstract class AreteScoreTask extends DefaultTask {
         getLogger().lifecycle(ReportWriter.text(reports));
         List<String> failures = new ArrayList<>();
         for (ScoreReport report : reports) {
-            if (report.status().equals("PLUGIN_ERROR")) throw new GradleException(report.file() + " could not be scored: " + report.errorMessage());
+            if (report.status().equals("ENGINE_ERROR")) throw new GradleException(report.file() + " could not be scored: " + report.errorMessage());
             if (!report.succeeded()) failures.add(report.file() + ": " + report.status());
             else if (bar != null && report.score() < bar) failures.add(report.file() + " scores " + report.score() + ", under " + bar);
             else if ("policy".equals(failUnder) && !report.meetsPassingScore()) failures.add(report.file() + " scores " + report.score() + ", under the " + report.policy() + " pass mark of " + report.passingScore());

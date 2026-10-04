@@ -89,7 +89,7 @@ class EngineScoringServiceTest {
         assertThat(result.diagnostics()).isEmpty();
         assertThat(result.engineSummaries()).hasSize(1);
         assertThat(result.engineSummaries().get(0).engineName()).isEqualTo("Broken Engine");
-        assertThat(result.engineSummaries().get(0).status()).isEqualTo("PLUGIN_ERROR");
+        assertThat(result.engineSummaries().get(0).status()).isEqualTo("ENGINE_ERROR");
     }
 
     @Test

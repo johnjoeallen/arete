@@ -207,7 +207,7 @@ class PolicySourcesTest {
         Engine engine = Engine.builder().policySource("file:" + tmp.resolve("base")).policySource("file:" + tmp.resolve("org"))
                 .cacheDir(null).build();
         ScoringResult result = engine.score(SpecInput.builder().content(MiniBundle.SPEC).format(SpecFormat.OPENAPI3).policy("Mini").build());
-        assertEquals(ScoringResult.Status.PLUGIN_ERROR, result.getStatus());
+        assertEquals(ScoringResult.Status.ENGINE_ERROR, result.getStatus());
     }
 
     @Test

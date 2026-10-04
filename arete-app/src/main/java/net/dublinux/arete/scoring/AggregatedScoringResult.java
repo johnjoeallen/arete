@@ -12,7 +12,7 @@ import java.util.Map;
  *
  * <p>There is deliberately no single aggregate {@code Status} field. When
  * engines disagree (e.g. one returns {@code SUCCESS} with diagnostics while
- * another returns {@code PLUGIN_ERROR}), collapsing that onto one status
+ * another returns {@code ENGINE_ERROR}), collapsing that onto one status
  * would force a choice between hiding the working engine's clean results
  * behind the failing one's error, or hiding the failure behind the
  * successes — either way the UI loses information. Instead

@@ -23,8 +23,7 @@ public class PolicyDocumentationController {
         this.markdownRenderer = markdownRenderer;
     }
 
-    // /plugins/... is the old URL, kept so existing links keep working.
-    @GetMapping({"/engines/{engineId}/rules/{ruleId}", "/plugins/{engineId}/rules/{ruleId}"})
+    @GetMapping("/engines/{engineId}/rules/{ruleId}")
     public String rule(@PathVariable String engineId, @PathVariable String ruleId, Model model) {
         RuleDocumentation documentation = Optional.of(engine)
                 .filter(candidate -> candidate.getId().equals(engineId))

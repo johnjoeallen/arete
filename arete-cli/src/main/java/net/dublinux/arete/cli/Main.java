@@ -106,7 +106,7 @@ public final class Main {
         Double threshold = threshold(options);
         int code = OK;
         for (ScoreReport report : reports) {
-            if (report.status().equals("PLUGIN_ERROR")) return ERROR;
+            if (report.status().equals("ENGINE_ERROR")) return ERROR;
             if (!report.succeeded()) code = FAILED;
             else if (threshold != null && report.score() < threshold) code = FAILED;
             else if (options.value("--fail-under") != null && options.value("--fail-under").equals("policy") && !report.meetsPassingScore()) code = FAILED;
@@ -149,7 +149,7 @@ public final class Main {
         };
         emit(options, out, cwd, rendered);
 
-        if (base.status().equals("PLUGIN_ERROR") || head.status().equals("PLUGIN_ERROR")) return ERROR;
+        if (base.status().equals("ENGINE_ERROR") || head.status().equals("ENGINE_ERROR")) return ERROR;
         if (!head.succeeded()) return FAILED;
         if (options.has("--fail-on-regression") && (diff.regressed() || diff.newBlockers() > 0)) return FAILED;
         return OK;

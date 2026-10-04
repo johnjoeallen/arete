@@ -131,7 +131,7 @@ public class EngineScoringService {
             // Defensive backstop per the interface's documented contract: a engine
             // must never be able to break a scoring run for the whole host.
             log.warn("Scoring engine '{}' threw unexpectedly: {}", scorer.getId(), t.toString());
-            return ScoringResult.pluginError(t.toString());
+            return ScoringResult.engineError(t.toString());
         }
     }
 
@@ -139,7 +139,7 @@ public class EngineScoringService {
         return switch (result.getStatus()) {
             case SUCCESS -> new ScoringSummary(
                     scorer.getName(), "SUCCESS", result.getDiagnostics().size(), null);
-            case PARSE_ERROR, PLUGIN_ERROR -> new ScoringSummary(
+            case PARSE_ERROR, ENGINE_ERROR -> new ScoringSummary(
                     scorer.getName(), result.getStatus().name(), 0, result.getErrorMessage());
         };
     }

@@ -74,7 +74,7 @@ class ValueMeasureTest {
         Files.writeString(dir.resolve("bad.md"), "---\nid: NoValue\nformat: 2\nrules:\n  DOC001: { measure: value, tiers: { 1: 1 } }\n---\n\n# NoValue\n");
         Engine engine = Engine.builder().cacheDir(null).userPoliciesDir(dir).build();
         ScoringResult result = engine.score(SpecInput.builder().content("openapi: 3.0.0\ninfo: { title: T, version: 1.0.0 }\npaths:\n  /m:\n    get:\n      responses: { '200': { description: OK } }\n").format(SpecFormat.OPENAPI3).policy("NoValue").build());
-        assertEquals(ScoringResult.Status.PLUGIN_ERROR, result.getStatus());
+        assertEquals(ScoringResult.Status.ENGINE_ERROR, result.getStatus());
     }
 
     private static String operationWith(int parameters) {
