@@ -166,7 +166,7 @@ The gate scores the head spec and the base spec with the same policy, then judge
 | Count-limit rule | Fail only if newly violated or the count is worse than base. |
 | New spec, no base | Must meet the full policy `passingScore` and have no error-level findings. |
 | Spec deleted | Skipped. |
-| Spec unchanged | Skipped, which keeps CI fast. |
+| Spec unchanged | Scored anyway and judged on its own (no blockers, meets the pass mark), so a policy or rule change cannot slip past. |
 | Base fails to parse | Treated as a new spec, with a warning. |
 | Head fails to parse | Fail. |
 

@@ -297,7 +297,7 @@ public final class ReportWriter {
 
     public static String text(GateResult gate) {
         StringBuilder out = new StringBuilder("gate: ").append(gate.passed() ? "PASSED" : "FAILED").append("  ").append(gate.specs().size())
-                .append(gate.specs().size() == 1 ? " spec" : " specs").append(" checked, ").append(gate.skipped().size()).append(" unchanged  (base ")
+                .append(gate.specs().size() == 1 ? " spec" : " specs").append(" checked, ").append(gate.unchanged().size()).append(" unchanged  (base ")
                 .append(gate.baseDescription()).append(")\n");
         for (SpecResult spec : gate.specs()) {
             out.append(spec.passed() ? "  PASS  " : "  FAIL  ").append(spec.file()).append(spec.isNew() ? "  (new spec)" : "").append('\n');
@@ -311,7 +311,7 @@ public final class ReportWriter {
     public static String markdown(GateResult gate) {
         StringBuilder out = new StringBuilder("## Areté gate: ").append(gate.passed() ? "PASSED" : "FAILED").append("\n\n")
                 .append(gate.specs().size()).append(gate.specs().size() == 1 ? " spec" : " specs").append(" checked");
-        if (!gate.skipped().isEmpty()) out.append(", ").append(gate.skipped().size()).append(" unchanged");
+        if (!gate.unchanged().isEmpty()) out.append(", ").append(gate.unchanged().size()).append(" unchanged");
         out.append(". Base: ").append(gate.baseDescription()).append(".\n\n");
         if (!gate.passed()) {
             out.append("**Why it failed**\n\n");
@@ -319,16 +319,16 @@ public final class ReportWriter {
             out.append('\n');
         }
         for (SpecResult spec : gate.specs()) {
-            out.append("### ").append(spec.file()).append(" — ").append(spec.isNew() ? "new spec, " : "").append(spec.passed() ? "passed" : "failed").append("\n\n");
+            out.append("### ").append(spec.file()).append(" — ").append(spec.isNew() ? "new spec, " : spec.unchanged() ? "unchanged, " : "").append(spec.passed() ? "passed" : "failed").append("\n\n");
             if (spec.warning() != null) out.append("_Note: ").append(spec.warning()).append("._\n\n");
             if (!spec.head().succeeded()) {
                 out.append("> ").append(spec.head().status()).append(": ").append(spec.head().errorMessage()).append("\n\n");
                 continue;
             }
-            if (spec.isNew()) {
+            if (spec.isNew() || spec.unchanged()) {
                 out.append(headline(spec.head())).append("\n\n");
                 for (Finding f : spec.head().findings()) {
-                    out.append("- **NEW** ").append(f.severityLabel()).append(" `").append(f.ruleId()).append("` `").append(f.pointer()).append("` (")
+                    out.append(spec.isNew() ? "- **NEW** " : "- ").append(f.severityLabel()).append(" `").append(f.ruleId()).append("` `").append(f.pointer()).append("` (")
                             .append(where(spec.head(), f)).append(") — ").append(oneLine(f.message())).append('\n');
                 }
                 if (spec.head().findings().isEmpty()) out.append("No findings.\n");
@@ -348,12 +348,13 @@ public final class ReportWriter {
         ArrayNode reasons = root.putArray("reasons");
         for (String reason : gate.reasons()) reasons.add(reason);
         ArrayNode skipped = root.putArray("unchanged");
-        for (String file : gate.skipped()) skipped.add(file);
+        for (SpecResult spec : gate.unchanged()) skipped.add(spec.file());
         ArrayNode specs = root.putArray("specs");
         for (SpecResult spec : gate.specs()) {
             ObjectNode node = specs.addObject();
             node.put("file", spec.file());
             node.put("newSpec", spec.isNew());
+            node.put("unchanged", spec.unchanged());
             node.put("passed", spec.passed());
             ArrayNode why = node.putArray("reasons");
             for (String reason : spec.reasons()) why.add(reason);

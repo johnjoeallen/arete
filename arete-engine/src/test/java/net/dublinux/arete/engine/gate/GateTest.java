@@ -117,13 +117,29 @@ class GateTest {
     }
 
     @Test
-    void anUnchangedRepositoryHasNothingToCheck() {
+    void anUnchangedSpecIsStillScoredAndPassesWhenItIsClean() {
         baseline(Map.of("apis/orders/openapi.yaml", WITH_SUMMARY));
 
         GateResult result = gate();
 
         assertTrue(result.passed());
-        assertEquals(0, result.specs().size());
+        assertEquals(1, result.specs().size());
+        assertTrue(result.specs().get(0).unchanged());
+        assertFalse(result.specs().get(0).isNew());
+        assertTrue(result.specs().get(0).head().score() > 0);
+    }
+
+    @Test
+    void anUnchangedSpecWithABlockerFailsTheGate() throws IOException {
+        strictPolicy();
+        baseline(Map.of("apis/orders/openapi.yaml", WITHOUT_SUMMARY, "apis/orders/.arete.yaml", "policy: Strict\n"));
+
+        GateResult result = gate();
+
+        assertFalse(result.passed());
+        SpecResult spec = result.specs().get(0);
+        assertTrue(spec.unchanged());
+        assertTrue(spec.reasons().stream().anyMatch(r -> r.startsWith("unchanged spec has 1 blocker")), spec.reasons().toString());
     }
 
     @Test
@@ -328,8 +344,8 @@ class GateTest {
         GateResult result = GateRunner.run(engine(repo.resolveSibling("p")), repo,
                 GateRequest.builder().baseSha("abc123def456").raw(template, Map.of()).build());
 
-        assertEquals(List.of("apis/stable/openapi.yaml"), result.skipped(), "identical to its base: nothing to check");
-        assertEquals(2, result.specs().size());
+        assertEquals(3, result.specs().size(), "every spec is scored, including the one identical to its base");
+        assertEquals(List.of("apis/stable/openapi.yaml"), result.unchanged().stream().map(SpecResult::file).toList());
         assertFalse(result.specs().get(0).isNew());
         assertFalse(result.specs().get(0).passed());
         assertTrue(result.specs().get(1).isNew());

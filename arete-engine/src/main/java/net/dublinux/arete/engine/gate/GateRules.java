@@ -17,7 +17,8 @@ import java.util.Map;
  * <ul>
  *   <li>A changed spec fails on any new blocker (an ERROR finding, from a PROHIBITED rule), or when its score is lower
  *       than the base's.</li>
- *   <li>A new spec has nothing to be compared with, so it must meet the policy's pass mark and have no blockers.</li>
+ *   <li>A new spec has nothing to be compared with, so it must meet the policy's pass mark and have no blockers. So must
+ *       an unchanged one: every spec is scored on every run, so a policy change or a rule update cannot slip past.</li>
  *   <li>A head that does not parse fails; one the engine cannot score is a configuration problem.</li>
  * </ul>
  */
@@ -25,21 +26,27 @@ final class GateRules {
     private GateRules() { }
 
     static SpecResult evaluate(String file, ScoreReport head, ScoreReport base, String warning) {
+        return evaluate(file, head, base, warning, false);
+    }
+
+    /** {@code unchanged}: the spec's text is the base's, so only {@code head} is scored and it must stand on its own. */
+    static SpecResult evaluate(String file, ScoreReport head, ScoreReport base, String warning, boolean unchanged) {
         List<String> reasons = new ArrayList<>();
+        String standalone = unchanged ? "unchanged spec" : "new spec";
         if (!head.succeeded()) {
             reasons.add(("PARSE_ERROR".equals(head.status()) ? "does not parse: " : "could not be scored: ") + head.errorMessage());
-            return new SpecResult(file, base == null, head, base, null, false, reasons, warning);
+            return new SpecResult(file, base == null && !unchanged, unchanged, head, base, null, false, reasons, warning);
         }
         if (base == null) {
             if (head.passingScore() != null && head.score() < head.passingScore()) {
-                reasons.add("new spec scores " + number(head.score()) + ", below the " + head.policy() + " pass mark of " + number(head.passingScore()));
+                reasons.add(standalone + " scores " + number(head.score()) + ", below the " + head.policy() + " pass mark of " + number(head.passingScore()));
             }
             long blockers = head.findings().stream().filter(f -> "ERROR".equals(f.severity())).count();
             if (blockers > 0) {
-                reasons.add("new spec has " + blockers + (blockers == 1 ? " blocker" : " blockers"));
+                reasons.add(standalone + " has " + blockers + (blockers == 1 ? " blocker" : " blockers"));
                 for (Finding f : head.findings()) if ("ERROR".equals(f.severity())) reasons.add("  " + describe(file, f));
             }
-            return new SpecResult(file, true, head, null, null, reasons.isEmpty(), reasons, warning);
+            return new SpecResult(file, !unchanged, unchanged, head, null, null, reasons.isEmpty(), reasons, warning);
         }
 
         ScoreDiff diff = ScoreDiff.of(base, head);
@@ -60,7 +67,7 @@ final class GateRules {
         if (diff.regressed()) {
             reasons.add("score fell from " + number(base.score()) + " to " + number(head.score()) + " (" + number(diff.scoreDelta()) + ")" + caused(diff));
         }
-        return new SpecResult(file, false, head, base, diff, reasons.isEmpty(), reasons, warning);
+        return new SpecResult(file, false, false, head, base, diff, reasons.isEmpty(), reasons, warning);
     }
 
     /** What the drop is owed to: rules the head violates that the base did not, each costing its points once. */

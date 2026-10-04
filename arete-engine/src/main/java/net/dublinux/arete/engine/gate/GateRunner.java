@@ -21,12 +21,12 @@ import java.util.Set;
 import java.util.TreeMap;
 
 /**
- * Runs the merge-gate over a repository: finds the specs a change touched, reads each one's base (the spec as it was at
+ * Runs the merge-gate over a repository: finds the specs, reads each one's base (the spec as it was at
  * the merge-base), scores both with the same policy and overrides, and applies {@link GateRules}.
  *
  * <p>In git mode the changed specs come from {@code git diff} against the base commit and the base from
- * {@code git show}: no checkout, and only specs the change touched. In raw mode (a shallow clone) every spec matching the
- * globs is compared with its base fetched from the code host, and the ones that did not change are dropped.
+ * {@code git show}: no checkout. Every spec matching the globs is scored on every run; one whose text is the base's is
+ * judged on its own (see {@link GateRules}). In raw mode (a shallow clone) each spec's base is fetched from the code host.
  */
 public final class GateRunner {
     private GateRunner() { }
@@ -39,39 +39,36 @@ public final class GateRunner {
             Git git = new Git(root);
             String base = resolveBase(git, request);
             source = new GitBaseSource(git, base);
-            changedByGit(git, base, request, candidates);
+            for (String path : walk(root, request)) candidates.put(path, path);   // every spec is scored, changed or not
+            changedByGit(git, base, request, candidates);                          // and a renamed one is read at its old path
         } else {
             source = new RawBaseSource(request.rawUrl, request.baseSha, request.rawHeaders, request.http);
             for (String path : request.changedFiles != null ? filter(request.changedFiles, request) : walk(root, request)) candidates.put(path, path);
         }
 
         List<SpecResult> results = new ArrayList<>();
-        List<String> skipped = new ArrayList<>();
         for (Map.Entry<String, String> candidate : candidates.entrySet()) {
             String file = candidate.getKey();
             Path path = root.resolve(file);
             if (!Files.isRegularFile(path)) continue;   // deleted
             String headText = read(path);
             Optional<String> baseText = source.read(candidate.getValue());
-            if (baseText.isPresent() && baseText.get().equals(headText)) {
-                skipped.add(file);
-                continue;
-            }
+            boolean unchanged = baseText.isPresent() && baseText.get().equals(headText);
             Overrides overrides = Overrides.discover(path, root);
             String policy = request.policy != null ? request.policy : overrides.policy();
             ScoreReport head = ScoreReport.of(engine, file, headText, policy, overrides);
             ScoreReport base = null;
             String warning = null;
-            if (baseText.isPresent()) {
+            if (baseText.isPresent() && !unchanged) {
                 base = ScoreReport.of(engine, file, baseText.get(), policy, overrides);
                 if (!base.succeeded()) {
                     warning = "the base did not parse (" + base.errorMessage() + "), so this is judged as a new spec";
                     base = null;
                 }
             }
-            results.add(GateRules.evaluate(file, head, base, warning));
+            results.add(GateRules.evaluate(file, head, base, warning, unchanged));
         }
-        return new GateResult(source.description(), results, skipped);
+        return new GateResult(source.description(), results);
     }
 
     // ---- git ----------------------------------------------------------------------------------------------

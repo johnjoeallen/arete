@@ -19,7 +19,7 @@ java -jar arete-cli.jar score apis/orders/openapi.yaml
 
 ## The merge-gate
 
-`arete gate` is the CI step. It does not re-argue debt a spec already has: it scores each changed spec as it is now
+`arete gate` is the CI step. It does not re-argue debt a spec already has: it scores every spec on every run: a changed one as it is now
 and as it was at the base, with the same policy and overrides, and judges the difference.
 
 | Case | The gate fails when |
@@ -27,7 +27,7 @@ and as it was at the base, with the same policy and overrides, and judges the di
 | A changed spec | it has a **new blocker** (an error-level finding, from a `PROHIBITED` rule), or its **score is lower** than the base's. |
 | A new spec (no base) | it scores below the policy's pass mark, or has any blocker: it has to stand on its own. |
 | A deleted spec | never: it is skipped. |
-| An unchanged spec | never: it is skipped, which keeps CI fast. |
+| An unchanged spec | on its own: it must have no blockers and meet the pass mark, like a new spec. Every spec is scored on every run. |
 | A head that does not parse | always. |
 | A base that does not parse | it is judged as a new spec, with a note. |
 
