@@ -80,6 +80,8 @@ protected boundary.
 | `arete-engine-api` | The engine's public types (findings, scores, severities, spec input). Published to Maven Central as `net.dublinux.arete:arete-engine-api`. |
 | `arete-engine` | The Areté Policy Engine: spec model, policy loading, Distill and scoring. A plain library with no Spring, database or UI. |
 | `arete-cli` | The `arete` command: score, diff and report specs, check a policy source. One runnable jar. |
+| `arete-maven-plugin`, `arete-gradle-plugin` | `gate` and `score` in the build, in process, as thin wrappers over the engine. |
+| `arete-ci-gate-*` | Deprecated: gate plugins that call a running Areté server. |
 | `arete-app` | The Spring Boot application, a local viewing and scoring UI over the engine. |
 
 ## Release

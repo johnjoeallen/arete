@@ -1,3 +1,5 @@
+> **Deprecated.** This plugin calls a running Areté server. Use the in-process Maven plugin instead (see `docs/build-plugins.md`); this one will be removed after one release.
+
 # arete-ci-gate-maven-plugin
 
 Fails `mvn verify` when the module's OpenAPI spec fails its Areté policy. All

@@ -73,6 +73,13 @@ final class MavenSettings {
         return settings;
     }
 
+    /** Reads several files in order, a later one over an earlier (global then user, as Maven does); a missing one is skipped. */
+    static MavenSettings load(List<Path> files) {
+        MavenSettings settings = new MavenSettings();
+        for (Path file : files) if (file != null) settings.merge(file);
+        return settings;
+    }
+
     /** Reads one file, as {@code mvn -s file} does. The file must exist. */
     static MavenSettings load(Path file) {
         MavenSettings settings = new MavenSettings();

@@ -8,8 +8,8 @@
 > loader (file, https and Maven sources with pin, checksum and cache; layering), `locked` rules and
 > `.arete.yaml` overrides. Also done: the `arete` CLI (`score`, `diff`, `report`, `policy verify`) and the
 > JSON, markdown and SARIF writers, with line numbers. Stable pointers too (parameters by `in:name`, responses
-> by status, tags by name). The merge-gate (`arete gate`: git or raw base, reports, `--report-only`). Not started: git policy sources, count-limit rules, the
-> extended rule semantics and the Maven/Gradle wrappers.
+> by status, tags by name). The merge-gate (`arete gate`: git or raw base, reports, `--report-only`). The Maven (`arete:gate`, `arete:score`) and Gradle (`areteGate`, `areteScore`) plugins as thin wrappers over a shared `GateJob`. Not started: git
+> policy sources, count-limit rules, the extended rule semantics, retiring the old HTTP-client gate plugins and publishing the plugins.
 
 ## Goals and requirements
 

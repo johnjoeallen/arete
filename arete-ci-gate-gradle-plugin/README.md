@@ -1,3 +1,5 @@
+> **Deprecated.** This plugin calls a running Areté server. Use the in-process Gradle plugin instead (see `docs/build-plugins.md`); this one will be removed after one release.
+
 # arete-ci-gate-gradle-plugin
 
 Fails `gradle check` when the project's OpenAPI spec fails its Areté policy.

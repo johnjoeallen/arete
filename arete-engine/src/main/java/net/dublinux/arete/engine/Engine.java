@@ -237,6 +237,12 @@ public class Engine {
         /** As {@link #mavenSettings()} but from one file, as {@code mvn -s file} does. The file must exist. */
         public Builder mavenSettings(Path settingsXml) { this.mavenSettings = MavenSettings.load(settingsXml); return this; }
 
+        /**
+         * As {@link #mavenSettings()} but from the given files, a later one over an earlier (global then user); a file that
+         * does not exist is skipped. This is how a Maven plugin passes the settings files its own build was started with.
+         */
+        public Builder mavenSettings(List<Path> settingsFiles) { this.mavenSettings = MavenSettings.load(settingsFiles); return this; }
+
         /** Activates a settings.xml profile, as {@code mvn -P id} does. */
         public Builder mavenProfile(String id) { mavenProfiles.add(id); return this; }
 

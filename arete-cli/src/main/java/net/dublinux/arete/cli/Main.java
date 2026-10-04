@@ -4,9 +4,8 @@ import net.dublinux.arete.engine.BundleValidationException;
 import net.dublinux.arete.engine.Engine;
 import net.dublinux.arete.engine.Overrides;
 import net.dublinux.arete.engine.gate.GateException;
-import net.dublinux.arete.engine.gate.GateRequest;
+import net.dublinux.arete.engine.gate.GateJob;
 import net.dublinux.arete.engine.gate.GateResult;
-import net.dublinux.arete.engine.gate.GateRunner;
 import net.dublinux.arete.engine.report.ReportWriter;
 import net.dublinux.arete.engine.report.ScoreDiff;
 import net.dublinux.arete.engine.report.ScoreReport;
@@ -32,12 +31,6 @@ public final class Main {
     static final int OK = 0;
     static final int FAILED = 1;
     static final int ERROR = 2;
-
-    static {
-        // The engine notes, at load, matcher members it has not classified: a note for its developers, not for
-        // someone scoring a spec. Real problems are still reported.
-        java.util.logging.Logger.getLogger("net.dublinux.arete.engine").setLevel(java.util.logging.Level.SEVERE);
-    }
 
     private Main() { }
 
@@ -166,49 +159,60 @@ public final class Main {
 
     private static int gate(Options options, PrintStream out, Path cwd) throws IOException {
         if (!options.positional.isEmpty()) throw new UsageException("gate takes no arguments; name the base with --target or --base-sha");
-        Path repo = options.value("--repo") == null ? cwd : cwd.resolve(options.value("--repo"));
-        GateRequest.Builder request = GateRequest.builder();
-        if (options.value("--target") != null) request.target(options.value("--target"));
-        if (options.value("--base-sha") != null) request.baseSha(options.value("--base-sha"));
-        for (String glob : options.all("--paths")) request.glob(glob);
-        if (options.value("--policy") != null) request.policy(options.value("--policy"));
+        GateJob.Config config = new GateJob.Config();
+        config.repository = options.value("--repo") == null ? cwd : cwd.resolve(options.value("--repo"));
+        config.target = options.value("--target");
+        config.baseSha = options.value("--base-sha");
+        config.globs.addAll(options.all("--paths"));
+        config.policy = options.value("--policy");
+        config.policySources.addAll(options.all("--policy-source"));
+        config.mavenRepositories.addAll(options.all("--maven-repository"));
+        String settings = options.value("--maven-settings");
+        if (settings != null) {
+            if (settings.equals("default")) config.useDefaultMavenSettings = true;
+            else config.mavenSettingsFiles.add(cwd.resolve(settings));
+        }
+        config.mavenProfiles.addAll(options.all("--maven-profile"));
+        config.requirePin = options.has("--require-pin");
+        config.noCache = options.has("--no-cache");
+        if (options.value("--cache-dir") != null) config.cacheDir = cwd.resolve(options.value("--cache-dir"));
+        if (options.value("--user-policies") != null) config.userPoliciesDir = cwd.resolve(options.value("--user-policies"));
         String source = options.value("--base-source") == null ? "git" : options.value("--base-source");
         switch (source) {
             case "git" -> { }
             case "raw" -> {
                 if (options.value("--raw-url") == null) throw new UsageException("--base-source raw needs --raw-url, a URL with {path} and {ref}");
-                java.util.Map<String, String> headers = new java.util.LinkedHashMap<>();
+                config.rawUrl = options.value("--raw-url");
                 for (String header : options.all("--raw-header")) {
                     int colon = header.indexOf(':');
                     if (colon <= 0) throw new UsageException("--raw-header must be 'Name: value'");
-                    headers.put(header.substring(0, colon).strip(), expandEnvironment(header.substring(colon + 1).strip()));
+                    config.rawHeaders.put(header.substring(0, colon).strip(), expandEnvironment(header.substring(colon + 1).strip()));
                 }
-                request.raw(options.value("--raw-url"), headers);
                 if (options.value("--changed-files") != null) {
-                    request.changedFiles(Files.readAllLines(cwd.resolve(options.value("--changed-files"))).stream().map(String::strip).filter(l -> !l.isEmpty()).toList());
+                    config.changedFiles = Files.readAllLines(cwd.resolve(options.value("--changed-files"))).stream().map(String::strip).filter(l -> !l.isEmpty()).toList();
                 }
             }
             default -> throw new UsageException("--base-source must be git or raw");
         }
-        Engine engine = engine(options, cwd);
-        GateResult result = GateRunner.run(engine, repo, request.build());
+        if (options.value("--report-json") != null) config.reportJson = cwd.resolve(options.value("--report-json"));
+        if (options.value("--report-md") != null) config.reportMarkdown = cwd.resolve(options.value("--report-md"));
+        if (options.value("--report-sarif") != null) config.reportSarif = cwd.resolve(options.value("--report-sarif"));
+        config.reportOnly = options.has("--report-only");
 
         String format = options.value("--format") == null ? "text" : options.value("--format");
-        String rendered = switch (format) {
-            case "text" -> ReportWriter.text(result);
+        if (!java.util.Set.of("text", "json", "md", "markdown", "sarif").contains(format)) throw new UsageException("--format must be text, json, md or sarif");
+
+        GateJob.Outcome outcome = GateJob.run(config);
+        GateResult result = outcome.result();
+        emit(options, out, cwd, switch (format) {
             case "json" -> ReportWriter.json(result);
             case "md", "markdown" -> ReportWriter.markdown(result);
             case "sarif" -> ReportWriter.sarif(result);
-            default -> throw new UsageException("--format must be text, json, md or sarif");
-        };
-        emit(options, out, cwd, rendered);
-        if (options.value("--report-json") != null) write(cwd, options.value("--report-json"), ReportWriter.json(result));
-        if (options.value("--report-md") != null) write(cwd, options.value("--report-md"), ReportWriter.markdown(result));
-        if (options.value("--report-sarif") != null) write(cwd, options.value("--report-sarif"), ReportWriter.sarif(result));
+            default -> ReportWriter.text(result);
+        });
 
-        if (result.hasEngineError()) return ERROR;
-        if (options.has("--report-only")) return OK;   // write the files, never block: a trial before enforcement
-        return result.passed() ? OK : FAILED;
+        if (outcome.engineError()) return ERROR;
+        return outcome.blocks() ? FAILED : OK;   // --report-only: the files are written and nothing blocks
     }
 
     /** {@code $NAME} and {@code ${NAME}} in a header value come from the environment, so a token never sits in a script. */
@@ -222,12 +226,6 @@ public final class Main {
         }
         matcher.appendTail(out);
         return out.toString();
-    }
-
-    private static void write(Path cwd, String target, String content) throws IOException {
-        Path path = cwd.resolve(target);
-        if (path.getParent() != null) Files.createDirectories(path.getParent());
-        Files.writeString(path, content, StandardCharsets.UTF_8);
     }
 
     // ---- policy verify ------------------------------------------------------------------------------------

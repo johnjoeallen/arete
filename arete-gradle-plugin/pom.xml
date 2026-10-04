@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>net.dublinux.arete</groupId>
+        <artifactId>arete-parent</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>arete-gradle-plugin</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>arete-gradle-plugin</name>
+    <description>Score OpenAPI specs and gate a change against its base, in process, from Gradle</description>
+    <url>https://github.com/johnjoeallen/arete</url>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- Community-published Gradle authoring API, so the plugin compiles inside this Maven reactor.
+             Consumers run it on whatever Gradle they have. -->
+        <gradle-api.version>8.11.1</gradle-api.version>
+        <junit.version>5.11.4</junit.version>
+        <shaded>net.dublinux.arete.shaded</shaded>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>net.dublinux.arete</groupId>
+            <artifactId>arete-engine</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.gradleplugins</groupId>
+            <artifactId>gradle-api</artifactId>
+            <version>${gradle-api.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.5.2</version>
+            </plugin>
+            <!-- A Gradle plugin shares a classpath with every other build plugin, so the engine's libraries are
+                 bundled and moved aside: another plugin's Jackson or Guava cannot clash with ours. SLF4J is left
+                 to Gradle, which provides it. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.6.2</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals><goal>shade</goal></goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <artifactSet>
+                                <excludes>
+                                    <exclude>org.slf4j:*</exclude>
+                                </excludes>
+                            </artifactSet>
+                            <relocations>
+                                <relocation><pattern>com.google</pattern><shadedPattern>${shaded}.com.google</shadedPattern></relocation>
+                                <relocation><pattern>com.fasterxml</pattern><shadedPattern>${shaded}.com.fasterxml</shadedPattern></relocation>
+                                <relocation><pattern>com.github.fge</pattern><shadedPattern>${shaded}.com.github.fge</shadedPattern></relocation>
+                                <relocation><pattern>org.apache</pattern><shadedPattern>${shaded}.org.apache</shadedPattern></relocation>
+                                <relocation><pattern>org.mozilla</pattern><shadedPattern>${shaded}.org.mozilla</shadedPattern></relocation>
+                                <relocation><pattern>org.joda</pattern><shadedPattern>${shaded}.org.joda</shadedPattern></relocation>
+                                <relocation><pattern>org.yaml</pattern><shadedPattern>${shaded}.org.yaml</shadedPattern></relocation>
+                                <relocation><pattern>org.checkerframework</pattern><shadedPattern>${shaded}.org.checkerframework</shadedPattern></relocation>
+                                <relocation><pattern>io.swagger</pattern><shadedPattern>${shaded}.io.swagger</shadedPattern></relocation>
+                            </relocations>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                        <exclude>module-info.class</exclude>
+                                        <exclude>META-INF/versions/*/module-info.class</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- The end-to-end test runs a real Gradle against the packaged jar, so it follows package. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>3.2.5</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

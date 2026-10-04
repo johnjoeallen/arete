@@ -65,6 +65,7 @@ nav:
   - Getting Started: getting-started.md
   - Configuration: configuration.md
   - Command line: cli.md
+  - Maven and Gradle: build-plugins.md
   - Automation API: automation-api.md
   - History: history.md
   - Scoring:

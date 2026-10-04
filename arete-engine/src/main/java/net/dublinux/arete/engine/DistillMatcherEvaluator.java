@@ -43,7 +43,8 @@ public final class DistillMatcherEvaluator {
         try {
             Program program = compiled(rule);
             for (String name : program.unclassifiedPropertyUses()) {
-                LOG.log(System.Logger.Level.WARNING,
+                // A note for people writing matchers, not for whoever scores a spec: debug level keeps it out of build logs.
+                LOG.log(System.Logger.Level.DEBUG,
                         "Matcher ''{0}'' uses member ''.{1}'' as an assumed property; "
                                 + "its operation shape has not been classified",
                         new Object[] {rule.id(), name});
