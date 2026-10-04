@@ -99,4 +99,22 @@ class ValueMeasureTest {
         assertEquals(99.0, run.apply(9).getOverallScore());
         assertEquals(97.0, run.apply(14).getOverallScore());
     }
+
+    @Test
+    void aPolicyCanTierStatus001ByHowManyPostsLackA201(@TempDir Path tmp) throws IOException {
+        Path dir = tmp.resolve("policies");
+        Files.createDirectories(dir);
+        Files.writeString(dir.resolve("p.md"), "---\nid: Creates\nformat: 2\nrules:\n  STATUS001: { tiers: { 2: 1, 5: 3 } }\n---\n\n# Creates\n");
+        Engine engine = Engine.builder().cacheDir(null).userPoliciesDir(dir).build();
+
+        java.util.function.IntFunction<ScoringResult> run = n -> {
+            StringBuilder text = new StringBuilder("openapi: 3.0.0\ninfo: { title: T, version: 1.0.0 }\npaths:\n");
+            for (int i = 0; i < n; i++) text.append("  /things").append(i).append(":\n    post:\n      summary: S\n      responses: { '200': { description: OK } }\n");
+            return engine.score(SpecInput.builder().content(text.toString()).format(SpecFormat.OPENAPI3).policy("Creates").build());
+        };
+        assertEquals(100.0, run.apply(1).getOverallScore(), "one missing 201 is tolerated");
+        assertEquals(99.0, run.apply(2).getOverallScore());
+        assertEquals(97.0, run.apply(6).getOverallScore());
+        assertEquals(6, run.apply(6).getRuleOutcomes().stream().filter(o -> o.ruleId().equals("STATUS001")).findFirst().get().count());
+    }
 }
