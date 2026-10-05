@@ -10,11 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://johnjoeallen.github.io/arete/0.99/publishing-spi/">
+        <link rel="canonical" href="https://johnjoeallen.github.io/arete/0.99/build-plugins/">
       
       
-        <link rel="prev" href="../releasing/">
+        <link rel="prev" href="../cli/">
       
+      
+        <link rel="next" href="../automation-api/">
       
       
         
@@ -25,7 +27,7 @@
     
     
       
-        <title>Publishing the SPI - Areté</title>
+        <title>Maven and Gradle - Areté</title>
       
     
     
@@ -78,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#publishing-the-spi-to-maven-central" class="md-skip">
+        <a href="#maven-and-gradle-plugins" class="md-skip">
           Skip to content
         </a>
       
@@ -117,7 +119,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Publishing the SPI
+              Maven and Gradle
             
           </span>
         </div>
@@ -345,6 +347,129 @@
   
   
     <li class="md-nav__item">
+      <a href="../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Command line
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Maven and Gradle
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Maven and Gradle
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#maven" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Maven
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gradle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Gradle
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../automation-api/" class="md-nav__link">
         
   
@@ -412,10 +537,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
             
   
   
@@ -433,8 +558,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -612,34 +737,6 @@
 
               
             
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../scoring/writing-a-plugin/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Writing a Plugin
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
           </ul>
         </nav>
       
@@ -678,44 +775,17 @@
       
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Publishing the SPI
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../publishing/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Publishing the SPI
+    Publishing to Maven Central
   
 
     
@@ -724,81 +794,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#one-time-setup" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        One-time setup
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#prepare-a-release" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Prepare a release
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#publish-the-spi" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Publish the SPI
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#migrating-consumers" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Migrating consumers
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#if-publishing-fails" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        If publishing fails
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -830,10 +825,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#one-time-setup" class="md-nav__link">
+  <a href="#maven" class="md-nav__link">
     <span class="md-ellipsis">
       
-        One-time setup
+        Maven
       
     </span>
   </a>
@@ -841,43 +836,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#prepare-a-release" class="md-nav__link">
+  <a href="#gradle" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Prepare a release
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#publish-the-spi" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Publish the SPI
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#migrating-consumers" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Migrating consumers
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#if-publishing-fails" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        If publishing fails
+        Gradle
       
     </span>
   </a>
@@ -901,7 +863,7 @@
 
 
   
-    <a href="https://github.com/johnjoeallen/arete/edit/main/docs/publishing-spi.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/johnjoeallen/arete/edit/main/docs/build-plugins.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -909,104 +871,106 @@
   
 
 
-<h1 id="publishing-the-spi-to-maven-central">Publishing the SPI to Maven Central<a class="headerlink" href="#publishing-the-spi-to-maven-central" title="Permanent link">&para;</a></h1>
-<p>The SPI is now published under these coordinates:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">&lt;dependency&gt;</span>
+<h1 id="maven-and-gradle-plugins">Maven and Gradle plugins<a class="headerlink" href="#maven-and-gradle-plugins" title="Permanent link">&para;</a></h1>
+<p>The plugins run the engine <strong>in the build</strong>: no Areté service, no network call to one. Each only maps its
+configuration onto the engine and acts on the result, so a build, the <a href="../cli/">command line</a> and any other embedder judge
+a spec the same way. Both write <code>gate.json</code>, <code>gate.md</code> and <code>gate.sarif</code> for a later CI step to post; Areté never calls
+GitLab or GitHub.</p>
+<p>The gate needs <code>git</code> on the path (it reads the base with <code>git show</code>); see the <a href="../cli/#the-merge-gate">gate</a> for how it
+judges a change, for shallow clones, and for the raw base source.</p>
+<div class="admonition tip">
+<p class="admonition-title">Building the plugins yourself</p>
+<p>To try an unreleased plugin, run <code>mvn clean install -DskipTests</code> and use the <code>-SNAPSHOT</code> version from your local
+repository. <a href="../getting-started/#install-the-maven-and-gradle-plugins-locally">Getting started</a> has the steps,
+including <code>mavenLocal()</code> for Gradle.</p>
+</div>
+<h2 id="maven">Maven<a class="headerlink" href="#maven" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">&lt;plugin&gt;</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="nt">&lt;groupId&gt;</span>net.dublinux.arete<span class="nt">&lt;/groupId&gt;</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="nt">&lt;artifactId&gt;</span>arete-scoring-spi<span class="nt">&lt;/artifactId&gt;</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span><span class="nt">&lt;version&gt;</span>VERSION<span class="nt">&lt;/version&gt;</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="nt">&lt;/dependency&gt;</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="nt">&lt;artifactId&gt;</span>arete-maven-plugin<span class="nt">&lt;/artifactId&gt;</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">  </span><span class="nt">&lt;version&gt;</span>0.1.0<span class="nt">&lt;/version&gt;</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">  </span><span class="nt">&lt;configuration&gt;</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">    </span><span class="nt">&lt;target&gt;</span>origin/main<span class="nt">&lt;/target&gt;</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">    </span><span class="nt">&lt;policySources&gt;</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">      </span><span class="nt">&lt;policySource&gt;</span>classpath:api-policy<span class="nt">&lt;/policySource&gt;</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">      </span><span class="nt">&lt;policySource&gt;</span>maven:org.acme:api-policy:2.3.1<span class="nt">&lt;/policySource&gt;</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">    </span><span class="nt">&lt;/policySources&gt;</span>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">  </span><span class="nt">&lt;/configuration&gt;</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="nt">&lt;/plugin&gt;</span>
 </code></pre></div>
-<p>The previous coordinates, <code>net.dublinux.speculate:speculate-scoring-spi</code>,
-are a different Maven artifact. Maven Central does not rename artifacts, so
-existing consumers must migrate explicitly.</p>
-<h2 id="one-time-setup">One-time setup<a class="headerlink" href="#one-time-setup" title="Permanent link">&para;</a></h2>
-<ol>
-<li>Create or sign in to an account at the <a href="https://central.sonatype.com/">Central Portal</a>.</li>
-<li>Claim and verify the <code>net.dublinux.arete</code> namespace. Use the repository's
-   GitHub identity and follow the verification instructions shown by Central.
-   Publishing will fail until this namespace is associated with the account.</li>
-<li>Create a Central Portal user token. Store the token's username and password
-   as GitHub Actions secrets named <code>MAVEN_CENTRAL_USERNAME</code> and
-   <code>MAVEN_CENTRAL_PASSWORD</code>.</li>
-<li>Create a GPG key for signing releases. Publish its public key to a public
-   keyserver and keep the private key and passphrase safe.</li>
-<li>
-<p>Add the following GitHub Actions secrets to the repository:</p>
-</li>
-<li>
-<p><code>MAVEN_CENTRAL_USERNAME</code></p>
-</li>
-<li><code>MAVEN_CENTRAL_PASSWORD</code></li>
-<li><code>GPG_PRIVATE_KEY</code> — the ASCII-armoured private key</li>
-<li><code>GPG_PASSPHRASE</code></li>
-</ol>
-<p>The <code>release</code> profile in
-<a href="https://github.com/johnjoeallen/arete/blob/main/arete-scoring-spi/pom.xml"><code>arete-scoring-spi/pom.xml</code></a>
-creates the sources and Javadoc jars, signs all artifacts, and uploads them
-through the Central Publishing Portal.</p>
-<h2 id="prepare-a-release">Prepare a release<a class="headerlink" href="#prepare-a-release" title="Permanent link">&para;</a></h2>
-<ol>
-<li>Make sure the new coordinates are present in the SPI POM and that the
-   working tree is clean.</li>
-<li>Run the tests and package check locally:</li>
-</ol>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>mvn<span class="w"> </span>-q<span class="w"> </span>verify
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>mvn<span class="w"> </span>net.dublinux.arete:arete-maven-plugin:gate<span class="w"> </span>-Darete.target<span class="o">=</span>origin/main
 </code></pre></div>
-<ol>
-<li>Commit the release-ready changes.</li>
-<li>Create a new semantic version tag. Do not reuse a tag that has already been
-   pushed:</li>
-</ol>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>git<span class="w"> </span>tag<span class="w"> </span>vX.Y.Z
-<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>main<span class="w"> </span>vX.Y.Z
+<table>
+<thead>
+<tr>
+<th>Goal</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>arete:gate</code></td>
+<td>The merge-gate. Runs once, at the directory Maven was started in, and fails the build on a regression. Defaults to the <code>verify</code> phase.</td>
+</tr>
+<tr>
+<td><code>arete:score</code></td>
+<td>Scores <code>specs</code> and fails under <code>failUnder</code> (a number, or <code>policy</code> for the policy's pass mark).</td>
+</tr>
+</tbody>
+</table>
+<p>Parameters (each also a property such as <code>-Darete.target</code>): <code>target</code>, <code>baseSha</code>, <code>paths</code>, <code>policy</code>, <code>policySources</code>,
+<code>mavenRepositories</code>, <code>cacheDir</code>, <code>userPolicies</code>, <code>rawUrl</code> and <code>rawHeaders</code> (the base from the code host, for a
+shallow clone), <code>reportDirectory</code> (default <code>target/arete</code>), <code>reportOnly</code>, <code>skip</code>.</p>
+<p><strong><code>settings.xml</code> is read for you.</strong> <code>useMavenSettings</code> (on by default) reads the settings files the build was started with,
+so <code>mvn -s ci-settings.xml</code> and the active profiles apply: the repositories of <code>maven:</code> policy sources, mirrors,
+credentials from <code>&lt;servers&gt;</code> and proxies come from there, as they do for the rest of CI. See
+<a href="../scoring/policy-engine/#policy-sources">policy sources</a> for what is used and what is not (encrypted passwords).</p>
+<h2 id="gradle">Gradle<a class="headerlink" href="#gradle" title="Permanent link">&para;</a></h2>
+<p>The plugin is published to Maven Central, not the Gradle Plugin Portal, so tell Gradle where to find it:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1">// settings.gradle</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">pluginManagement</span><span class="w"> </span><span class="o">{</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="n">repositories</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="n">mavenCentral</span><span class="o">();</span><span class="w"> </span><span class="n">gradlePluginPortal</span><span class="o">()</span><span class="w"> </span><span class="o">}</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="n">resolutionStrategy</span><span class="w"> </span><span class="o">{</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">        </span><span class="n">eachPlugin</span><span class="w"> </span><span class="o">{</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="o">(</span><span class="n">requested</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">id</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s1">'net.dublinux.arete'</span><span class="o">)</span><span class="w"> </span><span class="n">useModule</span><span class="o">(</span><span class="s2">"net.dublinux.arete:arete-gradle-plugin:${requested.version}"</span><span class="o">)</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">        </span><span class="o">}</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">    </span><span class="o">}</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="o">}</span>
 </code></pre></div>
-<p>The tag triggers the application release workflow, but it does not publish the
-SPI automatically.</p>
-<h2 id="publish-the-spi">Publish the SPI<a class="headerlink" href="#publish-the-spi" title="Permanent link">&para;</a></h2>
-<ol>
-<li>Open the repository's <strong>Actions</strong> tab.</li>
-<li>Select <strong>Publish SPI to Maven Central</strong>.</li>
-<li>Choose <strong>Run workflow</strong> and enter the tag, for example <code>vX.Y.Z</code>.</li>
-<li>Wait for the workflow to finish. It checks out that tag, derives the Maven
-   version by removing the leading <code>v</code>, imports the GPG key, and runs:</li>
-</ol>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>mvn<span class="w"> </span>--no-transfer-progress<span class="w"> </span>-pl<span class="w"> </span>arete-scoring-spi<span class="w"> </span>-Prelease<span class="w"> </span>deploy
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1">// build.gradle</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">plugins</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="s1">'net.dublinux.arete'</span><span class="w"> </span><span class="n">version</span><span class="w"> </span><span class="s1">'0.1.0'</span><span class="w"> </span><span class="o">}</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="n">arete</span><span class="w"> </span><span class="o">{</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">    </span><span class="n">target</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'origin/main'</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">    </span><span class="n">policySources</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">[</span><span class="s1">'classpath:api-policy'</span><span class="o">,</span><span class="w"> </span><span class="s1">'maven:org.acme:api-policy:2.3.1'</span><span class="o">]</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">    </span><span class="n">mavenRepositories</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">[</span><span class="s1">'https://repo.acme.com/maven'</span><span class="o">]</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">    </span><span class="n">mavenSettings</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">file</span><span class="o">(</span><span class="s1">'ci/settings.xml'</span><span class="o">)</span><span class="w">     </span><span class="c1">// optional: or useMavenSettings = true for ~/.m2/settings.xml</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">    </span><span class="n">specs</span><span class="o">.</span><span class="na">from</span><span class="o">(</span><span class="s1">'apis/orders/openapi.yaml'</span><span class="o">)</span><span class="w">       </span><span class="c1">// for areteScore</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="o">}</span>
 </code></pre></div>
-<ol>
-<li>Open <a href="https://central.sonatype.com/publishing/deployments">Central Portal deployments</a>,
-   inspect the pending deployment, and publish it manually. The workflow has
-   <code>autoPublish</code> disabled deliberately.</li>
-<li>After Central finishes processing, verify the artifact and its sources and
-   Javadoc jars under the new coordinates.</li>
-</ol>
-<h2 id="migrating-consumers">Migrating consumers<a class="headerlink" href="#migrating-consumers" title="Permanent link">&para;</a></h2>
-<p>Replace the old dependency:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nt">&lt;groupId&gt;</span>net.dublinux.speculate<span class="nt">&lt;/groupId&gt;</span>
-<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="nt">&lt;artifactId&gt;</span>speculate-scoring-spi<span class="nt">&lt;/artifactId&gt;</span>
-</code></pre></div>
-<p>with:</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nt">&lt;groupId&gt;</span>net.dublinux.arete<span class="nt">&lt;/groupId&gt;</span>
-<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nt">&lt;artifactId&gt;</span>arete-scoring-spi<span class="nt">&lt;/artifactId&gt;</span>
-</code></pre></div>
-<p>Consumers that import SPI classes must also change Java package imports from
-<code>net.dublinux.speculate...</code> to <code>net.dublinux.arete...</code>. Existing releases under
-the old coordinates remain available only if they were published previously;
-the new artifact does not replace them.</p>
-<h2 id="if-publishing-fails">If publishing fails<a class="headerlink" href="#if-publishing-fails" title="Permanent link">&para;</a></h2>
-<ul>
-<li><strong>Namespace error:</strong> verify that <code>net.dublinux.arete</code> is claimed and
-  verified in Central Portal.</li>
-<li><strong>401/403 authentication error:</strong> check the two Central Portal secrets and
-  ensure they contain the generated user-token credentials, not the account
-  password.</li>
-<li><strong>Signature error:</strong> check that the private GPG key and passphrase secrets
-  match, and that the public key is available from a public keyserver.</li>
-<li><strong>Version already exists:</strong> choose a new version. Published Maven versions
-  cannot be overwritten.</li>
-<li><strong>Wrong artifact:</strong> confirm that the workflow was run with the intended tag;
-  the tag determines the version and source contents.</li>
-</ul>
+<table>
+<thead>
+<tr>
+<th>Task</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>areteGate</code></td>
+<td>The merge-gate; fails the build on a regression. Never up to date.</td>
+</tr>
+<tr>
+<td><code>areteScore</code></td>
+<td>Scores <code>specs</code> and fails under <code>failUnder</code>.</td>
+</tr>
+</tbody>
+</table>
+<p>Neither is wired into <code>check</code>: run the gate as its own CI job so it can be a required check. Reports go to
+<code>build/reports/arete</code> (<code>reportDirectory</code>). <code>reportOnly = true</code> writes them and never fails.</p>
+<p>The plugin jar bundles the engine's libraries and moves them aside (Jackson, Guava, SnakeYAML and the rest are relocated
+under <code>net.dublinux.arete.shaded</code>), because a Gradle plugin shares a classpath with every other build plugin. It uses
+Gradle's own SLF4J.</p>
 
 
 

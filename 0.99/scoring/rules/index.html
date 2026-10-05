@@ -347,6 +347,60 @@
   
   
     <li class="md-nav__item">
+      <a href="../../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Command line
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../build-plugins/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Maven and Gradle
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../automation-api/" class="md-nav__link">
         
   
@@ -416,10 +470,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
             
   
   
@@ -437,8 +491,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_6">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -883,34 +937,6 @@
 
               
             
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../writing-a-plugin/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Writing a Plugin
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
           </ul>
         </nav>
       
@@ -952,14 +978,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../publishing-spi/" class="md-nav__link">
+      <a href="../../publishing/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Publishing the SPI
+    Publishing to Maven Central
   
 
     
@@ -1250,8 +1276,8 @@
 by category. A rule is only evaluated when a <a href="../policies/">policy</a> references
 it. See <a href="../policy-engine/">the policy engine</a> for how matchers, rules, and
 policies fit together.</p>
-<p>There are <strong>157 rules</strong> across <strong>20 categories</strong>, built on
-<strong>52 matchers</strong>.</p>
+<p>There are <strong>158 rules</strong> across <strong>20 categories</strong>, built on
+<strong>53 matchers</strong>.</p>
 <div class="admonition note">
 <p class="admonition-title">Reading the policy columns</p>
 <p>A number is the point deduction applied once if the rule matches;
@@ -1883,7 +1909,7 @@ a blank cell means that policy does not include the rule.</p>
 <td><code>STATUS001</code></td>
 <td>Creation operation lacks an appropriate success status</td>
 <td><code>response-code</code></td>
-<td>0.5</td>
+<td>by count (1+ costs 0.5, 3+ costs 1, 6+ costs 2)</td>
 <td>0.5</td>
 <td>0.5</td>
 </tr>
@@ -2132,6 +2158,14 @@ a blank cell means that policy does not include the rule.</p>
 <td>0.5</td>
 <td></td>
 <td>0.5</td>
+</tr>
+<tr>
+<td><code>JSON025</code></td>
+<td>Schema nests too deeply</td>
+<td><code>schema-depth</code></td>
+<td>by value (5+ costs 0.5, 7+ costs 1.5)</td>
+<td></td>
+<td></td>
 </tr>
 </tbody>
 </table>
@@ -2563,7 +2597,7 @@ a blank cell means that policy does not include the rule.</p>
 <td><code>STANDARD011</code></td>
 <td>Operation declares too many parameters</td>
 <td><code>parameter</code></td>
-<td>0.5</td>
+<td>by value (9+ costs 0.5, 13+ costs 1.5)</td>
 <td></td>
 <td></td>
 </tr>
@@ -2800,7 +2834,7 @@ a blank cell means that policy does not include the rule.</p>
 <td><code>VERSION003</code></td>
 <td>Version appears in the media type</td>
 <td><code>versioning</code></td>
-<td>0.5</td>
+<td></td>
 <td></td>
 <td></td>
 </tr>

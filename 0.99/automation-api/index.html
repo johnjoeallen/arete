@@ -13,7 +13,7 @@
         <link rel="canonical" href="https://johnjoeallen.github.io/arete/0.99/automation-api/">
       
       
-        <link rel="prev" href="../configuration/">
+        <link rel="prev" href="../build-plugins/">
       
       
         <link rel="next" href="../history/">
@@ -344,6 +344,60 @@
       
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Command line
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../build-plugins/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Maven and Gradle
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
     
   
   
@@ -577,10 +631,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
             
   
   
@@ -598,8 +652,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -777,34 +831,6 @@
 
               
             
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../scoring/writing-a-plugin/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Writing a Plugin
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
           </ul>
         </nav>
       
@@ -846,14 +872,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../publishing-spi/" class="md-nav__link">
+      <a href="../publishing/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Publishing the SPI
+    Publishing to Maven Central
   
 
     
@@ -1146,8 +1172,8 @@ level.</p>
 </code></pre></div>
 <p>Re-runs the given combinations against an already-submitted spec, by its UUID —
 no namespace, no re-upload. Same body/query options and response as the submit
-above. This is the flow a Maven/Gradle plugin uses: submit once, keep the UUID,
-score it whenever.</p>
+above. Submit once, keep the UUID, score it whenever. (The Maven and Gradle plugins do
+not use this API: they score in process.)</p>
 <h3 id="response-shaping">Response shaping<a class="headerlink" href="#response-shaping" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
@@ -1210,8 +1236,8 @@ the combination is judged against its own policy's bar (<code>level.source</code
 <code>"policy"</code>); a policy with no bar falls back to <code>blocker</code>. An explicit
 <code>?failOn=error</code> / <code>score&lt;NN</code> etc. overrides every combination
 (<code>level.source</code> = <code>"request"</code>).</p>
-<p>Plugins other than the policy engine can expose a bar via the SPI methods
-<code>getPassingScore(policy)</code> and <code>getSuggestedScoreLevel(policy)</code>.</p>
+<p>The policy engine supplies the bar through <code>getPassingScore(policy)</code> and
+<code>getSuggestedScoreLevel(policy)</code>.</p>
 <h2 id="remote-fetch">Remote fetch<a class="headerlink" href="#remote-fetch" title="Permanent link">&para;</a></h2>
 <p><code>{ "url": … }</code> is fetched server-side with these constraints:</p>
 <ul>

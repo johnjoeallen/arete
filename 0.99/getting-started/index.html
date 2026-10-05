@@ -397,6 +397,39 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#build-the-zip-locally" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Build the zip locally
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-the-zip" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install the zip
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-the-maven-and-gradle-plugins-locally" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install the Maven and Gradle plugins locally
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -425,6 +458,60 @@
     
   
     Configuration
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Command line
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../build-plugins/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Maven and Gradle
   
 
     
@@ -511,10 +598,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
             
   
   
@@ -532,8 +619,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -711,34 +798,6 @@
 
               
             
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../scoring/writing-a-plugin/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Writing a Plugin
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
           </ul>
         </nav>
       
@@ -780,14 +839,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../publishing-spi/" class="md-nav__link">
+      <a href="../publishing/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Publishing the SPI
+    Publishing to Maven Central
   
 
     
@@ -871,6 +930,39 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#build-the-zip-locally" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Build the zip locally
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-the-zip" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install the zip
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-the-maven-and-gradle-plugins-locally" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Install the Maven and Gradle plugins locally
+      
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -917,22 +1009,19 @@ and run the launcher script for your platform:</p>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>arete.bat<span class="w">         </span><span class="c1"># Windows</span>
 </code></pre></div>
 <p>Then open <a href="http://localhost:6809">http://localhost:6809</a>.</p>
-<p>The release zip contains <code>arete.jar</code>, both launcher scripts, and a
-<code>plugins/</code> folder holding the bundled
-<a href="../scoring/policy-engine/">Areté Policy Engine</a>.</p>
+<p>The release zip contains <code>arete.jar</code> and both launcher scripts. The
+<a href="../scoring/policy-engine/">Areté Policy Engine</a> is built into the jar.</p>
 <h2 id="build-from-source">Build from source<a class="headerlink" href="#build-from-source" title="Permanent link">&para;</a></h2>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>mvn<span class="w"> </span>clean<span class="w"> </span>package
 </code></pre></div>
 <p>This produces:</p>
 <ul>
-<li>the runnable app jar at <code>arete-app/target/arete-&lt;version&gt;.jar</code></li>
-<li>the bundled plugin jar at
-  <code>arete-policy-plugin/target/arete-policy-plugin-&lt;version&gt;.jar</code></li>
+<li>the runnable app jar at <code>arete-app/target/arete-&lt;version&gt;.jar</code>, which includes
+  the engine (<code>arete-engine</code>)</li>
 </ul>
 <h3 id="quick-start-with-the-helper-scripts">Quick start with the helper scripts<a class="headerlink" href="#quick-start-with-the-helper-scripts" title="Permanent link">&para;</a></h3>
-<p><code>build.sh</code> / <code>build.bat</code> run the Maven build and copy both jars into
-<code>scripts/</code> (the plugin jar under <code>scripts/plugins/</code>) so the launcher has
-everything it needs:</p>
+<p><code>build.sh</code> / <code>build.bat</code> run the Maven build and copy the app jar into
+<code>scripts/</code> so the launcher has everything it needs:</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Linux/macOS</label><label for="__tabbed_1_2">Windows</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -948,6 +1037,52 @@ everything it needs:</p>
 </div>
 </div>
 <p>Then open <a href="http://localhost:6809">http://localhost:6809</a>.</p>
+<h3 id="build-the-zip-locally">Build the zip locally<a class="headerlink" href="#build-the-zip-locally" title="Permanent link">&para;</a></h3>
+<p>The release zip is assembled by CI, but you can make the same one by hand. It contains the app jar and both launchers,
+with no top-level folder:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>mvn<span class="w"> </span>clean<span class="w"> </span>verify<span class="w">                       </span><span class="c1"># builds every module and runs the tests</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="nv">VERSION</span><span class="o">=</span><span class="k">$(</span>mvn<span class="w"> </span>-q<span class="w"> </span>help:evaluate<span class="w"> </span>-Dexpression<span class="o">=</span>project.version<span class="w"> </span>-DforceStdout<span class="k">)</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>rm<span class="w"> </span>-rf<span class="w"> </span>dist<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>mkdir<span class="w"> </span>-p<span class="w"> </span>dist/arete
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>cp<span class="w"> </span>arete-app/target/arete-<span class="nv">$VERSION</span>.jar<span class="w"> </span>dist/arete/arete.jar
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>cp<span class="w"> </span>arete-cli/target/arete-cli-<span class="nv">$VERSION</span>.jar<span class="w"> </span>dist/arete/arete-cli.jar<span class="w">   </span><span class="c1"># optional: the command line</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>cp<span class="w"> </span>scripts/arete.sh<span class="w"> </span>scripts/arete.bat<span class="w"> </span>dist/arete/
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>chmod<span class="w"> </span>+x<span class="w"> </span>dist/arete/arete.sh
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="o">(</span><span class="nb">cd</span><span class="w"> </span>dist/arete<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>zip<span class="w"> </span>-r<span class="w"> </span>../../arete-<span class="nv">$VERSION</span>.zip<span class="w"> </span>.<span class="o">)</span>
+</code></pre></div>
+<h3 id="install-the-zip">Install the zip<a class="headerlink" href="#install-the-zip" title="Permanent link">&para;</a></h3>
+<p>Unzip it anywhere, then run the launcher for your platform. Java 17 or later must be on the <code>PATH</code> (or set
+<code>JAVA_HOME</code>).</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>unzip<span class="w"> </span>arete-<span class="nv">$VERSION</span>.zip<span class="w"> </span>-d<span class="w"> </span>~/arete
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="nb">cd</span><span class="w"> </span>~/arete
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>./arete.sh<span class="w">          </span><span class="c1"># Linux/macOS (arete.bat on Windows)</span>
+</code></pre></div>
+<p>Open <a href="http://localhost:6809">http://localhost:6809</a>. To upgrade, unzip a newer zip over the old folder; your data lives in <code>~/.arete</code>, not in
+the install folder. To run the command line, use <code>java -jar arete-cli.jar --help</code>.</p>
+<h3 id="install-the-maven-and-gradle-plugins-locally">Install the Maven and Gradle plugins locally<a class="headerlink" href="#install-the-maven-and-gradle-plugins-locally" title="Permanent link">&para;</a></h3>
+<p>Both plugins are built by the same Maven reactor. Install everything into your local repository (<code>~/.m2</code>), skipping tests
+if you like:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>mvn<span class="w"> </span>clean<span class="w"> </span>install<span class="w"> </span>-DskipTests
+</code></pre></div>
+<p>That installs <code>arete-engine-api</code>, <code>arete-engine</code>, <code>arete-maven-plugin</code> and <code>arete-gradle-plugin</code> at the project version
+(for example <code>0.1.0-SNAPSHOT</code>). To build only the plugins and what they need: <code>mvn install -DskipTests -pl arete-maven-plugin,arete-gradle-plugin -am</code>.</p>
+<p><strong>Maven.</strong> In the project you want to check, use the installed version:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>mvn<span class="w"> </span>net.dublinux.arete:arete-maven-plugin:0.1.0-SNAPSHOT:gate<span class="w"> </span>-Darete.target<span class="o">=</span>origin/main
+</code></pre></div>
+<p>or declare <code>&lt;version&gt;0.1.0-SNAPSHOT&lt;/version&gt;</code> on the plugin as in <a href="../build-plugins/#maven">Maven and Gradle</a>.</p>
+<p><strong>Gradle.</strong> Add <code>mavenLocal()</code> to the plugin repositories and use the same version:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1">// settings.gradle</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="n">pluginManagement</span><span class="w"> </span><span class="o">{</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">    </span><span class="n">repositories</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="n">mavenLocal</span><span class="o">();</span><span class="w"> </span><span class="n">mavenCentral</span><span class="o">();</span><span class="w"> </span><span class="n">gradlePluginPortal</span><span class="o">()</span><span class="w"> </span><span class="o">}</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">    </span><span class="n">resolutionStrategy</span><span class="w"> </span><span class="o">{</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">        </span><span class="n">eachPlugin</span><span class="w"> </span><span class="o">{</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="o">(</span><span class="n">requested</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">id</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s1">'net.dublinux.arete'</span><span class="o">)</span><span class="w"> </span><span class="n">useModule</span><span class="o">(</span><span class="s2">"net.dublinux.arete:arete-gradle-plugin:${requested.version}"</span><span class="o">)</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">        </span><span class="o">}</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="w">    </span><span class="o">}</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="o">}</span>
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="c1">// build.gradle</span>
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="n">plugins</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="s1">'net.dublinux.arete'</span><span class="w"> </span><span class="n">version</span><span class="w"> </span><span class="s1">'0.1.0-SNAPSHOT'</span><span class="w"> </span><span class="o">}</span>
+</code></pre></div>
+<p>Rebuild with <code>mvn install</code> after changing the plugin source; Gradle caches SNAPSHOTs, so add <code>--refresh-dependencies</code> to pick up a rebuilt one.</p>
 <div class="admonition tip">
 <p class="admonition-title">Running live checks against a throwaway database</p>
 <p>Areté stores its data under <code>~/.arete</code> by default. When you are

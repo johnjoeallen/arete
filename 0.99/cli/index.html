@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://johnjoeallen.github.io/arete/0.99/scoring/">
+        <link rel="canonical" href="https://johnjoeallen.github.io/arete/0.99/cli/">
       
       
-        <link rel="prev" href="../history/">
+        <link rel="prev" href="../configuration/">
       
       
-        <link rel="next" href="policy-engine/">
+        <link rel="next" href="../build-plugins/">
       
       
         
@@ -27,7 +27,7 @@
     
     
       
-        <title>Overview - Areté</title>
+        <title>Command line - Areté</title>
       
     
     
@@ -80,7 +80,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#scoring" class="md-skip">
+        <a href="#command-line" class="md-skip">
           Skip to content
         </a>
       
@@ -119,7 +119,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Overview
+              Command line
             
           </span>
         </div>
@@ -344,10 +344,37 @@
       
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../cli/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Command line
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -363,6 +390,92 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Commands
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-merge-gate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The merge-gate
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-exit-code-is-the-decision" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The exit code is the decision
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#team-overrides" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Team overrides
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -452,8 +565,6 @@
       
   
   
-    
-  
   
   
     
@@ -466,11 +577,11 @@
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
         
           
           <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
@@ -491,7 +602,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             
@@ -506,37 +617,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Overview
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../scoring/" class="md-nav__link">
         
   
   
@@ -552,109 +636,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#running-scoring" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Running scoring
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#reading-findings" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Reading findings
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Reading findings">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#scores" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Scores
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#severity-levels" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Severity levels
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#policies" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Policies
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#where-the-engine-comes-from" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Where the engine comes from
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#next" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Next
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -667,7 +648,7 @@
   
   
     <li class="md-nav__item">
-      <a href="policy-engine/" class="md-nav__link">
+      <a href="../scoring/policy-engine/" class="md-nav__link">
         
   
   
@@ -695,7 +676,7 @@
   
   
     <li class="md-nav__item">
-      <a href="performance/" class="md-nav__link">
+      <a href="../scoring/performance/" class="md-nav__link">
         
   
   
@@ -723,7 +704,7 @@
   
   
     <li class="md-nav__item">
-      <a href="distill/" class="md-nav__link">
+      <a href="../scoring/distill/" class="md-nav__link">
         
   
   
@@ -751,7 +732,7 @@
   
   
     <li class="md-nav__item">
-      <a href="rules/" class="md-nav__link">
+      <a href="../scoring/rules/" class="md-nav__link">
         
   
   
@@ -779,7 +760,7 @@
   
   
     <li class="md-nav__item">
-      <a href="policies/" class="md-nav__link">
+      <a href="../scoring/policies/" class="md-nav__link">
         
   
   
@@ -888,10 +869,10 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#running-scoring" class="md-nav__link">
+  <a href="#commands" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Running scoring
+        Commands
       
     </span>
   </a>
@@ -899,38 +880,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#reading-findings" class="md-nav__link">
+  <a href="#the-merge-gate" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Reading findings
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Reading findings">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#scores" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Scores
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#severity-levels" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Severity levels
+        The merge-gate
       
     </span>
   </a>
@@ -938,10 +891,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#policies" class="md-nav__link">
+  <a href="#the-exit-code-is-the-decision" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Policies
+        The exit code is the decision
       
     </span>
   </a>
@@ -949,10 +902,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#where-the-engine-comes-from" class="md-nav__link">
+  <a href="#output" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Where the engine comes from
+        Output
       
     </span>
   </a>
@@ -960,10 +913,21 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#next" class="md-nav__link">
+  <a href="#policy" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Next
+        Policy
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#team-overrides" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Team overrides
       
     </span>
   </a>
@@ -987,7 +951,7 @@
 
 
   
-    <a href="https://github.com/johnjoeallen/arete/edit/main/docs/scoring/index.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
+    <a href="https://github.com/johnjoeallen/arete/edit/main/docs/cli.md" title="Edit this page" class="md-content__button md-icon" rel="edit">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -995,77 +959,175 @@
   
 
 
-<h1 id="scoring">Scoring<a class="headerlink" href="#scoring" title="Permanent link">&para;</a></h1>
-<p>Scoring in Areté is <strong>on-demand</strong>. Opening a spec doesn't run anything by
-itself — you choose what runs and when.</p>
-<p>Areté scores with one engine, the
-<a href="policy-engine/"><strong>Areté Policy Engine</strong></a> (<code>generic-policy</code>), built into the
-app. What changes between teams is the policy, not the engine: policies, rules
-and matchers are plain text files.</p>
-<p><img alt="The scoring picker and findings" src="../assets/screenshot-scoring.png" /></p>
-<h2 id="running-scoring">Running scoring<a class="headerlink" href="#running-scoring" title="Permanent link">&para;</a></h2>
-<p>A <strong>Scoring</strong> picker on the spec's page offers the engine with a policy
-dropdown. Click <strong>Score</strong> to run it; nothing runs until you do.</p>
-<p>The selection (and the policy chosen) is remembered <strong>per spec</strong> in the
-database, so re-opening a spec later starts from the same choice.</p>
-<h2 id="reading-findings">Reading findings<a class="headerlink" href="#reading-findings" title="Permanent link">&para;</a></h2>
-<p>Findings from the run are shown in one view. Each endpoint
-whose findings map to a specific operation shows a combined severity-count
-badge (❌ error, ⚠️ warning, ℹ️ info, 💡 hint) in its header; expanding the
-endpoint lists those findings in full:</p>
-<ul>
-<li>severity, rule ID, and the finding text</li>
-<li>the <a href="https://www.rfc-editor.org/rfc/rfc6901">JSON Pointer</a> location</li>
-<li>which plugin reported it</li>
-<li>a <strong>Learn more</strong> link to the plugin's own rule documentation when it provides
-  one</li>
-</ul>
-<h3 id="scores">Scores<a class="headerlink" href="#scores" title="Permanent link">&para;</a></h3>
-<p>A plugin may optionally report an overall compliance score (0–100) and, per
-diagnostic, how many points fixing it would recover. Areté shows these as
-percentages when present — but <strong>only ever from a single plugin's scoring
-model</strong>. With more than one scoring plugin checked, the score is hidden rather
-than combining two unrelated models into a meaningless number.</p>
-<h2 id="severity-levels">Severity levels<a class="headerlink" href="#severity-levels" title="Permanent link">&para;</a></h2>
-<p>Findings are tagged with one of four fixed <code>Severity</code> levels — <code>ERROR</code>,
-<code>WARNING</code>, <code>INFO</code>, <code>HINT</code>. The <strong>label</strong> shown for each (on the severity filter
-and in the findings table) comes from the plugin's <code>getSeverityLabel(Severity)</code>,
-so a plugin can surface its own vocabulary (e.g. <code>Must</code> / <code>Should</code> / <code>May</code> /
-<code>Hint</code>). The default simply title-cases the enum name.</p>
-<h2 id="policies">Policies<a class="headerlink" href="#policies" title="Permanent link">&para;</a></h2>
-<p>A plugin can declare more than one named policy — e.g. an
-<code>internal</code> / <code>external</code> split for an organisation that lints differently by API
-audience. Every enabled plugin gets its own row in the picker with its own
-policy dropdown; a plugin with only the implicit default set just has one
-entry.</p>
-<p>A policy is a <strong>plugin-chosen name</strong>, not an engine-specific concept. The
-Areté Policy Engine exposes one policy per bundled <a href="policies/">policy</a>:
-<strong>Enterprise Grade</strong> (the default), <strong>Zalando</strong>, and <strong>Zalando Extended</strong>.</p>
-<div class="admonition note">
-<p class="admonition-title"><code>getPolicies()</code> returns a <code>List</code>, not a <code>Set</code></p>
-<p>The picker submits a policy's <strong>position</strong> in the returned list, and the
-UI shows them in that order (preferred default first). A <code>Set.of(...)</code> with
-two or more elements has no iteration-order guarantee in Java, so policies
-would reshuffle on every restart. Keep the order stable across releases.</p>
-</div>
-<h2 id="where-the-engine-comes-from">Where the engine comes from<a class="headerlink" href="#where-the-engine-comes-from" title="Permanent link">&para;</a></h2>
-<p>The engine is a dependency of the app: the application creates one <code>Engine</code>
-(from <code>arete-engine</code>) at startup and uses it for every run. There are no plugin
-jars to drop in and no plugin folders, and no global enable/disable switch. The
-same engine is a plain library that other programs can embed.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">Engine</span><span class="w"> </span><span class="n">engine</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">Engine</span><span class="p">();</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">engine</span><span class="p">.</span><span class="na">configure</span><span class="p">(</span><span class="n">Map</span><span class="p">.</span><span class="na">of</span><span class="p">());</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">ScoringResult</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">engine</span><span class="p">.</span><span class="na">score</span><span class="p">(</span><span class="n">SpecInput</span><span class="p">.</span><span class="na">builder</span><span class="p">()</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">        </span><span class="p">.</span><span class="na">content</span><span class="p">(</span><span class="n">yaml</span><span class="p">).</span><span class="na">format</span><span class="p">(</span><span class="n">SpecFormat</span><span class="p">.</span><span class="na">OPENAPI3</span><span class="p">).</span><span class="na">policy</span><span class="p">(</span><span class="s">"Enterprise Grade"</span><span class="p">).</span><span class="na">build</span><span class="p">());</span>
+<h1 id="command-line">Command line<a class="headerlink" href="#command-line" title="Permanent link">&para;</a></h1>
+<p><code>arete</code> scores API specs without a server, so a CI job can run it as a step: score, write result files, and let the
+exit code decide. It is one jar (<code>arete-cli-&lt;version&gt;.jar</code>, attached to each release):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>java<span class="w"> </span>-jar<span class="w"> </span>arete-cli.jar<span class="w"> </span>score<span class="w"> </span>apis/orders/openapi.yaml
 </code></pre></div>
-<h2 id="next">Next<a class="headerlink" href="#next" title="Permanent link">&para;</a></h2>
+<h2 id="commands">Commands<a class="headerlink" href="#commands" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>arete score &lt;spec&gt;...</code></td>
+<td>Scores each spec and prints the score, grade and findings with their file and line.</td>
+</tr>
+<tr>
+<td><code>arete diff &lt;base&gt; &lt;head&gt;</code></td>
+<td>Scores two versions of a spec with the same policy and says which findings are <strong>NEW</strong>, <strong>EXISTING</strong> or <strong>RESOLVED</strong>, and how the score moved.</td>
+</tr>
+<tr>
+<td><code>arete report &lt;spec&gt;...</code></td>
+<td>Writes a full markdown report: the score, then every finding grouped under its rule, and the overrides applied.</td>
+</tr>
+<tr>
+<td><code>arete gate</code></td>
+<td>The merge-gate: scores every spec, reads each changed spec's base, and judges the change rather than the spec.</td>
+</tr>
+<tr>
+<td><code>arete policy verify</code></td>
+<td>Loads the policy sources and compiles every matcher; says what the bundle holds.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="the-merge-gate">The merge-gate<a class="headerlink" href="#the-merge-gate" title="Permanent link">&para;</a></h2>
+<p><code>arete gate</code> is the CI step. It does not re-argue debt a spec already has: it scores every spec on every run: a changed one as it is now
+and as it was at the base, with the same policy and overrides, and judges the difference.</p>
+<table>
+<thead>
+<tr>
+<th>Case</th>
+<th>The gate fails when</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A changed spec</td>
+<td>it has a <strong>new blocker</strong> (an error-level finding, from a <code>PROHIBITED</code> rule), or its <strong>score is lower</strong> than the base's.</td>
+</tr>
+<tr>
+<td>A new spec (no base)</td>
+<td>it scores below the policy's pass mark, or has any blocker: it has to stand on its own.</td>
+</tr>
+<tr>
+<td>A deleted spec</td>
+<td>never: it is skipped.</td>
+</tr>
+<tr>
+<td>An unchanged spec</td>
+<td>on its own: it must have no blockers and meet the pass mark, like a new spec. Every spec is scored on every run.</td>
+</tr>
+<tr>
+<td>A head that does not parse</td>
+<td>always.</td>
+</tr>
+<tr>
+<td>A base that does not parse</td>
+<td>it is judged as a new spec, with a note.</td>
+</tr>
+</tbody>
+</table>
+<p>A failure says why and where: the rule, the file and line, and, for a lower score, which newly violated rules caused it.
+A moved spec is compared with its old self. Count-based and tiered rules are compared by count (or worst value), not by hit: they fail only when newly violated or worse than the base.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>arete<span class="w"> </span>gate<span class="w"> </span>--target<span class="w"> </span>origin/main<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span>--policy-source<span class="w"> </span><span class="s2">"maven:org.acme:api-policy:2.3.1"</span><span class="w"> </span>--maven-settings<span class="w"> </span>default<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">  </span>--report-md<span class="w"> </span>gate.md<span class="w"> </span>--report-json<span class="w"> </span>gate.json<span class="w"> </span>--report-sarif<span class="w"> </span>gate.sarif
+</code></pre></div>
 <ul>
-<li><a href="policy-engine/">Areté Policy Engine</a> — how the bundled
-  matchers, rules, and policies work, and how to extend the bundle.</li>
-<li><a href="rules/">Rule Catalogue</a> — every rule in the bundle and which policies use it.</li>
-<li><a href="policies/">Policies</a> — the bundled Enterprise Grade, Zalando, and Zalando
-  Extended policies.</li>
+<li><strong>The base</strong> is the merge-base of <code>HEAD</code> and <code>--target</code> (default <code>origin/main</code>), or <code>--base-sha</code> when the CI system
+  provides it (GitLab's <code>CI_MERGE_REQUEST_DIFF_BASE_SHA</code>). In git mode it is read with <code>git show &lt;base&gt;:&lt;path&gt;</code>: no
+  checkout, and only for specs that changed. Specs are the files matching <code>--paths</code> (default <code>**/openapi.yaml</code>,
+  <code>.yml</code> and <code>.json</code>), found per folder, each with its own <code>.arete.yaml</code>.</li>
+<li><strong>Shallow clones</strong> do not hold the base commit. Either fetch the history (<code>GIT_DEPTH: 0</code> on GitLab, <code>fetch-depth: 0</code>
+  on GitHub), or read the base from the code host: <code>--base-source raw --base-sha &lt;sha&gt; --raw-url '&lt;url with {path} and
+  {ref}&gt;' --raw-header 'PRIVATE-TOKEN: $TOKEN'</code> (<code>$TOKEN</code> comes from the environment). Pin the base to the merge-base
+  SHA, not the tip of the branch, or changes main made since the branch was cut show up as the branch's own. Raw mode
+  compares every spec found with its base and drops the identical ones; <code>--changed-files &lt;file&gt;</code> limits it to a list.
+  When the base cannot be reached the command says what to change and exits 2: that is a configuration problem, not a
+  verdict.</li>
+<li><strong>Reports</strong> are written alongside the main output: <code>--report-md</code> is the merge-request comment (the verdict, why it
+  failed, then a score line and one line per finding per spec, new ones first), <code>--report-json</code> the full record, and
+  <code>--report-sarif</code> the findings the change introduced, with file and line. A separate step posts them: Areté never calls
+  GitLab or GitHub.</li>
+<li><strong><code>--report-only</code></strong> writes the same files and always exits 0, for a trial period before the job is made required.</li>
+<li><strong>Adopting on a repository with legacy specs.</strong> Every spec is judged, and an unchanged one has to meet the pass mark and have
+  no blockers, so a legacy spec below the pass mark fails every merge until it is fixed. Start with <code>--report-only</code> to see
+  the damage, then either fix those specs, limit <code>--paths</code> to the specs that are ready, or give a legacy spec a policy of its
+  own in its <code>.arete.yaml</code> (a lower <code>passingScore</code>) and tighten it over time.</li>
 </ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># GitLab</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nt">api-gate</span><span class="p">:</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="nt">stage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span><span class="nt">variables</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> GIT_DEPTH</span><span class="p">:</span><span class="w"> </span><span class="s">"0"</span><span class="w"> </span><span class="p p-Indicator">}</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">  </span><span class="nt">script</span><span class="p">:</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git fetch origin "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">java -jar arete-cli.jar gate --target "origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" --maven-settings default --report-md gate.md</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">  </span><span class="nt">artifacts</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{</span><span class="nt"> when</span><span class="p">:</span><span class="w"> </span><span class="nv">always</span><span class="p p-Indicator">,</span><span class="nt"> paths</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">gate.md</span><span class="p p-Indicator">]</span><span class="w"> </span><span class="p p-Indicator">}</span>
+</code></pre></div>
+<h2 id="the-exit-code-is-the-decision">The exit code is the decision<a class="headerlink" href="#the-exit-code-is-the-decision" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>0</code></td>
+<td>Everything passed.</td>
+</tr>
+<tr>
+<td><code>1</code></td>
+<td>The check failed: a score under the threshold, a regression, a spec that does not parse.</td>
+</tr>
+<tr>
+<td><code>2</code></td>
+<td>The command or its configuration is wrong: bad options, an unreadable file, a policy source that cannot be loaded, bad <code>.arete.yaml</code>.</td>
+</tr>
+</tbody>
+</table>
+<p><code>score</code> fails with <code>--fail-under &lt;n&gt;</code> (a number) or <code>--fail-under policy</code> (the policy's own pass mark).
+<code>diff</code> fails with <code>--fail-on-regression</code> (the score fell, or a new blocker appeared). Without those flags the
+commands only report. Nothing posts to GitLab or GitHub: a separate step posts the text.</p>
+<h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">&para;</a></h2>
+<p><code>--format text|json|md|sarif</code> (default <code>text</code>) and <code>--out &lt;file&gt;</code>.</p>
+<ul>
+<li><strong>text</strong>: for a terminal.</li>
+<li><strong>json</strong>: versioned (<code>schemaVersion</code>), with every finding, its pointer, line and column, the policy and pass mark,
+  and the overrides applied.</li>
+<li><strong>md</strong>: for a merge-request comment. A diff is one line per finding, new ones first:
+  <code>- **NEW** Warning</code>STATUS001<code></code>/paths/~1orders/get<code>(apis/orders.yaml:42) — message</code>, under a score line. Long
+  runs of unchanged findings are capped.</li>
+<li><strong>sarif</strong>: SARIF 2.1.0 with the file, line and column of each finding, so a code host can annotate the line. For a
+  <code>diff</code> it holds only the NEW findings, the ones worth annotating.</li>
+</ul>
+<p>Findings are located from the spec's own text, for YAML and JSON. A finding about something missing (a summary that is
+not there) is placed on the thing that should have it.</p>
+<h2 id="policy">Policy<a class="headerlink" href="#policy" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>arete<span class="w"> </span>score<span class="w"> </span>spec.yaml<span class="w"> </span>--policy<span class="w"> </span><span class="s2">"Zalando"</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>arete<span class="w"> </span>score<span class="w"> </span>spec.yaml<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span>--policy-source<span class="w"> </span>classpath:api-policy<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span>--policy-source<span class="w"> </span><span class="s2">"maven:org.acme:api-policy:2.3.1"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">  </span>--maven-settings<span class="w"> </span>default
+</code></pre></div>
+<p><code>--policy-source</code> is repeatable and layers: see <a href="../scoring/policy-engine/#policy-sources">policy sources</a>. With no
+source the public bundle in the jar is used. <code>--maven-settings default|&lt;path&gt;</code> reads repositories, mirrors,
+credentials and proxies from <code>settings.xml</code>, as the rest of CI does; <code>--maven-profile &lt;id&gt;</code> activates a profile;
+<code>--cache-dir</code> / <code>--no-cache</code> control where fetched
+bundles are kept; <code>--user-policies &lt;dir&gt;</code> adds <code>*.md</code> policies.</p>
+<h2 id="team-overrides">Team overrides<a class="headerlink" href="#team-overrides" title="Permanent link">&para;</a></h2>
+<p>A <code>.arete.yaml</code> next to the spec, or in a parent folder up to the repository's <code>.git</code>, is read automatically (the
+nearest wins); <code>--overrides &lt;file&gt;</code> names one and <code>--no-overrides</code> ignores it. It holds deliberate, reviewed
+deviations, each with a reason, and may name the policy for the folder. See
+<a href="../scoring/policy-engine/#team-overrides-aretyaml">team overrides</a>. The policy is <code>--policy</code>, else the file's, else the
+bundle's first.</p>
+<p>Both specs of a <code>diff</code> are judged with the head's policy and overrides, so a difference is the spec's, not the rules'.</p>
 
 
 

@@ -13,10 +13,10 @@
         <link rel="canonical" href="https://johnjoeallen.github.io/arete/0.99/releasing/">
       
       
-        <link rel="prev" href="../scoring/writing-a-plugin/">
+        <link rel="prev" href="../scoring/policies/">
       
       
-        <link rel="next" href="../publishing-spi/">
+        <link rel="next" href="../publishing/">
       
       
         
@@ -347,6 +347,60 @@
   
   
     <li class="md-nav__item">
+      <a href="../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Command line
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../build-plugins/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Maven and Gradle
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../automation-api/" class="md-nav__link">
         
   
@@ -414,10 +468,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
             
   
   
@@ -435,8 +489,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_6">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -614,34 +668,6 @@
 
               
             
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../scoring/writing-a-plugin/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Writing a Plugin
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
           </ul>
         </nav>
       
@@ -738,10 +764,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#publishing-the-spi-to-maven-central" class="md-nav__link">
+  <a href="#publishing-to-maven-central" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Publishing the SPI to Maven Central
+        Publishing to Maven Central
       
     </span>
   </a>
@@ -774,14 +800,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../publishing-spi/" class="md-nav__link">
+      <a href="../publishing/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Publishing the SPI
+    Publishing to Maven Central
   
 
     
@@ -843,10 +869,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#publishing-the-spi-to-maven-central" class="md-nav__link">
+  <a href="#publishing-to-maven-central" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Publishing the SPI to Maven Central
+        Publishing to Maven Central
       
     </span>
   </a>
@@ -907,26 +933,34 @@
 <td><code>arete-app/target/arete-&lt;version&gt;.jar</code></td>
 </tr>
 <tr>
-<td>Bundled plugin jar</td>
-<td><code>arete-policy-plugin/target/arete-policy-plugin-&lt;version&gt;.jar</code></td>
+<td>Command line</td>
+<td><code>arete-cli/target/arete-cli-&lt;version&gt;.jar</code> (one runnable jar)</td>
+</tr>
+<tr>
+<td>Maven plugin</td>
+<td><code>arete-maven-plugin/target/arete-maven-plugin-&lt;version&gt;.jar</code></td>
+</tr>
+<tr>
+<td>Gradle plugin</td>
+<td><code>arete-gradle-plugin/target/arete-gradle-plugin-&lt;version&gt;.jar</code> (self-contained)</td>
 </tr>
 </tbody>
 </table>
-<p><code>build.sh</code> / <code>build.bat</code> run this and copy both into <code>scripts/</code> (the plugin jar
-under <code>scripts/plugins/</code>) so the launcher scripts can run straight away.</p>
+<p><code>build.sh</code> / <code>build.bat</code> run this and copy the jar into <code>scripts/</code> so the
+launcher scripts can run straight away. The engine (<code>arete-engine</code>) is a
+dependency of the app and is inside that jar.</p>
 <h2 id="tagged-releases">Tagged releases<a class="headerlink" href="#tagged-releases" title="Permanent link">&para;</a></h2>
 <p>Pushing a tag matching <code>v*.*.*</code> runs
 <a href="https://github.com/johnjoeallen/arete/blob/main/.github/workflows/release.yml"><code>.github/workflows/release.yml</code></a>,
 which sets the Maven version from the tag, builds, packages a zip
-(<code>arete.jar</code>, both launcher scripts, and <code>plugins/</code> with the bundled
-plugin), and publishes it as a GitHub release.</p>
-<h2 id="publishing-the-spi-to-maven-central">Publishing the SPI to Maven Central<a class="headerlink" href="#publishing-the-spi-to-maven-central" title="Permanent link">&para;</a></h2>
-<p>Publishing <code>arete-scoring-spi</code> to Maven Central is <strong>not</strong> part of the
-release workflow — it doesn't belong on every tag push. It runs from
-<a href="https://github.com/johnjoeallen/arete/blob/main/.github/workflows/publish-spi.yml"><code>.github/workflows/publish-spi.yml</code></a>,
+(<code>arete.jar</code> and both launcher scripts), and publishes it as a GitHub release together with the command line jar.</p>
+<h2 id="publishing-to-maven-central">Publishing to Maven Central<a class="headerlink" href="#publishing-to-maven-central" title="Permanent link">&para;</a></h2>
+<p>Publishing the engine, its API and the Maven and Gradle plugins to Maven Central is <strong>not</strong> part of the
+release workflow: it doesn't belong on every tag push. It runs from
+<a href="https://github.com/johnjoeallen/arete/blob/main/.github/workflows/publish.yml"><code>.github/workflows/publish.yml</code></a>,
 triggered by hand from the Actions tab against a specific tag once that release
 is ready to be published externally.
-See <a href="../publishing-spi/">Publishing the SPI</a> for the Central Portal setup and
+See <a href="../publishing/">Publishing to Maven Central</a> for the Central Portal setup and
 release procedure.</p>
 <h2 id="documentation">Documentation<a class="headerlink" href="#documentation" title="Permanent link">&para;</a></h2>
 <p>This site is built with <a href="https://www.mkdocs.org/">MkDocs</a> + the

@@ -347,6 +347,60 @@
   
   
     <li class="md-nav__item">
+      <a href="../../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Command line
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../build-plugins/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Maven and Gradle
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../automation-api/" class="md-nav__link">
         
   
@@ -416,10 +470,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
             
   
   
@@ -437,8 +491,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_6">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -790,34 +844,6 @@
 
               
             
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../writing-a-plugin/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Writing a Plugin
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
           </ul>
         </nav>
       
@@ -859,14 +885,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../publishing-spi/" class="md-nav__link">
+      <a href="../../publishing/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Publishing the SPI
+    Publishing to Maven Central
   
 
     
@@ -1079,9 +1105,8 @@ doesn't.</p>
 <p>Matchers were originally Groovy closures run in-process. Groovy executes
 arbitrary code with full JVM access, so it fails the first requirement
 outright: a Groovy matcher from an untrusted source can do anything the
-application can. It is retained now only as a build-time parity reference —
-<code>Matcher.groovy</code> files are run against <code>Matcher.distill</code> on every build to catch
-any semantic drift, never against a submitted spec.</p>
+application can. It has since been removed from the build entirely; Distill is the
+only matcher language.</p>
 <p>Groovy is not even the fast option. Compiled once and reused, it is <strong>~4–5×
 slower than Distill</strong> across the matcher set (measured below); as it was
 actually wired — recompiling the script with a fresh <code>GroovyShell</code> on every
@@ -1116,7 +1141,7 @@ bytecode — which the rest of this page quantifies.</p>
 <h2 id="plugins-are-a-separate-trust-tier">Plugins are a separate trust tier<a class="headerlink" href="#plugins-are-a-separate-trust-tier" title="Permanent link">&para;</a></h2>
 <p>None of this replaces Areté's plugin facility. A scoring plugin is
 arbitrary compiled Java loaded through the SPI and a child-first classloader;
-<code>arete-policy-plugin</code> is itself one. A plugin runs with full
+<code>arete-engine</code> is itself one. A plugin runs with full
 application privileges, so <strong>installing one is a trust decision</strong> — and
 building it from source does not remove that boundary, it only moves the
 audit to you: the plugin's own code, its transitive dependencies, and its
@@ -1137,6 +1162,14 @@ are complementary: the plugin is where trusted, complex, compiled logic
 belongs; the matcher is where a shareable rule belongs — and the second is
 where nearly all the work happens.</p>
 <h2 id="measurements">Measurements<a class="headerlink" href="#measurements" title="Permanent link">&para;</a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Historical</p>
+<p>These figures were taken while a Groovy implementation of each matcher still
+shipped, which is how the two could be compared. Groovy and the benchmark
+tests that ran it (<code>DistillGroovyParityTest</code>, <code>PerformanceGainBenchmarkTest</code>)
+have been removed, so the figures are kept as a record and cannot be reproduced
+from the current tree.</p>
+</div>
 <div class="admonition note">
 <p class="admonition-title">These are ratios, not a benchmark suite</p>
 <p>Figures come from a single developer-machine run and vary with hardware
@@ -1606,14 +1639,7 @@ from any source — instead of ~40 lines of null-checked Java per matcher, in a
 language where a rule change means a release and a matcher can never leave the
 jar.</p>
 <h2 id="reproducing">Reproducing<a class="headerlink" href="#reproducing" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>mvn<span class="w"> </span>-pl<span class="w"> </span>arete-policy-plugin<span class="w"> </span><span class="nb">test</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span>-Dtest<span class="o">=</span><span class="s1">'DistillGroovyParityTest#fullSweepParityAndPerformance+javaBaselineComparison'</span><span class="w"> </span><span class="se">\</span>
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span>-Darete.benchmark<span class="o">=</span><span class="nb">true</span>
-</code></pre></div>
-<p>The parity assertions run unconditionally in the normal build; the
-<code>-Darete.benchmark=true</code> flag adds the timing tables.
-<code>PerformanceGainBenchmarkTest</code> (same flag) covers the end-to-end and
-allocation figures.</p>
+<p>Not reproducible any more: the comparison needed the Groovy matchers and the tests that ran them, which have been removed (see the note under <em>Measurements</em>).</p>
 
 
 

@@ -16,7 +16,7 @@
         <link rel="prev" href="../rules/">
       
       
-        <link rel="next" href="../writing-a-plugin/">
+        <link rel="next" href="../../releasing/">
       
       
         
@@ -347,6 +347,60 @@
   
   
     <li class="md-nav__item">
+      <a href="../../cli/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Command line
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../build-plugins/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Maven and Gradle
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../automation-api/" class="md-nav__link">
         
   
@@ -416,10 +470,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" checked>
         
           
-          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
             
   
   
@@ -437,8 +491,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_6">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_8">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -696,34 +750,6 @@
 
               
             
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../writing-a-plugin/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Writing a Plugin
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
           </ul>
         </nav>
       
@@ -765,14 +791,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../../publishing-spi/" class="md-nav__link">
+      <a href="../../publishing/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Publishing the SPI
+    Publishing to Maven Central
   
 
     
@@ -1207,11 +1233,6 @@ requested.</p>
 <td>Version appears in a header</td>
 </tr>
 <tr>
-<td><code>VERSION003</code></td>
-<td>−0.5</td>
-<td>Version appears in the media type</td>
-</tr>
-<tr>
 <td><code>VERSION004</code></td>
 <td>−0.5</td>
 <td>Interface is unversioned</td>
@@ -1248,7 +1269,7 @@ requested.</p>
 </tr>
 <tr>
 <td><code>STATUS001</code></td>
-<td>−0.5</td>
+<td>by count (1+ costs 0.5, 3+ costs 1, 6+ costs 2)</td>
 <td>Creation operation lacks an appropriate success status</td>
 </tr>
 <tr>
@@ -1288,7 +1309,7 @@ requested.</p>
 </tr>
 <tr>
 <td><code>STANDARD011</code></td>
-<td>−0.5</td>
+<td>by value (9+ costs 0.5, 13+ costs 1.5)</td>
 <td>Operation declares too many parameters</td>
 </tr>
 <tr>
@@ -1430,6 +1451,11 @@ requested.</p>
 <td><code>JSON023</code></td>
 <td>−0.5</td>
 <td>Array schema declares no items</td>
+</tr>
+<tr>
+<td><code>JSON025</code></td>
+<td>by value (5+ costs 0.5, 7+ costs 1.5)</td>
+<td>Schema nests too deeply</td>
 </tr>
 <tr>
 <td><code>SECURITY003</code></td>
