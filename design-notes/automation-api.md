@@ -3,7 +3,10 @@
 > **Implemented** in v0.99.78–v0.99.81. The `run` selection and submitter are
 > resolved directly in `AutomationApiController` rather than via a
 > `HandlerMethodArgumentResolver`; `?httpStatusOnFail=422` is opt-in (the
-> default is HTTP 200/201 with the verdict in the body). See
+> default is HTTP 200/201 with the verdict in the body). Since written: `PluginScoringService` became
+> `EngineScoringService` and the scoring-plugin mechanism is gone (one engine; the request field is still called
+> `validator`), and the Maven and Gradle plugins score in process instead of calling this API. The API remains
+> for scripts against a running local app. See
 > [`docs/automation-api.md`](../docs/automation-api.md) for the shipped API.
 
 ## Goal

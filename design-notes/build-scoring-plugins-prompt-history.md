@@ -1,5 +1,8 @@
 # How the build-gate design was shaped — a prompt flow
 
+> **Historical.** This shaped the HTTP-client `arete-ci-gate-*` design, which was retired for in-process
+> plugins over the engine (see `serverless-core-plan.md`). Kept for the reasoning, not as a current design.
+
 > Companion to [`build-scoring-plugins.md`](build-scoring-plugins.md). This is
 > the decision trail: the questions asked, in order, and what each one settled.
 > Read it to understand *why* the design looks the way it does before changing

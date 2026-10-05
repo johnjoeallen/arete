@@ -8,6 +8,11 @@ GitLab or GitHub.
 The gate needs `git` on the path (it reads the base with `git show`); see the [gate](cli.md#the-merge-gate) for how it
 judges a change, for shallow clones, and for the raw base source.
 
+!!! tip "Building the plugins yourself"
+    To try an unreleased plugin, run `mvn clean install -DskipTests` and use the `-SNAPSHOT` version from your local
+    repository. [Getting started](getting-started.md#install-the-maven-and-gradle-plugins-locally) has the steps,
+    including `mavenLocal()` for Gradle.
+
 ## Maven
 
 ```xml

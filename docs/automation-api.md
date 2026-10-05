@@ -110,8 +110,8 @@ POST /api/v1/specs/{uuid}/validate?run=<validator>/<policy>
 
 Re-runs the given combinations against an already-submitted spec, by its UUID —
 no namespace, no re-upload. Same body/query options and response as the submit
-above. This is the flow a Maven/Gradle plugin uses: submit once, keep the UUID,
-score it whenever.
+above. Submit once, keep the UUID, score it whenever. (The Maven and Gradle plugins do
+not use this API: they score in process.)
 
 ### Response shaping
 

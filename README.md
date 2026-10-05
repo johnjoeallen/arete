@@ -36,10 +36,48 @@ Then open <http://localhost:6809>.
 
 ### From source
 
+Requires Java 17+ and Maven.
+
 ```bash
-mvn clean package        # or ./build.sh — also copies jars into scripts/
+mvn clean package        # or ./build.sh — also copies the app jar to scripts/arete.jar
 ./scripts/arete.sh
 ```
+
+### Build and install the zip locally
+
+```bash
+mvn clean verify
+VERSION=$(mvn -q help:evaluate -Dexpression=project.version -DforceStdout)
+rm -rf dist && mkdir -p dist/arete
+cp arete-app/target/arete-$VERSION.jar dist/arete/arete.jar
+cp arete-cli/target/arete-cli-$VERSION.jar dist/arete/arete-cli.jar   # optional
+cp scripts/arete.sh scripts/arete.bat dist/arete/
+chmod +x dist/arete/arete.sh
+(cd dist/arete && zip -r ../../arete-$VERSION.zip .)
+
+unzip arete-$VERSION.zip -d ~/arete && cd ~/arete && ./arete.sh
+```
+
+Open <http://localhost:6809>. Data lives in `~/.arete`, so upgrading is just
+unzipping a newer zip over the old folder.
+
+### Build and install the Maven and Gradle plugins locally
+
+```bash
+mvn clean install -DskipTests    # installs the engine and both plugins into ~/.m2
+```
+
+Maven, in the project to check:
+
+```bash
+mvn net.dublinux.arete:arete-maven-plugin:0.1.0-SNAPSHOT:gate -Darete.target=origin/main
+```
+
+Gradle: add `mavenLocal()` to `pluginManagement.repositories` in
+`settings.gradle` and use `id 'net.dublinux.arete' version '0.1.0-SNAPSHOT'`.
+Full snippets are in
+[Getting Started](https://johnjoeallen.github.io/arete/getting-started/) and
+[Maven and Gradle](https://johnjoeallen.github.io/arete/build-plugins/).
 
 Common flags: `--port PORT` / `-p PORT`, `--wipe-db`, `-h`. The launcher
 respects `JAVA_HOME`. See

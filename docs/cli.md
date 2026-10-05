@@ -32,8 +32,7 @@ and as it was at the base, with the same policy and overrides, and judges the di
 | A base that does not parse | it is judged as a new spec, with a note. |
 
 A failure says why and where: the rule, the file and line, and, for a lower score, which newly violated rules caused it.
-A moved spec is compared with its old self. Count-based rules (limits that fail only when newly exceeded) arrive with the
-richer rule semantics; until then a new finding is judged as above.
+A moved spec is compared with its old self. Count-based and tiered rules are compared by count (or worst value), not by hit: they fail only when newly violated or worse than the base.
 
 ```bash
 arete gate --target origin/main \
