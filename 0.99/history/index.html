@@ -13,7 +13,7 @@
         <link rel="canonical" href="https://johnjoeallen.github.io/arete/0.99/history/">
       
       
-        <link rel="prev" href="../automation-api/">
+        <link rel="prev" href="../build-plugins/">
       
       
         <link rel="next" href="../scoring/">
@@ -398,33 +398,6 @@
       
   
   
-  
-  
-    <li class="md-nav__item">
-      <a href="../automation-api/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Automation API
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
     
   
   
@@ -565,10 +538,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#automation-api" class="md-nav__link">
+  <a href="#automation-api-removed" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Automation API
+        Automation API (removed)
       
     </span>
   </a>
@@ -614,10 +587,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
         
           
-          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
             
   
   
@@ -635,8 +608,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -979,10 +952,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#automation-api" class="md-nav__link">
+  <a href="#automation-api-removed" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Automation API
+        Automation API (removed)
       
     </span>
   </a>
@@ -1233,25 +1206,17 @@ so a deployment can add or override policies without a rebuild.</p>
 <p>Large documents are handled explicitly: the OpenAPI parser and the bundle's
 YAML loader both accept configurable size limits so that legitimately large
 specifications are not rejected as though malformed.</p>
-<h2 id="automation-api">Automation API<a class="headerlink" href="#automation-api" title="Permanent link">&para;</a></h2>
-<p>An unauthenticated JSON API under <code>/api/v1</code> was added for CI: submit a spec
-inline or by URL, name the validator/policy combinations to run, and get
-findings plus a pass/fail verdict (JSON or SARIF). Specs are grouped by a
-plain <strong>namespace</strong> slug and attributed to a <strong>submitter</strong> — both
-self-asserted, neither checked; uniqueness moved from a global spec title to
-<code>(namespace, title)</code>. Because there is no authentication, the deployment is
-required to sit behind a protected boundary. Each policy can declare a
-passing score and grade bands (<code>passingScore:</code> / <code>grades:</code>, or a non-numeric
-<code>scoring: blocker | error</code>); the score, grade, and pass/fail against that bar
-are reported on every scoring, and the automation-API verdict honours the
-bar unless the caller overrides it. Grading was later made universal — a
-policy with no <code>grades:</code> block derives bands from its <code>passingScore</code>, or falls
-back to a default <code>A ≥ 90 … D ≥ 60</code> — and a <code>+</code>/<code>-</code> is appended for the top or
-bottom third of a band. A <code>shared</code> deployment mode
-locks down the local-filesystem features (path loading, the drop folder,
-<code>file:</code> URLs) that only make sense for a single-user install, and the
-server-side URL fetcher is restricted to <code>http</code>/<code>https</code> with a mandatory SSRF
-guard.</p>
+<h2 id="automation-api-removed">Automation API (removed)<a class="headerlink" href="#automation-api-removed" title="Permanent link">&para;</a></h2>
+<p>An unauthenticated JSON API under <code>/api/v1</code> was added for CI and later removed
+in favour of the in-process engine, CLI and build plugins. Its lasting effects:
+specs are grouped by a plain <strong>namespace</strong> slug and attributed to a
+<strong>submitter</strong>, and each policy can declare a passing score and grade bands
+(<code>passingScore:</code> / <code>grades:</code>, or a non-numeric <code>scoring: blocker | error</code>).
+Grading was made universal — a policy with no <code>grades:</code> block derives bands
+from its <code>passingScore</code>, or falls back to a default <code>A ≥ 90 … D ≥ 60</code> — and a
+<code>+</code>/<code>-</code> is appended for the top or bottom third of a band. A <code>shared</code>
+deployment mode locks down the local-filesystem features (path loading, the
+drop folder, <code>file:</code> URLs) that only make sense for a single-user install.</p>
 <h2 id="tooling-and-documentation">Tooling and documentation<a class="headerlink" href="#tooling-and-documentation" title="Permanent link">&para;</a></h2>
 <p>The documentation moved to a <strong>MkDocs (Material) site</strong> deployed to GitHub
 Pages, with <code>mike</code> for versioned docs, generated rule and policy pages, and

@@ -403,10 +403,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#automation-api-settings" class="md-nav__link">
+  <a href="#deployment-mode" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Automation API settings
+        Deployment mode
       
     </span>
   </a>
@@ -487,33 +487,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../automation-api/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Automation API
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../history/" class="md-nav__link">
         
   
@@ -554,10 +527,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
         
           
-          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
             
   
   
@@ -575,8 +548,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_8">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -865,10 +838,10 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#automation-api-settings" class="md-nav__link">
+  <a href="#deployment-mode" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Automation API settings
+        Deployment mode
       
     </span>
   </a>
@@ -960,7 +933,7 @@ you launch from:</p>
 </tr>
 </tbody>
 </table>
-<h3 id="automation-api-settings">Automation API settings<a class="headerlink" href="#automation-api-settings" title="Permanent link">&para;</a></h3>
+<h3 id="deployment-mode">Deployment mode<a class="headerlink" href="#deployment-mode" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -973,17 +946,7 @@ you launch from:</p>
 <tr>
 <td><code>arete.deployment.mode</code></td>
 <td><code>local</code></td>
-<td><code>shared</code> locks down local-filesystem features — see the <a href="../automation-api/#deployment-mode">Automation API</a>.</td>
-</tr>
-<tr>
-<td><code>arete.api.url-fetch.allow-private</code></td>
-<td><code>false</code></td>
-<td>Allow the URL fetcher to reach private/loopback addresses. Ignored in <code>shared</code> mode.</td>
-</tr>
-<tr>
-<td><code>arete.api.url-fetch.timeout</code></td>
-<td><code>10s</code></td>
-<td>Connect/read timeout for a URL fetch.</td>
+<td><code>shared</code> locks down local-filesystem features (path loading, the drop folder, <code>file:</code> URLs).</td>
 </tr>
 </tbody>
 </table>
