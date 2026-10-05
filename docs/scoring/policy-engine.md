@@ -384,8 +384,7 @@ Prose describing the policy's intent.
 - Each rule value is either a **number `0`–`100`** (a point deduction) or the
   literal **`PROHIBITED`**.
 - `passingScore:` (optional, `0`–`100`) — the minimum overall score the policy
-  considers a pass. Reported on every scoring and used by the
-  [Automation API](../automation-api.md#scoring-level) verdict.
+  considers a pass. Reported on every scoring.
 - `grades:` (optional) — a `label → minimum score` map, listed highest
   threshold first. A score at or above a threshold earns that label; within a
   band wide enough to divide, the top third adds a `+` and the bottom third a

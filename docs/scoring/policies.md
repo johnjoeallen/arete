@@ -18,7 +18,7 @@ effectiveScore = 0 if any PROHIBITED rule matched, else qualityScore
 The default policy: it enables every generally-applicable bundled rule, with a few rule parameters calibrated for a typical enterprise API (allow-listed proprietary headers, expected OAuth2 scopes, standard rate-limit headers).
 
 - **111** rules active
-- passing score: **90** (the [automation API](../automation-api.md) fails below this unless overridden)
+- passing score: **90** (the score a spec must reach to pass)
 - grades: A ≥ 95, B ≥ 90, C ≥ 80, D ≥ 70, else F
 
 Parameter overrides:
@@ -150,7 +150,7 @@ Parameter overrides:
 Contains only implemented rules mapped to the supplied Zalando rule catalogue. No generic-only or Enterprise Grade-specific rule is enabled here.
 
 - **40** rules active
-- suggested gate: `error` (used by the [automation API](../automation-api.md) unless overridden)
+- suggested gate: `error` (the gate level a spec must clear)
 
 Parameter overrides:
 
@@ -209,7 +209,7 @@ Parameter overrides:
 Everything in the `Zalando` policy, plus the checks that were previously only in Zalando's supplementary linter rule pack, reworked as Areté rules.
 
 - **61** rules active
-- suggested gate: `error` (used by the [automation API](../automation-api.md) unless overridden)
+- suggested gate: `error` (the gate level a spec must clear)
 
 Parameter overrides:
 

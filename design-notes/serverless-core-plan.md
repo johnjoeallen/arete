@@ -223,7 +223,7 @@ arete policy verify [--policy-source <source>]...              # load the source
 
 **The server** (`arete-app`) is the UI as it is today, local developer tooling rather than shared infrastructure: view a spec, score it against a policy, and see the findings so the developer can fix them before committing. It keeps a local H2 store for scores. It calls `arete-engine` directly. CI never needs it, and nothing is deployed. The JSON report is a CI artifact only; the UI does not import it. Scoring locally with the same pinned policy reproduces the CI results.
 
-The HTTP-client gate (`arete-ci-gate-*`) is retired. The `/api/v1` Automation API stays, as the way to score from a script against a running local app; it is not part of the CI path and is no longer described as deprecated.
+The HTTP-client gate (`arete-ci-gate-*`) is retired. The `/api/v1` Automation API is removed.
 
 ## Staged rollout
 

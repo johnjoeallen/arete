@@ -147,10 +147,10 @@ for pid, pol in policies.items():
     lines.append(f"- **{len(active)}** rules active" + (f", **{len(prohibited)}** prohibited" if prohibited else ""))
     if pol.get("passingScore") is not None:
         lines.append(f"- passing score: **{pol['passingScore']}** "
-                     "(the [automation API](../automation-api.md) fails below this unless overridden)")
+                     "(the score a spec must reach to pass)")
     elif pol.get("scoring"):
         lines.append(f"- suggested gate: `{pol['scoring']}` "
-                     "(used by the [automation API](../automation-api.md) unless overridden)")
+                     "(the gate level a spec must clear)")
     if pol.get("grades"):
         bands = ", ".join(f"{k} ≥ {v}" for k, v in pol["grades"].items())
         lines.append(f"- grades: {bands}, else F")

@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * Runs the {@link Engine} against a raw spec. Scoring is on-demand: the
  * application never runs anything automatically, the caller (the spec view
- * page's Refresh control, or the automation API) picks the policy per run.
+ * page's Refresh control) picks the policy per run.
  * A request naming any other engine id is skipped.
  */
 @Service

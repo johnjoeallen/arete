@@ -32,7 +32,7 @@ import java.util.Set;
  * It is not final so a test can stand in for it.
  */
 public class Engine {
-    /** Identifier the application and the automation API use for this engine. */
+    /** Identifier the application uses for this engine. */
     public static final String ID = "generic-policy";
 
     /** Where a rule's documentation page is, as a base URL ending in "/"; null when nothing serves one (a build, the CLI). */

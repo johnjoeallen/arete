@@ -98,12 +98,6 @@ a safe-by-construction expression language. It ships the Enterprise Grade,
 Zalando, and Zalando Extended policies. Add your own policies under
 `~/.arete/policies`.
 
-For CI, the **Automation API** (`/api/v1`) takes a spec inline or by URL, runs
-the validator/policy combinations you name, and returns findings plus a
-pass/fail verdict (JSON or SARIF). No authentication — put it behind a
-protected boundary.
-
-- [Automation API](https://johnjoeallen.github.io/arete/automation-api/)
 - [Scoring overview](https://johnjoeallen.github.io/arete/scoring/)
 - [Policy engine](https://johnjoeallen.github.io/arete/scoring/policy-engine/)
 - [Distill reference](https://johnjoeallen.github.io/arete/scoring/distill/)

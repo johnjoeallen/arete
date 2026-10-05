@@ -8,8 +8,7 @@ import org.springframework.stereotype.Component;
  *
  * <p>{@code shared} means multi-user or network-exposed: local-filesystem
  * reach becomes a cross-user disclosure risk, so {@code file:} URLs, the
- * {@code /api/load-file} endpoint, the drop-folder watcher, and the SSRF
- * guard's opt-out are all locked down. See {@code design-notes/automation-api.md}.
+ * {@code /api/load-file} endpoint and the drop-folder watcher are locked down.
  */
 @Component
 public class DeploymentMode {

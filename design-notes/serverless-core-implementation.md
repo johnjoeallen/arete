@@ -87,7 +87,7 @@ Comparison with other linters is out of scope for now.
 | Engine, API and both plugins publishable from `publish.yml` | Done; the workflow has not been run |
 | Old `arete-ci-gate-*` modules retired | Done |
 | First real publish (Maven Central) | Not done |
-| Deprecated `automation-api` and HTTP-client gate removed | Not done; `AutomationApiController` remains |
+| Automation API and HTTP-client gate removed | Done |
 
 ## Extras beyond the stage list (70%)
 
@@ -110,5 +110,4 @@ Publishing goes last, after enough local testing.
 4. Run the Maven plugin, Gradle plugin and CLI from a local install against one repository and check they agree.
 5. Merge to `main`.
 6. Run `publish.yml` once and confirm the engine, API and both plugins resolve from the published location.
-7. Remove the deprecated automation API.
 8. Optional: signature checking, `--annotate-changed-only`, Distill combinators.

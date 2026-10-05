@@ -23,7 +23,7 @@ public class SpecEntity {
 
     /**
      * The stable public identifier — a random UUID, generated on creation.
-     * Every external reference (URLs, the automation API, CI engines) uses
+     * Every external reference (URLs, CI engines) uses
      * this; the numeric {@link #id} never leaves the app. {@code NOT NULL} and
      * the unique index are added by {@code SpecSchemaMigration} (Hibernate
      * can't add a {@code NOT NULL} column with no default to a non-empty

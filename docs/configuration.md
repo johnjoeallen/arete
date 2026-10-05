@@ -28,11 +28,9 @@ you launch from:
 | `~/.arete/specs` | Drop spec files here to have them loaded and watched automatically. |
 | `~/.arete/policies` | Drop extra `*.md` policy files here to add them to the bundled [Areté Policy Engine](scoring/policy-engine.md#user-policies). |
 
-### Automation API settings
+### Deployment mode
 
 | Property | Default | Effect |
 |---|---|---|
-| `arete.deployment.mode` | `local` | `shared` locks down local-filesystem features — see the [Automation API](automation-api.md#deployment-mode). |
-| `arete.api.url-fetch.allow-private` | `false` | Allow the URL fetcher to reach private/loopback addresses. Ignored in `shared` mode. |
-| `arete.api.url-fetch.timeout` | `10s` | Connect/read timeout for a URL fetch. |
+| `arete.deployment.mode` | `local` | `shared` locks down local-filesystem features (path loading, the drop folder, `file:` URLs). |
 

@@ -242,26 +242,18 @@ Large documents are handled explicitly: the OpenAPI parser and the bundle's
 YAML loader both accept configurable size limits so that legitimately large
 specifications are not rejected as though malformed.
 
-## Automation API
+## Automation API (removed)
 
-An unauthenticated JSON API under `/api/v1` was added for CI: submit a spec
-inline or by URL, name the validator/policy combinations to run, and get
-findings plus a pass/fail verdict (JSON or SARIF). Specs are grouped by a
-plain **namespace** slug and attributed to a **submitter** — both
-self-asserted, neither checked; uniqueness moved from a global spec title to
-`(namespace, title)`. Because there is no authentication, the deployment is
-required to sit behind a protected boundary. Each policy can declare a
-passing score and grade bands (`passingScore:` / `grades:`, or a non-numeric
-`scoring: blocker | error`); the score, grade, and pass/fail against that bar
-are reported on every scoring, and the automation-API verdict honours the
-bar unless the caller overrides it. Grading was later made universal — a
-policy with no `grades:` block derives bands from its `passingScore`, or falls
-back to a default `A ≥ 90 … D ≥ 60` — and a `+`/`-` is appended for the top or
-bottom third of a band. A `shared` deployment mode
-locks down the local-filesystem features (path loading, the drop folder,
-`file:` URLs) that only make sense for a single-user install, and the
-server-side URL fetcher is restricted to `http`/`https` with a mandatory SSRF
-guard.
+An unauthenticated JSON API under `/api/v1` was added for CI and later removed
+in favour of the in-process engine, CLI and build plugins. Its lasting effects:
+specs are grouped by a plain **namespace** slug and attributed to a
+**submitter**, and each policy can declare a passing score and grade bands
+(`passingScore:` / `grades:`, or a non-numeric `scoring: blocker | error`).
+Grading was made universal — a policy with no `grades:` block derives bands
+from its `passingScore`, or falls back to a default `A ≥ 90 … D ≥ 60` — and a
+`+`/`-` is appended for the top or bottom third of a band. A `shared`
+deployment mode locks down the local-filesystem features (path loading, the
+drop folder, `file:` URLs) that only make sense for a single-user install.
 
 ## Tooling and documentation
 
