@@ -52,11 +52,19 @@ parameter count as a measured value, so a `format: 2` policy can tier on it:
 STANDARD011:
   measure: value
   tiers: { 5: 0.5, 9: 1, 13: 3 }   # 5-8 parameters costs 0.5, 9-12 costs 1, 13 or more costs 3
-  parameters: { maximum: 0 }       # report every operation, so the tiers set the limit
 ```
 
-The matcher only reports operations above `maximum`, so tiers starting below
-the default of 8 need `maximum` lowered as shown. The cost follows the operation
+The matcher only reports operations above `maximum`, which is 8 unless the policy says otherwise. When a rule is charged
+by value and the policy does not set `maximum`, the engine sets it to one below the lowest tier, so the example above
+runs with `maximum: 4` and the 5-8 tier works. Set it yourself to override that:
+
+```yaml
+  parameters: { maximum: 0 }       # report every operation, with its count, even those below the first tier
+```
+
+`maximum: 0` costs nothing extra (operations under the first tier are not charged) but, once any operation reaches a tier,
+every operation with parameters is listed as a finding. Use it when you want that full picture, not for the limit itself.
+The cost follows the operation
 with the most parameters. The rule counts declared parameters only;
 it does not weigh a parameter's importance, inspect `$ref` fan-out, or account
 for parameters supplied through a request body.

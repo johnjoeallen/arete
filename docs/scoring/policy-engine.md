@@ -477,6 +477,17 @@ value on it. A rule charged by value whose matcher reports no value is a scoring
 gate compares the worst value too, so a schema getting deeper fails even when the number of findings is unchanged
 (`JSON025 got worse: 5 -> 7`). `measure` goes only with `tiers`.
 
+**The threshold follows the lowest tier.** Some matchers report only what is past a threshold of their own (`maximum`: report
+above it; `minimum`: report from it), and the rule ships a default. A tier below that default would never fire, so when a
+rule is charged by value and the policy does not set the threshold, the engine sets it from the lowest tier: `maximum` becomes
+one below the tier (`tiers: { 5: ... }` gives `maximum: 4`), `minimum` becomes the tier itself. You only write the tiers.
+
+A threshold the policy sets that would hide the lowest tier (`maximum` at or above it, `minimum` above it) is a scoring error
+naming the rule, not a tier that quietly never fires. Set the threshold yourself when you want a different one. The usual reason is `0` (or `1` for `minimum`), which reports
+**every** occurrence. Below the lowest tier nothing is charged, but once any occurrence reaches a tier, the findings for the
+smaller ones are listed too, so a reader sees every operation and its count and not only the offenders. The default hides
+them, which is quieter and is what most policies want.
+
 `expect: match` only makes sense with a matcher written to find evidence of something wanted. Every bundled matcher reports
 *violations*, so none of the bundled rules is used that way; it is for your own matchers, for example one that matches an
 operation declaring a `Link` header, with `expect: match, points: 2` meaning "somewhere in the API a paginated response must

@@ -117,4 +117,31 @@ class ValueMeasureTest {
         assertEquals(97.0, run.apply(6).getOverallScore());
         assertEquals(6, run.apply(6).getRuleOutcomes().stream().filter(o -> o.ruleId().equals("STATUS001")).findFirst().get().count());
     }
+
+    @Test
+    void anOmittedThresholdFollowsTheLowestTier(@TempDir Path tmp) throws IOException {
+        Path dir = tmp.resolve("policies");
+        Files.createDirectories(dir);
+        // No maximum: the rule's default of 8 would hide the 5-8 tier, so it becomes one below the lowest tier (4).
+        Files.writeString(dir.resolve("p.md"), "---\nid: Params\nformat: 2\nrules:\n  STANDARD011: { measure: value, tiers: { 5: 0.5, 9: 1 } }\n---\n\n# Params\n");
+        Engine params = Engine.builder().cacheDir(null).userPoliciesDir(dir).build();
+        java.util.function.IntFunction<ScoringResult> run = n -> params.score(
+                SpecInput.builder().content(operationWith(n)).format(SpecFormat.OPENAPI3).policy("Params").build());
+        assertEquals(100.0, run.apply(4).getOverallScore());
+        assertEquals(99.5, run.apply(5).getOverallScore());
+        assertEquals(99.0, run.apply(9).getOverallScore());
+
+        // minimum: the rule's default of 5 would hide a first tier of 4, so it becomes the lowest tier.
+        Engine depth = engine(tmp.resolve("d"), "{ measure: value, tiers: { 4: 1, 6: 3 } }");
+        assertEquals(99.0, score(depth, 4).getOverallScore());
+        assertEquals(100.0, score(depth, 3).getOverallScore());
+    }
+
+    @Test
+    void anExplicitThresholdThatHidesTheLowestTierIsAnError(@TempDir Path tmp) throws IOException {
+        Engine hidden = engine(tmp.resolve("a"), "{ measure: value, tiers: { 4: 1 }, parameters: { minimum: 5 } }");
+        assertEquals(ScoringResult.Status.ENGINE_ERROR, score(hidden, 4).getStatus());
+        Engine ok = engine(tmp.resolve("b"), "{ measure: value, tiers: { 4: 1 }, parameters: { minimum: 1 } }");
+        assertEquals(99.0, score(ok, 4).getOverallScore());
+    }
 }

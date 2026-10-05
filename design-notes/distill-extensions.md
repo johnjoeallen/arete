@@ -34,6 +34,10 @@ A matcher returns a list of occurrences, each a violation: a pointer, a subject 
 5. **The resolved schema graph.** `nestingDepth` is now exposed to matchers (JSON025). `schema.properties` already lists nested properties; a matcher could also walk references,
    with `nestingDepth` and `refProblems` already in the model.
 
+   **Threshold defaults (done).** A matcher that reports only past a threshold of its own (`maximum`, `minimum`) would hide a
+   tier below the rule's default. When a policy charges by value and omits that parameter, the engine derives it from the
+   lowest tier: `maximum` = tier − 1, `minimum` = tier. An explicit value wins; `maximum: 0` is the "list everything" setting.
+
 ## Constraints
 
 - Distill stays a safe expression language: no loops, no I/O, no reflection. Anything added is a builtin or a model field.

@@ -373,6 +373,10 @@ public class Engine {
                 }
                 Map<String, Object> parameters = new LinkedHashMap<>(rule.parameters());
                 parameters.putAll(policyRule.getValue().parameters());
+                if (policyRule.getValue() instanceof Graduated byValue && byValue.byValue() && !byValue.tiers().isEmpty()) {
+                    String problem = deriveThreshold(matcher, byValue, parameters);
+                    if (problem != null) return ScoringResult.engineError("Rule " + rule.id() + ": " + problem);
+                }
                 PolicyRule effectiveRule = new PolicyRule(rule.id(), rule.title(), rule.category(), rule.matcherId(), rule.scope(), parameters, rule.documentationMarkdown());
                 matches = distillRuntime.execute(matcher, api, effectiveRule);
             } catch (MatcherEvaluationException e) {
@@ -516,6 +520,30 @@ public class Engine {
     public Optional<RuleDocumentation> getRuleDocumentation(String matcherId) {
         PolicyRule rule = activeBundle().rules().get(matcherId);
         return rule == null ? Optional.empty() : Optional.of(new RuleDocumentation(rule.title(), interpolateDocumentation(rule.documentationMarkdown(), rule.parameters())));
+    }
+
+    /**
+     * A rule charged by value reports only the occurrences past its matcher's threshold, so a threshold above the lowest
+     * tier would hide that tier. When the policy does not set the threshold itself, it is derived from the lowest tier:
+     * {@code maximum} (reports above it) is one below the tier, {@code minimum} (reports from it) is the tier. A threshold the policy sets that would hide the lowest tier is a
+     * scoring error, returned as the message.
+     */
+    private static String deriveThreshold(Matcher matcher, Graduated byValue, Map<String, Object> parameters) {
+        int lowest = byValue.tiers().get(0).minimum();
+        Object maximum = byValue.parameters().get("maximum");
+        Object minimum = byValue.parameters().get("minimum");
+        if (matcher.parameters().containsKey("maximum")) {
+            if (maximum == null) parameters.put("maximum", lowest - 1);
+            else if (maximum instanceof Number n && n.doubleValue() >= lowest) {
+                return "maximum " + maximum + " hides the lowest tier (" + lowest + "): it must be " + (lowest - 1) + " or less";
+            }
+        } else if (matcher.parameters().containsKey("minimum")) {
+            if (minimum == null) parameters.put("minimum", lowest);
+            else if (minimum instanceof Number n && n.doubleValue() > lowest) {
+                return "minimum " + minimum + " hides the lowest tier (" + lowest + "): it must be " + lowest + " or less";
+            }
+        }
+        return null;
     }
 
     /** Replaces {@code {{parameter-name}}} placeholders with declared rule parameters. */
