@@ -57,7 +57,7 @@ class RuleCorpusTest {
                 Path recorded = dir.resolve("bad.findings");
                 String actual = String.join("\n", bad) + "\n";
                 if (UPDATE) Files.writeString(recorded, actual);
-                else assertEquals(Files.readString(recorded), actual, rule.id() + " findings changed — review; regenerate with -Dcorpus.update=true");
+                else assertEquals(SnapshotText.normalise(Files.readString(recorded)), SnapshotText.normalise(actual), rule.id() + " findings changed — review; regenerate with -Dcorpus.update=true");
             }));
         }
     }

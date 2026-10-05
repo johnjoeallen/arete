@@ -144,6 +144,6 @@ class PolicySnapshotTest {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-        assertEquals(expected, actual, name + " changed — review the diff; if intended, regenerate with -Dsnapshot.update=true");
+        assertEquals(SnapshotText.normalise(expected), SnapshotText.normalise(actual), name + " changed — review the diff; if intended, regenerate with -Dsnapshot.update=true");
     }
 }

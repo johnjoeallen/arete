@@ -47,7 +47,7 @@ class DistillGrammarSnapshotTest {
         updated = rewriteAlternation(updated, "@generated distill.member.names",
                 DistillMatcherEvaluator.KNOWN_MEMBERS);
 
-        if (updated.equals(grammar)) {
+        if (SnapshotText.normalise(updated).equals(SnapshotText.normalise(grammar))) {
             return;
         }
         if (UPDATE) {

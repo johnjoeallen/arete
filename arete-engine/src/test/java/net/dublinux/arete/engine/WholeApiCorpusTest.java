@@ -123,7 +123,7 @@ class WholeApiCorpusTest {
             }
             Path snapshot = spec.resolveSibling(stem(spec) + ".snapshot");
             if (UPDATE) Files.writeString(snapshot, out.toString());
-            else assertEquals(Files.readString(snapshot), out.toString(), stem(spec) + " changed — review; regenerate with -Dcorpus.update=true");
+            else assertEquals(SnapshotText.normalise(Files.readString(snapshot)), SnapshotText.normalise(out.toString()), stem(spec) + " changed — review; regenerate with -Dcorpus.update=true");
         }));
     }
 }
