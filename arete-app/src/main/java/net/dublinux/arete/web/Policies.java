@@ -1,6 +1,7 @@
 package net.dublinux.arete.web;
 
-import net.dublinux.arete.scoring.spi.SpecScoringPlugin;
+import net.dublinux.arete.engine.api.SpecInput;
+import net.dublinux.arete.engine.Engine;
 import net.dublinux.arete.web.api.Slugs;
 
 import java.util.List;
@@ -8,7 +9,7 @@ import java.util.List;
 /**
  * Policy (policy) names can contain spaces and mixed case ("Enterprise
  * Grade"). URLs and form fields carry a slug ("enterprise-grade"); this maps
- * between the two against a plugin's own {@link SpecScoringPlugin#getPolicies()}.
+ * between the two against a engine's own the engine's policies.
  */
 public final class Policies {
 
@@ -22,12 +23,12 @@ public final class Policies {
 
     /**
      * Resolves a slug (or an exact name, or a legacy positional index) back to
-     * the plugin's real policy name. Falls back to
-     * {@link SpecScoringPlugin#DEFAULT_POLICY} for anything unrecognised.
+     * the engine's real policy name. Falls back to
+     * {@link Engine#DEFAULT_POLICY} for anything unrecognised.
      */
     public static String resolve(List<String> policyNames, String value) {
         if (value == null || value.isBlank() || policyNames.isEmpty()) {
-            return SpecScoringPlugin.DEFAULT_POLICY;
+            return SpecInput.DEFAULT_POLICY;
         }
         String v = value.trim();
         for (String name : policyNames) {
@@ -43,6 +44,6 @@ public final class Policies {
         } catch (NumberFormatException ignored) {
             // not an index either
         }
-        return SpecScoringPlugin.DEFAULT_POLICY;
+        return SpecInput.DEFAULT_POLICY;
     }
 }

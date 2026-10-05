@@ -1,21 +1,20 @@
 package net.dublinux.arete.web.api;
 
+import net.dublinux.arete.engine.api.SpecInput;
 import net.dublinux.arete.domain.SpecEntity;
 import net.dublinux.arete.domain.SpecSource;
-import net.dublinux.arete.plugin.AggregatedScoringResult;
-import net.dublinux.arete.plugin.AttributedDiagnostic;
-import net.dublinux.arete.plugin.PluginRegistry;
-import net.dublinux.arete.plugin.PluginRunRequest;
-import net.dublinux.arete.plugin.PluginSettingsService;
-import net.dublinux.arete.plugin.PluginScoringService;
-import net.dublinux.arete.plugin.ScoreLevel;
-import net.dublinux.arete.plugin.SpecScoringResultService;
-import net.dublinux.arete.plugin.ScoringSummary;
+import net.dublinux.arete.scoring.AggregatedScoringResult;
+import net.dublinux.arete.scoring.AttributedDiagnostic;
+import net.dublinux.arete.scoring.EngineRunRequest;
+import net.dublinux.arete.scoring.EngineScoringService;
+import net.dublinux.arete.scoring.ScoreLevel;
+import net.dublinux.arete.scoring.SpecScoringResultService;
+import net.dublinux.arete.scoring.ScoringSummary;
 import net.dublinux.arete.service.ParsedSpec;
 import net.dublinux.arete.service.SpecParserService;
 import net.dublinux.arete.service.SpecStorageService;
-import net.dublinux.arete.scoring.spi.Severity;
-import net.dublinux.arete.scoring.spi.SpecScoringPlugin;
+import net.dublinux.arete.engine.api.Severity;
+import net.dublinux.arete.engine.Engine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -52,24 +51,22 @@ public class AutomationApiController {
 
     private final SpecParserService parser;
     private final SpecStorageService storage;
-    private final PluginScoringService scoring;
-    private final PluginRegistry pluginRegistry;
-    private final PluginSettingsService pluginSettings;
+    private final EngineScoringService scoring;
+    private final Engine engine;
     private final SpecScoringResultService results;
     private final RemoteSpecFetcher fetcher;
     private final DeploymentMode deploymentMode;
     private final net.dublinux.arete.service.NamespaceService namespaces;
 
     public AutomationApiController(SpecParserService parser, SpecStorageService storage,
-            PluginScoringService scoring, PluginRegistry pluginRegistry,
-            PluginSettingsService pluginSettings, SpecScoringResultService results,
+            EngineScoringService scoring, Engine engine,
+            SpecScoringResultService results,
             RemoteSpecFetcher fetcher, DeploymentMode deploymentMode,
             net.dublinux.arete.service.NamespaceService namespaces) {
         this.parser = parser;
         this.storage = storage;
         this.scoring = scoring;
-        this.pluginRegistry = pluginRegistry;
-        this.pluginSettings = pluginSettings;
+        this.engine = engine;
         this.results = results;
         this.fetcher = fetcher;
         this.deploymentMode = deploymentMode;
@@ -208,7 +205,7 @@ public class AutomationApiController {
                 .body(new SubmitResponse(toResource(saved), run.ok(), run.verdict(), run.results()));
     }
 
-    /** Re-score an already-stored spec by its UUID — the flow a CI plugin uses after an earlier submit. */
+    /** Re-score an already-stored spec by its UUID — the flow a CI engine uses after an earlier submit. */
     @PostMapping("/specs/{ref}/score")
     public ResponseEntity<?> rescore(@PathVariable String ref,
             @RequestHeader(name = "Content-Type", required = false) String contentType,
@@ -239,29 +236,29 @@ public class AutomationApiController {
     // --- helpers ------------------------------------------------------
 
     private record ScoredRun(boolean ok, String verdict, List<CombinationResult> results,
-            List<PluginRunRequest> forPersistence) { }
+            List<EngineRunRequest> forPersistence) { }
 
     private ScoredRun runCombos(String rawSpec, List<RunCombination> combos, String failOn) {
         ScoreLevel forcedLevel = "policy".equalsIgnoreCase(failOn) ? null : ScoreLevel.parse(failOn);
         List<CombinationResult> comboResults = new ArrayList<>();
-        List<PluginRunRequest> forPersistence = new ArrayList<>();
+        List<EngineRunRequest> forPersistence = new ArrayList<>();
         boolean ok = true;
         for (RunCombination combo : combos) {
-            SpecScoringPlugin plugin = enabledPlugin(combo.validator());
-            if (plugin == null) {
+            Engine scorer = enabledEngine(combo.validator());
+            if (scorer == null) {
                 throw new ApiException(HttpStatus.UNPROCESSABLE_ENTITY,
                         "unknown or disabled validator '" + combo.validator() + "'");
             }
             // Accept a policy slug ("enterprise-grade") or the exact name.
-            String policy = net.dublinux.arete.web.Policies.resolve(safePolicies(plugin), combo.policy());
-            AggregatedScoringResult r = scoring.scoreOne(rawSpec, plugin.getId(), policy);
-            forPersistence.add(new PluginRunRequest(plugin.getId(), policy));
+            String policy = net.dublinux.arete.web.Policies.resolve(safePolicies(scorer), combo.policy());
+            AggregatedScoringResult r = scoring.scoreOne(rawSpec, scorer.getId(), policy);
+            forPersistence.add(new EngineRunRequest(scorer.getId(), policy));
 
-            ResolvedLevel level = resolveLevel(forcedLevel, plugin, policy);
+            ResolvedLevel level = resolveLevel(forcedLevel, scorer, policy);
             boolean failed = !statusOf(r).equals("SUCCESS") || level.level().failedBy(r);
             ok &= !failed;
             comboResults.add(new CombinationResult(
-                    plugin.getId(), policy, statusOf(r), errorOf(r),
+                    scorer.getId(), policy, statusOf(r), errorOf(r),
                     box(r.overallScore()), r.grade(), box(r.passingScore()),
                     new LevelOutcome(level.level().describe(), level.source(), !failed),
                     severityCounts(r), Math.max(0, r.rulesEvaluatedCount()), findings(r)));
@@ -269,44 +266,44 @@ public class AutomationApiController {
         return new ScoredRun(ok, ok ? "PASS" : "FAIL", comboResults, forPersistence);
     }
 
-    private void persist(long specId, String rawSpec, List<PluginRunRequest> requests) {
+    private void persist(long specId, String rawSpec, List<EngineRunRequest> requests) {
         try {
             AggregatedScoringResult combined = scoring.scoreMany(rawSpec, requests);
             results.save(specId, SpecScoringResultService.contentHashOf(rawSpec),
-                    combined, requests.stream().map(PluginRunRequest::pluginId).distinct().toList());
+                    combined, requests.stream().map(EngineRunRequest::engineId).distinct().toList());
         } catch (RuntimeException e) {
             log.warn("Could not persist combined scoring for spec {}: {}", specId, e.toString());
         }
     }
 
-    private List<String> safePolicies(SpecScoringPlugin plugin) {
+    private List<String> safePolicies(Engine scorer) {
         try {
-            return List.copyOf(plugin.getPolicies());
+            return List.copyOf(scorer.getPolicies());
         } catch (Throwable t) {
-            return List.of(SpecScoringPlugin.DEFAULT_POLICY);
+            return List.of(SpecInput.DEFAULT_POLICY);
         }
     }
 
     private record ResolvedLevel(ScoreLevel level, String source) { }
 
-    private ResolvedLevel resolveLevel(ScoreLevel forced, SpecScoringPlugin plugin, String policy) {
+    private ResolvedLevel resolveLevel(ScoreLevel forced, Engine scorer, String policy) {
         if (forced != null) {
             return new ResolvedLevel(forced, "request");
         }
-        Optional<String> suggested = safeSuggestedLevel(plugin, policy);
+        Optional<String> suggested = safeSuggestedLevel(scorer, policy);
         if (suggested.isPresent()) {
             try {
                 return new ResolvedLevel(ScoreLevel.parse(suggested.get()), "policy");
             } catch (IllegalArgumentException e) {
-                log.warn("Plugin '{}' suggested an invalid score level '{}': {}", plugin.getId(), suggested.get(), e.toString());
+                log.warn("Engine '{}' suggested an invalid score level '{}': {}", scorer.getId(), suggested.get(), e.toString());
             }
         }
         return new ResolvedLevel(ScoreLevel.BLOCKER, "default");
     }
 
-    private static Optional<String> safeSuggestedLevel(SpecScoringPlugin plugin, String policy) {
+    private static Optional<String> safeSuggestedLevel(Engine scorer, String policy) {
         try {
-            return plugin.getSuggestedScoreLevel(policy);
+            return scorer.getSuggestedScoreLevel(policy);
         } catch (Throwable t) {
             return Optional.empty();
         }
@@ -343,7 +340,7 @@ public class AutomationApiController {
             for (String p : runParams) {
                 int slash = p.indexOf('/');
                 out.add(slash < 0
-                        ? new RunCombination(p.trim(), SpecScoringPlugin.DEFAULT_POLICY)
+                        ? new RunCombination(p.trim(), SpecInput.DEFAULT_POLICY)
                         : new RunCombination(p.substring(0, slash).trim(), p.substring(slash + 1).trim()));
             }
         }
@@ -400,16 +397,11 @@ public class AutomationApiController {
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "no namespace '" + namespace + "'"));
     }
 
-    private SpecScoringPlugin enabledPlugin(String id) {
+    private Engine enabledEngine(String id) {
         if (id == null) {
             return null;
         }
-        for (SpecScoringPlugin plugin : pluginRegistry.getPlugins()) {
-            if (plugin.getId().equals(id.trim()) && pluginSettings.isEnabled(plugin.getId())) {
-                return plugin;
-            }
-        }
-        return null;
+        return Engine.ID.equals(id.trim()) ? engine : null;
     }
 
     private static ResponseEntity.BodyBuilder status(boolean ok, Integer httpStatusOnFail, boolean isNew) {
@@ -429,11 +421,11 @@ public class AutomationApiController {
     }
 
     private static String statusOf(AggregatedScoringResult r) {
-        return r.pluginSummaries().stream().findFirst().map(ScoringSummary::status).orElse("PLUGIN_ERROR");
+        return r.engineSummaries().stream().findFirst().map(ScoringSummary::status).orElse("ENGINE_ERROR");
     }
 
     private static String errorOf(AggregatedScoringResult r) {
-        return r.pluginSummaries().stream().findFirst().map(ScoringSummary::errorMessage).orElse(null);
+        return r.engineSummaries().stream().findFirst().map(ScoringSummary::errorMessage).orElse(null);
     }
 
     private static Map<String, Long> severityCounts(AggregatedScoringResult r) {

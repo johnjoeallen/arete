@@ -1,0 +1,12 @@
+openapi: 3.0.0
+info: { title: Corpus, version: 1.0.0, description: Corpus example. }
+paths:
+  /customers: { get: { responses: { '200': { description: OK } } } }
+  /orders: { get: { responses: { '200': { description: OK } } } }
+  /invoices: { get: { responses: { '200': { description: OK } } } }
+  /payments: { get: { responses: { '200': { description: OK } } } }
+  /products: { get: { responses: { '200': { description: OK } } } }
+  /suppliers: { get: { responses: { '200': { description: OK } } } }
+  /shipments: { get: { responses: { '200': { description: OK } } } }
+  /reports: { get: { responses: { '200': { description: OK } } } }
+  /audit-events: { get: { responses: { '200': { description: OK } } } }

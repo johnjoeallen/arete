@@ -1,7 +1,7 @@
 # Distill editor support
 
 Syntax highlighting for [Distill](../../docs/scoring/distill.md) — the
-Groovy influenced fluent rule language in `api-policy/matchers/*/Matcher.distill`.
+Java-shaped fluent rule language in `api-policy/matchers/*/Matcher.distill`.
 
 This directory is a VS Code extension **and** a TextMate bundle. Both editors
 use the same `distill.tmLanguage.json` grammar.
@@ -66,7 +66,7 @@ The `function-name` and `member-name` alternations in
 drift. After adding a builtin:
 
 ```sh
-mvn -pl arete-policy-plugin test -Dtest=DistillGrammarSnapshotTest -Dsnapshot.update=true
+mvn -pl arete-engine test -Dtest=DistillGrammarSnapshotTest -Dsnapshot.update=true
 ```
 
 and commit the regenerated grammar.

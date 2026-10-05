@@ -1,0 +1,1 @@
+/paths/~1customers~1{access_token}/get/parameters/path:access_token  |  Parameter name may expose sensitive data: access_token

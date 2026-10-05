@@ -15,7 +15,7 @@
     <h3>Scoring findings</h3>
     <table class="endpoint-findings">
         <thead>
-            <tr><th>Severity</th><th>Rule</th><th>Finding</th><th>Location</th><th>Source</th></tr>
+            <tr><th>Severity</th><th>Rule</th><th>Finding</th><th>Location</th></tr>
         </thead>
         <tbody>
             <tr th:each="av : ${findings.diagnostics()}" th:attr="data-severity=${av.diagnostic().getSeverity()}">
@@ -42,7 +42,6 @@
                        class="diagnostic-doc-link">Learn more &#8599;</a>
                 </td>
                 <td th:text="${@jsonPointers.toDisplayPath(av.diagnostic().getPointer())}"></td>
-                <td><span class="diagnostic-source" th:text="${av.pluginName()}"></span></td>
             </tr>
         </tbody>
     </table>

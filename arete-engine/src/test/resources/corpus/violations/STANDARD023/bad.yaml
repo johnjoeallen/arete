@@ -1,0 +1,6 @@
+openapi: 3.0.0
+info: { title: Corpus, version: 1.0.0, description: Corpus example. }
+servers:
+  - url: http://localhost:8080/v1
+  - url: https://my-service/v1
+paths: {}

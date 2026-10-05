@@ -1,6 +1,6 @@
 # Areté Policy Engine
 
-The **Areté Policy Engine** (`arete-policy-plugin`, plugin id
+The **Areté Policy Engine** (`arete-engine`, plugin id
 `generic-policy`) is the built-in, policy-driven scoring plugin. Instead of
 hard-coding checks in Java, it ships a **policy bundle**: a tree of Markdown +
 YAML files defining **matchers** (Distill programs that inspect the normalised
@@ -37,15 +37,14 @@ rule pipelines (`.map` / `.filter` / `.expand`, slashy regex literals,
   network, reflection, or unbounded loops.
 - See the [Distill reference](distill.md) for the full grammar and builtin catalogue.
 
-The build also runs optional `Matcher.groovy` counterparts as parity checks;
-they are not part of the deployed matcher runtime. See
-[The case for Distill](performance.md) for how the engines compare.
+Distill is the only matcher language; there is no second runtime. See
+[The case for Distill](performance.md) for why.
 
 ---
 
 ## The policy bundle
 
-Everything lives under `arete-policy-plugin/src/main/resources/api-policy/`:
+Everything lives under `arete-engine/src/main/resources/api-policy/`:
 
 ```
 api-policy/
@@ -53,8 +52,7 @@ api-policy/
 ├── matchers/
 │   └── <matcher-id>/
 │       ├── Matcher.md          # descriptor (YAML front matter) + prose
-│       ├── Matcher.distill         # the matcher, in Distill — the only runtime used
-│       └── Matcher.groovy      # build-time parity check (optional)
+│       └── Matcher.distill     # the matcher, in Distill — the only runtime used
 ├── rules/
 │   └── <RULE-ID>.md             # rule front matter + human documentation
 └── policies/
@@ -240,6 +238,40 @@ every `description` / `summary` in the document; `api.lint.refs` is every
 carry an `itemsPresent` flag. JSON Pointers are pre-escaped and safe to return
 verbatim as `pointer`.
 
+**Pointers are stable.** A finding is named by what it is about, not by where it sits in a list, so adding a
+parameter, a tag or a response does not make every later finding look new. A parameter is
+`.../parameters/<in>:<name>` (a second one with the same `in` and `name`, itself a finding, is
+`.../parameters/<in>:<name>#2`); a response is `.../responses/<status>`, and a response header
+`.../responses/<status>/headers/<name>`; a tag is `/tags/<name>`; the metadata fields are
+`/info/description`, `/info/contact/name` and so on. Two findings of one rule are the same finding in two runs when their
+rule, pointer and subject (the rule's own label, such as `GET /orders` or a server's URL) match, whatever the message
+says. The one place a pointer still counts position is a member of an inline `allOf`, `anyOf` or `oneOf`, which has no
+name (`.../allOf/1/...`). Reports find these pointers' lines in the spec text, so a pointer that names a parameter or tag
+still lands on its line.
+
+**`$ref` is transparent.** A same-document `$ref` to a component request body,
+response, header, parameter or schema reads like the thing it names, through
+chains of references, so a spec that defines something once under `components`
+scores the same as one that writes it inline. A property that is a `$ref` carries
+the type, format, constraints, enum and description of the schema it names (its
+own `description` and `example` win), plus the raw `ref` it was written as. A
+cycle, a chain longer than 32 links, or a target that does not exist stops at the
+stub and is listed in `api.refProblems` as `{ref, reason}` with reason `cycle`,
+`chain-too-long` or `missing`; it is never dropped silently.
+
+**Nested schemas are visible.** A schema's `properties` list holds its direct
+properties first, then those below them: properties of inline objects nested
+under a property, of `items`, of `additionalProperties` and of inline `allOf` /
+`anyOf` / `oneOf` members. Each entry carries its own `pointer` at the place it
+is declared and a `depth` counting property hops (composition members, `items`
+and `additionalProperties` add none). A referenced schema is not entered; it is
+a component and reports at its own definition, once, however many properties
+use it. Each schema also carries `nestingDepth`, the longest chain of property
+hops below it through `$ref`s (a scalar is 0, an object of scalars 1); a
+recursive schema stops where it recurs. `api.schemaProperties` also lists the
+properties of schemas written inline in a request body or response, and of
+those in component request bodies and responses.
+
 `api.operations`, `api.responses`, and `api.schemaProperties` are flat
 convenience views: every `operationDetails` entry across all paths, every
 response across all operations, and every property across all schemas, in one
@@ -395,6 +427,183 @@ policies.
 Two ready-made examples, `Lenient` (every rule, 0.1 each) and `Pedantic` (every
 rule, 2.0 each, security rules `PROHIBITED`), make good starting points.
 
+### How a rule is charged (policy format 2)
+
+By default a rule that matches costs its `points` once, however many times it matches, and a match is the violation. A
+policy that declares **`format: 2`** can say more about a rule:
+
+| Setting | Meaning |
+|---|---|
+| `points: N` | A flat cost, charged once. As before. |
+| `per-match: N` and `max: M` | Charge `N` for each match, up to `M` in all. Without `max` the only limit is the score floor of 0. |
+| `tiers: { 2: 1, 5: 3, 20: 8 }` | Charge the points of the highest tier the match count reaches: 2 or more costs 1, 5 or more costs 3, 20 or more costs 8. **Below the lowest tier the rule is not violated**: it reports nothing, so a tier map also expresses "up to N is fine". |
+| `measure: value` | With `tiers`: tier on the **value** the matcher reports with each occurrence (the deepest schema, the operation with the most parameters), taking the worst one, not on how many occurrences there are. `measure: count` is the default. See below. |
+| `expect: match` | The opposite sense: the matcher looks for something that should be there, and **finding nothing** is the violation. It is reported once, at the spec root, with a message that nothing was found. |
+| `expect: no-match` | The default, as before. |
+| `points: PROHIBITED` | Unchanged: any violation forces the score to 0. Works with `expect: match`. |
+
+Exactly one of `points`, `per-match` and `tiers` is given; `max` goes only with `per-match`; `measure` only with `tiers`. A policy without
+`format: 2` that uses the new keys is rejected, so a policy file never changes meaning silently. For example:
+
+```yaml
+---
+id: Strict Pagination
+format: 2
+rules:
+  PAGE004:
+    per-match: 0.5        # each unbounded page size costs half a point...
+    max: 3                # ...but never more than 3
+  JSON022:
+    tiers: { 6: 1, 21: 3 }   # five unbounded strings are tolerated; more cost 1, then 3
+---
+```
+
+A rule can be charged by what the matcher *measured* rather than how often it matched. A matcher reports a value as
+an optional fourth argument of `occurrence(...)`, and the policy opts in with `measure: value`:
+
+```yaml
+format: 2
+rules:
+  JSON025:                         # schema nesting depth; each occurrence carries its depth
+    measure: value
+    tiers: { 5: 0.5, 7: 1.5 }      # 5 or 6 levels deep costs 0.5, 7 or more costs 1.5
+  STANDARD011:                     # parameters per operation; each occurrence carries the count
+    measure: value
+    tiers: { 9: 1, 13: 3 }
+```
+
+The cost follows the **largest** value among the occurrences. Every occurrence is still reported as a finding, with the
+value on it. A rule charged by value whose matcher reports no value is a scoring error, not a silent zero. The merge
+gate compares the worst value too, so a schema getting deeper fails even when the number of findings is unchanged
+(`JSON025 got worse: 5 -> 7`). `measure` goes only with `tiers`.
+
+`expect: match` only makes sense with a matcher written to find evidence of something wanted. Every bundled matcher reports
+*violations*, so none of the bundled rules is used that way; it is for your own matchers, for example one that matches an
+operation declaring a `Link` header, with `expect: match, points: 2` meaning "somewhere in the API a paginated response must
+declare one".
+
+Every finding of a rule scored this way is still listed, and each carries the rule's whole cost. The result also records, per
+rule, how many times it matched and what it cost (`rules` in the JSON report), because for a rule scored by count the
+**merge-gate** compares the count: it fails when the count rose (or the rule was newly violated), even where the cost did
+not move because a cap or a tier absorbed it. A rule charged a flat cost is judged as before: more findings of a rule the
+base already violated is existing debt.
+
+`expect: match` is whole-spec today: "at least one match anywhere". Asking that *every* operation or schema match needs a
+matcher that reports what it looked at as well as what it found, which is part of the [Distill extensions](../../design-notes/distill-extensions.md)
+still to be designed.
+
+### Policy sources
+
+The bundle in the jar is only the default. An engine takes a list of **sources**,
+loaded in order and layered: a later source adds to the earlier ones, or replaces an
+entry with the same id, and may use any matcher or rule an earlier one defines. An
+organisation's own standards live in a bundle of their own, apart from the public tool.
+
+A source is a URI, optionally with `#ref=<ref>&path=<folder>` for a git source:
+
+| Source | Example |
+|---|---|
+| Bundle in the jar | `classpath:api-policy` (the default) |
+| Directory or zip on disk | `file:./policy/`, `file:./policy-2.3.1.zip` |
+| Zip over HTTPS | `https://host/policy-2.3.1.zip` (plain HTTP only for loopback) |
+| Maven coordinate | `maven:org.acme:api-policy:2.3.1` (a zip; add `:jar` for a jar) |
+| Git repository | `git:https://git.acme.com/api/policy.git#ref=v2.3.1&path=bundle` |
+
+A Maven coordinate is looked up in Maven layout
+(`org/acme/api-policy/2.3.1/api-policy-2.3.1.zip`) in the repositories you give the engine
+(`mavenRepository(url)`, an `https:` or `file:` base URL) and, if you ask for it, those in your
+Maven `settings.xml`. A zip may hold its files at the root or inside one folder.
+
+A **git** source is read with the `git` program, so it uses the credentials the machine already has (an ssh key, a
+credential helper, a CI job token in the URL's environment). The repository is `https://`, `ssh://`, `file://` or
+`user@host:path`. `ref` is a branch, tag or full commit id (the default branch if left out) and `path` is the folder
+holding `PolicyBundle.yaml` (the repository root if left out). Only that ref is fetched, shallowly, into a scratch
+folder that is deleted afterwards; hooks and the `ext::` transport are off, and a symbolic link in the bundle is refused.
+`git:https://git.acme.com/api/policy.git` alone follows the default branch.
+
+**Maven settings.** CI already says where artifacts live and who may fetch them in
+`settings.xml`, so the engine reads it instead of asking again. `Engine.builder().mavenSettings()`
+reads `~/.m2/settings.xml` over `$MAVEN_HOME/conf/settings.xml`; `mavenSettings(path)` reads one
+file, as `mvn -s` does; `mavenProfile("id")` activates a profile, as `mvn -P` does. From it the
+engine uses:
+
+- the **local repository** (`<localRepository>`, else `~/.m2/repository`), looked at first;
+- the **repositories of active profiles** (listed in `<activeProfiles>`, active by default, or
+  activated by a system property), then Maven Central;
+- **mirrors**, matched by `mirrorOf` (`*`, `external:*`, ids, `!id`) and replacing the repository
+  URL, so a corporate Nexus that mirrors everything is used instead of Central;
+- **servers**, for credentials: a `<username>`/`<password>` becomes Basic authentication, and
+  `<httpHeaders>` are sent as they are (for a bearer token). Credentials are looked up by the id of
+  the repository, or of the mirror that replaced it;
+- an active **proxy**, with its `nonProxyHosts` and credentials.
+
+`${env.NAME}` and system properties are substituted, so a secret can live in a CI variable. An
+encrypted password (`{…}`) is not supported and is refused with a message; use `${env.NAME}`.
+A placeholder that is not set is an error when its server is used, never a blank password.
+
+Without the builder, `maven-settings` (`default`, or a path) and `maven-profiles` do the same in
+`configure(Map)`. Nothing reads `settings.xml` unless asked.
+
+**Pins (optional, not yet a security boundary).** A source can carry `#sha256=<hex>` (the digest of the archive) and
+`&version=<v>` (the bundle's `bundleVersion`); a mismatch fails the load, and `requirePin` refuses a remote source with no
+`sha256`. This only detects a bundle that changed since the pin was written. Where the first digest comes from, and who
+vouches for a bundle, is not settled, so the examples do not use pins; signature checking is planned.
+
+Fetched archives are kept in a cache by digest (`~/.arete/cache/policies` by default), so a
+pinned source is read from there on later runs, with no network. Every archive is bounded
+in size and entry count.
+
+```java
+Engine engine = Engine.builder()
+        .policySource("classpath:api-policy")
+        .policySource("maven:org.acme:api-policy:2.3.1")
+        .mavenSettings()                       // repositories, mirrors and credentials from settings.xml
+        .build();
+```
+
+Without the builder, `new Engine().configure(Map)` reads the same settings from the keys
+`policy-sources`, `maven-repositories`, `require-pin`, `cache-dir` and `policies-dir`, or from
+system properties `arete.policy.sources`, `arete.policy.maven-repositories`,
+`arete.policy.maven-settings`, `arete.policy.maven-profiles`, `arete.policy.require-pin`, `arete.policy.cache-dir` and `arete.policy.policies-dir`.
+
+### Locked rules
+
+A policy can mark a rule `locked`, which stops a team overriding it in `.arete.yaml`:
+
+```yaml
+rules:
+  SECURITY001:
+    points: 5
+    locked: true
+```
+
+The lock is enforced by the engine. A team that needs different rules has to pick a different policy.
+
+### Team overrides: `.arete.yaml`
+
+A team keeps its deliberate, reviewed deviations from a policy in an `.arete.yaml` next to its
+specs. Each states a `reason`, and either disables the rule or changes its `points` or `parameters`:
+
+```yaml
+policy: Enterprise Grade
+overrides:
+  STATUS003:
+    reason: Our gateway answers 403 for a missing token, by design.
+    disable: true
+  PAGE004:
+    reason: Reporting endpoints page in thousands.
+    points: 1
+    parameters: { maximum: 1000 }
+```
+
+```java
+ScoringResult result = engine.score(input, Overrides.parse(Files.readString(Path.of(".arete.yaml"))));
+```
+
+The file is parsed strictly: an unknown key, a missing reason, or an override of a rule that does not
+exist is an error, so a typo cannot silently do nothing. An override of a locked rule fails the run. An
+override of a rule the chosen policy does not run has no effect. The bundle itself is never changed.
+
 ---
 
 ## Scoring
@@ -428,7 +637,7 @@ The result reports `overallScore` (`effectiveScore`) and
    `matchers:`.
 3. Add rules that use it.
 4. Regenerate the behaviour snapshots and review the diff:
-   `mvn -pl arete-policy-plugin test -Dtest=PolicySnapshotTest -Dsnapshot.update=true`.
+   `mvn -pl arete-engine test -Dtest=PolicySnapshotTest -Dsnapshot.update=true`.
 
 ### Behaviour snapshots
 
@@ -437,9 +646,8 @@ and checks the findings — and each policy's end-to-end score — against golde
 files under `src/test/resources/snapshots/`. Any change to a matcher, rule
 parameters, or the scoring model surfaces as a diff there. After an intended
 change, regenerate with `-Dsnapshot.update=true` and review what moved before
-committing the updated snapshots. (`Matcher.groovy` parity checks still run for
-matchers that have one, but they compare two implementations of the current
-behaviour, not against a frozen baseline — the snapshots are the baseline.)
+committing the updated snapshots. The per-rule examples in
+`src/test/resources/corpus/` and the whole-API specs beside them are checked the same way.
 
 ### A new policy
 
@@ -462,17 +670,16 @@ validated against the rule descriptor at bundle load time; unknown or
 incorrectly typed overrides fail fast. The shorthand remains equivalent to a
 declaration with no overrides.
 
-### Build & install
+### Build
 
 ```bash
-mvn -q -pl arete-policy-plugin -am package -DskipTests
-cp arete-policy-plugin/target/arete-policy-plugin-*.jar \
-   ~/.arete/plugins/
+mvn -q -pl arete-engine -am package -DskipTests
 ```
 
-`PolicyScoringPluginTest` / `...LoadIT` load the real bundle and will
-fail the build on any manifest, front-matter, scope, parameter, or
-rule-compile error.
+The bundle is part of the `arete-engine` jar; the app depends on it, so there
+is nothing to install. `EngineTest` and the corpus tests load the
+real bundle and will fail the build on any manifest, front-matter, scope,
+parameter, or rule-compile error.
 
 ---
 

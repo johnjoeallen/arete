@@ -1,13 +1,12 @@
 package net.dublinux.arete.web;
 
+import net.dublinux.arete.engine.Engine;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.dublinux.arete.plugin.PluginRegistry;
 import net.dublinux.arete.service.SpecStorageService;
 import net.dublinux.arete.web.dto.SpecSummary;
-import net.dublinux.arete.scoring.spi.MatcherTestProvider;
-import net.dublinux.arete.scoring.spi.MatcherTestRequest;
-import net.dublinux.arete.scoring.spi.ScoringResult;
+import net.dublinux.arete.engine.api.MatcherTestRequest;
+import net.dublinux.arete.engine.api.ScoringResult;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -67,12 +66,12 @@ public class MatcherTestController {
                   responses:
                     '200': { description: OK }
             """;
-    private final PluginRegistry pluginRegistry;
+    private final Engine engine;
     private final SpecStorageService specStorageService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public MatcherTestController(PluginRegistry pluginRegistry, SpecStorageService specStorageService) {
-        this.pluginRegistry = pluginRegistry;
+    public MatcherTestController(Engine engine, SpecStorageService specStorageService) {
+        this.engine = engine;
         this.specStorageService = specStorageService;
     }
 
@@ -106,17 +105,8 @@ public class MatcherTestController {
             return "matcher-test";
         }
 
-        MatcherTestProvider provider = pluginRegistry.getPlugins().stream()
-                .filter(MatcherTestProvider.class::isInstance)
-                .map(MatcherTestProvider.class::cast)
-                .findFirst().orElse(null);
-        if (provider == null) {
-            model.addAttribute("testError", "No loaded plugin provides matcher testing.");
-            return "matcher-test";
-        }
-
         try {
-            ScoringResult result = provider.testMatcher(new MatcherTestRequest("distill", matcherId, matcherSource,
+            ScoringResult result = engine.testMatcher(new MatcherTestRequest("distill", matcherId, matcherSource,
                     scope, parsedParameters, spec));
             if (result.getStatus() == ScoringResult.Status.SUCCESS) {
                 model.addAttribute("diagnostics", result.getDiagnostics());

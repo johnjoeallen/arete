@@ -1,0 +1,14 @@
+openapi: 3.0.0
+info: { title: Corpus, version: 1.0.0, description: Corpus example. }
+paths:
+  /customers:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateCustomer' }
+      responses: { '201': { description: Created } }
+components:
+  schemas:
+    CreateCustomer: { type: object }

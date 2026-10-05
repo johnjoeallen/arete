@@ -36,10 +36,48 @@ Then open <http://localhost:6809>.
 
 ### From source
 
+Requires Java 17+ and Maven.
+
 ```bash
-mvn clean package        # or ./build.sh — also copies jars into scripts/
+mvn clean package        # or ./build.sh — also copies the app jar to scripts/arete.jar
 ./scripts/arete.sh
 ```
+
+### Build and install the zip locally
+
+```bash
+mvn clean verify
+VERSION=$(mvn -q help:evaluate -Dexpression=project.version -DforceStdout)
+rm -rf dist && mkdir -p dist/arete
+cp arete-app/target/arete-$VERSION.jar dist/arete/arete.jar
+cp arete-cli/target/arete-cli-$VERSION.jar dist/arete/arete-cli.jar   # optional
+cp scripts/arete.sh scripts/arete.bat dist/arete/
+chmod +x dist/arete/arete.sh
+(cd dist/arete && zip -r ../../arete-$VERSION.zip .)
+
+unzip arete-$VERSION.zip -d ~/arete && cd ~/arete && ./arete.sh
+```
+
+Open <http://localhost:6809>. Data lives in `~/.arete`, so upgrading is just
+unzipping a newer zip over the old folder.
+
+### Build and install the Maven and Gradle plugins locally
+
+```bash
+mvn clean install -DskipTests    # installs the engine and both plugins into ~/.m2
+```
+
+Maven, in the project to check:
+
+```bash
+mvn net.dublinux.arete:arete-maven-plugin:0.1.0-SNAPSHOT:gate -Darete.target=origin/main
+```
+
+Gradle: add `mavenLocal()` to `pluginManagement.repositories` in
+`settings.gradle` and use `id 'net.dublinux.arete' version '0.1.0-SNAPSHOT'`.
+Full snippets are in
+[Getting Started](https://johnjoeallen.github.io/arete/getting-started/) and
+[Maven and Gradle](https://johnjoeallen.github.io/arete/build-plugins/).
 
 Common flags: `--port PORT` / `-p PORT`, `--wipe-db`, `-h`. The launcher
 respects `JAVA_HOME`. See
@@ -54,11 +92,11 @@ endpoint with severity badges, JSON Pointer locations, and links to rule
 docs.
 
 The release bundles the **Areté Policy Engine**
-(`arete-policy-plugin`) — a policy-driven linter whose matchers,
+(`arete-engine`) — a policy-driven linter whose matchers,
 rules, and policies are plain text files, with matchers written in Distill,
 a safe-by-construction expression language. It ships the Enterprise Grade,
-Zalando, and Zalando Extended policies. Drop additional plugin jars into
-`~/.arete/plugins`.
+Zalando, and Zalando Extended policies. Add your own policies under
+`~/.arete/policies`.
 
 For CI, the **Automation API** (`/api/v1`) takes a spec inline or by URL, runs
 the validator/policy combinations you name, and returns findings plus a
@@ -72,22 +110,26 @@ protected boundary.
   — editor highlighting for VS Code / IntelliJ lives in [`editors/distill/`](editors/distill/)
 - [Rule catalogue](https://johnjoeallen.github.io/arete/scoring/rules/)
   and [policies](https://johnjoeallen.github.io/arete/scoring/policies/)
-- [Writing a plugin](https://johnjoeallen.github.io/arete/scoring/writing-a-plugin/)
 
 ## Modules
 
 | Module | Purpose |
 |---|---|
-| `arete-scoring-spi` | Plugin SPI, published to Maven Central (`net.dublinux.arete:arete-scoring-spi`). |
-| `arete-policy-plugin` | The bundled Areté Policy Engine. |
-| `arete-app` | The Spring Boot application. |
+| `arete-engine-api` | The engine's public types (findings, scores, severities, spec input). Published to Maven Central. |
+| `arete-engine` | The Areté Policy Engine: spec model, policy loading, Distill and scoring. A plain library with no Spring, database or UI. Published to Maven Central. |
+| `arete-cli` | The `arete` command: score, diff and report specs, check a policy source. One runnable jar. |
+| `arete-maven-plugin`, `arete-gradle-plugin` | `gate` and `score` in the build, in process, as thin wrappers over the engine. Published to Maven Central. |
+| `arete-app` | The Spring Boot application, a local viewing and scoring UI over the engine. |
 
 ## Release
 
 Pushing a tag matching `v*.*.*` runs
 [`.github/workflows/release.yml`](.github/workflows/release.yml), which sets
 the Maven version from the tag, builds, packages the zip, and publishes it
-as a GitHub release. Docs are deployed to GitHub Pages by
+as a GitHub release, with the command line jar. The engine, its API and the
+Maven and Gradle plugins go to Maven Central from
+[`.github/workflows/publish.yml`](.github/workflows/publish.yml), run by hand
+against a tag ([how](docs/publishing.md)). Docs are deployed to GitHub Pages by
 [`.github/workflows/docs.yml`](.github/workflows/docs.yml).
 
 ## License

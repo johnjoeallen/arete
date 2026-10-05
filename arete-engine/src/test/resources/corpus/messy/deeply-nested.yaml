@@ -1,0 +1,87 @@
+openapi: 3.0.3
+info:
+  title: Deeply Nested API
+  description: Schemas that nest through references, inline objects and composition.
+  version: 1.0.0
+  contact: { name: Team, email: team@acme-retail.com }
+  license: { name: Apache-2.0, url: https://www.apache.org/licenses/LICENSE-2.0 }
+x-api-id: 11111111-2222-3333-4444-555555555555
+x-audience: company-internal
+servers:
+  - url: https://api.acme-retail.com
+paths:
+  /documents/{document_id}:
+    get:
+      summary: Get a document
+      parameters:
+        - $ref: '#/components/parameters/DocumentId'
+      responses:
+        '200': { $ref: '#/components/responses/Document' }
+        '404': { $ref: '#/components/responses/Alias' }
+components:
+  parameters:
+    DocumentId:
+      name: document_id
+      in: path
+      required: true
+      schema: { type: string }
+  responses:
+    Document:
+      description: The document.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Document' }
+    Alias: { $ref: '#/components/responses/Document' }
+  schemas:
+    Document:
+      type: object
+      properties:
+        title: { type: string }
+        body:
+          type: object
+          properties:
+            sections:
+              type: array
+              items:
+                type: object
+                properties:
+                  heading: { type: string }
+                  blocks:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        kind:
+                          type: string
+                          enum: [1, paragraph]
+                        runs:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              text: { type: string }
+                              style: { $ref: '#/components/schemas/Style' }
+        owner: { $ref: '#/components/schemas/Person' }
+        revisions:
+          type: array
+    Style:
+      allOf:
+        - $ref: '#/components/schemas/Base'
+        - type: object
+          properties:
+            bold: { type: boolean }
+    Base: { type: object, properties: { id: { type: string } } }
+    Person:
+      type: object
+      properties:
+        name: { type: string }
+        manager: { $ref: '#/components/schemas/Person' }
+        reports:
+          type: array
+          items: { $ref: '#/components/schemas/Person' }
+    Node:
+      type: object
+      properties:
+        next: { $ref: '#/components/schemas/Node' }
+    LoopA: { $ref: '#/components/schemas/LoopB' }
+    LoopB: { $ref: '#/components/schemas/LoopA' }

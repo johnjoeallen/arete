@@ -1,0 +1,1 @@
+/paths/~1customers/get/responses/429  |  Response 429 lacks one or more required headers: RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset

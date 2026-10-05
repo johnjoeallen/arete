@@ -1,0 +1,12 @@
+openapi: 3.0.0
+info:
+  title: Customer API
+  description: Manage customers.
+  version: 1.2.3
+  contact:
+    name: API Team
+    email: api@example.test
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+paths: {}

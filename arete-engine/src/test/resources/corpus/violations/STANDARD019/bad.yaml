@@ -1,0 +1,13 @@
+openapi: 3.0.0
+info: { title: Corpus, version: 1.0.0, description: Corpus example. }
+paths: {}
+components:
+  schemas:
+    Party: { type: object }
+    LoyaltyFields: { type: object }
+    Customer:
+      allOf:
+        - $ref: '#/components/schemas/Party'
+        - type: object
+          properties:
+            loyaltyTier: { type: string }

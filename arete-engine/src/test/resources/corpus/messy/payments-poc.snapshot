@@ -1,0 +1,171 @@
+# findings and score by policy; regenerate with -Dcorpus.update=true
+
+## Enterprise Grade  score=77.5  grade=D+  findings=77
+  DOC006  /info/contact/email  |  API metadata is missing contact email
+  DOC006  /info/version  |  API metadata is missing semantic version
+  DOC007  /  |  API metadata is missing x-api-id
+  DOC008  /  |  API metadata is missing x-audience
+  DOC009  /paths/~1v1~1payments~1{paymentId}~1refund/put  |  Operation summary is not action-oriented
+  DOC010  /paths/~1v1~1payments/post  |  operationId 'createPayment' is also used by GET /v1/payments
+  DOC010  /paths/~1v1~1payments~1{paymentId}~1refund/put  |  Operation has no operationId
+  DOC011  /paths/~1v1~1payments/get  |  Operation is not assigned any tag
+  DOC011  /paths/~1v1~1payments~1{paymentId}~1refund/put  |  Operation is not assigned any tag
+  DOC012  /info/title  |  API title does not end with 'API'
+  DOC013  /components/schemas/PaymentRequest/allOf/1/properties/note  |  PaymentRequest.note has no description or example
+  DOC013  /components/schemas/PaymentResponse/properties/id  |  PaymentResponse.id has no description or example
+  DOC013  /components/schemas/PaymentResponse/properties/status  |  PaymentResponse.status has no description or example
+  DOC014  /paths/~1v1~1payments/get/parameters/query:a  |  GET /v1/payments a has no description or example
+  DOC014  /paths/~1v1~1payments/get/parameters/query:b  |  GET /v1/payments b has no description or example
+  DOC014  /paths/~1v1~1payments/get/parameters/query:c  |  GET /v1/payments c has no description or example
+  DOC014  /paths/~1v1~1payments/get/parameters/query:d  |  GET /v1/payments d has no description or example
+  DOC014  /paths/~1v1~1payments/get/parameters/query:e  |  GET /v1/payments e has no description or example
+  DOC014  /paths/~1v1~1payments/get/parameters/query:f  |  GET /v1/payments f has no description or example
+  DOC014  /paths/~1v1~1payments/get/parameters/query:filter  |  GET /v1/payments filter has no description or example
+  DOC014  /paths/~1v1~1payments/get/parameters/query:g  |  GET /v1/payments g has no description or example
+  DOC014  /paths/~1v1~1payments/get/parameters/query:ids  |  GET /v1/payments ids has no description or example
+  DOC014  /paths/~1v1~1payments/get/parameters/query:ids#2  |  GET /v1/payments ids has no description or example
+  DOC014  /paths/~1v1~1payments/get/parameters/query:limit  |  GET /v1/payments limit has no description or example
+  DOC014  /paths/~1v1~1payments/get/parameters/query:page  |  GET /v1/payments page has no description or example
+  DOC014  /paths/~1v1~1payments/get/parameters/query:sort  |  GET /v1/payments sort has no description or example
+  DOC015  /paths/~1v1~1payments/get  |  Operation description is missing
+  DOC015  /paths/~1v1~1payments/post  |  Operation description is missing
+  DOC015  /paths/~1v1~1payments~1{paymentId}~1refund/put  |  Operation description is missing
+  DOC019  /tags/Payments  |  Tag 'Payments' is declared more than once
+  DOC020  /info/license  |  API license does not declare a url
+  DOC021  /paths/~1v1~1payments/get  |  Operation summary has too few words to be meaningful
+  JSON007  /components/schemas/PaymentResponse/properties/status  |  Property uses an enum
+  JSON012  /paths/~1v1~1payments/post/requestBody/content/application~1vnd.acme.v2+json/schema/properties/accountId  |  Numeric property does not declare a format
+  JSON012  /paths/~1v1~1payments/post/requestBody/content/application~1vnd.acme.v2+json/schema/properties/amount  |  Numeric property does not declare a format
+  JSON013  /components/schemas/PaymentResponse/properties/status  |  Enum value type is inconsistent with the property type
+  JSON014  /components/schemas/PaymentResponse/properties/status  |  Enum is not marked extensible
+  JSON015  /components/schemas/PaymentResponse/properties/status  |  Enum value is not UPPER_SNAKE_CASE
+  JSON018  /paths/~1v1~1payments/post/requestBody/content/application~1vnd.acme.v2+json/schema/properties/accountId  |  Numeric property does not declare a format
+  JSON019  /paths/~1v1~1payments/post/requestBody/content/application~1vnd.acme.v2+json/schema/properties/amount  |  Numeric property does not declare a format
+  REST002  /paths/~1v1~1payments  |  Collection name is singular
+  REST002  /paths/~1v1~1payments~1{paymentId}~1refund  |  Collection name is singular
+  REST002  /paths/~1v1~1payments~1{paymentId}~1refund  |  Collection name is singular
+  REST005  /components/schemas/PaymentRequest  |  Name has prohibited suffix Request
+  REST006  /components/schemas/PaymentResponse  |  Name has prohibited suffix Response
+  SECURITY001  /paths/~1v1~1payments/get  |  Operation does not require security scheme bearerAuth
+  SECURITY001  /paths/~1v1~1payments/post  |  Operation does not require security scheme bearerAuth
+  SECURITY001  /paths/~1v1~1payments~1{paymentId}~1refund/put  |  Operation does not require security scheme bearerAuth
+  SECURITY002  /paths/~1v1~1payments/get  |  Operation does not require security scheme bearerAuth with scopes read, write
+  SECURITY002  /paths/~1v1~1payments/post  |  Operation does not require security scheme bearerAuth with scopes read, write
+  SECURITY002  /paths/~1v1~1payments~1{paymentId}~1refund/put  |  Operation does not require security scheme bearerAuth with scopes read, write
+  SECURITY004  /info  |  Description or summary contains active markup (a script tag, javascript: URL, event handler, or eval call)
+  STANDARD005  /paths/~1v1~1payments~1{paymentId}~1refund  |  Resource path exceeds the maximum nesting depth
+  STANDARD006  /paths/~1v1~1payments  |  Nested resource type is not exposed as a root resource
+  STANDARD006  /paths/~1v1~1payments~1{paymentId}~1refund  |  Nested resource type is not exposed as a root resource
+  STANDARD009  /paths/~1v1~1payments/get/parameters/query:ids  |  Collection query parameter ids does not use form serialization with explode=true
+  STANDARD009  /paths/~1v1~1payments/get/parameters/query:sort  |  Collection query parameter sort does not use form serialization with explode=true
+  STANDARD011  /paths/~1v1~1payments/get  |  Operation declares 13 parameters, more than the maximum of 8
+  STANDARD013  /paths/~1v1~1payments~1{paymentId}~1refund/put  |  Path template placeholder '{paymentId}' has no matching path parameter
+  STANDARD015  /paths/~1v1~1payments/post  |  Request body is present but not marked required: true
+  STANDARD018  /info  |  Uses the non-standard extension 'x-internal-owner'
+  STANDARD019  /components/schemas/PaymentRequest  |  PaymentRequest uses allOf with inline members instead of $ref
+  STANDARD020  /paths/~1v1~1payments/post  |  Request body declares an inline object schema instead of a $ref
+  STANDARD020  /paths/~1v1~1payments/post  |  Response 404 declares an inline object schema instead of a $ref
+  STANDARD026  /paths/~1v1~1payments/get/parameters/query:ids#2  |  Parameter 'ids' in query is declared more than once
+  STANDARD027  /servers  |  Server URL has a trailing slash, which produces '//' when joined with a path
+  STATUS001  /paths/~1v1~1payments/post  |  Operation lacks the required documented status
+  STATUS003  /paths/~1v1~1payments~1{paymentId}~1refund/put/responses/403  |  Response uses the configured status code
+  STATUS006  /paths/~1v1~1payments/post/responses/404  |  Error response does not declare application/problem+json
+  STATUS006  /paths/~1v1~1payments/post/responses/429  |  Error response does not declare application/problem+json
+  STATUS006  /paths/~1v1~1payments~1{paymentId}~1refund/put/responses/401  |  Error response does not declare application/problem+json
+  STATUS006  /paths/~1v1~1payments~1{paymentId}~1refund/put/responses/403  |  Error response does not declare application/problem+json
+  STATUS006  /paths/~1v1~1payments~1{paymentId}~1refund/put/responses/405  |  Error response does not declare application/problem+json
+  STATUS007  /paths/~1v1~1payments/post/responses/429  |  Response 429 lacks one or more required headers: RateLimit-Limit, RateLimit-Remaining
+  UPDATE001  /paths/~1v1~1payments~1{paymentId}~1refund/put  |  PUT appears to perform a partial update
+  VERSION001  /paths/~1v1~1payments  |  Interface version is exposed through uri
+  VERSION001  /paths/~1v1~1payments~1{paymentId}~1refund  |  Interface version is exposed through uri
+
+## Zalando  score=91.0  grade=A-  findings=33
+  DOC006  /info/contact/email  |  API metadata is missing contact email
+  DOC006  /info/version  |  API metadata is missing semantic version
+  DOC007  /  |  API metadata is missing x-api-id
+  DOC008  /  |  API metadata is missing x-audience
+  JSON012  /paths/~1v1~1payments/post/requestBody/content/application~1vnd.acme.v2+json/schema/properties/accountId  |  Numeric property does not declare a format
+  JSON012  /paths/~1v1~1payments/post/requestBody/content/application~1vnd.acme.v2+json/schema/properties/amount  |  Numeric property does not declare a format
+  JSON013  /components/schemas/PaymentResponse/properties/status  |  Enum value type is inconsistent with the property type
+  JSON014  /components/schemas/PaymentResponse/properties/status  |  Enum is not marked extensible
+  JSON015  /components/schemas/PaymentResponse/properties/status  |  Enum value is not UPPER_SNAKE_CASE
+  REST002  /paths/~1v1~1payments  |  Collection name is singular
+  REST002  /paths/~1v1~1payments~1{paymentId}~1refund  |  Collection name is singular
+  REST002  /paths/~1v1~1payments~1{paymentId}~1refund  |  Collection name is singular
+  SECURITY001  /paths/~1v1~1payments/get  |  Operation does not require security scheme bearerAuth
+  SECURITY001  /paths/~1v1~1payments/post  |  Operation does not require security scheme bearerAuth
+  SECURITY001  /paths/~1v1~1payments~1{paymentId}~1refund/put  |  Operation does not require security scheme bearerAuth
+  SECURITY002  /paths/~1v1~1payments/get  |  Operation does not require security scheme bearerAuth with scopes read
+  SECURITY002  /paths/~1v1~1payments/post  |  Operation does not require security scheme bearerAuth with scopes read
+  SECURITY002  /paths/~1v1~1payments~1{paymentId}~1refund/put  |  Operation does not require security scheme bearerAuth with scopes read
+  STANDARD005  /paths/~1v1~1payments~1{paymentId}~1refund  |  Resource path exceeds the maximum nesting depth
+  STANDARD006  /paths/~1v1~1payments  |  Nested resource type is not exposed as a root resource
+  STANDARD006  /paths/~1v1~1payments~1{paymentId}~1refund  |  Nested resource type is not exposed as a root resource
+  STANDARD009  /paths/~1v1~1payments/get/parameters/query:ids  |  Collection query parameter ids does not use form serialization with explode=true
+  STANDARD009  /paths/~1v1~1payments/get/parameters/query:sort  |  Collection query parameter sort does not use form serialization with explode=true
+  STATUS001  /paths/~1v1~1payments/post  |  Operation lacks the required documented status
+  STATUS003  /paths/~1v1~1payments~1{paymentId}~1refund/put/responses/403  |  Response uses the configured status code
+  STATUS006  /paths/~1v1~1payments/post/responses/404  |  Error response does not declare application/problem+json
+  STATUS006  /paths/~1v1~1payments/post/responses/429  |  Error response does not declare application/problem+json
+  STATUS006  /paths/~1v1~1payments~1{paymentId}~1refund/put/responses/401  |  Error response does not declare application/problem+json
+  STATUS006  /paths/~1v1~1payments~1{paymentId}~1refund/put/responses/403  |  Error response does not declare application/problem+json
+  STATUS006  /paths/~1v1~1payments~1{paymentId}~1refund/put/responses/405  |  Error response does not declare application/problem+json
+  STATUS007  /paths/~1v1~1payments/post/responses/429  |  Response 429 lacks one or more required headers: RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset
+  VERSION001  /paths/~1v1~1payments  |  Interface version is exposed through uri
+  VERSION001  /paths/~1v1~1payments~1{paymentId}~1refund  |  Interface version is exposed through uri
+
+## Zalando Extended  score=83.5  grade=B  findings=54
+  CASE008  /tags/Payment Operations  |  Tag name 'Payment Operations' does not follow the kebab-case convention
+  DOC006  /info/contact/email  |  API metadata is missing contact email
+  DOC006  /info/version  |  API metadata is missing semantic version
+  DOC007  /  |  API metadata is missing x-api-id
+  DOC008  /  |  API metadata is missing x-audience
+  DOC011  /paths/~1v1~1payments/get  |  Operation is not assigned any tag
+  DOC011  /paths/~1v1~1payments~1{paymentId}~1refund/put  |  Operation is not assigned any tag
+  DOC017  /tags/Payments  |  Tag 'Payments' has no description
+  DOC018  /tags/Payment Operations  |  Operation tag 'Payment Operations' is not declared in the top-level tags list
+  DOC019  /tags/Payments  |  Tag 'Payments' is declared more than once
+  DOC020  /info/license  |  API license does not declare a url
+  JSON012  /paths/~1v1~1payments/post/requestBody/content/application~1vnd.acme.v2+json/schema/properties/accountId  |  Numeric property does not declare a format
+  JSON012  /paths/~1v1~1payments/post/requestBody/content/application~1vnd.acme.v2+json/schema/properties/amount  |  Numeric property does not declare a format
+  JSON013  /components/schemas/PaymentResponse/properties/status  |  Enum value type is inconsistent with the property type
+  JSON014  /components/schemas/PaymentResponse/properties/status  |  Enum is not marked extensible
+  JSON015  /components/schemas/PaymentResponse/properties/status  |  Enum value is not UPPER_SNAKE_CASE
+  JSON021  /paths/~1v1~1payments/post/requestBody/content/application~1vnd.acme.v2+json/schema/properties/accountId  |  Numeric property does not declare both a minimum and a maximum
+  JSON021  /paths/~1v1~1payments/post/requestBody/content/application~1vnd.acme.v2+json/schema/properties/amount  |  Numeric property does not declare both a minimum and a maximum
+  JSON022  /components/schemas/PaymentRequest/allOf/1/properties/note  |  String property does not declare a maximum length
+  JSON022  /components/schemas/PaymentResponse/properties/id  |  String property does not declare a maximum length
+  JSON022  /components/schemas/PaymentResponse/properties/status  |  String property does not declare a maximum length
+  JSON022  /paths/~1v1~1payments/post/requestBody/content/application~1vnd.acme.v2+json/schema/properties/card_number  |  String property does not declare a maximum length
+  REST002  /paths/~1v1~1payments  |  Collection name is singular
+  REST002  /paths/~1v1~1payments~1{paymentId}~1refund  |  Collection name is singular
+  REST002  /paths/~1v1~1payments~1{paymentId}~1refund  |  Collection name is singular
+  REST007  /paths  |  All 2 paths start with '/v1', which could move to the server URL
+  SECURITY001  /paths/~1v1~1payments/get  |  Operation does not require security scheme bearerAuth
+  SECURITY001  /paths/~1v1~1payments/post  |  Operation does not require security scheme bearerAuth
+  SECURITY001  /paths/~1v1~1payments~1{paymentId}~1refund/put  |  Operation does not require security scheme bearerAuth
+  SECURITY002  /paths/~1v1~1payments/get  |  Operation does not require security scheme bearerAuth with scopes read
+  SECURITY002  /paths/~1v1~1payments/post  |  Operation does not require security scheme bearerAuth with scopes read
+  SECURITY002  /paths/~1v1~1payments~1{paymentId}~1refund/put  |  Operation does not require security scheme bearerAuth with scopes read
+  SECURITY004  /info  |  Description or summary contains active markup (a script tag, javascript: URL, event handler, or eval call)
+  STANDARD005  /paths/~1v1~1payments~1{paymentId}~1refund  |  Resource path exceeds the maximum nesting depth
+  STANDARD006  /paths/~1v1~1payments  |  Nested resource type is not exposed as a root resource
+  STANDARD006  /paths/~1v1~1payments~1{paymentId}~1refund  |  Nested resource type is not exposed as a root resource
+  STANDARD009  /paths/~1v1~1payments/get/parameters/query:ids  |  Collection query parameter ids does not use form serialization with explode=true
+  STANDARD009  /paths/~1v1~1payments/get/parameters/query:sort  |  Collection query parameter sort does not use form serialization with explode=true
+  STANDARD013  /paths/~1v1~1payments~1{paymentId}~1refund/put  |  Path template placeholder '{paymentId}' has no matching path parameter
+  STANDARD024  /components/schemas/PaymentRequest  |  Component schema 'PaymentRequest' is defined but never referenced
+  STANDARD024  /components/schemas/PaymentResponse  |  Component schema 'PaymentResponse' is defined but never referenced
+  STANDARD026  /paths/~1v1~1payments/get/parameters/query:ids#2  |  Parameter 'ids' in query is declared more than once
+  STANDARD027  /servers  |  Server URL has a trailing slash, which produces '//' when joined with a path
+  STANDARD028  /servers  |  Server URL uses the documentation placeholder host api.example.com
+  STATUS001  /paths/~1v1~1payments/post  |  Operation lacks the required documented status
+  STATUS003  /paths/~1v1~1payments~1{paymentId}~1refund/put/responses/403  |  Response uses the configured status code
+  STATUS006  /paths/~1v1~1payments/post/responses/404  |  Error response does not declare application/problem+json
+  STATUS006  /paths/~1v1~1payments/post/responses/429  |  Error response does not declare application/problem+json
+  STATUS006  /paths/~1v1~1payments~1{paymentId}~1refund/put/responses/401  |  Error response does not declare application/problem+json
+  STATUS006  /paths/~1v1~1payments~1{paymentId}~1refund/put/responses/403  |  Error response does not declare application/problem+json
+  STATUS006  /paths/~1v1~1payments~1{paymentId}~1refund/put/responses/405  |  Error response does not declare application/problem+json
+  STATUS007  /paths/~1v1~1payments/post/responses/429  |  Response 429 lacks one or more required headers: RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset
+  VERSION001  /paths/~1v1~1payments  |  Interface version is exposed through uri
+  VERSION001  /paths/~1v1~1payments~1{paymentId}~1refund  |  Interface version is exposed through uri

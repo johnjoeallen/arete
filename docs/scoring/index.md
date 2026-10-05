@@ -1,31 +1,26 @@
 # Scoring
 
-Scoring in Areté is **on-demand and pluggable**. Opening a spec doesn't
-run anything by itself — you choose what runs and when.
+Scoring in Areté is **on-demand**. Opening a spec doesn't run anything by
+itself — you choose what runs and when.
 
-Areté ships one bundled plugin, the
-[**Areté Policy Engine**](policy-engine.md) (`generic-policy`), and
-discovers any additional plugin jars you drop in. Multiple plugins can run
-together — for example a general API-guidelines linter alongside a specialised,
-organisation-specific plugin such as a breaking-changes checker.
+Areté scores with one engine, the
+[**Areté Policy Engine**](policy-engine.md) (`generic-policy`), built into the
+app. What changes between teams is the policy, not the engine: policies, rules
+and matchers are plain text files.
 
 ![The scoring picker and findings](../assets/screenshot-scoring.png)
 
 ## Running scoring
 
-A **Scoring** picker on the spec's page lists every globally enabled plugin
-as its own row — a checkbox plus that plugin's own policy dropdown — so more
-than one plugin can run at once. Click **Score** to run every checked plugin;
-nothing runs until you do.
+A **Scoring** picker on the spec's page offers the engine with a policy
+dropdown. Click **Score** to run it; nothing runs until you do.
 
-Which plugins are checked is remembered **per spec** in the database, so
-re-opening a spec later starts from the same selection. (A plugin's global
-enabled/disabled state in **Settings** still governs whether it appears in the
-picker at all.)
+The selection (and the policy chosen) is remembered **per spec** in the
+database, so re-opening a spec later starts from the same choice.
 
 ## Reading findings
 
-Findings from every plugin that ran are merged into one view. Each endpoint
+Findings from the run are shown in one view. Each endpoint
 whose findings map to a specific operation shows a combined severity-count
 badge (❌ error, ⚠️ warning, ℹ️ info, 💡 hint) in its header; expanding the
 endpoint lists those findings in full:
@@ -70,34 +65,24 @@ Areté Policy Engine exposes one policy per bundled [policy](policies.md):
     two or more elements has no iteration-order guarantee in Java, so policies
     would reshuffle on every restart. Keep the order stable across releases.
 
-## Where plugins come from
+## Where the engine comes from
 
-The core engine discovers each plugin from its shaded jar using Java's
-`ServiceLoader`. A plugin registers an implementation through
-`META-INF/services/net.dublinux.arete.scoring.spi.SpecScoringPlugin` and
-is loaded in an isolated classloader. This is the common plugin lifecycle; the
-Policy Engine is not special in this respect.
+The engine is a dependency of the app: the application creates one `Engine`
+(from `arete-engine`) at startup and uses it for every run. There are no plugin
+jars to drop in and no plugin folders, and no global enable/disable switch. The
+same engine is a plain library that other programs can embed.
 
-Plugin `.jar` files are discovered from two folders at startup:
-
-- **`plugins/`, next to `arete.jar`** — where the release zip ships the
-  bundled [Areté Policy Engine](policy-engine.md). Not created
-  automatically if missing.
-- **`~/.arete/plugins`** — a stable location independent of where Areté
-  is installed, created automatically if it doesn't exist. Drop your own plugin
-  jars here.
-
-Enable or disable individual plugins globally from **Settings**. A disabled
-plugin stays loaded but never appears in a spec's picker and is skipped during
-scoring, so re-enabling it doesn't need a restart. The per-spec checkbox is
-a narrower, additional switch layered on top of the global setting.
+```java
+Engine engine = new Engine();
+engine.configure(Map.of());
+ScoringResult result = engine.score(SpecInput.builder()
+        .content(yaml).format(SpecFormat.OPENAPI3).policy("Enterprise Grade").build());
+```
 
 ## Next
 
-- [Areté Policy Engine](policy-engine.md) — how the bundled plugin's
+- [Areté Policy Engine](policy-engine.md) — how the bundled
   matchers, rules, and policies work, and how to extend the bundle.
 - [Rule Catalogue](rules.md) — every rule in the bundle and which policies use it.
 - [Policies](policies.md) — the bundled Enterprise Grade, Zalando, and Zalando
   Extended policies.
-- [Writing a Plugin](writing-a-plugin.md) — implement the `SpecScoringPlugin`
-  SPI.

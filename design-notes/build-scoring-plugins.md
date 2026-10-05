@@ -1,10 +1,7 @@
 # Areté CI Gate — Maven & Gradle build-gate plugins
 
-> **v1 implemented.** Modules `arete-ci-gate-core`,
-> `arete-ci-gate-maven-plugin`, `arete-ci-gate-gradle-plugin` are in the
-> reactor. Still to do: the `ci-gate-it.yml` integration job (real Areté +
-> TestKit) and the first `ci-gate-v1.0.0` publish. This document remains the
-> design of record.
+> **Superseded and removed.** The `arete-ci-gate-*` modules this describes were retired in favour of in-process plugins
+> (`arete-maven-plugin`, `arete-gradle-plugin`) over the embeddable engine; see `serverless-core-plan.md`. Kept as history.
 >
 > The plugins are thin clients of Areté's existing
 > [Automation API](../docs/automation-api.md). Scoring stays entirely
@@ -237,7 +234,7 @@ non-gating, so nothing is hidden.
 ## Modules
 
 Three new modules **in this repository's reactor**, alongside `arete-app`,
-`arete-scoring-spi`, and `arete-policy-plugin`:
+`arete-engine-api`, and `arete-engine`:
 
 | Module | Purpose |
 |---|---|
@@ -249,7 +246,7 @@ They build with the rest of the project (`mvn -q verify` at the root builds
 them too), but **release on their own cadence and to their own channels** —
 see *Release & CI*. `arete-ci-gate-core` needs only the JDK HTTP client and a
 JSON library; the two plugins add their build-tool APIs. Nothing depends on
-`arete-scoring-spi`, and nothing in `arete-app` depends on these modules.
+`arete-engine-api`, and nothing in `arete-app` depends on these modules.
 
 ## Non-goals
 
@@ -319,7 +316,7 @@ CI (GitHub Actions in this repo):
 
 0. Add the three modules to the root `pom.xml` `<modules>` with their own
    version property; wire the `-Prelease` profile (GPG sign, sources + javadoc
-   jars) the way `arete-scoring-spi` already has it.
+   jars) the way `arete-engine-api` already has it.
 1. `arete-ci-gate-core` — API client + report formatter, tested against a
    stub HTTP server. No build-tool code.
 2. Maven plugin — `check` goal, tested against a sample `pom.xml` and a real

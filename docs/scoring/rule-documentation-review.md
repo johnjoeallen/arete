@@ -3,7 +3,7 @@
 ## Scope
 
 This review covers all 146 rule documents under
-`arete-policy-plugin/src/main/resources/api-policy/rules/`.
+`arete-engine/src/main/resources/api-policy/rules/`.
 
 The review assesses documentation, not the desirability of the rule itself. A
 rule can be well documented while still being a heuristic, a future capability,

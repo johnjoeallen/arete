@@ -24,9 +24,8 @@ doesn't.
 Matchers were originally Groovy closures run in-process. Groovy executes
 arbitrary code with full JVM access, so it fails the first requirement
 outright: a Groovy matcher from an untrusted source can do anything the
-application can. It is retained now only as a build-time parity reference —
-`Matcher.groovy` files are run against `Matcher.distill` on every build to catch
-any semantic drift, never against a submitted spec.
+application can. It has since been removed from the build entirely; Distill is the
+only matcher language.
 
 Groovy is not even the fast option. Compiled once and reused, it is **~4–5×
 slower than Distill** across the matcher set (measured below); as it was
@@ -68,7 +67,7 @@ bytecode — which the rest of this page quantifies.
 
 None of this replaces Areté's plugin facility. A scoring plugin is
 arbitrary compiled Java loaded through the SPI and a child-first classloader;
-`arete-policy-plugin` is itself one. A plugin runs with full
+`arete-engine` is itself one. A plugin runs with full
 application privileges, so **installing one is a trust decision** — and
 building it from source does not remove that boundary, it only moves the
 audit to you: the plugin's own code, its transitive dependencies, and its
@@ -92,6 +91,13 @@ belongs; the matcher is where a shareable rule belongs — and the second is
 where nearly all the work happens.
 
 ## Measurements
+
+!!! warning "Historical"
+    These figures were taken while a Groovy implementation of each matcher still
+    shipped, which is how the two could be compared. Groovy and the benchmark
+    tests that ran it (`DistillGroovyParityTest`, `PerformanceGainBenchmarkTest`)
+    have been removed, so the figures are kept as a record and cannot be reproduced
+    from the current tree.
 
 !!! note "These are ratios, not a benchmark suite"
     Figures come from a single developer-machine run and vary with hardware
@@ -225,13 +231,4 @@ jar.
 
 ## Reproducing
 
-```bash
-mvn -pl arete-policy-plugin test \
-  -Dtest='DistillGroovyParityTest#fullSweepParityAndPerformance+javaBaselineComparison' \
-  -Darete.benchmark=true
-```
-
-The parity assertions run unconditionally in the normal build; the
-`-Darete.benchmark=true` flag adds the timing tables.
-`PerformanceGainBenchmarkTest` (same flag) covers the end-to-end and
-allocation figures.
+Not reproducible any more: the comparison needed the Groovy matchers and the tests that ran them, which have been removed (see the note under *Measurements*).

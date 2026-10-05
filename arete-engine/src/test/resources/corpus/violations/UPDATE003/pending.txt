@@ -1,0 +1,1 @@
+A manual-review rule: the matcher intentionally returns no automated findings (see the rule's own documentation), so no spec can make it report.

@@ -1,0 +1,12 @@
+openapi: 3.0.0
+info: { title: Corpus, version: 1.0.0, description: Corpus example. }
+paths: {}
+components:
+  schemas:
+    TagList:
+      type: array
+    Product:
+      type: object
+      properties:
+        categories:
+          type: array

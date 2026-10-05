@@ -11,9 +11,8 @@ only the immutable `api` and `rule` values, a fixed set of builtins, and
 [RE2/J](https://github.com/google/re2j) regular expressions. There is no I/O,
 reflection, recursion, or unbounded iteration.
 
-The build also runs a matching `Matcher.groovy` for some matchers as a parity
-check; Groovy is not part of the deployed runtime. A deployed Areté always
-evaluates matchers with Distill.
+Distill is the only matcher language. (Matchers were once also written in Groovy;
+that runtime and its parity checks have been removed.)
 
 **Editor support.** [`editors/distill/`](https://github.com/johnjoeallen/arete/tree/main/editors/distill)
 is a syntax-highlighting grammar for VS Code and IntelliJ / other JetBrains
@@ -84,6 +83,16 @@ occurrence("/info/title", api.info.title,
 
 // splice a rule-supplied fragment into a pattern
 schema.name ==~ /{{rule.parameters["prefix"]}}[A-Z][A-Za-z0-9]*/
+```
+
+**An occurrence may carry a measured value.** `occurrence(pointer, path, message, value)` takes an optional fourth
+argument, a number: the nesting depth, the parameter count. It does nothing unless a policy charges the rule with
+`measure: value` (see "How a rule is charged"); then the cost follows the largest value reported. A non-number fourth
+argument is a matcher error.
+
+```java
+.map { schema -> occurrence(schema.pointer, schema.name,
+    "Schema '{{schema.name}}' nests {{schema.nestingDepth}} levels deep", schema.nestingDepth) }
 ```
 
 **Literal braces next to a hole need no escape.** The `{{` / `}}` closest to

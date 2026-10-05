@@ -1,0 +1,12 @@
+openapi: 3.0.0
+info: { title: Corpus, version: 1.0.0, description: Corpus example. }
+paths:
+  /customers:
+    get:
+      parameters:
+        - name: status
+          in: query
+          description: Filter by lifecycle status.
+          example: active
+          schema: { type: string }
+      responses: { '200': { description: OK } }

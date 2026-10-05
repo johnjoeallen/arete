@@ -1,0 +1,14 @@
+openapi: 3.0.0
+info: { title: Corpus, version: 1.0.0, description: Corpus example. }
+paths: {}
+components:
+  schemas:
+    Thing:
+      type: object
+      properties:
+        customers:
+          type: array
+          items: { type: string }
+        children:
+          type: array
+          items: { type: string }

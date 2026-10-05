@@ -64,6 +64,8 @@ nav:
   - Home: index.md
   - Getting Started: getting-started.md
   - Configuration: configuration.md
+  - Command line: cli.md
+  - Maven and Gradle: build-plugins.md
   - Automation API: automation-api.md
   - History: history.md
   - Scoring:
@@ -73,6 +75,5 @@ nav:
       - Distill reference: scoring/distill.md
       - Rule Catalogue: scoring/rules.md
       - Policies: scoring/policies.md
-      - Writing a Plugin: scoring/writing-a-plugin.md
   - Releasing: releasing.md
-  - Publishing the SPI: publishing-spi.md
+  - Publishing to Maven Central: publishing.md

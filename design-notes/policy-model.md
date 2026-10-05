@@ -44,7 +44,7 @@ rule binds a matcher to a scope and parameters; the policy decides which rules
 run and what each match costs.
 
 ```
-qualityScore   = max(0, 100 − Σ deductions for matched rules)   # once per rule
+qualityScore   = max(0, 100 − Σ deductions for matched rules)   # once per rule; `format: 2` rules may charge per match or by tier
 overallScore    = 0 if any PROHIBITED rule matched, else qualityScore
 grade           = gradeFor(overallScore)   # see above
 passes          = passingScore is unset, or overallScore ≥ passingScore
@@ -70,14 +70,17 @@ passes          = passingScore is unset, or overallScore ≥ passingScore
   **`validator`** for the plugin — a stable request-contract name, and the
   plugin genuinely is a validator of the spec even though its output is a
   score.
-- The physical DB tables `spec_validation_results` and column `rule_set_index`
-  are unchanged, so a user's existing local scores survive the rename with no
-  migration.
+- ~~The physical DB tables `spec_validation_results` and column `rule_set_index` are unchanged.~~ Later renamed to match
+  (the local database is disposable), along with the `/plugins` URL alias and `pluginError` field.
 
-## SPI impact
+## History: the SPI
 
-`arete-scoring-spi` (renamed from `arete-validation-spi`) is published to Maven
+> **Superseded.** The scoring-plugin SPI was removed. There is one `Engine` class in `arete-engine`, and the
+> `SpecScoringPlugin` names below are kept only for the rename's history.
+
+
+`arete-engine-api` (renamed from `arete-validation-spi`) is published to Maven
 Central, so this is a **breaking change** for any external plugin: new
-coordinates (`net.dublinux.arete:arete-scoring-spi`), new package
-(`net.dublinux.arete.scoring.spi`), `SpecScoringPlugin` with `score(...)` and
-`getPolicies()`. The bundled `arete-policy-plugin` is the only known consumer.
+coordinates (`net.dublinux.arete:arete-engine-api`), new package
+(`net.dublinux.arete.engine.api`), `SpecScoringPlugin` with `score(...)` and
+`getPolicies()`. The bundled `arete-engine` is the only known consumer.

@@ -21,14 +21,11 @@ jobs:
           cache: maven
 
       - name: Set version from tag
-        # -DprocessAllModules is required: arete-scoring-spi, arete-policy-plugin
+        # -DprocessAllModules is required: arete-engine-api, arete-engine
         # and arete-app carry an explicit <version> and do not declare
         # arete-parent as their <parent> (arete-app parents to Spring Boot), so
         # without it versions:set never reaches them and the packaged jars keep
-        # the SNAPSHOT name. It also stamps the arete-ci-gate-* modules with this
-        # tag's version, which is harmless here — this workflow neither zips nor
-        # publishes them, and their real releases run from ci-gate-v* tags via
-        # publish-ci-gate.yml, which sets their version itself.
+        # the SNAPSHOT name.
         run: mvn --no-transfer-progress versions:set -DnewVersion=${GITHUB_REF_NAME#v} -DgenerateBackupPoms=false -DprocessAllModules=true
 
       - name: Build
@@ -37,11 +34,10 @@ jobs:
       - name: Package zip
         run: |
           VERSION=${GITHUB_REF_NAME#v}
-          mkdir -p dist/arete/plugins
+          mkdir -p dist/arete
           cp arete-app/target/arete-${VERSION}.jar dist/arete/arete.jar
           cp scripts/arete.sh dist/arete/
           cp scripts/arete.bat dist/arete/
-          cp arete-policy-plugin/target/arete-policy-plugin-${VERSION}.jar dist/arete/plugins/arete-policy-plugin.jar
           chmod +x dist/arete/arete.sh
           ZIP="$(pwd)/arete-${VERSION}.zip"
           # Zip the folder contents, not the folder: no top-level arete/ in the archive.
@@ -68,12 +64,13 @@ jobs:
         run: |
           gh release create "$GITHUB_REF_NAME" \
             arete-${GITHUB_REF_NAME#v}.zip \
+            arete-cli/target/arete-cli-${GITHUB_REF_NAME#v}.jar \
             distill-syntax-${EXT_VERSION}.zip \
             distill-syntax-${EXT_VERSION}.vsix \
             --title "$GITHUB_REF_NAME" \
             --generate-notes
 
-      # Publishing arete-scoring-spi to Maven Central is NOT part of
+      # Publishing arete-engine-api to Maven Central is NOT part of
       # this workflow — it doesn't belong on every tag push. See
       # publish-spi.yml, triggered by hand from the Actions tab against a
       # specific tag once that release is ready to be published externally.

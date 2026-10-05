@@ -1,9 +1,8 @@
 package net.dublinux.arete.web;
 
-import net.dublinux.arete.plugin.PluginRegistry;
+import net.dublinux.arete.engine.Engine;
 import net.dublinux.arete.service.MarkdownRenderer;
-import net.dublinux.arete.scoring.spi.RuleDocumentation;
-import net.dublinux.arete.scoring.spi.RuleDocumentationProvider;
+import net.dublinux.arete.engine.api.RuleDocumentation;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,26 +12,22 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
-/** Serves rule documentation owned by a loaded plugin at a stable local URL. */
+/** Serves rule documentation owned by a loaded engine at a stable local URL. */
 @Controller
 public class PolicyDocumentationController {
-    private final PluginRegistry pluginRegistry;
+    private final Engine engine;
     private final MarkdownRenderer markdownRenderer;
 
-    public PolicyDocumentationController(PluginRegistry pluginRegistry, MarkdownRenderer markdownRenderer) {
-        this.pluginRegistry = pluginRegistry;
+    public PolicyDocumentationController(Engine engine, MarkdownRenderer markdownRenderer) {
+        this.engine = engine;
         this.markdownRenderer = markdownRenderer;
     }
 
-    @GetMapping("/plugins/{pluginId}/rules/{ruleId}")
-    public String rule(@PathVariable String pluginId, @PathVariable String ruleId, Model model) {
-        RuleDocumentation documentation = pluginRegistry.getPlugins().stream()
-                .filter(plugin -> plugin.getId().equals(pluginId))
-                .filter(RuleDocumentationProvider.class::isInstance)
-                .map(RuleDocumentationProvider.class::cast)
-                .map(provider -> provider.getRuleDocumentation(ruleId))
-                .flatMap(Optional::stream)
-                .findFirst()
+    @GetMapping("/engines/{engineId}/rules/{ruleId}")
+    public String rule(@PathVariable String engineId, @PathVariable String ruleId, Model model) {
+        RuleDocumentation documentation = Optional.of(engine)
+                .filter(candidate -> candidate.getId().equals(engineId))
+                .flatMap(candidate -> candidate.getRuleDocumentation(ruleId))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         model.addAttribute("documentationTitle", documentation.title());
         model.addAttribute("renderedDocumentation", markdownRenderer.render(documentation.markdown()));

@@ -1,0 +1,1 @@
+/components/schemas/Thing/properties/customer_id  |  Identifier property should declare format uuid: customer_id

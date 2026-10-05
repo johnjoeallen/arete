@@ -1,11 +1,10 @@
 package net.dublinux.arete.web;
 
 import net.dublinux.arete.domain.NamespaceEntity;
-import net.dublinux.arete.plugin.PluginRegistry;
-import net.dublinux.arete.plugin.PluginSettingsService;
-import net.dublinux.arete.plugin.PluginScoringService;
-import net.dublinux.arete.plugin.SpecPluginSettingsService;
-import net.dublinux.arete.plugin.SpecScoringResultService;
+import net.dublinux.arete.engine.Engine;
+import net.dublinux.arete.scoring.EngineScoringService;
+import net.dublinux.arete.scoring.SpecEngineSettingsService;
+import net.dublinux.arete.scoring.SpecScoringResultService;
 import net.dublinux.arete.service.NamespaceService;
 import net.dublinux.arete.service.SpecFileWatcher;
 import net.dublinux.arete.service.SpecParserService;
@@ -36,19 +35,19 @@ class SpecControllerNamespaceTest {
 
     @MockitoBean SpecParserService specParserService;
     @MockitoBean SpecStorageService specStorageService;
-    @MockitoBean PluginScoringService pluginScoringService;
+    @MockitoBean EngineScoringService engineScoringService;
     @MockitoBean SpecFileWatcher specFileWatcher;
     @MockitoBean net.dublinux.arete.web.api.DeploymentMode deploymentMode;
-    @MockitoBean PluginRegistry pluginRegistry;
-    @MockitoBean PluginSettingsService pluginSettingsService;
-    @MockitoBean SpecPluginSettingsService specPluginSettingsService;
+    @MockitoBean Engine engine;
+    @MockitoBean SpecEngineSettingsService specEngineSettingsService;
     @MockitoBean SpecScoringResultService specScoringResultService;
     @MockitoBean NamespaceService namespaceService;
 
     @BeforeEach
     void wire() {
         lenient().when(specFileWatcher.getSpecsHome()).thenReturn(java.nio.file.Path.of("/tmp/specs"));
-        lenient().when(pluginRegistry.getPlugins()).thenReturn(List.of());
+        lenient().when(engine.getId()).thenReturn(Engine.ID);
+        lenient().when(engine.getName()).thenReturn("Areté Policy Engine");
         lenient().when(specStorageService.findByNamespace(anyString())).thenReturn(List.of());
         lenient().when(namespaceService.resolveKey(any())).thenAnswer(inv -> {
             String k = inv.getArgument(0);

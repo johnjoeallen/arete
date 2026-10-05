@@ -27,7 +27,7 @@
             not a security boundary. The name keeps your casing; <code>Payments</code> and
             <code>payments</code> are the same namespace.
         </p>
-        <table class="plugin-settings">
+        <table class="engine-settings">
             <thead>
                 <tr><th>Name</th><th>Key</th><th>Specs</th><th></th></tr>
             </thead>
@@ -39,7 +39,7 @@
                     <td>
                         <form th:if="${ns.specCount == 0 and ns.key != 'default'}" method="post"
                               th:action="@{/settings/namespaces/{key}/delete(key=${ns.key})}">
-                            <button type="submit" class="plugin-toggle-btn is-disabled">Delete</button>
+                            <button type="submit" class="engine-toggle-btn is-disabled">Delete</button>
                         </form>
                     </td>
                 </tr>
@@ -49,30 +49,6 @@
             <input type="text" name="name" placeholder="new namespace name…" maxlength="100" required>
             <button type="submit">Create</button>
         </form>
-
-        <h3>Validator plugins</h3>
-        <p th:if="${pluginRows.isEmpty()}" class="muted">
-            No scoring plugins are loaded. Drop a plugin jar into <code th:text="${installPluginsDir}"></code>
-            or <code th:text="${userPluginsDir}"></code> and restart.
-        </p>
-        <table class="plugin-settings" th:if="${!pluginRows.isEmpty()}">
-            <thead>
-                <tr><th>Plugin</th><th>ID</th><th>Status</th></tr>
-            </thead>
-            <tbody>
-                <tr th:each="row : ${pluginRows}">
-                    <td th:text="${row.name()}">Plugin name</td>
-                    <td><code th:text="${row.id()}">plugin-id</code></td>
-                    <td>
-                        <form method="post" th:action="@{/settings/plugins/{id}/toggle(id=${row.id()})}">
-                            <button type="submit" class="plugin-toggle-btn" th:classappend="${row.enabled()} ? ' is-enabled' : ' is-disabled'">
-                                <span th:text="${row.enabled()} ? 'Enabled' : 'Disabled'">Enabled</span>
-                            </button>
-                        </form>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
     </div>
 </div>
 <script th:src="@{/js/tabs.js}" src="/js/tabs.js" defer></script>

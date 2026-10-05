@@ -6,7 +6,7 @@ Helpers for keeping the docs site (`docs/`) in sync with the code.
 
 Regenerates `docs/scoring/rules.md` and `docs/scoring/policies.md` from
 the policy bundle
-(`arete-policy-plugin/src/main/resources/api-policy/`). Run it
+(`arete-engine/src/main/resources/api-policy/`). Run it
 after adding or changing a rule, policy, or rule.
 
 ```bash

@@ -1,0 +1,12 @@
+openapi: 3.0.0
+info: { title: Corpus, version: 1.0.0, description: Corpus example. }
+paths: {}
+components:
+  schemas:
+    Customer:
+      type: object
+      properties:
+        displayName:
+          type: string
+          description: The customer's preferred display name.
+          example: Ada Lovelace

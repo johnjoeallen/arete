@@ -1,0 +1,69 @@
+name: Publish to Maven Central
+
+# Deliberately workflow_dispatch-only, never on a tag push: publishing to Central is a reviewed action
+# for a release that is meant to be depended on externally, not something every tagged release should
+# trigger. Run it from the Actions tab, pointing at the tag to publish. It publishes the artifacts a build
+# or an embedder depends on: arete-engine-api, arete-engine, arete-maven-plugin and arete-gradle-plugin (and
+# the arete-parent pom they inherit from). The command line jar and the app ship as GitHub release assets
+# (release.yml), not on Central. The upload lands as a pending deployment at
+# central.sonatype.com/publishing/deployments for manual review (autoPublish is off, see the release profile
+# in the parent pom).
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to publish from (e.g. v0.99.11)'
+        required: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Set version from tag
+        env:
+          TAG: ${{ inputs.tag }}
+        run: mvn --no-transfer-progress versions:set -DnewVersion=${TAG#v} -DgenerateBackupPoms=false -DprocessAllModules=true
+
+      - name: Build and test
+        # Publish nothing that has not passed its own tests. The parent pom and the four published modules
+        # are what is built; the app and CLI are not part of this upload.
+        run: mvn --no-transfer-progress -pl .,arete-engine-api,arete-engine,arete-maven-plugin,arete-gradle-plugin -am verify
+
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v7
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+
+      - name: Publish to Maven Central
+        env:
+          MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          mkdir -p ~/.m2
+          {
+            echo '<settings>'
+            echo '  <servers>'
+            echo '    <server>'
+            echo '      <id>central</id>'
+            echo "      <username>${MAVEN_CENTRAL_USERNAME}</username>"
+            echo "      <password>${MAVEN_CENTRAL_PASSWORD}</password>"
+            echo '    </server>'
+            echo '  </servers>'
+            echo '</settings>'
+          } > ~/.m2/settings.xml
+          mvn --no-transfer-progress -Prelease -DskipTests \
+            -pl .,arete-engine-api,arete-engine,arete-maven-plugin,arete-gradle-plugin \
+            deploy
+          echo "Uploaded to Central Portal — review and publish manually at https://central.sonatype.com/publishing/deployments"

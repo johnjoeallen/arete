@@ -1,0 +1,64 @@
+# findings and score by policy; regenerate with -Dcorpus.update=true
+
+## Enterprise Grade  score=91.5  grade=B-  findings=37
+  BULK002  /components/schemas/Document/properties/body/properties/sections  |  Array property has no maximum item count
+  BULK002  /components/schemas/Document/properties/body/properties/sections/items/properties/blocks  |  Array property has no maximum item count
+  BULK002  /components/schemas/Document/properties/body/properties/sections/items/properties/blocks/items/properties/runs  |  Array property has no maximum item count
+  BULK002  /components/schemas/Document/properties/revisions  |  Array property has no maximum item count
+  BULK002  /components/schemas/Person/properties/reports  |  Array property has no maximum item count
+  DOC010  /paths/~1documents~1{document_id}/get  |  Operation has no operationId
+  DOC011  /paths/~1documents~1{document_id}/get  |  Operation is not assigned any tag
+  DOC013  /components/schemas/Base/properties/id  |  Base.id has no description or example
+  DOC013  /components/schemas/Document/properties/body  |  Document.body has no description or example
+  DOC013  /components/schemas/Document/properties/body/properties/sections  |  Document.sections has no description or example
+  DOC013  /components/schemas/Document/properties/body/properties/sections/items/properties/blocks  |  Document.blocks has no description or example
+  DOC013  /components/schemas/Document/properties/body/properties/sections/items/properties/blocks/items/properties/kind  |  Document.kind has no description or example
+  DOC013  /components/schemas/Document/properties/body/properties/sections/items/properties/blocks/items/properties/runs  |  Document.runs has no description or example
+  DOC013  /components/schemas/Document/properties/body/properties/sections/items/properties/blocks/items/properties/runs/items/properties/style  |  Document.style has no description or example
+  DOC013  /components/schemas/Document/properties/body/properties/sections/items/properties/blocks/items/properties/runs/items/properties/text  |  Document.text has no description or example
+  DOC013  /components/schemas/Document/properties/body/properties/sections/items/properties/heading  |  Document.heading has no description or example
+  DOC013  /components/schemas/Document/properties/owner  |  Document.owner has no description or example
+  DOC013  /components/schemas/Document/properties/revisions  |  Document.revisions has no description or example
+  DOC013  /components/schemas/Document/properties/title  |  Document.title has no description or example
+  DOC013  /components/schemas/Node/properties/next  |  Node.next has no description or example
+  DOC013  /components/schemas/Person/properties/manager  |  Person.manager has no description or example
+  DOC013  /components/schemas/Person/properties/name  |  Person.name has no description or example
+  DOC013  /components/schemas/Person/properties/reports  |  Person.reports has no description or example
+  DOC013  /components/schemas/Style/allOf/1/properties/bold  |  Style.bold has no description or example
+  DOC014  /paths/~1documents~1{document_id}/get/parameters/path:document_id  |  GET /documents/{document_id} document_id has no description or example
+  DOC015  /paths/~1documents~1{document_id}/get  |  Operation description is missing
+  JSON007  /components/schemas/Document/properties/body/properties/sections/items/properties/blocks/items/properties/kind  |  Property uses an enum
+  JSON013  /components/schemas/Document/properties/body/properties/sections/items/properties/blocks/items/properties/kind  |  Enum value type is inconsistent with the property type
+  JSON014  /components/schemas/Document/properties/body/properties/sections/items/properties/blocks/items/properties/kind  |  Enum is not marked extensible
+  JSON015  /components/schemas/Document/properties/body/properties/sections/items/properties/blocks/items/properties/kind  |  Enum value is not UPPER_SNAKE_CASE
+  JSON023  /components/schemas/Document/properties/revisions  |  Array property 'revisions' declares no items
+  JSON025  /components/schemas/Document  |  Schema 'Document' nests 6 levels deep
+  SECURITY001  /paths/~1documents~1{document_id}/get  |  Operation does not require security scheme bearerAuth
+  SECURITY002  /paths/~1documents~1{document_id}/get  |  Operation does not require security scheme bearerAuth with scopes read, write
+  STANDARD019  /components/schemas/Style  |  Style uses allOf with inline members instead of $ref
+  STATUS006  /paths/~1documents~1{document_id}/get/responses/404  |  Error response does not declare application/problem+json
+  VERSION004  /paths  |  Interface has no explicit versioning
+
+## Zalando  score=97.0  grade=A+  findings=6
+  JSON013  /components/schemas/Document/properties/body/properties/sections/items/properties/blocks/items/properties/kind  |  Enum value type is inconsistent with the property type
+  JSON014  /components/schemas/Document/properties/body/properties/sections/items/properties/blocks/items/properties/kind  |  Enum is not marked extensible
+  JSON015  /components/schemas/Document/properties/body/properties/sections/items/properties/blocks/items/properties/kind  |  Enum value is not UPPER_SNAKE_CASE
+  SECURITY001  /paths/~1documents~1{document_id}/get  |  Operation does not require security scheme bearerAuth
+  SECURITY002  /paths/~1documents~1{document_id}/get  |  Operation does not require security scheme bearerAuth with scopes read
+  STATUS006  /paths/~1documents~1{document_id}/get/responses/404  |  Error response does not declare application/problem+json
+
+## Zalando Extended  score=95.5  grade=A  findings=14
+  DOC011  /paths/~1documents~1{document_id}/get  |  Operation is not assigned any tag
+  JSON013  /components/schemas/Document/properties/body/properties/sections/items/properties/blocks/items/properties/kind  |  Enum value type is inconsistent with the property type
+  JSON014  /components/schemas/Document/properties/body/properties/sections/items/properties/blocks/items/properties/kind  |  Enum is not marked extensible
+  JSON015  /components/schemas/Document/properties/body/properties/sections/items/properties/blocks/items/properties/kind  |  Enum value is not UPPER_SNAKE_CASE
+  JSON022  /components/schemas/Base/properties/id  |  String property does not declare a maximum length
+  JSON022  /components/schemas/Document/properties/body/properties/sections/items/properties/blocks/items/properties/kind  |  String property does not declare a maximum length
+  JSON022  /components/schemas/Document/properties/body/properties/sections/items/properties/blocks/items/properties/runs/items/properties/text  |  String property does not declare a maximum length
+  JSON022  /components/schemas/Document/properties/body/properties/sections/items/properties/heading  |  String property does not declare a maximum length
+  JSON022  /components/schemas/Document/properties/title  |  String property does not declare a maximum length
+  JSON022  /components/schemas/Person/properties/name  |  String property does not declare a maximum length
+  JSON023  /components/schemas/Document/properties/revisions  |  Array property 'revisions' declares no items
+  SECURITY001  /paths/~1documents~1{document_id}/get  |  Operation does not require security scheme bearerAuth
+  SECURITY002  /paths/~1documents~1{document_id}/get  |  Operation does not require security scheme bearerAuth with scopes read
+  STATUS006  /paths/~1documents~1{document_id}/get/responses/404  |  Error response does not declare application/problem+json

@@ -90,7 +90,6 @@ Parameter overrides:
     | `BULK003` | −0.5 | Bulk mutation uses search criteria in PUT |
     | `VERSION001` | −0.5 | Version appears in the URI |
     | `VERSION002` | −0.5 | Version appears in a header |
-    | `VERSION003` | −0.5 | Version appears in the media type |
     | `VERSION004` | −0.5 | Interface is unversioned |
     | `COMPAT001` | −0.5 | Existing service or interface is removed |
     | `COMPAT002` | −0.5 | Existing field is removed |
@@ -98,7 +97,7 @@ Parameter overrides:
     | `COMPAT004` | −0.5 | Existing operation is removed |
     | `COMPAT005` | −0.5 | Existing enum value is removed |
     | `COMPAT006` | −0.5 | HTTP binding is changed |
-    | `STATUS001` | −0.5 | Creation operation lacks an appropriate success status |
+    | `STATUS001` | by count (1+ costs 0.5, 3+ costs 1, 6+ costs 2) | Creation operation lacks an appropriate success status |
     | `STATUS002` | −0.5 | Created resource response lacks location information |
     | `STATUS003` | −0.5 | Authentication failure uses an inappropriate status |
     | `STATUS004` | −0.5 | Resource retrieval lacks a not-found response |
@@ -106,7 +105,7 @@ Parameter overrides:
     | `STATUS006` | −0.5 | Error response lacks Problem Details |
     | `STATUS007` | −0.5 | Rate-limit response lacks required headers |
     | `STANDARD010` | −0.5 | OpenAPI version is unsupported or missing |
-    | `STANDARD011` | −0.5 | Operation declares too many parameters |
+    | `STANDARD011` | by value (9+ costs 0.5, 13+ costs 1.5) | Operation declares too many parameters |
     | `STANDARD012` | −0.5 | Path parameter is not marked required |
     | `STANDARD013` | −0.5 | Path parameter does not match the path template |
     | `STANDARD014` | −0.5 | Parameter has no schema or content |
@@ -135,6 +134,7 @@ Parameter overrides:
     | `DOC016` | −0.5 | Schema example omits a required field |
     | `ERROR011` | −0.5 | Error responses share an example payload |
     | `JSON023` | −0.5 | Array schema declares no items |
+    | `JSON025` | by value (5+ costs 0.5, 7+ costs 1.5) | Schema nests too deeply |
     | `SECURITY003` | −0.5 | Security requirement names an undefined scheme |
     | `SECURITY004` | −0.5 | Description contains active markup |
     | `STANDARD025` | −0.5 | Path key contains a query string |

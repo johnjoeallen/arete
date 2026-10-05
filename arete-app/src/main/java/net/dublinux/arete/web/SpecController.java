@@ -1,31 +1,30 @@
 package net.dublinux.arete.web;
 
+import net.dublinux.arete.engine.api.SpecInput;
 import net.dublinux.arete.domain.SpecEntity;
 import net.dublinux.arete.domain.SpecSource;
-import net.dublinux.arete.plugin.AggregatedScoringResult;
-import net.dublinux.arete.plugin.CachedScoringResult;
-import net.dublinux.arete.plugin.ComponentFindings;
-import net.dublinux.arete.plugin.EndpointFindings;
-import net.dublinux.arete.plugin.GeneralFindings;
-import net.dublinux.arete.plugin.PluginRegistry;
-import net.dublinux.arete.plugin.PluginRunRequest;
-import net.dublinux.arete.plugin.PluginSettingsService;
-import net.dublinux.arete.plugin.PluginScoringService;
-import net.dublinux.arete.plugin.SpecPluginSettingsService;
-import net.dublinux.arete.plugin.SpecScoringResultService;
+import net.dublinux.arete.scoring.AggregatedScoringResult;
+import net.dublinux.arete.scoring.CachedScoringResult;
+import net.dublinux.arete.scoring.ComponentFindings;
+import net.dublinux.arete.scoring.EndpointFindings;
+import net.dublinux.arete.scoring.GeneralFindings;
+import net.dublinux.arete.scoring.EngineRunRequest;
+import net.dublinux.arete.scoring.EngineScoringService;
+import net.dublinux.arete.scoring.SpecEngineSettingsService;
+import net.dublinux.arete.scoring.SpecScoringResultService;
 import net.dublinux.arete.service.EndpointGrouper;
 import net.dublinux.arete.service.ParsedSpec;
 import net.dublinux.arete.service.SpecFileWatcher;
 import net.dublinux.arete.service.SpecParserService;
 import net.dublinux.arete.service.SpecStorageService;
-import net.dublinux.arete.web.dto.SpecPluginRunChoice;
+import net.dublinux.arete.web.dto.SpecEngineRunChoice;
 import net.dublinux.arete.web.dto.SpecSummary;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
-import net.dublinux.arete.scoring.spi.Severity;
-import net.dublinux.arete.scoring.spi.SpecScoringPlugin;
+import net.dublinux.arete.engine.api.Severity;
+import net.dublinux.arete.engine.Engine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -58,28 +57,26 @@ public class SpecController {
 
     private final SpecParserService specParserService;
     private final SpecStorageService specStorageService;
-    private final PluginScoringService pluginScoringService;
+    private final EngineScoringService engineScoringService;
     private final SpecFileWatcher specFileWatcher;
-    private final PluginRegistry pluginRegistry;
-    private final PluginSettingsService pluginSettingsService;
-    private final SpecPluginSettingsService specPluginSettingsService;
+    private final Engine engine;
+    private final SpecEngineSettingsService specEngineSettingsService;
     private final SpecScoringResultService specScoringResultService;
     private final net.dublinux.arete.web.api.DeploymentMode deploymentMode;
     private final net.dublinux.arete.service.NamespaceService namespaceService;
 
     public SpecController(SpecParserService specParserService, SpecStorageService specStorageService,
-            PluginScoringService pluginScoringService, SpecFileWatcher specFileWatcher,
-            PluginRegistry pluginRegistry, PluginSettingsService pluginSettingsService,
-            SpecPluginSettingsService specPluginSettingsService, SpecScoringResultService specScoringResultService,
+            EngineScoringService engineScoringService, SpecFileWatcher specFileWatcher,
+            Engine engine,
+            SpecEngineSettingsService specEngineSettingsService, SpecScoringResultService specScoringResultService,
             net.dublinux.arete.web.api.DeploymentMode deploymentMode,
             net.dublinux.arete.service.NamespaceService namespaceService) {
         this.specParserService = specParserService;
         this.specStorageService = specStorageService;
-        this.pluginScoringService = pluginScoringService;
+        this.engineScoringService = engineScoringService;
         this.specFileWatcher = specFileWatcher;
-        this.pluginRegistry = pluginRegistry;
-        this.pluginSettingsService = pluginSettingsService;
-        this.specPluginSettingsService = specPluginSettingsService;
+        this.engine = engine;
+        this.specEngineSettingsService = specEngineSettingsService;
         this.specScoringResultService = specScoringResultService;
         this.deploymentMode = deploymentMode;
         this.namespaceService = namespaceService;
@@ -193,22 +190,22 @@ public class SpecController {
 
     /**
      * Renders a spec's docs. Scoring is on-demand, not automatic — see
-     * {@link PluginScoringService} — so {@code ran} is absent on a plain
+     * {@link EngineScoringService} — so {@code ran} is absent on a plain
      * open (nothing runs; instead the last Score run's result, if any, is
      * reloaded from {@link SpecScoringResultService} so it doesn't just
      * vanish when the page is left) and present when the Score form
-     * resubmits here. {@code plugin} is the checked plugin ids from that
-     * form — a plugin present in {@code allParams} (i.e. rendered as a
-     * picker row) but absent from {@code plugin} was unchecked, per HTML's
+     * resubmits here. {@code engine} is the checked engine ids from that
+     * form — a engine present in {@code allParams} (i.e. rendered as a
+     * picker row) but absent from {@code engine} was unchecked, per HTML's
      * normal "an unchecked checkbox submits nothing" behaviour.
      *
-     * <p>Every candidate plugin's per-spec enabled state and policy choice
+     * <p>Every candidate engine's per-spec enabled state and policy choice
      * is persisted from the submitted form before running anything, so both
      * survive a later plain reopen of this page — see {@link
-     * #pluginChoices}.
+     * #engineChoices}.
      *
-     * <p>Each row's policy is submitted as {@code policy_<pluginId>},
-     * valued by its <em>position</em> in that plugin's policies (e.g.
+     * <p>Each row's policy is submitted as {@code policy_<engineId>},
+     * valued by its <em>position</em> in that engine's policies (e.g.
      * {@code "0"}), not its name — see {@link #resolvePolicy}.
      */
     @GetMapping("/spec/{ref}")
@@ -236,7 +233,7 @@ public class SpecController {
         model.addAttribute("activateScore", scored != null);
         populateCachedScoring(model, entity.getId());
         populateSidebar(model, q, entity, NamespaceContext.from(request));
-        model.addAttribute("pluginChoices", pluginChoices(entity.getId(), Map.of()));
+        model.addAttribute("engineChoices", engineChoices(entity.getId(), Map.of()));
         return "result";
     }
 
@@ -246,43 +243,31 @@ public class SpecController {
      * the run parameters never appear in the address bar.
      */
     @PostMapping("/spec/{ref}/score")
-    public String score(@PathVariable String ref, @RequestParam(required = false) List<String> plugin,
-            @RequestParam Map<String, String> allParams) {
+    public String score(@PathVariable String ref, @RequestParam Map<String, String> allParams) {
         SpecEntity entity = specStorageService.findByRef(ref)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Spec not found"));
         long id = entity.getId();
-        Set<String> checkedPluginIds = plugin == null ? Set.of() : Set.copyOf(plugin);
-        List<PluginRunRequest> requests = new ArrayList<>();
-        for (SpecScoringPlugin candidate : pluginRegistry.getPlugins()) {
-            if (!pluginSettingsService.isEnabled(candidate.getId())) {
-                continue;
-            }
-            boolean enabledForSpec = checkedPluginIds.contains(candidate.getId());
+        List<EngineRunRequest> requests = new ArrayList<>();
+        for (Engine candidate : List.of(engine)) {
             String submitted = allParams.get("policy_" + candidate.getId());
             String policyName = resolvePolicy(candidate.getId(), submitted);
-            specPluginSettingsService.setSelection(id, candidate.getId(), enabledForSpec,
+            specEngineSettingsService.setSelection(id, candidate.getId(), true,
                     policyIndex(candidate.getId(), policyName));
-            if (enabledForSpec) {
-                requests.add(new PluginRunRequest(candidate.getId(), policyName));
-            }
+            requests.add(new EngineRunRequest(candidate.getId(), policyName));
         }
-        if (requests.isEmpty()) {
-            specScoringResultService.deleteForSpec(id);
-        } else {
-            AggregatedScoringResult scoring = pluginScoringService.scoreMany(entity.getRawContent(), requests);
-            specScoringResultService.save(id, SpecScoringResultService.contentHashOf(entity.getRawContent()),
-                    scoring, requests.stream().map(PluginRunRequest::pluginId).toList());
-        }
+        AggregatedScoringResult scoring = engineScoringService.scoreMany(entity.getRawContent(), requests);
+        specScoringResultService.save(id, SpecScoringResultService.contentHashOf(entity.getRawContent()),
+                scoring, requests.stream().map(EngineRunRequest::engineId).toList());
         return "redirect:/spec/" + ref + "?scored";
     }
 
-    /** The position of {@code policyName} in its plugin's policies, or null if unknown — for the persisted picker choice. */
-    private Integer policyIndex(String pluginId, String policyName) {
-        SpecScoringPlugin plugin = findEnabledPlugin(pluginId);
-        if (plugin == null) {
+    /** The position of {@code policyName} in its engine's policies, or null if unknown — for the persisted picker choice. */
+    private Integer policyIndex(String engineId, String policyName) {
+        Engine scorer = findEnabledEngine(engineId);
+        if (scorer == null) {
             return null;
         }
-        int i = safePolicies(plugin).indexOf(policyName);
+        int i = safePolicies(scorer).indexOf(policyName);
         return i >= 0 ? i : null;
     }
 
@@ -295,12 +280,12 @@ public class SpecController {
     private void populateCachedScoring(Model model, Long specId) {
         model.addAttribute("hasBeenScored", false);
         specScoringResultService.findForSpec(specId).ifPresent(cached -> {
-            populateScoringModel(model, cached.result(), cached.activePluginIds());
+            populateScoringModel(model, cached.result(), cached.activeEngineIds());
             model.addAttribute("resultFromCache", true);
         });
     }
 
-    private void populateScoringModel(Model model, AggregatedScoringResult scoring, List<String> activePluginIds) {
+    private void populateScoringModel(Model model, AggregatedScoringResult scoring, List<String> activeEngineIds) {
         model.addAttribute("hasBeenScored", true);
         model.addAttribute("scoring", scoring);
         model.addAttribute("endpointFindings", EndpointFindings.byEndpoint(scoring.diagnostics()));
@@ -308,7 +293,7 @@ public class SpecController {
         model.addAttribute("requestBodyFindings", ComponentFindings.byComponent("requestBodies", scoring.diagnostics()));
         model.addAttribute("responseFindings", ComponentFindings.byComponent("responses", scoring.diagnostics()));
         model.addAttribute("generalFindings", GeneralFindings.unattributed(scoring.diagnostics()));
-        model.addAttribute("severityLabels", severityLabelsOf(activePluginIds));
+        model.addAttribute("severityLabels", severityLabelsOf(activeEngineIds));
         model.addAttribute("severityScoreImpact", severityScoreImpactOf(scoring));
     }
 
@@ -326,7 +311,7 @@ public class SpecController {
         }
         long id = entity.getId();
         specStorageService.deleteById(id);
-        specPluginSettingsService.deleteAllForSpec(id);
+        specEngineSettingsService.deleteAllForSpec(id);
         specScoringResultService.deleteForSpec(id);
         if (entity.getSource() == SpecSource.FILE && entity.getFilePath() != null) {
             Path path = Path.of(entity.getFilePath());
@@ -389,7 +374,7 @@ public class SpecController {
         model.addAttribute("currentNamespaceKey", current.getNameKey());
         model.addAttribute("currentSubmitter", ctx.submitter());
         model.addAttribute("currentUri", ctx.currentUri());
-        model.addAttribute("pluginChoices", pluginChoices(active == null ? null : active.getId(), Map.of()));
+        model.addAttribute("engineChoices", engineChoices(active == null ? null : active.getId(), Map.of()));
     }
 
     private static List<SpecSummary> toSummaries(List<SpecEntity> entities, String q) {
@@ -435,75 +420,67 @@ public class SpecController {
     }
 
     /**
-     * Every globally-enabled plugin for the view page's picker: its policies
+     * Every globally-enabled engine for the view page's picker: its policies
      * (each with a URL-safe slug), whether it's checked for this spec, and the
      * currently selected policy slug.
      *
      * @param specId nullable — no spec context (e.g. the index sidebar) means
      *               every row defaults to checked.
      */
-    private List<SpecPluginRunChoice> pluginChoices(Long specId, Map<String, String> ignored) {
-        List<SpecPluginRunChoice> choices = new ArrayList<>();
-        for (SpecScoringPlugin plugin : pluginRegistry.getPlugins()) {
-            if (!pluginSettingsService.isEnabled(plugin.getId())) {
-                continue;
-            }
-            List<String> policies = safePolicies(plugin);
-            List<SpecPluginRunChoice.Policy> options = policies.stream()
-                    .map(name -> new SpecPluginRunChoice.Policy(name, Policies.slug(name)))
+    private List<SpecEngineRunChoice> engineChoices(Long specId, Map<String, String> ignored) {
+        List<SpecEngineRunChoice> choices = new ArrayList<>();
+        for (Engine scorer : List.of(engine)) {
+            List<String> policies = safePolicies(scorer);
+            List<SpecEngineRunChoice.Policy> options = policies.stream()
+                    .map(name -> new SpecEngineRunChoice.Policy(name, Policies.slug(name)))
                     .toList();
-            boolean enabledForSpec = specId == null || specPluginSettingsService.isEnabledForSpec(specId, plugin.getId());
-            Integer persistedIndex = specId == null ? null : specPluginSettingsService.policyIndexForSpec(specId, plugin.getId());
+            boolean enabledForSpec = specId == null || specEngineSettingsService.isEnabledForSpec(specId, scorer.getId());
+            Integer persistedIndex = specId == null ? null : specEngineSettingsService.policyIndexForSpec(specId, scorer.getId());
             int selected = persistedIndex != null && persistedIndex >= 0 && persistedIndex < policies.size() ? persistedIndex : 0;
             String selectedSlug = policies.isEmpty() ? "" : Policies.slug(policies.get(selected));
-            choices.add(new SpecPluginRunChoice(plugin.getId(), plugin.getName(), options, enabledForSpec, selectedSlug));
+            choices.add(new SpecEngineRunChoice(scorer.getId(), scorer.getName(), options, enabledForSpec, selectedSlug));
         }
-        choices.sort(Comparator.comparing(SpecPluginRunChoice::pluginName, String.CASE_INSENSITIVE_ORDER));
+        choices.sort(Comparator.comparing(SpecEngineRunChoice::engineName, String.CASE_INSENSITIVE_ORDER));
         return choices;
     }
 
-    /** Defensive: a plugin is untrusted, dynamically loaded code. Preserves its declared policy order. */
-    private List<String> safePolicies(SpecScoringPlugin plugin) {
+    /** Defensive: a engine is untrusted, dynamically loaded code. Preserves its declared policy order. */
+    private List<String> safePolicies(Engine scorer) {
         try {
-            return List.copyOf(plugin.getPolicies());
+            return List.copyOf(scorer.getPolicies());
         } catch (Throwable t) {
-            log.warn("Scoring plugin '{}' threw from getPolicies(): {}", plugin.getId(), t.toString());
-            return List.of(SpecScoringPlugin.DEFAULT_POLICY);
+            log.warn("Scoring engine '{}' threw from getPolicies(): {}", scorer.getId(), t.toString());
+            return List.of(SpecInput.DEFAULT_POLICY);
         }
     }
 
-    /** The picker submits {@code policy_<pluginId>} = a policy slug; map it back to the plugin's real name. */
-    private String resolvePolicy(String pluginId, String slugOrName) {
-        SpecScoringPlugin plugin = findEnabledPlugin(pluginId);
-        return plugin == null
-                ? SpecScoringPlugin.DEFAULT_POLICY
-                : Policies.resolve(safePolicies(plugin), slugOrName);
+    /** The picker submits {@code policy_<engineId>} = a policy slug; map it back to the engine's real name. */
+    private String resolvePolicy(String engineId, String slugOrName) {
+        Engine scorer = findEnabledEngine(engineId);
+        return scorer == null
+                ? SpecInput.DEFAULT_POLICY
+                : Policies.resolve(safePolicies(scorer), slugOrName);
     }
 
-    private SpecScoringPlugin findEnabledPlugin(String pluginId) {
-        for (SpecScoringPlugin plugin : pluginRegistry.getPlugins()) {
-            if (plugin.getId().equals(pluginId) && pluginSettingsService.isEnabled(plugin.getId())) {
-                return plugin;
-            }
-        }
-        return null;
+    private Engine findEnabledEngine(String engineId) {
+        return Engine.ID.equals(engineId) ? engine : null;
     }
 
     /**
      * Display text for each of the four {@link Severity} levels. With
-     * exactly one active plugin, uses that plugin's own vocabulary (e.g.
+     * exactly one active engine, uses that engine's own vocabulary (e.g.
      * zally-core's Must/Should/May/Hint) — see {@link
-     * SpecScoringPlugin#getSeverityLabel}. With zero or several active
-     * plugins there's no single vocabulary to prefer (two plugins may label
+     * Engine#getSeverityLabel}. With zero or several active
+     * engines there's no single vocabulary to prefer (two engines may label
      * the same {@link Severity} differently), so this falls back to the
      * SPI's own default labels, same as for an absent/unknown/disabled
-     * plugin or one that throws.
+     * engine or one that throws.
      */
-    private Map<String, String> severityLabelsOf(List<String> activePluginIds) {
-        SpecScoringPlugin plugin = activePluginIds.size() == 1 ? findEnabledPlugin(activePluginIds.get(0)) : null;
+    private Map<String, String> severityLabelsOf(List<String> activeEngineIds) {
+        Engine scorer = activeEngineIds.size() == 1 ? findEnabledEngine(activeEngineIds.get(0)) : null;
         Map<String, String> labels = new LinkedHashMap<>();
         for (Severity severity : Severity.values()) {
-            labels.put(severity.name(), safeSeverityLabel(plugin, severity));
+            labels.put(severity.name(), safeSeverityLabel(scorer, severity));
         }
         return labels;
     }
@@ -515,12 +492,12 @@ public class SpecController {
         return impact;
     }
 
-    private String safeSeverityLabel(SpecScoringPlugin plugin, Severity severity) {
-        if (plugin != null) {
+    private String safeSeverityLabel(Engine scorer, Severity severity) {
+        if (scorer != null) {
             try {
-                return plugin.getSeverityLabel(severity);
+                return scorer.getSeverityLabel(severity);
             } catch (Throwable t) {
-                log.warn("Scoring plugin '{}' threw from getSeverityLabel({}): {}", plugin.getId(), severity, t.toString());
+                log.warn("Scoring engine '{}' threw from getSeverityLabel({}): {}", scorer.getId(), severity, t.toString());
             }
         }
         return switch (severity) {

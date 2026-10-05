@@ -1,0 +1,10 @@
+openapi: 3.0.0
+info: { title: Corpus, version: 1.0.0, description: Corpus example. }
+paths: {}
+components:
+  schemas:
+    Customer:
+      type: object
+      properties:
+        customerId: { type: string }
+        email2: { type: string }

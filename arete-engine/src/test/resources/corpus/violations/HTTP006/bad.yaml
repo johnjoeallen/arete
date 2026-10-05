@@ -1,0 +1,7 @@
+openapi: 3.0.0
+info: { title: Corpus, version: 1.0.0, description: Corpus example. }
+paths:
+  /customers/{customer_id}:
+    get:
+      summary: Deactivate customer
+      responses: { '200': { description: OK } }

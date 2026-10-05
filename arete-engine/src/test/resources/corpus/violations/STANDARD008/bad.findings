@@ -1,0 +1,1 @@
+/paths/~1customers/get/parameters/header:X-Internal-Trace  |  Proprietary request header is not allow-listed: X-Internal-Trace

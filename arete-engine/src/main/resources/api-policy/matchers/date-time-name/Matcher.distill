@@ -1,0 +1,9 @@
+distill(api, rule) {
+    return api.schemas
+        .expand { schema -> schema.properties
+            .filter { prop -> prop.type == "string"
+                && prop.format == "date-time"
+                && !tokenise(",", rule.parameters.suffix).any { s -> prop.name.endsWith(s) } }
+            .map { prop -> occurrence(prop.pointer, prop.name,
+                "Date-time property name does not end with one of: {{rule.parameters.suffix}}") } };
+}

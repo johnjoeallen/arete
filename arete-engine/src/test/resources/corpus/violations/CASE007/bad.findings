@@ -1,0 +1,2 @@
+/components/schemas/create_customer_request  |  Schema name 'create_customer_request' is a request/response object but is not PascalCase
+/components/schemas/customerResponse  |  Schema name 'customerResponse' is a request/response object but is not PascalCase

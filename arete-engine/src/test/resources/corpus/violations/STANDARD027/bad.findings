@@ -1,0 +1,1 @@
+/servers  |  Server URL has a trailing slash, which produces '//' when joined with a path

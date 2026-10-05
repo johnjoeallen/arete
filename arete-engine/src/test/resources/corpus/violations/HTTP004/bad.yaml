@@ -1,0 +1,10 @@
+openapi: 3.0.0
+info: { title: Corpus, version: 1.0.0, description: Corpus example. }
+paths:
+  /customers/{customer_id}:
+    delete:
+      summary: Delete customer
+      requestBody:
+        content:
+          application/json: { schema: { type: object } }
+      responses: { '204': { description: Deleted } }
